@@ -1,0 +1,7 @@
+#  Securing AMQ Broker on OpenShift
+
+Securing AMQ Broker on OpenShift involves:
+
+*   **Encrypting Connections**: Configuring SSL/TLS for secure client-broker communication, managing certificates and trust stores on OpenShift, and enabling secure listeners.
+*   **Enabling RBAC (Role-Based Access Control)**: Defining users, roles, and permissions within AMQ Broker and integrating with OpenShift's authentication mechanisms.
+*   **Integrating External Identity Providers (IDP)**: Configuring AMQ Broker to authenticate against external IDPs like LDAP or Keycloak and mapping external roles to broker roles.

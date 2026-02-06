@@ -1,0 +1,14 @@
+#  Hands-on Lab: Deploying and Managing AMQ Broker
+
+=== Hands-on Lab: Deploying and Managing AMQ Broker
+
+This lab provides practical experience in deploying and managing AMQ Broker on OpenShift, covering essential tasks from initial setup to advanced configurations.
+
+Key activities include:
+
+*   Deploying a basic AMQ Broker instance.
+*   Configuring external access and testing client connectivity.
+*   Implementing basic security features like encryption and Role-Based Access Control (RBAC).
+*   Deploying a High Availability (HA) broker cluster.
+*   Monitoring broker metrics and performing administrative tasks using the management console.
+*   Developing and testing client applications using Core Protocol and AMQP.

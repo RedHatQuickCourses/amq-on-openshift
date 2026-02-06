@@ -1,10 +1,32 @@
-name: REPLACEREPONAME
-title: FIXME Course Title
-version: 1
+name: amq-on-openshift
+title:  'AMQ Broker on OpenShift: Deployment and Management'
+version: 1.0.0
 nav:
 - modules/ROOT/nav.adoc
 - modules/LABENV/nav.adoc
-- modules/chapter1/nav.adoc
-- modules/chapter2/nav.adoc
-- modules/chapter3/nav.adoc
+
+- modules/overview-of-message-oriented-middleware/nav.adoc
+
+- modules/amq-broker-overview/nav.adoc
+
+- modules/deploying-amq-broker-on-openshift/nav.adoc
+
+- modules/scaling-amq-broker-on-openshift/nav.adoc
+
+- modules/securing-amq-broker-on-openshift/nav.adoc
+
+- modules/amq-broker-high-availability-on-openshift/nav.adoc
+
+- modules/different-message-stores-for-amq-broker-on-openshift/nav.adoc
+
+- modules/accessing-management-console-for-amq-broker-on-openshift/nav.adoc
+
+- modules/enabling-external-access-to-brokers-deployed-on-openshift/nav.adoc
+
+- modules/core-protocol-client-examples/nav.adoc
+
+- modules/amqp-protocol-client-examples/nav.adoc
+
+- modules/hands-on-lab-deploying-and-managing-amq-broker/nav.adoc
+
 - modules/appendix/nav.adoc

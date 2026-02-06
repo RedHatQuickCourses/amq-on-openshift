@@ -1,0 +1,227 @@
+#  Lab: Deploying a Basic AMQ Broker Instance
+
+```adoc
+= Lab: Deploying a Basic AMQ Broker Instance
+:description: This lab guides you through deploying a basic Red Hat AMQ Broker instance on OpenShift using the AMQ Broker Operator.
+:keywords: AMQ Broker, OpenShift, Operator, Custom Resource, Deployment, Lab, Hands-on
+
+This lab provides hands-on experience with deploying a basic Red Hat AMQ Broker instance on OpenShift Container Platform. You will learn how to leverage the AMQ Broker Operator and Custom Resources to provision and verify a message broker.
+
+== Learning Objectives
+
+*   Understand the role of the AMQ Broker Operator in OpenShift deployments.
+*   Deploy a simple AMQ Broker instance using a Custom Resource.
+*   Verify the successful deployment of the broker and its components.
+*   Send test messages to the broker using the `artemis` command-line tool.
+
+== Prerequisites
+
+Before starting this lab, ensure you have:
+
+*   Access to an OpenShift Container Platform cluster (version 4.x or later).
+*   The `oc` command-line interface (CLI) installed and configured to connect to your OpenShift cluster.
+*   Cluster-admin or equivalent permissions to install Operators and create Custom Resources in a new namespace.
+*   (Optional) A basic understanding of Kubernetes/OpenShift concepts like Pods, Services, and Namespaces.
+
+== Understanding AMQ Broker Deployment on OpenShift
+
+On OpenShift, Red Hat AMQ Broker instances are deployed and managed using the *AMQ Broker Operator*. An Operator is a method of packaging, deploying, and managing a Kubernetes application. The AMQ Broker Operator extends the Kubernetes API to understand and manage AMQ Broker instances.
+
+Instead of manually deploying individual Pods, Services, and other Kubernetes resources, you interact with the Operator by creating *Custom Resources (CRs)*. For AMQ Broker, the primary Custom Resource Definition (CRD) is `ActiveMQArtemis`. When you create an `ActiveMQArtemis` CR, the Operator watches for this new resource and automatically provisions all the necessary underlying OpenShift components (Deployment, StatefulSet, Services, Routes, etc.) to run your broker instance according to the specifications in your CR.
+
+This declarative approach simplifies deployment, scaling, and management, allowing you to focus on *what* you want (an AMQ Broker instance) rather than *how* to achieve it. As indicated in the "Getting Started with AMQ Broker" instructions, this involves installing the broker and creating a broker instance, often with anonymous access enabled for initial testing.
+
+== Hands-on Lab: Deploying a Basic AMQ Broker Instance
+
+Follow the steps below to deploy your first AMQ Broker instance.
+
+=== Step 1: Log in to OpenShift
+
+Ensure you are logged in to your OpenShift cluster using the `oc` CLI.
+
+[source,bash]
+----
+oc login --token=<your-token> --server=<your-api-server>
+# Alternatively, use the developer login workflow if available for your cluster.
+----
+
+Verify your current project (namespace):
+
+[source,bash]
+----
+oc whoami --show-current-project
+----
+
+=== Step 2: Create a New Project
+
+For this lab, we'll create a dedicated OpenShift project (namespace) to isolate our broker deployment.
+
+[source,bash]
+----
+oc new-project amq-broker-lab
+----
+
+You should see output similar to:
+```text
+Now using project "amq-broker-lab" on server "https://api.cluster.example.com:6443".
+```
+
+=== Step 3: Install the AMQ Broker Operator
+
+If the AMQ Broker Operator is not already installed in your cluster, you need to install it. For this lab, we will install it in the `amq-broker-lab` namespace.
+
+.Create the Operator Group (if not already present for your namespace)
+[source,bash]
+----
+oc apply -f - <<EOF
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: amq-broker-operator-group
+  namespace: amq-broker-lab
+spec:
+  targetNamespaces:
+  - amq-broker-lab
+EOF
+----
+
+.Subscribe to the AMQ Broker Operator
+[source,bash]
+----
+oc apply -f - <<EOF
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: amq-broker-operator
+  namespace: amq-broker-lab
+spec:
+  channel: current
+  installPlanApproval: Automatic
+  name: amq-broker-rhel8
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+----
+
+.Verify the Operator deployment
+Wait for the Operator Pod to be in a `Running` state. This might take a few minutes.
+[source,bash]
+----
+oc get pods -n amq-broker-lab | grep amq-broker-operator
+----
+You should see output indicating a running Pod, for example:
+```text
+amq-broker-operator-XXXXX-YYYYY   1/1     Running   0          3m
+```
+
+=== Step 4: Deploy the AMQ Broker Instance
+
+Now, we'll create an `ActiveMQArtemis` Custom Resource to deploy our broker. We will enable anonymous access for simplicity in this basic lab, as suggested by the context, making it easier for clients to connect without authentication.
+
+[source,bash]
+----
+oc create -f - <<EOF
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+  namespace: amq-broker-lab
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.13
+    journalType: nio
+    enableAnonymous: true
+  console:
+    expose: true # Expose Hawtio console for later access
+  acceptors:
+    - name: my-acceptor
+      protocols: [AMQP, CORE, MQTT, STOMP, OPENWIRE]
+      port: 61616
+      sslEnabled: false
+      expose: true # Expose this internal acceptor via a Service
+EOF
+----
+
+This command creates a single-node AMQ Broker instance named `my-broker` in the `amq-broker-lab` namespace. It uses a specific Red Hat AMQ Broker image, enables anonymous access, and configures an acceptor for common messaging protocols on port 61616, which will be exposed internally within OpenShift. We also enable the Hawtio management console for potential later use.
+
+=== Step 5: Verify the Broker Deployment
+
+Monitor the deployment of your broker instance to ensure it's ready.
+
+.Check the `ActiveMQArtemis` Custom Resource status
+[source,bash]
+----
+oc get activemqartemises -n amq-broker-lab
+----
+Wait until the `STATUS` shows `Running` and `READY` is `1/1`. This might take a few moments as the broker Pod starts up.
+
+.Check the Pods
+[source,bash]
+----
+oc get pods -n amq-broker-lab
+----
+You should see a Pod similar to `my-broker-broker-0-XXXXX` in a `Running` state.
+
+.Check the Services
+[source,bash]
+----
+oc get svc -n amq-broker-lab
+----
+You should see services like `my-broker-amqp`, `my-broker-core`, `my-broker-console`, etc., which expose the broker's listeners and the management console.
+
+=== Step 6: Test Message Production with `artemis` CLI
+
+To confirm the broker is active and accepting messages, we'll use the `artemis` command-line tool (part of the AMQ Broker distribution) to send a test message. For convenience, we can execute this tool directly from inside the broker Pod itself.
+
+.Access the Broker Pod's shell
+[source,bash]
+----
+oc exec -it deployment/my-broker-broker -- bash
+----
+You are now inside the broker Pod's shell. The `deployment/my-broker-broker` refers to the Deployment managed by the Operator that controls the broker Pods.
+
+.Navigate to the `bin` directory
+[source,bash]
+----
+cd /home/jboss/amq-broker/bin
+----
+
+.Send test messages to a queue
+We'll use the `artemis producer` command to send messages to a new queue named `demoQueue`. Since we are executing from within the broker Pod, the internal IP address of the broker itself is `localhost`. The context provides an example of `artemis producer` command:
+`./amq-broker/bin/artemis producer --url tcp://10.129.2.15:61616 --destination queue://demoQueue`
+We'll adapt this to use `localhost` and a specific message count.
+
+[source,bash]
+----
+./artemis producer --url tcp://localhost:61616 --destination queue://demoQueue --message-count 100
+----
+
+You should see output similar to the following, indicating messages were successfully sent:
+```text
+Connection brokerURL = tcp://localhost:61616
+Producer ActiveMQQueue[demoQueue], thread=0 Started to calculate elapsed time ...
+Producer ActiveMQQueue[demoQueue], thread=0 Produced: 100 messages
+Producer ActiveMQQueue[demoQueue], thread=0 Elapsed time in second : 0 s
+Producer ActiveMQQueue[demoQueue], thread=0 Elapsed time in milli second : XXXX milli seconds
+```
+
+.Exit the Pod shell
+[source,bash]
+----
+exit
+----
+
+You have successfully deployed a basic AMQ Broker instance on OpenShift and verified its operation by sending test messages.
+
+== Summary
+
+In this lab, you gained practical experience with the fundamental steps of deploying a Red Hat AMQ Broker instance on OpenShift. You learned how to:
+
+*   Deploy the AMQ Broker Operator on OpenShift.
+*   Create an `ActiveMQArtemis` Custom Resource to provision an AMQ Broker instance with anonymous access.
+*   Verify the broker's deployment status and its associated OpenShift resources.
+*   Use the `artemis` CLI tool to interact with the deployed broker and send test messages, confirming its functionality.
+
+This foundational deployment sets the stage for further configurations, such as enabling external access, securing the broker, configuring high availability, and integrating with other systems.
+```

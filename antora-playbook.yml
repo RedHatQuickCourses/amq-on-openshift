@@ -1,6 +1,6 @@
 site:
-  title: FIXME Course Title
-  start_page: REPLACEREPONAME::index.adoc
+  title:  'AMQ Broker on OpenShift: Deployment and Management'
+  start_page: amq-on-openshift::index.adoc
 
 content:
   sources:

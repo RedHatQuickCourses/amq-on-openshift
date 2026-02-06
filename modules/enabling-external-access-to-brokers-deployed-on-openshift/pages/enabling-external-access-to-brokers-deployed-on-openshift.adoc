@@ -1,0 +1,6 @@
+#  Enabling External Access to Brokers Deployed on OpenShift
+
+When an acceptor is exposed on an AMQ Broker deployed on OpenShift, the Operator automatically creates a dedicated service and route for each broker pod.
+
+* External clients connect to the broker by using the full hostname of the route.
+* External access can be tested using a `curl` command to the route's hostname.

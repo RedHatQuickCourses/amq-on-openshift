@@ -1,0 +1,130 @@
+#  Adjusting Resource Allocations (CPU, Memory) for Broker Pods
+
+= Adjusting Resource Allocations (CPU, Memory) for Broker Pods
+
+This section details how to configure CPU and memory resource allocations for your AMQ Broker pods deployed on OpenShift. Properly setting these values is crucial for ensuring stable performance, efficient resource utilization, and predictable behavior of your messaging infrastructure.
+
+== Understanding Resource Requests and Limits
+
+On OpenShift, resource management for containers is controlled through `requests` and `limits` for CPU and memory. These configurations guide the OpenShift scheduler and runtime environment on how to manage your broker pods.
+
+=== CPU Resource Management
+
+*   `requests.cpu`:: This value specifies the *minimum* amount of host-node CPU that each broker container requires to run. The OpenShift scheduler uses this value to determine which node can accommodate the broker pod. If a node doesn't have at least this amount of available CPU, the pod will not be scheduled on it. CPU requests are typically measured in millicores (`m`), where `1000m` equals 1 full CPU core. For example, `"250m"` means 0.25 of a CPU core.
+*   `limits.cpu`:: This value defines the *maximum* amount of host-node CPU that each broker container can consume. If a broker container attempts to exceed this specified CPU limit, OpenShift will *throttle* the container. Throttling ensures that the container's CPU usage does not impact other containers or the node's overall stability. While useful for preventing resource hogging, consistent throttling can lead to performance degradation for the throttled application.
+
+=== Memory Resource Management
+
+*   `requests.memory`:: This value specifies the *minimum* amount of host-node memory that each broker container requires. Similar to CPU requests, the OpenShift scheduler uses this value to place the pod on a node that has at least this amount of available memory. Memory requests are typically measured in bytes, with common suffixes like `M` for megabytes or `G` for gigabytes. For example, `"512M"` means 512 megabytes.
+*   `limits.memory`:: This value defines the *maximum* amount of host-node memory that each broker container can consume. If a broker container attempts to exceed this memory limit, the OpenShift platform will terminate the container with an "Out Of Memory" (OOMKilled) error. This mechanism prevents a single misbehaving application from consuming all available memory on a node and causing instability for other services.
+
+=== Important Considerations for Resource Allocation
+
+*   **Default Behavior for Requests**: If you specify `limits` for a resource but do not explicitly specify `requests`, the broker container will *request* the configured `limits` values for that resource. For instance, if you set `limits.cpu: "500m"` but omit `requests.cpu`, the broker will request `"500m"` CPU.
++
+[IMPORTANT]
+.Set `limits` without `requests`
+Always set `limits` without explicitly setting `requests` to precisely control the amount of memory and CPU requested. This practice also ensures that the same values are requested for each broker container, especially in deployments with multiple brokers. This helps maintain consistency and predictable scheduling behavior across your broker cluster.
+
+*   **Init Containers**: The AMQ Broker Operator utilizes *Init Containers* during the initialization phase of each broker pod. Any resource `limits` and `requests` that you configure for the main broker container also apply to these Init Containers. This ensures that the initialization process itself is subject to the same resource constraints.
+*   **Testing and Tuning**: While general recommendations can be provided, the optimal resource allocations are highly dependent on your specific messaging use cases, message throughput, concurrency, and overall AMQ Broker architecture. It is *strongly recommended* that you thoroughly test and tune these values in a development or staging environment before applying them to your production environment. Misconfigured resources can lead to performance bottlenecks, instability, or inefficient resource utilization.
+
+== Hands-on Activity: Adjusting Resource Allocations for an AMQ Broker Pod
+
+In this activity, you will modify an existing AMQ Broker custom resource (CR) to adjust the CPU and memory allocations for its pods.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   An existing AMQ Broker instance deployed via its custom resource.
+*   `oc` CLI configured and logged into your OpenShift cluster.
+*   Basic understanding of YAML syntax.
+
+=== Procedure: Adjusting Broker Pod Resources
+
+1.  **Identify your Broker Custom Resource**:
+    First, list your existing `ActiveMQArtemis` custom resources to identify the one you want to modify.
+
+    ```bash
+    oc get activemqartemis
+    ```
+    You should see output similar to this:
+    ```
+    NAME           AGE
+    my-broker      5m
+    ```
+    In this example, our broker's CR name is `my-broker`.
+
+2.  **Edit the Broker Custom Resource**:
+    Use the `oc edit` command to open the custom resource for editing in your default editor (e.g., `vi` or `nano`).
+
+    ```bash
+    oc edit activemqartemis my-broker
+    ```
+
+3.  **Modify the `deploymentPlan.resources` section**:
+    Navigate to the `spec.deploymentPlan.resources` section within the YAML. You will add or modify the `limits` and `requests` for `cpu` and `memory`.
+
+    [IMPORTANT]
+    .Ensure Proper Indentation
+    YAML is sensitive to indentation. Ensure that your `resources` block is correctly indented under `deploymentPlan`.
+
+    Locate or add the `resources` block as shown below. For this example, we will set CPU limits to `500m` and memory limits to `1024M`. As per the recommendation, we will *not* explicitly set `requests` so they default to the `limits` values.
+
+    ```yaml
+    # ... existing CR content ...
+    spec:
+      deploymentPlan:
+        size: 1 # Assuming a single broker for simplicity, adjust as needed
+        # ... other deploymentPlan configurations ...
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "1024M"
+        # If you wanted to explicitly set requests, it would look like this:
+        # requests:
+        #   cpu: "250m"
+        #   memory: "512M"
+    # ... rest of CR content ...
+    ```
+
+    In this configuration:
+    *   Each broker container will be limited to `500m` (half a CPU core).
+    *   Each broker container will be limited to `1024M` (1 GB) of memory.
+    *   Since `requests` are not specified, the broker will *request* `500m` CPU and `1024M` memory for scheduling purposes.
+
+4.  **Save the Custom Resource**:
+    Save and close the editor. The OpenShift Operator will detect the change in the `ActiveMQArtemis` custom resource and automatically reconcile the broker deployment, updating the underlying Pods with the new resource allocations. This typically involves terminating the existing broker pods and creating new ones with the updated specifications.
+
+5.  **Verify the Resource Allocations**:
+    After a short period, verify that the new resource allocations have been applied to your broker pods.
+
+    a.  **Check Pod Status**: Ensure the broker pod(s) are running.
+        ```bash
+        oc get pods -l app.kubernetes.io/name=my-broker # Replace 'my-broker' with your broker name
+        ```
+
+    b.  **Describe a Broker Pod**: Get detailed information about one of the broker pods.
+        ```bash
+        oc describe pod <broker-pod-name>
+        ```
+        Look for the `Resources` section under the `Containers` details. You should see output similar to this, reflecting your changes:
+        ```
+        ...
+        Containers:
+          amq-broker:
+            Container ID:  ...
+            Image:         ...
+            Port:          61616/TCP
+            Host Port:     0/TCP
+            Limits:
+              cpu:     500m
+              memory:  1024M
+            Requests:
+              cpu:     500m
+              memory:  1024M
+        ...
+        ```
+        Notice that `Requests` now matches `Limits` because we didn't specify them explicitly.
+
+This concludes the process of adjusting CPU and memory resource allocations for your AMQ Broker pods on OpenShift. Remember to monitor your broker's performance after making such changes to ensure optimal operation.

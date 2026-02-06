@@ -1,0 +1,200 @@
+#  Common Messaging Patterns (Point-to-Point, Publish/Subscribe)
+
+module-messaging-patterns
+:page-title: Common Messaging Patterns
+
+[[_common_messaging_patterns]]
+= Common Messaging Patterns
+
+Asynchronous messaging systems like Red Hat AMQ Broker facilitate communication between different components of an application or various applications themselves. The way messages are delivered and consumed defines distinct *messaging patterns*. Understanding these patterns—Point-to-Point and Publish/Subscribe—is crucial for designing robust, scalable, and decoupled systems. These patterns dictate how producers send messages and how consumers receive them, influencing system architecture and behavior.
+
+== Point-to-Point Messaging (Queues)
+
+The Point-to-Point (P2P) messaging pattern is characterized by its one-to-one delivery semantics, where each message sent by a producer is consumed by exactly one consumer. This pattern is primarily implemented using *queues*.
+
+=== Technical Explanation
+
+In a P2P model:
+
+*   *Producer*: Sends messages to a specific queue.
+*   *Queue*: A persistent storage mechanism that holds messages in the order they are received.
+*   *Consumer*: Retrieves messages from the queue. Once a message is consumed, it is removed from the queue.
+
+As per the xref:../../overview/overview-of-message-oriented-middleware.adoc#_queue[product documentation^], a *queue* implements point-to-point semantics: "Each message is seen by only one consumer, and the message is removed from the queue after it is read."
+
+Key characteristics of Point-to-Point messaging:
+
+*   *Single Consumer*: Regardless of how many consumers are listening to a queue, each message is delivered to only one of them.
+*   *Message Removal*: After a consumer successfully processes a message, the message is removed from the queue, ensuring it's not processed again by another consumer.
+*   *Load Balancing*: If multiple consumers are connected to the same queue, the broker automatically distributes incoming messages among them, effectively load balancing the processing workload. This makes P2P ideal for task distribution.
+*   *Persistence*: Queues typically store messages persistently until they are consumed, ensuring message delivery even if consumers are temporarily unavailable.
+*   *Ordered Delivery*: Messages are generally delivered to consumers in the order they were sent to the queue.
+
+.Conceptual Flow of Point-to-Point Messaging
+....
++----------+       +-----------+       +-----------+
+| Producer | ----> |   Queue   | ----> | Consumer1 |
++----------+       +-----------+       +-----------+
+                       /   \
+                      /     \
+                     V       V
+                +-----------+   +-----------+
+                | Consumer2 |   | Consumer3 |
+                +-----------+   +-----------+
+
+Each message from the Producer is consumed by *only one* of the active Consumers (Consumer1, Consumer2, or Consumer3) and is then removed from the Queue.
+....
+
+=== Use Cases for Point-to-Point
+
+Point-to-Point messaging is well-suited for scenarios where:
+
+*   *Task Queues*: Distributing tasks to a pool of workers (e.g., image processing, video encoding, report generation).
+*   *Order Processing*: Ensuring each customer order is processed exactly once by a single backend service.
+*   *Financial Transactions*: Guaranteeing that a payment transaction is handled uniquely.
+*   *Workflow Management*: Passing a task from one stage to the next in a sequential workflow.
+
+[[_publish_subscribe_messaging]]
+== Publish/Subscribe Messaging (Topics)
+
+The Publish/Subscribe (Pub/Sub) messaging pattern is designed for one-to-many communication, where a single message sent by a producer (publisher) can be received by multiple consumers (subscribers). This pattern is implemented using *topics*.
+
+=== Technical Explanation
+
+In a Pub/Sub model:
+
+*   *Publisher*: Sends messages to a specific topic.
+*   *Topic*: A broadcast mechanism that delivers messages to all active subscribers. Unlike queues, topics generally do not remove messages after delivery to a subscriber; instead, they make messages available to *all* interested subscribers.
+*   *Subscriber*: Registers interest in a topic and receives a copy of every message published to that topic while it is active.
+
+As per the xref:../../overview/overview-of-message-oriented-middleware.adoc#_topic[product documentation^], a *topic* implements publish-subscribe semantics: "Each message is seen by multiple consumers, and the message remains available to other consumers after it is read."
+
+Key characteristics of Publish/Subscribe messaging:
+
+*   *Multiple Consumers*: All active subscribers to a topic receive their own copy of each message published to that topic.
+*   *Message Availability*: Messages are essentially broadcast. Each subscriber processes its own copy independently.
+*   *Decoupling*: Publishers and subscribers are highly decoupled. Publishers don't need to know about the subscribers, and subscribers don't need to know about the publishers. They only need to agree on the topic name.
+*   *Timeliness*: Messages are typically delivered to subscribers in real-time or near real-time. If a subscriber is not active when a message is published, it might miss that message unless *durable subscriptions* are used (a more advanced concept ensuring messages are retained for inactive subscribers).
+*   *No Load Balancing (by default)*: Since all subscribers get a copy, there's no inherent load balancing of message processing among them in the same way as with queues.
+
+.Conceptual Flow of Publish/Subscribe Messaging
+....
++-----------+       +----------+
+| Publisher | ----> |  Topic   |
++-----------+       +----------+
+                       / | \
+                      /  |  \
+                     V   V   V
+                +-----------+   +-----------+   +-----------+
+                | Subscriber1 | | Subscriber2 | | Subscriber3 |
+                +-----------+   +-----------+   +-----------+
+
+Each message from the Publisher is received by *all active* Subscribers (Subscriber1, Subscriber2, and Subscriber3).
+....
+
+=== Use Cases for Publish/Subscribe
+
+Publish/Subscribe messaging is ideal for scenarios involving:
+
+*   *Broadcast Notifications*: Sending system alerts, news updates, or marketing messages to all interested applications or users.
+*   *Real-time Data Feeds*: Stock market updates, sports scores, weather alerts, or IoT sensor data where multiple applications need the same information simultaneously.
+*   *Event Streaming*: Decoupling microservices by publishing events (e.g., "OrderCreated," "UserUpdated") that various other services can react to independently.
+*   *Monitoring and Logging*: Broadcasting log entries or performance metrics that multiple monitoring tools or analytics engines can consume.
+
+== Choosing the Right Messaging Pattern
+
+The choice between Point-to-Point and Publish/Subscribe depends entirely on your application's requirements for message delivery and consumer interaction.
+
+.Comparison of Messaging Patterns
+|===
+| Feature | Point-to-Point (Queues) | Publish/Subscribe (Topics)
+
+| *Delivery Semantics* | One-to-one | One-to-many
+| *Message Consumption* | Message removed after one consumer processes it | Each active subscriber receives a copy; message remains available for others
+| *Decoupling* | Producer and Consumer are aware of a shared queue, but not each other directly | High decoupling; Publisher doesn't know Subscribers, and vice versa
+| *Load Balancing* | Built-in for multiple consumers on the same queue | Not inherently built-in for message processing; all subscribers get a copy
+| *Persistence* | Messages typically persist until consumed | Messages generally not persisted for inactive subscribers unless using durable subscriptions
+| *Use Cases* | Task distribution, order processing, unique transaction handling | Event broadcasting, real-time data feeds, notifications, system events
+|===
+
+*   Choose *Point-to-Point* when you need to distribute tasks among a group of identical workers, ensuring each task is processed exactly once, or when you need a reliable, ordered stream of messages for a single processing flow.
+*   Choose *Publish/Subscribe* when you need to broadcast information to multiple, potentially different, consumers, allowing them to react independently to events, or when you need strong decoupling between message senders and receivers.
+
+== Hands-on Activity: Designing with Messaging Patterns
+
+This activity focuses on applying your understanding of Point-to-Point and Publish/Subscribe patterns to design message flows for common application scenarios. While we won't be deploying an AMQ Broker instance *in this specific module*, understanding *when* and *why* to use each pattern is a critical design skill that precedes implementation.
+
+=== Objective
+
+Apply the knowledge of Point-to-Point and Publish/Subscribe patterns to determine the optimal message flow for various application requirements.
+
+=== Scenario 1: E-commerce Order Processing
+
+Imagine an e-commerce platform where a customer places an order. Multiple backend services need to react to this event, but some tasks are unique, while others are shared.
+
+.System Components:
+*   `Web Store Frontend`: Where customers place orders.
+*   `Order Service`: Receives the raw order.
+*   `Inventory Service`: Needs to update stock levels.
+*   `Payment Service`: Needs to process the payment.
+*   `Shipping Service`: Needs to arrange delivery.
+*   `Analytics Service`: Needs to record all orders for business intelligence.
+*   `Email Notification Service`: Needs to send order confirmation emails.
+
+.Tasks:
+1.  *Order Confirmation*: The `Order Service` receives the order and needs to confirm it. This is a primary task that should be handled once.
+2.  *Payment Processing*: The `Payment Service` needs to process the payment for the order. This is a critical, single-responsibility task.
+3.  *Inventory Update*: The `Inventory Service` needs to deduct items from stock. This must happen only once per order.
+4.  *Shipping Arrangement*: The `Shipping Service` needs to be notified to prepare for dispatch. This is a unique request per order.
+5.  *Order Logging*: The `Analytics Service` needs to receive *every* order for reporting. Multiple analytical tools might subscribe to this.
+6.  *Customer Notification*: The `Email Notification Service` needs to send an email to the customer.
+
+.Questions:
+*   For which of the above tasks (1-6) would you recommend using a *Point-to-Point Queue*? Justify your choice.
+*   For which of the above tasks (1-6) would you recommend using a *Publish/Subscribe Topic*? Justify your choice.
+*   Describe how the `Order Service` might interact with AMQ Broker to initiate these communications.
+
+=== Scenario 2: Real-time Stock Market Data Feed
+
+A financial institution wants to distribute real-time stock quotes to several internal and external applications.
+
+.System Components:
+*   `Market Data Publisher`: Ingests raw stock data and publishes quotes for specific stocks (e.g., AAPL, GOOG, MSFT).
+*   `Trading Platform`: Needs to display real-time quotes for all stocks the user is watching.
+*   `Algorithmic Trading Bot`: Needs to react to specific stock price changes (e.g., only AAPL and MSFT).
+*   `Market Data Archive`: Needs to store *all* historical stock quotes for compliance and analysis.
+*   `Public API Gateway`: Makes selected stock quotes available to external partners.
+
+.Questions:
+*   How would you structure the messaging architecture (queues/topics) for the `Market Data Publisher` to efficiently distribute information?
+*   Which pattern(s) would the `Trading Platform` utilize, and why?
+*   Which pattern(s) would the `Algorithmic Trading Bot` utilize, and how might it filter messages?
+*   Which pattern(s) would the `Market Data Archive` utilize, and why?
+*   What considerations should be made regarding message volume and reliability in this scenario?
+
+=== Scenario 3: Microservice Event Bus
+
+A microservices architecture relies on an event bus to communicate state changes between services.
+
+.System Components:
+*   `User Service`: Manages user profiles (creates, updates, deletes users).
+*   `Product Service`: Manages product catalog.
+*   `Order Service`: Processes orders.
+*   `Notification Service`: Sends email/SMS based on various events.
+*   `Audit Log Service`: Records all significant system events.
+*   `Recommendation Service`: Generates product recommendations based on user activity.
+
+.Example Events:
+*   `UserCreatedEvent`
+*   `UserUpdatedEvent`
+*   `OrderPlacedEvent`
+*   `ProductOutOfStockEvent`
+
+.Questions:
+*   For broadcasting general events like `UserCreatedEvent` or `OrderPlacedEvent` that multiple services might be interested in, which messaging pattern is most appropriate, and why?
+*   If the `Notification Service` needs to send a confirmation email *only once* after an `OrderPlacedEvent`, how might it use a queue *in conjunction with* a topic, or what pattern would ensure single processing?
+*   The `Audit Log Service` needs to capture *all* events from *all* services. Describe its interaction with the messaging system.
+*   How does using these patterns promote decoupling between microservices?
+
+---
+Next, we will delve into the architecture of AMQ Broker and how it supports these fundamental messaging patterns.

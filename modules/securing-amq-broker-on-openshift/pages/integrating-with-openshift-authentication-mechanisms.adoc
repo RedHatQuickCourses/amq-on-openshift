@@ -1,0 +1,148 @@
+#  Integrating with OpenShift Authentication Mechanisms
+
+= Integrating with OpenShift Authentication Mechanisms
+
+This section explores how Red Hat AMQ Broker, when deployed on OpenShift, can leverage OpenShift's native capabilities for managing authentication configurations. Specifically, we will focus on integrating with OpenShift's secret management to securely define internal broker users and their roles for property-based login modules. While AMQ Broker supports various authentication mechanisms, OpenShift provides a secure and standardized way to externalize sensitive configuration like user credentials.
+
+== Managing Broker Users with OpenShift Secrets and ActiveMQArtemisSecurity CR
+
+AMQ Broker, built on Apache ActiveMQ Artemis, supports various login modules to authenticate clients. One common and straightforward method is through *property-based login modules*, where users, their passwords, and assigned roles are defined. When deploying AMQ Broker on OpenShift, managing these sensitive credentials directly within the broker's configuration YAML files is not recommended due to security concerns. Instead, OpenShift's `Secret` resources provide a secure way to store and inject these sensitive details into the broker's runtime.
+
+The `ActiveMQArtemisSecurity` Custom Resource (CR) is used to configure security aspects of the AMQ Broker instance, including various login modules. For property-based authentication, you configure a `propertiesLoginModules` entry within this CR. This configuration then explicitly references an OpenShift `Secret` that contains the actual usernames and passwords.
+
+This approach offers several significant benefits for security and operational management:
+
+*   *Enhanced Security*: User credentials are not stored in plain text within CR definitions or other configuration files. OpenShift Secrets encrypt the data at rest and provide robust access control mechanisms to manage who can access these sensitive secrets.
+*   *Centralized Management*: User credentials can be managed using standard OpenShift `oc` CLI commands, integrating seamlessly with existing OpenShift administrative workflows and tools.
+*   *Separation of Concerns*: User credentials are kept separate from the role assignments. The `Secret` stores the user's login details, while the `ActiveMQArtemisSecurity` CR defines the roles for those users, providing a clearer division of security configuration responsibilities.
+
+=== How Property-Based Authentication Integration Works:
+
+1.  **Secret Creation**: An OpenShift `Secret` is created to store the user credentials. This secret *must* follow a specific naming convention: `security-properties-<module-name>`, where `<module-name>` corresponds to the name that will be given to the `propertiesLoginModules` entry in your `ActiveMQArtemisSecurity` CR. Each user's username and password are added as key-value pairs within this secret.
+2.  **Security CR Definition**: The `ActiveMQArtemisSecurity` Custom Resource is then defined to declare a `propertiesLoginModules` entry. This entry specifies the logical name of the login module (e.g., `"prop-module"`), which implicitly links it to the previously created secret via the naming convention. The CR also lists the users and their assigned roles. Critically, the *passwords are not included* in the `ActiveMQArtemisSecurity` CR; they are securely sourced exclusively from the linked secret.
+3.  **Broker Integration**: When the `ActiveMQArtemisSecurity` CR is deployed and reconciled by the AMQ Broker Operator, the operator configures the broker instance to use the specified `propertiesLoginModules`. The broker then dynamically fetches the user passwords from the associated OpenShift Secret. This setup allows clients to authenticate against the broker using the credentials managed by OpenShift.
+
+== Hands-on Activity: Configuring Broker Users via OpenShift Secrets
+
+This hands-on activity guides you through the process of creating broker users and assigning roles by leveraging OpenShift Secrets for secure credential management and the `ActiveMQArtemisSecurity` Custom Resource for role definition.
+
+=== Prerequisites
+
+*   Access to an OpenShift cluster with the `oc` CLI configured.
+*   The AMQ Broker Operator installed in your project.
+*   An AMQ Broker instance already deployed (e.g., a basic instance from previous labs).
+*   Ensure you are logged in as an administrator or a user with permissions to create secrets and Custom Resources in your project.
+
+=== Procedure
+
+.Log in to OpenShift and Select Your Project
+++++
+First, ensure you are logged in to OpenShift and switch to the project where your AMQ Broker is deployed. Using an administrator account is recommended for secret creation.
+
+[,bash]
+----
+oc login -u system:admin
+oc project my-amq-broker-project # <1>
+----
+<1> Replace `my-amq-broker-project` with the actual name of your OpenShift project.
+++++
+
+.Create a Secret for Broker User Credentials
+++++
+Create an OpenShift `Secret` that will securely store the usernames and passwords for your broker users. The name of the secret *must* adhere to the pattern `security-properties-<module-name>`, where `<module-name>` will be the `name` attribute of your `propertiesLoginModules` in the `ActiveMQArtemisSecurity` CR.
+
+In this example, we'll create two users: `sam` with password `samspassword` and `rob` with password `robspassword`. The chosen module name for this exercise will be `prop-module`.
+
+[,bash]
+----
+oc create secret generic security-properties-prop-module \
+  --from-literal=sam=samspassword \
+  --from-literal=rob=robspassword
+----
+
+*Explanation*:
+This command creates a generic secret named `security-properties-prop-module`. The `--from-literal` flags add key-value pairs to the secret's data, where the key represents the username and the value is the corresponding password.
+++++
+
+.Define the ActiveMQArtemisSecurity Custom Resource
+++++
+Next, create an `ActiveMQArtemisSecurity` Custom Resource (CR) to define the `propertiesLoginModules` and assign roles to the users whose credentials are now stored in the secret.
+
+Create a file named `broker-security-cr.yaml` with the following content:
+
+[,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisSecurity
+metadata:
+  name: ex-prop
+spec:
+  loginModules:
+    propertiesLoginModules:
+      - name: "prop-module" # <1>
+        users:
+          - name: "sam"
+            roles:
+              - "sender"
+              - "admin" # Sam will have both sender and admin roles
+          - name: "rob"
+            roles:
+              - "receiver" # Rob will only have the receiver role
+----
+<1> The `name: "prop-module"` here *must* match the `<module-name>` used in the secret name (`security-properties-prop-module`) to establish the link.
+
+*Explanation*:
+*   `metadata.name: ex-prop`: This is the name of our `ActiveMQArtemisSecurity` CR instance.
+*   `spec.loginModules.propertiesLoginModules`: This section defines a property-based login module for the broker.
+*   `name: "prop-module"`: This logical name for the login module is crucial. It acts as the bridge, telling the broker to look for a secret named `security-properties-prop-module` for credentials.
+*   `users`: This array lists the usernames that correspond to the keys in your secret and assigns specific roles to each user. Notice that passwords are *not* included here; the broker will fetch them securely from the linked secret.
+++++
+
+.Apply the ActiveMQArtemisSecurity Custom Resource
+++++
+Apply the `broker-security-cr.yaml` file to your OpenShift cluster. The AMQ Broker Operator will detect this new CR, reconcile the desired state, and update your broker's security configuration accordingly.
+
+[,bash]
+----
+oc apply -f broker-security-cr.yaml
+----
+
+*Verification*:
+You can check the status of your `ActiveMQArtemisSecurity` CR to ensure it was successfully processed:
+
+[,bash]
+----
+oc get activemqartemissecurity ex-prop -o yaml
+----
+
+Look for a `status` section within the output indicating that the CR has been successfully deployed and reconciled. You can also check the logs of your broker pod for messages related to security configuration updates.
+
+[,bash]
+----
+oc logs <your-broker-pod-name> | grep "Security configuration loaded"
+----
+Replace `<your-broker-pod-name>` with the actual name of one of your broker pods.
+++++
+
+.Test Client Authentication (Conceptual)
+++++
+Once the security configuration is applied, clients attempting to connect to your AMQ Broker can now authenticate using the `sam` and `rob` credentials that you defined. For instance, a client application designed to send messages to a specific queue might use `sam`'s credentials (given his `sender` role), while a client consuming messages might use `rob`'s credentials (given his `receiver` role).
+
+*Example (conceptual client connection properties for a Java client using a property-based context)*:
+When configuring a client, you would typically specify the connection details, including the username and password.
+
+[,properties]
+----
+java.naming.factory.initial=org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory
+java.naming.provider.url=tcp://<broker-service-host>:61616 # <1>
+connectionFactory.ConnectionFactory=tcp://<broker-service-host>:61616
+username=sam
+password=samspassword
+----
+<1> Replace `<broker-service-host>` and port with the actual service endpoint of your AMQ Broker.
+
+*Important Considerations*:
+The actual client-side configuration will vary significantly based on the client library, the messaging protocol (e.g., JMS, AMQP, MQTT), and the programming language used. The fundamental point, however, remains consistent: the AMQ Broker will now validate these incoming client credentials against the users defined via the `ActiveMQArtemisSecurity` CR and the linked OpenShift Secret. Clients attempting to perform actions not permitted by their assigned roles will be denied access.
+++++
+
+This activity provides a practical demonstration of integrating OpenShift's secure secret management capabilities with AMQ Broker's internal user and role management, significantly enhancing the overall security posture and operational efficiency of your messaging infrastructure on OpenShift.

@@ -1,0 +1,376 @@
+#  JDBC Message Store Integration with External Databases
+
+Here is the detailed educational content on "JDBC Message Store Integration with External Databases," presented in Antora AsciiDoc format, incorporating technical explanations and a hands-on activity.
+
+```asciidoc
+= Different Message Stores for AMQ Broker on OpenShift: JDBC Message Store Integration with External Databases
+
+This section delves into integrating Red Hat AMQ Broker on OpenShift with external databases for message persistence using JDBC. We will explore the technical aspects of this integration, its benefits, considerations, and provide a hands-on lab to demonstrate the configuration.
+
+== Overview of JDBC Message Store
+
+While AMQ Broker primarily uses a high-performance, file-based journal for message persistence, it also offers the capability to store message and binding data in an external relational database using Java Database Connectivity (JDBC). This approach allows organizations to leverage existing database infrastructure and integrate messaging persistence into their wider IT data management strategies.
+
+=== How JDBC Persistence Works
+
+When configured for JDBC persistence, AMQ Broker uses a JDBC connection to store message and binding data in dedicated database tables. The data within these tables is encoded using AMQ Broker's internal journal encoding format. This means that while the data resides in a relational database, it's not directly queryable via SQL for message content in a human-readable format, but rather serves as a durable store managed by the broker.
+
+=== Benefits and Use Cases
+
+Integrating with an external database for message persistence can be beneficial in scenarios such as:
+
+*   **Centralized Data Management:** Organizations with strict policies for data management and backups often prefer to consolidate all persistent data, including message data, within their existing database infrastructure.
+*   **Leveraging Existing DBA Expertise:** Utilizing a database for persistence allows database administrators (DBAs) to apply their expertise in monitoring, backing up, and recovering message data using familiar tools and processes.
+*   **Infrastructure Consistency:** Aligning AMQ Broker's persistence with other applications that rely on relational databases can simplify overall infrastructure management.
+
+=== Performance Considerations
+
+It is important to note that *using a database for message persistence can negatively affect the performance of a messaging system*. Writing messaging data to database tables via JDBC introduces significant overhead compared to the highly optimized, direct disk I/O of the file-based journal. This overhead stems from several factors:
+
+*   **JDBC Driver and Network Latency:** Data needs to travel over the network to the database server, involving network latency and processing by the JDBC driver.
+*   **Database Transaction Overhead:** Each message persistence operation translates into database transactions, which involve logging, locking, and synchronization within the database system.
+*   **I/O Characteristics:** Databases often abstract the underlying storage, which can sometimes lead to less optimal I/O patterns for write-heavy, sequential operations compared to a finely tuned file journal.
+
+Therefore, while offering integration benefits, JDBC persistence should be chosen carefully, particularly for high-throughput or low-latency messaging scenarios where the file-based journal typically excels.
+
+=== Supported Databases
+
+AMQ Broker supports various relational databases for JDBC persistence. For the most up-to-date list of supported databases, always refer to the `Red Hat AMQ 7 Supported Configurations` documentation on the Red Hat Customer Portal. Common choices include PostgreSQL, MySQL, Oracle, and Microsoft SQL Server.
+
+== Prerequisites for JDBC Message Store
+
+Before configuring AMQ Broker for JDBC persistence, ensure the following prerequisites are met:
+
+*   **Dedicated Database:** A dedicated relational database instance (e.g., PostgreSQL, MySQL) is required for use with AMQ Broker. This database should be accessible from the OpenShift cluster where the broker will run.
+*   **Database Credentials:** You will need appropriate database credentials (username and password) for the broker to connect and write data. These should be stored securely, ideally in an OpenShift `Secret`.
+*   **JDBC Driver JAR File:** The required JDBC driver JAR file for your specific database must be available to the broker at runtime. This typically involves:
+    *   Including the JAR in a custom broker image.
+    *   Mounting the JAR via an OpenShift `ConfigMap` or `Secret` as a volume into the broker pod and ensuring it's on the classpath.
+    *   Using an `initContainer` to download the JAR into a shared volume accessible by the broker container.
+    *   Refer to the AMQ Broker documentation (e.g., "Section 4.4, 'Adding third-party JAR files'") for specific instructions on making JAR files available.
+*   **OpenShift Storage (for the database):** If deploying the database itself within OpenShift, ensure you have appropriate Persistent Volumes (PVs) and Persistent Volume Claims (PVCs) configured for database data persistence.
+*   **Network Connectivity:** Ensure network policies and firewall rules allow the AMQ Broker pods to connect to the database server on the specified port.
+
+== Configuring AMQ Broker for JDBC Persistence
+
+Configuring AMQ Broker for JDBC persistence on OpenShift involves specifying the database connection details within the `brokerProperties` attribute of the `ActiveMQArtemis` Custom Resource (CR).
+
+=== Key Configuration Attributes
+
+The primary attributes you'll configure under `brokerProperties` are:
+
+*   `storeConfiguration`:
+    *   Set this to `DATABASE` to enable JDBC persistence.
+*   `storeConfiguration.jdbcDriverClassName`:
+    *   Specify the fully-qualified class name of your JDBC database driver.
+    *   *Example (PostgreSQL):* `org.postgresql.Driver`
+*   `storeConfiguration.jdbcConnectionUrl`:
+    *   Provide the full JDBC connection URL for your database server. This URL includes the hostname, port, database name, and any necessary configuration parameters like user and password.
+    *   *Example (PostgreSQL):* `jdbc:postgresql://postgresql-service.default.svc.cluster.local:5432/postgres?user=postgres&password=postgres`
+    *   *Note:* It is highly recommended to use OpenShift `Secret`s for sensitive information like database usernames and passwords instead of hardcoding them directly in the URL. You can use OpenShift environment variables injected from Secrets.
+
+=== High Availability with Shared Store JDBC
+
+When using JDBC persistence in a High Availability (HA) setup with a *shared store* architecture, it's crucial to prevent multiple brokers from concurrently accessing and writing to the same database tables, which can lead to data corruption. AMQ Broker addresses this using a JDBC lease lock.
+
+To enable this, set the `HAPolicyConfiguration` attribute in your CR:
+
+*   `HAPolicyConfiguration: SHARED_STORE_PRIMARY`
+    *   This setting ensures that only one broker instance (`PRIMARY`) can write to the database at any given time, acquiring a lease lock. If a second broker attempts to start with this configuration, it will become a backup and wait for the primary to fail before attempting to take over the lease and become active.
+
+=== Example Custom Resource Snippet
+
+Here's an example of how these properties would look in an `ActiveMQArtemis` Custom Resource:
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-jdbc-broker
+spec:
+  deploymentPlan:
+    size: 1 # For a single instance with JDBC, or 2 for HA shared store
+    image: registry.redhat.io/amq7/amq-broker-rhel8:latest
+    # ... other deployment plan configurations ...
+  brokerProperties:
+    - "storeConfiguration=DATABASE"
+    - "storeConfiguration.jdbcDriverClassName=org.postgresql.Driver"
+    - "storeConfiguration.jdbcConnectionUrl=jdbc:postgresql://postgresql-service.default.svc.cluster.local:5432/postgres?user=postgres&password=postgres"
+    # Example for HA shared store (if applicable, typically with size: 2)
+    # - "HAPolicyConfiguration=SHARED_STORE_PRIMARY"
+  # ... other broker configurations ...
+----
+
+*Security Note*: In a real-world scenario, the `user` and `password` in `jdbcConnectionUrl` should be injected via environment variables from an OpenShift Secret, not hardcoded. The AMQ Broker Operator supports injecting secrets into broker pods.
+
+== Hands-on Lab: Deploying AMQ Broker with JDBC Persistence
+
+In this lab, you will deploy a basic PostgreSQL database on OpenShift and then configure an AMQ Broker instance to use this PostgreSQL database for message persistence.
+
+=== Lab Prerequisites
+
+*   An OpenShift cluster with `oc` CLI configured and logged in.
+*   The AMQ Broker Operator installed in your project (e.g., in the `amq-broker` namespace, or your current project).
+*   Sufficient permissions to create Deployments, Services, Secrets, and Custom Resources.
+
+=== Step 1: Create a New OpenShift Project
+
+Create a new project for this lab to keep resources organized.
+
+[source,bash,subs="attributes+"]
+----
+oc new-project amq-jdbc-lab
+----
+
+=== Step 2: Deploy a PostgreSQL Database
+
+We'll deploy a simple PostgreSQL instance for demonstration purposes. In a production environment, you would likely use a more robust, highly available database solution.
+
+1.  **Create a PostgreSQL Secret:** This secret will hold the database password.
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc create secret generic postgres-secret --from-literal=POSTGRES_PASSWORD=mysecurepassword
+    ----
+
+2.  **Deploy PostgreSQL:** Create a Deployment and Service for PostgreSQL.
+
+    [source,yaml,subs="attributes+"]
+    ----
+    # postgres-deployment.yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: postgresql
+      labels:
+        app: postgresql
+    spec:
+      selector:
+        matchLabels:
+          app: postgresql
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            app: postgresql
+        spec:
+          containers:
+            - name: postgresql
+              image: registry.redhat.io/rhel8/postgresql-13:latest # Or a suitable PostgreSQL image
+              ports:
+                - containerPort: 5432
+              env:
+                - name: POSTGRESQL_USER
+                  value: postgres
+                - name: POSTGRESQL_DATABASE
+                  value: postgres
+                - name: POSTGRESQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-secret
+                      key: POSTGRES_PASSWORD
+              volumeMounts:
+                - name: postgres-data
+                  mountPath: /var/lib/pgsql/data
+          volumes:
+            - name: postgres-data
+              persistentVolumeClaim:
+                claimName: postgres-pvc
+    ---
+    # postgres-service.yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: postgresql-service
+      labels:
+        app: postgresql
+    spec:
+      ports:
+        - port: 5432
+          targetPort: 5432
+          name: postgresql
+      selector:
+        app: postgresql
+    ---
+    # postgres-pvc.yaml
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: postgres-pvc
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+    ----
+
+    Apply these manifests:
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc apply -f postgres-deployment.yaml
+    ----
+
+3.  **Verify PostgreSQL Deployment:** Wait for the PostgreSQL pod to be `Running`.
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc get pods -l app=postgresql
+    oc get svc postgresql-service
+    ----
+
+    Note the service name: `postgresql-service`. This will be part of your JDBC URL.
+
+=== Step 3: Make JDBC Driver Available to AMQ Broker
+
+For this lab, we will use a common approach: providing the JDBC driver via a `ConfigMap` and mounting it into the broker pod.
+
+1.  **Download the PostgreSQL JDBC Driver:**
+    Fetch the PostgreSQL JDBC driver JAR file. For example, from Maven Central.
+
+    [source,bash,subs="attributes+"]
+    ----
+    curl -o postgresql-42.2.19.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.19/postgresql-42.2.19.jar
+    ----
+    *Note*: Replace `42.2.19` with a version compatible with your PostgreSQL image if necessary.
+
+2.  **Create a ConfigMap with the Driver:**
+    Embed the JAR file into a ConfigMap. This will base64 encode the JAR.
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc create configmap amq-jdbc-driver --from-file=postgresql.jar=postgresql-42.2.19.jar
+    ----
+    *Note*: The key in the ConfigMap is `postgresql.jar`.
+
+=== Step 4: Create the AMQ Broker Custom Resource with JDBC Configuration
+
+Now, create the `ActiveMQArtemis` CR, configuring it to use the PostgreSQL database and mount the JDBC driver.
+
+[source,yaml,subs="attributes+"]
+----
+# amq-broker-jdbc.yaml
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: amq-jdbc-broker
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:latest
+    requireLogin: false # For simplicity in lab, typically 'true'
+    persistenceEnabled: true # Ensure persistence is enabled
+    env: # Inject DB credentials from secret
+      - name: POSTGRES_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: postgres-secret
+            key: POSTGRESQL_USER # Assuming postgres-secret contains POSTGRESQL_USER and POSTGRESQL_PASSWORD
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: postgres-secret
+            key: POSTGRES_PASSWORD
+    brokerProperties:
+      - "storeConfiguration=DATABASE"
+      - "storeConfiguration.jdbcDriverClassName=org.postgresql.Driver"
+      - "storeConfiguration.jdbcConnectionUrl=jdbc:postgresql://postgresql-service:5432/postgres?user=$(POSTGRES_USERNAME)&password=$(POSTGRES_PASSWORD)"
+    extraVolumes: # Mount the ConfigMap with the JDBC driver
+      - name: jdbc-driver-volume
+        configMap:
+          name: amq-jdbc-driver
+    extraVolumeMounts:
+      - name: jdbc-driver-volume
+        mountPath: /opt/amq/drivers # A standard location where broker might look or add to classpath
+        readOnly: true
+    # For a production scenario, you'd also need to ensure the driver is on the classpath.
+    # The AMQ Broker image often has mechanisms to pick up JARs from specific locations like /opt/amq/drivers.
+    # If not, a custom image with the driver pre-installed or explicit classpath modification is needed.
+----
+
+Apply the AMQ Broker CR:
+
+[source,bash,subs="attributes+"]
+----
+oc apply -f amq-broker-jdbc.yaml
+----
+
+=== Step 5: Monitor Broker Deployment
+
+Wait for the AMQ Broker pod to be `Running`. This may take a few minutes as the Operator provisions the broker.
+
+[source,bash,subs="attributes+"]
+----
+oc get activemqartemis amq-jdbc-broker -o yaml
+oc get pods -l app=amq-jdbc-broker
+oc logs -f $(oc get pod -l app=amq-jdbc-broker -o jsonpath='{.items[0].metadata.name}')
+----
+
+Look for messages in the broker logs indicating successful connection to the database and persistence setup, e.g., "ActiveMQ Artemis Message Journal is using JDBC for persistence."
+
+=== Step 6: Verify Persistence (Optional)
+
+1.  **Expose the Management Console:** If not already exposed, create a route to access the Hawtio console.
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc get activemqartemis amq-jdbc-broker -o jsonpath='{.status.consoleURL}'
+    ----
+    Navigate to this URL in your browser. (Default credentials are `admin`/`admin` if `requireLogin` is false, otherwise look up the `activemqartemis-console-users` secret).
+
+2.  **Send and Receive Messages:**
+    Use the Hawtio console or a client application (e.g., using `oc rsh` into the broker pod to run `artemis producer` and `artemis consumer` commands, or external clients) to send some messages to a queue (e.g., `exampleQueue`).
+
+3.  **Restart the Broker:**
+    Simulate a broker restart by scaling down and then up the broker deployment, or deleting the pod.
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc scale activemqartemis amq-jdbc-broker --replicas=0
+    oc get pods -l app=amq-jdbc-broker # Verify pod is terminated
+    oc scale activemqartemis amq-jdbc-broker --replicas=1
+    ----
+
+4.  **Verify Message Persistence:**
+    Once the broker pod is `Running` again, re-access the Hawtio console. Check `exampleQueue`. If the messages are still present, it confirms that JDBC persistence is working correctly.
+
+5.  **Clean up:**
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc delete activemqartemis amq-jdbc-broker
+    oc delete deployment postgresql
+    oc delete service postgresql-service
+    oc delete pvc postgres-pvc
+    oc delete secret postgres-secret
+    oc delete configmap amq-jdbc-driver
+    oc delete project amq-jdbc-lab
+    rm postgresql-42.2.19.jar # delete the downloaded jar
+    ----
+
+== Troubleshooting and Best Practices
+
+*   **Database Connection Errors:**
+    *   **Symptom:** Broker fails to start, logs show JDBC connection exceptions, "Communications link failure," or "Connection refused."
+    *   **Cause:** Incorrect `jdbcConnectionUrl`, wrong credentials, database not running, network policy blocking access, incorrect port.
+    *   **Remedy:** Double-check the URL, username, and password. Ensure the `postgresql-service` is up and accessible. Check OpenShift `NetworkPolicy` if any are applied.
+*   **JDBC Driver Not Found:**
+    *   **Symptom:** Broker logs show `ClassNotFoundException` for the JDBC driver.
+    *   **Cause:** The JDBC driver JAR file is not correctly placed on the broker's classpath.
+    *   **Remedy:** Verify the `extraVolumeMounts` in the CR and ensure the `ConfigMap` (`amq-jdbc-driver`) contains the correct JAR. For specific AMQ Broker images, consult documentation on where to place third-party JARs or how to modify the classpath. Using a custom image with the driver pre-installed is often the most robust solution for production.
+*   **Performance Degradation:**
+    *   **Symptom:** High message latency, low throughput, increased CPU/memory usage on broker or database.
+    *   **Cause:** Inherent overhead of JDBC persistence, inefficient database configuration, network bottlenecks.
+    *   **Remedy:** Review database performance metrics. Optimize database indexing and configuration. Consider using the file-based journal for high-performance scenarios if JDBC integration is not a strict requirement.
+*   **Schema Issues:**
+    *   **Symptom:** Broker fails to start or persist messages with database errors related to table or column creation/access.
+    *   **Cause:** Insufficient database user permissions, existing incompatible schema, database issues.
+    *   **Remedy:** Ensure the database user has `CREATE TABLE`, `INSERT`, `SELECT`, `UPDATE`, `DELETE` permissions. If using an existing database, ensure there are no conflicts.
+*   **Shared Store HA:**
+    *   Always use `HAPolicyConfiguration: SHARED_STORE_PRIMARY` for shared store HA setups with JDBC to prevent data corruption. Without this, multiple active brokers could simultaneously try to write to the same tables.
+*   **Database Security:**
+    *   Never hardcode database credentials in the `ActiveMQArtemis` Custom Resource. Always use OpenShift `Secret`s to store sensitive information and inject them into the broker pod's environment variables, then reference these variables in the `jdbcConnectionUrl`.
+    *   Configure SSL/TLS for JDBC connections to encrypt data in transit between the broker and the database. This typically involves adding SSL parameters to the `jdbcConnectionUrl` and managing trust stores for the broker.
+```

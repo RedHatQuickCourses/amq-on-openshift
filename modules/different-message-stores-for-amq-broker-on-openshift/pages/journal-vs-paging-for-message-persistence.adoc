@@ -1,0 +1,188 @@
+#  Journal vs. Paging for Message Persistence
+
+This content is provided in Antora AsciiDoc format.
+
+[discrete]
+= Journal vs. Paging for Message Persistence
+
+AMQ Broker, built on Apache ActiveMQ Artemis, employs sophisticated mechanisms to ensure message durability and efficient handling, especially under high load or when dealing with large messages. Two fundamental concepts for achieving this are the *Message Journal* and *Message Paging*. While both contribute to message persistence, they serve distinct purposes and operate differently.
+
+== The Message Journal
+
+The message journal is the primary persistence mechanism for AMQ Broker. It is a high-performance, append-only transaction log that stores all critical broker data, ensuring durability and crash recovery.
+
+=== Detailed Technical Explanation
+
+*   **Purpose**: The journal is the authoritative source of truth for the broker's state. It records every persistent message, transaction, binding, and acknowledgment. Its primary goal is to ensure that no message or critical state information is lost even in the event of a broker crash or restart.
+*   **How it Works**:
+    *   **Append-Only Log**: Data is written sequentially to journal files on disk. This sequential write pattern is highly optimized for performance, as it minimizes disk seek times.
+    *   **Transactionality**: All operations affecting persistent state (e.g., sending a persistent message, acknowledging it, creating a durable subscription) are written to the journal as part of a transaction. This guarantees atomicity and consistency.
+    *   **Durability**: Once an operation is committed to the journal and flushed to disk, it is considered durable. Upon restart, the broker can replay the journal to restore its exact state prior to the shutdown or crash.
+    *   **Data Stored**: The journal stores:
+        *   Full content of *small to medium-sized* persistent messages.
+        *   Metadata for *large messages* (the large message payload itself is often handled differently, as discussed under Paging).
+        *   Binding information (which addresses and queues exist).
+        *   Durable subscription states.
+        *   Transaction logs for in-flight transactions.
+*   **Performance**: Due to its append-only nature and optimized disk I/O, the journal offers excellent write performance, which is crucial for high-throughput messaging systems.
+*   **Location**: The journal files are stored in the directory configured by the `journalDirectory` attribute within the broker's configuration. It is critical to store this on fast, persistent storage.
+
+== Message Paging
+
+Message paging is a mechanism designed to prevent the broker from running out of memory when queues accumulate a large number of messages or when individual messages are excessively large. It offloads messages from the broker's active memory to disk, making the broker more resilient to message floods and memory pressure.
+
+=== Detailed Technical Explanation
+
+*   **Purpose**:
+    *   **Memory Management**: When the number of messages in a queue or the total memory footprint of messages held in memory exceeds predefined thresholds, the broker "pages out" messages to disk. This frees up JVM heap space, preventing `OutOfMemoryError` issues and maintaining broker stability.
+    *   **Large Message Handling**: Large messages (typically those exceeding a few hundred kilobytes, configurable) are often *always* paged or streamed directly to disk rather than being held entirely in memory. This prevents a single large message from consuming a significant portion of the broker's memory. The `largeMessagesDirectory` attribute specifies the location for these files.
+    *   **Back Pressure**: Paging can also act as a form of back-pressure, slowing down producers if consumers are unable to keep up, ensuring the broker doesn't collapse under extreme load.
+*   **How it Works**:
+    *   **Thresholds**: Paging is triggered when configured memory limits (e.g., `global-max-size` for the entire broker, or specific `max-size-bytes` for an address) are breached.
+    *   **Paging Files**: Messages are written to dedicated paging files on disk. These files are distinct from the journal files.
+    *   **Retrieval**: When a consumer is ready to receive a paged message, the broker reads the message back from the paging file into memory for delivery.
+    *   **Address Full Policy**: When paging occurs, the `address-full-policy` configuration dictates what happens to incoming messages. Policies can range from `PAGE` (the default, which triggers paging) to `BLOCK` (blocking producers until space is available) or `DROP` (discarding new messages).
+*   **Performance Impact**: While necessary for stability, paging can introduce latency. Reading messages from paging files is slower than delivering messages directly from memory, as it involves disk I/O. However, it's preferable to a broker crash.
+*   **Location**: Paging files are stored in the directory configured by the `pagingDirectory` attribute.
+
+== Journal vs. Paging: Key Differences and Interaction
+
+While both mechanisms store message data on disk, their roles are complementary:
+
+*   **Journal**: Primarily for *durability, transactional integrity, and crash recovery*. It's the sequential, high-performance log of all state changes.
+*   **Paging**: Primarily for *memory management, handling message floods, and accommodating large messages*. It's an overflow mechanism to offload data from memory to disk when necessary.
+
+Here's a comparison:
+
+[cols="1,2,2", options="header"]
+|===
+|Feature |Message Journal |Message Paging
+
+|**Primary Goal**
+|Durability, transactional integrity, crash recovery, "source of truth".
+|Memory management, overflow handling, large message support.
+
+|**When Used**
+|For *all* persistent messages, bindings, transactions, and acknowledgments.
+|When memory thresholds are exceeded for queues/addresses, or for large message payloads.
+
+|**Storage Pattern**
+|Append-only, sequential writes for high performance.
+|Messages are written to dedicated paging files; can be less sequential than journal.
+
+|**Data Stored**
+|Full message content (for small/medium messages), metadata for large messages, transaction logs, binding info.
+|Full message content for messages offloaded from memory or large message payloads.
+
+|**Performance Implication**
+|Optimized for high-speed writes; central to overall message throughput.
+|Introduces latency when messages are read back from disk; prevents `OutOfMemoryError`.
+
+|**Configuration Directives**
+|`journalDirectory`, `journal-min-files`, `journal-file-size`.
+|`pagingDirectory`, `global-max-size`, `address-full-policy`, `max-size-bytes` (on address settings).
+|===
+
+*   **Interaction**: A persistent message always first goes through the journal to ensure its durability. If that message then remains in a queue and contributes to memory pressure, it might subsequently be *paged out* to a paging file. When a consumer requests it, the broker retrieves it from the paging file, and its final acknowledgment is again recorded in the journal. For large messages, the metadata (headers, properties) might go into the journal, while the payload itself goes directly to the `largeMessagesDirectory` within the paging system.
+
+== Configuration Considerations and Best Practices
+
+For optimal performance and reliability on OpenShift, it's crucial to correctly configure the directories for the journal and paging files, leveraging Persistent Volumes (PVs).
+
+=== Hands-on Activity: Configuring Journal and Paging Directories
+
+In an OpenShift environment, you deploy AMQ Broker using the AMQ Broker Operator, which manages `ActiveMQArtemis` Custom Resources (CRs). You define the storage locations within this CR.
+
+.Prerequisites
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   `oc` CLI tool configured to access your cluster.
+*   A default StorageClass configured or existing PersistentVolumeClaims (PVCs) available.
+
+.Procedure
+
+.   **Create a Project (if you don't have one):**
+    First, create a new project for your broker instance.
+    ```bash
+    oc new-project amq-broker-persistence-lab
+    ```
+
+.   **Define the `ActiveMQArtemis` Custom Resource:**
+    You will create a YAML file, `broker-persistence-cr.yaml`, to define your broker instance. This example configures both `journalDirectory` and `pagingDirectory` to point to specific paths within a mounted persistent volume.
+
+    ```yaml
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-ha-broker
+      namespace: amq-broker-persistence-lab
+    spec:
+      deploymentPlan:
+        size: 2
+        image: registry.redhat.io/amq7/amq-broker:7.10
+        extraMounts:
+          # Define a Persistent Volume Claim to be mounted
+          - name: broker-data
+            mountPath: /var/lib/artemis/data
+            persistentVolumeClaim:
+              claimName: amq-broker-data-pvc # This PVC needs to be created first
+        brokerProperties:
+          # --- Journal Configuration ---
+          - "broker.amq.io/v1beta1.ActiveMQArtemis/metadata.name={{ .Metadata.Name }}"
+          - "journalDirectory=/var/lib/artemis/data/journal" # Path within the mounted PV
+          - "bindingsDirectory=/var/lib/artemis/data/bindings" # Path within the mounted PV
+          - "largeMessagesDirectory=/var/lib/artemis/data/large-messages" # Path within the mounted PV
+          # --- Paging Configuration ---
+          - "pagingDirectory=/var/lib/artemis/data/paging" # Path within the mounted PV
+          # --- High Availability Configuration (for example, using shared store) ---
+          # Note: SHARED_STORE_PRIMARY implies the broker uses a file lock
+          # to prevent concurrent access by multiple brokers to the same store.
+          - "HAPolicyConfiguration.policyType=SHARED_STORE_PRIMARY"
+          - "HAPolicyConfiguration.sharedStorePrimary.voteRetries=10"
+          - "HAPolicyConfiguration.sharedStorePrimary.voteRetryWait=1000"
+          # Optional: Configure global paging limits
+          - "global-max-size=100m" # Trigger paging if total message memory exceeds 100MB
+          - "address-full-policy=PAGE" # Default policy, but explicit for clarity
+    ---
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: amq-broker-data-pvc
+      namespace: amq-broker-persistence-lab
+    spec:
+      accessModes:
+        - ReadWriteOnce # or ReadWriteMany if your storage supports it and HA policy allows
+      resources:
+        requests:
+          storage: 10Gi # Request 10GB of storage
+      # storageClassName: my-storage-class # Uncomment and specify if not using default
+    ```
+    *   **`extraMounts`**: This section is crucial. It defines a `broker-data` volume mount that uses a `PersistentVolumeClaim` named `amq-broker-data-pvc` and mounts it to `/var/lib/artemis/data` inside the broker pod.
+    *   **`brokerProperties`**: Within this section, `journalDirectory`, `pagingDirectory`, `bindingsDirectory`, and `largeMessagesDirectory` are set to subdirectories within the mounted `/var/lib/artemis/data` path. This ensures all persistent data goes to the dedicated storage.
+    *   **`global-max-size`**: This is an example of a paging-related broker property that sets the overall memory limit for messages before paging starts.
+    *   **`HAPolicyConfiguration.policyType=SHARED_STORE_PRIMARY`**: As seen in the context, this is important for shared-store HA setups, where multiple brokers share the same underlying storage. The file lock ensures data integrity.
+
+.   **Apply the Configuration:**
+    Apply the YAML file to your OpenShift cluster.
+    ```bash
+    oc apply -f broker-persistence-cr.yaml
+    ```
+
+.   **Verify Deployment:**
+    Check the status of your broker pods and the PVC.
+    ```bash
+    oc get pods -n amq-broker-persistence-lab
+    oc get pvc -n amq-broker-persistence-lab
+    ```
+    Once the pods are running, you can connect to them and verify the directory structure.
+    ```bash
+    oc exec -it my-ha-broker-ss-0 -n amq-broker-persistence-lab -- ls -l /var/lib/artemis/data
+    ```
+    You should see `journal`, `paging`, `bindings`, and `large-messages` directories.
+
+.Best Practices
+*   **Dedicated Storage**: Always use dedicated, high-performance persistent storage (e.g., SSD-backed Persistent Volumes) for both journal and paging directories.
+*   **Separate Storage**: For extremely high-performance requirements, consider using separate PVs for journal and paging directories to avoid I/O contention.
+*   **Monitoring**: Monitor disk I/O, memory usage, and queue depths to understand when paging is occurring and if your sizing is adequate.
+*   **Sizing**: Carefully size your persistent volumes. While paging prevents memory issues, excessive paging due to undersized storage or very high message volumes can impact performance.
+
+By understanding and correctly configuring the Message Journal and Message Paging, you can build a robust, high-performance, and durable messaging system with AMQ Broker on OpenShift.

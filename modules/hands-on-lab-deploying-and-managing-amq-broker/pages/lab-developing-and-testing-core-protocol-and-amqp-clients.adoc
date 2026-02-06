@@ -1,0 +1,755 @@
+#  Lab: Developing and Testing Core Protocol and AMQP Clients
+
+= Lab: Developing and Testing Core Protocol and AMQP Clients
+
+This lab activity guides you through developing and testing client applications that interact with Red Hat AMQ Broker deployed on OpenShift using both the AMQ Core Protocol JMS and the AMQP 1.0 protocol via Qpid JMS. You will learn to configure client applications, establish connections, and send/receive messages, including considerations for secure connections.
+
+ifdef::context[:*Learning Objectives*]
+*   Develop Java-based producer and consumer applications using AMQ Core Protocol JMS.
+*   Develop Java-based producer and consumer applications using Apache Qpid JMS for AMQP 1.0.
+*   Configure client connections to an AMQ Broker on OpenShift, including secure (SSL/TLS) connections.
+*   Test message exchange between producers and consumers.
+endif::[]
+
+== 1. Prerequisites
+
+Before you begin this lab, ensure you have the following:
+
+*   **OpenShift Cluster:** Access to an OpenShift Container Platform cluster.
+*   **AMQ Broker Instance:** A running Red Hat AMQ Broker instance on OpenShift, deployed using the AMQ Broker Operator. This broker should have:
+    *   An external route or service exposing its Core Protocol and AMQP listeners.
+    *   SSL/TLS enabled on the external listeners (as per the `Securing AMQ Broker` objectives).
+    *   A user account (e.g., `admin`/`admin`) configured for authentication.
+*   **Java Development Kit (JDK):** Version 11 or higher installed on your local machine.
+*   **Apache Maven:** Version 3.6 or higher for project management and building.
+*   **Git Client:** For cloning sample repositories (optional, but good practice).
+*   **OpenShift CLI (`oc`):** Configured and logged into your OpenShift cluster.
+
+[NOTE]
+For simplicity, this lab will use a self-signed certificate or a certificate issued by a private CA for SSL/TLS. You will either import the CA certificate into a trust store or temporarily disable host verification (not recommended for production).
+
+== 2. Identifying Broker Connection Details
+
+To connect your clients to the AMQ Broker, you need its external access URL and port.
+
+. Find the Broker's External Route
+Look for the OpenShift Route exposed for your AMQ Broker instance's Core Protocol or AMQP acceptor.
+If you followed previous labs for deploying an AMQ Broker with external access, you should have a route named similarly to `broker-amqp-route` or `broker-core-route`.
+
+[tabs]
+====
+CLI::
++
+--
+. Execute the following command to list routes in your project:
++
+[source,bash,subs="attributes+"]
+----
+oc get routes -n <your-openshift-project>
+----
+
+. Identify the `HOST/PORT` for your AMQ Broker's core or AMQP listener. For example, it might look like `broker-amqp-route-your-project.apps.cluster.example.com`.
+. Store the hostname for later use.
++
+[source,bash,subs="attributes+"]
+----
+export BROKER_HOST=$(oc get route <broker-amqp-route-name> -n <your-openshift-project> -o jsonpath='{.spec.host}')
+echo "Broker Host: ${BROKER_HOST}"
+----
+--
+OpenShift Console::
++
+--
+. Log in to the OpenShift Container Platform web console.
+. Navigate to your project.
+. Go to *Networking* -> *Routes*.
+. Locate the route for your AMQ Broker instance (e.g., `broker-amqp-route` or `broker-core-route`).
+. Copy the "Location" URL, which is the hostname for your broker.
+--
+====
+
+[NOTE]
+If your broker's external listener is exposed via a Service (e.g., a LoadBalancer Service) instead of a Route, you would use the service's external IP and port. However, Routes are more common for HTTP/HTTPS or TCP passthrough on OpenShift.
+
+=== 2.1. Obtaining the CA Certificate for SSL/TLS
+
+If your broker is configured with SSL/TLS, clients need to trust the certificate presented by the broker. You'll need the Certificate Authority (CA) certificate that signed your broker's server certificate.
+
+. Download the CA Certificate (Example using `oc` for an operator-managed certificate)
+If your broker was deployed using the AMQ Broker Operator, and you're using self-signed certificates or a certificate provisioned by OpenShift's default CA, you might be able to extract it. Otherwise, obtain the CA certificate from your certificate management system.
+
+[source,bash,subs="attributes+"]
+----
+# Replace 'broker-dr-secret-name' with the actual secret name used by your broker for TLS, often ends with '-tls'
+# This is an example, actual secret name may vary.
+oc extract secret/<broker-tls-secret-name> --keys=ca.crt --to=- -n <your-openshift-project> > ca.crt
+----
+
+. Create a Java Trust Store
+Use the `keytool` utility to import the `ca.crt` into a new Java trust store.
+
+[source,bash,subs="attributes+"]
+----
+keytool -import -trustcacerts -alias amq-broker-ca -file ca.crt -keystore server-ca-truststore.jks -storepass securepass
+----
+[WARNING]
+For production environments, ensure you use strong, unique passwords for your trust stores and manage them securely. The `securepass` used here is for lab purposes only.
+
+== 3. Lab: AMQ Core Protocol JMS Client
+
+The AMQ Core Protocol is based on OpenWire and is the native protocol of Apache ActiveMQ Artemis, which forms the foundation of Red Hat AMQ Broker. This section demonstrates developing a simple Java client using the AMQ Core Protocol JMS client.
+
+=== 3.1. Technical Explanation: AMQ Core Protocol JMS
+
+Red Hat AMQ Core Protocol JMS is a client library specifically designed for Java applications to interact with AMQ Broker using its highly performant, native Core Protocol. It provides a JMS (Java Message Service) API implementation, allowing developers to leverage standard JMS concepts (connections, sessions, queues, topics, producers, consumers) while benefiting from the Core Protocol's efficiency. The library internally handles the serialization and network communication details over TCP.
+
+When using SSL/TLS, the client needs to be configured with the appropriate trust store to verify the broker's identity, and potentially a key store if client authentication is required (though not covered in this basic lab).
+
+=== 3.2. Hands-on Activity: Developing a Core Protocol Client
+
+. Create a Maven Project
+Create a new directory for your project and initialize a Maven project.
+
+[source,bash]
+----
+mkdir amq-core-client && cd amq-core-client
+mvn archetype:generate -DgroupId=com.example.amq -DartifactId=amq-core-client -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+----
+
+. Update `pom.xml`
+Navigate into the `amq-core-client` directory and open `pom.xml`. Add the `artemis-jms-client` dependency.
+
+[source,xml]
+----
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example.amq</groupId>
+  <artifactId>amq-core-client</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>amq-core-client</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>11</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <activemq.version>2.31.0.redhat-00001</activemq.version> <!-- Use the version compatible with your AMQ Broker -->
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>artemis-jms-client</artifactId>
+      <version>${activemq.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.36</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>com.example.amq.core.CoreProducer</mainClass> <!-- Will be set for producer or consumer -->
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+----
+[IMPORTANT]
+Ensure the `activemq.version` specified in the `pom.xml` is compatible with your deployed AMQ Broker version. Consult Red Hat documentation for recommended client versions. The example `2.31.0.redhat-00001` is a placeholder.
+
+. Implement the Core Protocol Producer
+Create a new Java file `src/main/java/com/example/amq/core/CoreProducer.java` with the following content. Replace `${BROKER_HOST}` with the actual hostname you obtained earlier.
+
+[source,java]
+----
+package com.example.amq.core;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQJMSConnectionFactory;
+
+import javax.jms.*;
+import java.util.Objects;
+
+public class CoreProducer {
+
+    private static final String BROKER_URL = "tcp://${BROKER_HOST}:443" +
+            "?sslEnabled=true" +
+            "&verifyHost=true" + // Set to false for self-signed without proper CA if you encounter issues, but not recommended
+            "&trustStorePath=server-ca-truststore.jks" +
+            "&trustStorePassword=securepass" +
+            "&useTopologyForLoadBalancing=false" + // Important for direct connection to a single broker
+            "&initialConnectAttempts=-1" +
+            "&failoverAttempts=-1";
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String QUEUE_NAME = "exampleQueue";
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            // 1. Create a Connection Factory
+            ConnectionFactory connectionFactory = new ActiveMQJMSConnectionFactory(BROKER_URL, USERNAME, PASSWORD);
+            System.out.println("Connecting to broker: " + BROKER_URL);
+
+            // 2. Create a Connection
+            connection = connectionFactory.createConnection();
+            connection.start();
+            System.out.println("Connection started.");
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // Not transacted, auto-acknowledge
+            System.out.println("Session created.");
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(QUEUE_NAME);
+            System.out.println("Destination created: " + QUEUE_NAME);
+
+            // 5. Create a Producer
+            producer = session.createProducer(destination);
+            System.out.println("Producer created.");
+
+            // 6. Send Messages
+            for (int i = 1; i <= 5; i++) {
+                String text = "Hello from Core Protocol Producer! Message " + i;
+                TextMessage message = session.createTextMessage(text);
+                producer.send(message);
+                System.out.println("Sent message: " + text);
+                Thread.sleep(1000);
+            }
+
+            System.out.println("Messages sent successfully.");
+
+        } catch (JMSException | InterruptedException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 7. Close Resources
+            if (producer != null) {
+                try {
+                    producer.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            System.out.println("Producer resources closed.");
+        }
+    }
+}
+----
+[NOTE]
+The `BROKER_URL` uses parameters like `sslEnabled=true`, `trustStorePath`, and `trustStorePassword` to configure the secure connection. The context provided gives an example of such a URL: `queue://TEST --user admin --password admin --protocol core --sleep 1000 --url "tcp://${EXT_ACCEPTOR_HOST}:443?sslEnabled=true&verifyHost=false&trustStorePath=server-ca-truststore.jks&trustStorePassword=securepass..."`. We are adapting this to a Java `ConnectionFactory` constructor and setting `verifyHost=true` as a best practice, assuming your trust store is correctly configured. If you encounter `PKIX path building failed` errors, try `verifyHost=false` *for testing only*, then resolve your certificate issues.
+
+. Implement the Core Protocol Consumer
+Create a new Java file `src/main/java/com/example/amq/core/CoreConsumer.java` with the following content. Again, replace `${BROKER_HOST}`.
+
+[source,java]
+----
+package com.example.amq.core;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQJMSConnectionFactory;
+
+import javax.jms.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+public class CoreConsumer {
+
+    private static final String BROKER_URL = "tcp://${BROKER_HOST}:443" +
+            "?sslEnabled=true" +
+            "&verifyHost=true" + // Set to false for self-signed without proper CA if you encounter issues, but not recommended
+            "&trustStorePath=server-ca-truststore.jks" +
+            "&trustStorePassword=securepass" +
+            "&useTopologyForLoadBalancing=false" +
+            "&initialConnectAttempts=-1" +
+            "&failoverAttempts=-1";
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String QUEUE_NAME = "exampleQueue";
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+        CountDownLatch latch = new CountDownLatch(5); // Expecting 5 messages
+
+        try {
+            // 1. Create a Connection Factory
+            ConnectionFactory connectionFactory = new ActiveMQJMSConnectionFactory(BROKER_URL, USERNAME, PASSWORD);
+            System.out.println("Connecting to broker: " + BROKER_URL);
+
+            // 2. Create a Connection
+            connection = connectionFactory.createConnection();
+            connection.start();
+            System.out.println("Connection started.");
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            System.out.println("Session created.");
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(QUEUE_NAME);
+            System.out.println("Destination created: " + QUEUE_NAME);
+
+            // 5. Create a Consumer
+            consumer = session.createConsumer(destination);
+            System.out.println("Consumer created. Waiting for messages...");
+
+            // 6. Set a Message Listener
+            consumer.setMessageListener(message -> {
+                try {
+                    if (message instanceof TextMessage) {
+                        TextMessage textMessage = (TextMessage) message;
+                        System.out.println("Received message: " + textMessage.getText());
+                        latch.countDown(); // Decrement latch for each message
+                    } else {
+                        System.out.println("Received non-text message: " + message.getClass().getName());
+                    }
+                } catch (JMSException e) {
+                    System.err.println("Error processing message: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
+
+            // 7. Wait for messages or timeout
+            latch.await(30, TimeUnit.SECONDS); // Wait up to 30 seconds for all messages
+            System.out.println("Consumer finished waiting or received all expected messages.");
+
+        } catch (JMSException | InterruptedException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 8. Close Resources
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            System.out.println("Consumer resources closed.");
+        }
+    }
+}
+----
+
+. Build and Run the Clients
+First, compile your project. Then, run the consumer and producer in separate terminal windows.
+
+[source,bash]
+----
+# Ensure you are in the amq-core-client directory
+mvn clean install
+----
+
+Open **Terminal 1** (for the Consumer):
+[source,bash]
+----
+# Navigate to amq-core-client directory
+java -cp target/amq-core-client-1.0-SNAPSHOT.jar:target/dependency/* com.example.amq.core.CoreConsumer
+# Or using exec-maven-plugin for simplicity:
+mvn exec:java -Dexec.mainClass="com.example.amq.core.CoreConsumer"
+----
+You should see output indicating the consumer is connecting and waiting for messages.
+
+Open **Terminal 2** (for the Producer):
+[source,bash]
+----
+# Navigate to amq-core-client directory
+java -cp target/amq-core-client-1.0-SNAPSHOT.jar:target/dependency/* com.example.amq.core.CoreProducer
+# Or using exec-maven-plugin for simplicity:
+mvn exec:java -Dexec.mainClass="com.example.amq.core.CoreProducer"
+----
+The producer will send 5 messages. You should see "Sent message:" output. Simultaneously, the consumer in Terminal 1 should start displaying "Received message:" for each message.
+
+. Verify in Hawtio Console (Optional)
+If you have the Hawtio Management Console enabled and exposed for your AMQ Broker, you can log in and navigate to the "Queues" section. You should see `exampleQueue` listed, and its message count should fluctuate (briefly increasing and then decreasing as messages are consumed) or show zero if messages are processed quickly.
+
+=== 3.3. Troubleshooting Core Protocol Client Issues
+
+*   **`JMSException: Failed to create session` or `Connection refused`:**
+    *   Verify `BROKER_HOST` and `443` (or the correct port) are accurate and the broker is running.
+    *   Ensure the OpenShift Route for the Core Protocol is correctly configured and accessible externally.
+    *   Check firewall rules if running clients from outside your OpenShift network.
+*   **`JMSException: AMQ219014: Cannot connect to server(s)`:**
+    *   This typically indicates the broker hostname or port is incorrect, or the broker is not reachable.
+*   **`javax.net.ssl.SSLHandshakeException: PKIX path building failed` or `unable to find valid certification path to requested target`:**
+    *   This means the Java client does not trust the broker's SSL certificate.
+    *   Ensure `server-ca-truststore.jks` exists in the working directory or is correctly referenced.
+    *   Verify the correct `ca.crt` was imported into the trust store.
+    *   Double-check `trustStorePassword`.
+    *   *For testing only*: Temporarily set `verifyHost=false` in the `BROKER_URL` to bypass certificate verification, but resolve the underlying certificate issue for production.
+*   **`JMSException: Invalid user name or password`:**
+    *   Check `USERNAME` and `PASSWORD` in your client code against the credentials configured on your AMQ Broker.
+*   **`JMSException: Queue not found`:**
+    *   Ensure the `exampleQueue` exists or that your broker is configured to auto-create queues. AMQ Broker typically auto-creates non-durable queues by default.
+
+== 4. Lab: AMQP Protocol Client
+
+AMQP (Advanced Message Queuing Protocol) 1.0 is an ISO standard, open, internet wire protocol for asynchronous messaging. Red Hat AMQ Broker provides full support for AMQP 1.0, enabling interoperability with a wide range of AMQP-compliant clients and brokers. This section demonstrates using Apache Qpid JMS (part of Red Hat build of Apache Qpid JMS) for Java to interact with the broker via AMQP.
+
+=== 4.1. Technical Explanation: AMQP 1.0 and Qpid JMS
+
+AMQP 1.0 defines the messages and how they are transferred, but not the API. Qpid JMS is a Java Message Service (JMS) 1.1/2.0 client that implements the AMQP 1.0 wire protocol, allowing Java applications to use the familiar JMS API to connect to AMQP 1.0 brokers. This client translates JMS calls into AMQP 1.0 protocol messages and handles the underlying network communication.
+
+Similar to Core Protocol, secure connections via SSL/TLS require configuring the client's trust store.
+
+=== 4.2. Hands-on Activity: Developing an AMQP Client
+
+. Create a Maven Project
+You can create a new project or modify the existing one. For clarity, let's create a separate one.
+
+[source,bash]
+----
+cd ..
+mkdir amq-amqp-client && cd amq-amqp-client
+mvn archetype:generate -DgroupId=com.example.amq -DartifactId=amq-amqp-client -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+----
+
+. Update `pom.xml`
+Navigate into the `amq-amqp-client` directory and open `pom.xml`. Add the `qpid-jms-client` dependency.
+
+[source,xml]
+----
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example.amq</groupId>
+  <artifactId>amq-amqp-client</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>amq-amqp-client</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>11</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <qpid.jms.version>0.62.0.redhat-00001</qpid.jms.version> <!-- Use the version compatible with your AMQ Broker -->
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.qpid</groupId>
+      <artifactId>qpid-jms-client</artifactId>
+      <version>${qpid.jms.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.36</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>com.example.amq.amqp.AmqpProducer</mainClass> <!-- Will be set for producer or consumer -->
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+----
+[IMPORTANT]
+Ensure the `qpid.jms.version` is compatible with your deployed AMQ Broker. The example `0.62.0.redhat-00001` is a placeholder. Refer to Red Hat documentation for the correct version.
+
+. Implement the AMQP Producer
+Create a new Java file `src/main/java/com/example/amq/amqp/AmqpProducer.java` with the following content. Replace `${BROKER_HOST}` with the actual hostname.
+
+[source,java]
+----
+package com.example.amq.amqp;
+
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+import javax.jms.*;
+import java.util.Objects;
+
+public class AmqpProducer {
+
+    // AMQP URLs typically start with 'amqps://' for SSL/TLS, 'amqp://' for plain TCP
+    private static final String BROKER_URL = "amqps://${BROKER_HOST}:443";
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String QUEUE_NAME = "exampleAmqpQueue";
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        // Set system properties for SSL/TLS trust store
+        // Ensure server-ca-truststore.jks is in the current working directory or specify full path
+        System.setProperty("javax.net.ssl.trustStore", "server-ca-truststore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "securepass");
+        // Optional: If you encounter hostname verification issues with self-signed certs
+        // System.setProperty("qpid.jms.ssl.trustStoreHostVerify", "false");
+
+        try {
+            // 1. Create a Connection Factory
+            ConnectionFactory connectionFactory = new JmsConnectionFactory(USERNAME, PASSWORD, BROKER_URL);
+            System.out.println("Connecting to broker: " + BROKER_URL);
+
+            // 2. Create a Connection
+            connection = connectionFactory.createConnection();
+            connection.start();
+            System.out.println("Connection started.");
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            System.out.println("Session created.");
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(QUEUE_NAME);
+            System.out.println("Destination created: " + QUEUE_NAME);
+
+            // 5. Create a Producer
+            producer = session.createProducer(destination);
+            System.out.println("Producer created.");
+
+            // 6. Send Messages
+            for (int i = 1; i <= 5; i++) {
+                String text = "Hello from AMQP Producer! Message " + i;
+                TextMessage message = session.createTextMessage(text);
+                producer.send(message);
+                System.out.println("Sent message: " + text);
+                Thread.sleep(1000);
+            }
+
+            System.out.println("Messages sent successfully.");
+
+        } catch (JMSException | InterruptedException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 7. Close Resources
+            if (producer != null) {
+                try {
+                    producer.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            System.out.println("Producer resources closed.");
+        }
+    }
+}
+----
+[NOTE]
+For Qpid JMS, SSL/TLS configuration is typically done via Java system properties (`javax.net.ssl.trustStore`, `javax.net.ssl.trustStorePassword`). Ensure the `server-ca-truststore.jks` file created earlier is copied into the `amq-amqp-client` directory or specify its full path. If you get `Hostname verification failed` errors, you can uncomment `System.setProperty("qpid.jms.ssl.trustStoreHostVerify", "false");` *for testing only*.
+
+. Implement the AMQP Consumer
+Create a new Java file `src/main/java/com/example/amq/amqp/AmqpConsumer.java` with the following content. Again, replace `${BROKER_HOST}`.
+
+[source,java]
+----
+package com.example.amq.amqp;
+
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+import javax.jms.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+public class AmqpConsumer {
+
+    private static final String BROKER_URL = "amqps://${BROKER_HOST}:443";
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String QUEUE_NAME = "exampleAmqpQueue";
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+        CountDownLatch latch = new CountDownLatch(5); // Expecting 5 messages
+
+        // Set system properties for SSL/TLS trust store
+        // Ensure server-ca-truststore.jks is in the current working directory or specify full path
+        System.setProperty("javax.net.ssl.trustStore", "server-ca-truststore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "securepass");
+        // Optional: If you encounter hostname verification issues with self-signed certs
+        // System.setProperty("qpid.jms.ssl.trustStoreHostVerify", "false");
+
+        try {
+            // 1. Create a Connection Factory
+            ConnectionFactory connectionFactory = new JmsConnectionFactory(USERNAME, PASSWORD, BROKER_URL);
+            System.out.println("Connecting to broker: " + BROKER_URL);
+
+            // 2. Create a Connection
+            connection = connectionFactory.createConnection();
+            connection.start();
+            System.out.println("Connection started.");
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            System.out.println("Session created.");
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(QUEUE_NAME);
+            System.out.println("Destination created: " + QUEUE_NAME);
+
+            // 5. Create a Consumer
+            consumer = session.createConsumer(destination);
+            System.out.println("Consumer created. Waiting for messages...");
+
+            // 6. Set a Message Listener
+            consumer.setMessageListener(message -> {
+                try {
+                    if (message instanceof TextMessage) {
+                        TextMessage textMessage = (TextMessage) message;
+                        System.out.println("Received message: " + textMessage.getText());
+                        latch.countDown(); // Decrement latch for each message
+                    } else {
+                        System.out.println("Received non-text message: " + message.getClass().getName());
+                    }
+                } catch (JMSException e) {
+                    System.err.println("Error processing message: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
+
+            // 7. Wait for messages or timeout
+            latch.await(30, TimeUnit.SECONDS); // Wait up to 30 seconds for all messages
+            System.out.println("Consumer finished waiting or received all expected messages.");
+
+        } catch (JMSException | InterruptedException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 8. Close Resources
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            System.out.println("Consumer resources closed.");
+        }
+    }
+}
+----
+
+. Build and Run the Clients
+First, compile your project. Then, run the consumer and producer in separate terminal windows.
+
+[source,bash]
+----
+# Ensure you are in the amq-amqp-client directory
+mvn clean install
+----
+
+Open **Terminal 3** (for the AMQP Consumer):
+[source,bash]
+----
+# Navigate to amq-amqp-client directory
+java -cp target/amq-amqp-client-1.0-SNAPSHOT.jar:target/dependency/* com.example.amq.amqp.AmqpConsumer
+# Or using exec-maven-plugin for simplicity:
+mvn exec:java -Dexec.mainClass="com.example.amq.amqp.AmqpConsumer"
+----
+You should see output indicating the consumer is connecting and waiting for messages.
+
+Open **Terminal 4** (for the AMQP Producer):
+[source,bash]
+----
+# Navigate to amq-amqp-client directory
+java -cp target/amq-amqp-client-1.0-SNAPSHOT.jar:target/dependency/* com.example.amq.amqp.AmqpProducer
+# Or using exec-maven-plugin for simplicity:
+mvn exec:java -Dexec.mainClass="com.example.amq.amqp.AmqpProducer"
+----
+The producer will send 5 messages. You should see "Sent message:" output. Simultaneously, the consumer in Terminal 3 should start displaying "Received message:" for each message.
+
+. Verify in Hawtio Console (Optional)
+Log in to the Hawtio Management Console. Navigate to the "Queues" section. You should see `exampleAmqpQueue` listed, and its message count should fluctuate or show zero.
+
+=== 4.3. Troubleshooting AMQP Client Issues
+
+*   **`JMSException: Peer did not send any data` or `Connection refused`:**
+    *   Verify `BROKER_HOST` and `443` (or the correct port) are accurate and the broker is running.
+    *   Ensure the OpenShift Route for the AMQP Protocol is correctly configured and accessible externally.
+    *   Check firewall rules if running clients from outside your OpenShift network.
+*   **`javax.net.ssl.SSLHandshakeException` or `unable to find valid certification path to requested target`:**
+    *   Ensure `server-ca-truststore.jks` is in the `amq-amqp-client` working directory or referenced with a full path.
+    *   Verify `javax.net.ssl.trustStore` and `javax.net.ssl.trustStorePassword` system properties are correctly set.
+    *   Double-check the content and password of `server-ca-truststore.jks`.
+    *   *For testing only*: Temporarily uncomment `System.setProperty("qpid.jms.ssl.trustStoreHostVerify", "false");` to bypass hostname verification.
+*   **`JMSException: Not authorized`:**
+    *   Check `USERNAME` and `PASSWORD` in your client code against the credentials configured on your AMQ Broker.
+*   **`JMSException: The AMQP message broker did not create a durable consumer for the requested subject.`:**
+    *   This can happen if the queue is not configured for auto-creation or if there are specific authorization issues preventing queue creation or access.
+
+Congratulations! You have successfully developed and tested both AMQ Core Protocol JMS and AMQP 1.0 clients to interact with your Red Hat AMQ Broker instance on OpenShift, including secure connections. This foundational knowledge is crucial for integrating diverse applications with your message-oriented middleware.

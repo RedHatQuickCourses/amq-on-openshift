@@ -1,0 +1,149 @@
+#  Mapping External Roles to Broker Roles
+
+[[mapping-external-roles-to-broker-roles]]
+= Mapping External Roles to Broker Roles
+
+Integrating Red Hat AMQ Broker on OpenShift with external identity providers (IDPs) such as LDAP or Keycloak enhances security by centralizing user authentication. However, for the broker to enforce fine-grained authorization, it requires a mechanism to translate the roles or groups assigned to users by the external IDP into its own internal role and permission model. This crucial process is known as *mapping external roles to broker roles*.
+
+== Detailed Technical Explanation
+
+When AMQ Broker is configured to use an external IDP for authentication, the overall flow for a connecting client involves several steps:
+
+1.  **Client Connection and Authentication Request**: A client attempts to connect to the AMQ Broker. The broker receives the authentication credentials (e.g., username and password).
+2.  **External IDP Authentication**: Instead of authenticating against its own internal user store (like a `propertiesLoginModule`), the broker delegates the authentication request to the configured external IDP (e.g., an LDAP server or Keycloak instance).
+3.  **External Role Retrieval**: If authentication is successful, the external IDP not only confirms the user's identity but also returns information about the user, which typically includes their membership in various groups or roles defined within the IDP. For example, an LDAP server might provide a list of LDAP groups the user belongs to, or Keycloak might return specific client roles.
+4.  **Role Mapping Configuration**: Within the AMQ Broker's security configuration (primarily managed via the `ActiveMQArtemisSecurity` Custom Resource on OpenShift), you define rules for mapping these externally provided roles or groups to *internal AMQ Broker roles*. This mapping is essential because AMQ Broker's authorization model grants specific permissions (like `send`, `consume`, `createAddress`) to these internal broker roles.
+5.  **Internal Role Assignment**: Based on the mapping rules, the authenticated user is assigned one or more internal AMQ Broker roles.
+6.  **Authorization Enforcement**: Once the user has internal broker roles, AMQ Broker's authorization engine checks the permissions granted to these roles against the requested messaging operation (e.g., sending a message to a specific address, creating a queue).
+
+The `ActiveMQArtemisSecurity` Custom Resource (CR) is central to this configuration on OpenShift. While the provided context details how to define *internal* users and roles using a `propertiesLoginModule`, the same CR structure accommodates external IDP integration. For an external IDP, you would typically configure an `ldapLoginModule` or a `keycloakLoginModule` (not explicitly shown in the provided context, but a core feature of AMQ Broker). These external login modules contain specific properties to:
+
+*   Connect to the external IDP.
+*   Define how to search for users and retrieve their attributes (e.g., groups).
+*   Crucially, specify how the retrieved external groups/roles should be mapped to the *internal broker roles* defined within the `securityDomains` section of the `ActiveMQArtemisSecurity` CR.
+
+The `securityDomains` section of the `ActiveMQArtemisSecurity` CR is where you define the canonical *broker roles* (e.g., `sender`, `receiver`, `admin`, or custom roles like `group1`, `group2` as seen in the context). These broker roles are then granted specific permissions (e.g., `send`, `consume`, `createAddress`, `createNonDurableQueue`, `browse`) to addresses and queues via the `brokerProperties` section. The mapping ensures that a user's *external identity* translates into the appropriate *broker permissions*.
+
+This layered approach offers significant benefits:
+
+*   **Centralized User Management**: All user accounts, passwords, and initial role assignments are managed by the external IDP, leveraging existing enterprise identity systems.
+*   **Flexible Authorization**: AMQ Broker maintains its own granular authorization rules that are decoupled from the external IDP's specific role names. This allows administrators to define messaging-specific permissions that align with application needs, regardless of the external group structure.
+*   **Security Consistency**: Enables consistent security policies across different applications and services that integrate with the same external IDP.
+
+After the mapping is established, an authenticated user's ability to interact with AMQ Broker resources is determined by the cumulative permissions of all internal broker roles they have been mapped to.
+
+== Hands-on Activity: Defining Target Broker Roles for External Mapping
+
+This activity focuses on configuring the *target broker roles* and their associated permissions within an `ActiveMQArtemisSecurity` Custom Resource (CR). In a real-world external IDP integration, the external IDP's groups or roles would be mapped to these specific broker roles.
+
+For this example, we will define two broker roles: `external-app-producer` and `external-app-consumer`. These roles will then be granted relevant permissions, serving as the ultimate destination for external role mapping.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   `oc` CLI configured and logged in to your OpenShift cluster.
+*   A project (namespace) where you intend to deploy your broker.
+
+=== Procedure
+
+.  **Create an `ActiveMQArtemisSecurity` CR to Define Broker Roles and Permissions**
+
+    Create a file named `amq-external-role-targets.yaml` with the following content. This CR defines placeholder `securityDomains` entries for our target roles and then uses `brokerProperties` to grant them specific permissions. In an actual deployment, your external IDP configuration would map to these roles.
+
+    [source,yaml]
+    ----
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemisSecurity
+    metadata:
+      name: external-app-security
+      namespace: <YOUR_OPENSHIFT_PROJECT> # Specify your OpenShift project name here. Optional for CLI if logged into correct project.
+    spec:
+      loginModules:
+        # This propertiesLoginModule is a placeholder to satisfy CRD requirements
+        # In a real external IDP setup, you would have an ldapLoginModule or keycloakLoginModule here
+        propertiesLoginModules:
+          - name: "dummy-idp-module"
+            users:
+              - name: "idpuser"
+                password: "idppassword"
+                roles:
+                  - "external-app-producer"
+                  - "external-app-consumer"
+      securityDomains:
+        brokerDomain:
+          # Define the existence of our internal broker roles
+          - name: "external-app-producer"
+            roles:
+              - name: "external-app-producer"
+          - name: "external-app-consumer"
+            roles:
+              - name: "external-app-consumer"
+        broker:
+          # Grant broker-level permissions to the internal broker roles
+          - role: "external-app-producer"
+            permissions:
+              - "send"
+              - "createAddress"
+              - "createNonDurableQueue"
+          - role: "external-app-consumer"
+            permissions:
+              - "consume"
+              - "browse"
+              - "createAddress"
+              - "createNonDurableQueue" # Consumers might need to create temporary queues
+      brokerProperties:
+        # Apply specific permissions to addresses based on the broker roles
+        # Grant 'send' permissions to 'external-app-producer' on all addresses
+        - "security.roles.external-app-producer.send=*"
+        # Grant 'consume', 'browse', 'createAddress', and 'createNonDurableQueue' permissions to 'external-app-consumer' on all addresses
+        - "security.roles.external-app-consumer.consume=*"
+        - "security.roles.external-app-consumer.browse=*"
+        - "security.roles.external-app-consumer.createAddress=*"
+        - "security.roles.external-app-consumer.createNonDurableQueue=*"
+    ----
+
+    .  **Deploy the `ActiveMQArtemisSecurity` CR instance**
+
+    Before applying, make sure to replace `<YOUR_OPENSHIFT_PROJECT>` with the actual name of your OpenShift project (e.g., `my-amq-broker-project`).
+
+    [source,bash]
+    ----
+    oc apply -f amq-external-role-targets.yaml
+    ----
+
+    You should receive confirmation that the security CR was created:
+    ```bash
+    activemqartemissecurity.broker.amq.io/external-app-security created
+    ```
+
+.  **Verify the `ActiveMQArtemisSecurity` CR Deployment**
+
+    Inspect the deployed CR to ensure its configuration is correctly registered:
+
+    [source,bash]
+    ----
+    oc get activemqartemissecurity external-app-security -o yaml
+    ----
+
+    Review the `.spec` section in the output to confirm that `loginModules`, `securityDomains`, and `brokerProperties` are defined as expected.
+
+.  **Conceptual Integration with an External IDP**
+
+    With this `ActiveMQArtemisSecurity` CR deployed, any AMQ Broker instances in the same namespace will be aware of the `external-app-producer` and `external-app-consumer` roles and their associated permissions.
+
+    In a full external IDP integration, you would modify the `ActiveMQArtemisSecurity` CR (or create a separate one focused on the IDP) to include an `ldapLoginModule` or `keycloakLoginModule`. Within that configuration, you would define directives that map external groups or roles from your IDP to these internal broker roles.
+
+    For example, if your company's LDAP has a group named `MSG_APP_PRODUCERS`, you would configure the `ldapLoginModule` to map members of `MSG_APP_PRODUCERS` to the `external-app-producer` broker role. Similarly, an `MSG_APP_CONSUMERS` LDAP group would map to `external-app-consumer`.
+
+    Once a user authenticates via the external IDP and their external roles are successfully mapped to `external-app-producer` or `external-app-consumer`, the AMQ Broker will apply the permissions defined in this activity. For instance, a user mapped to `external-app-producer` would then be able to send messages, create addresses, and create non-durable queues on any address within the broker.
+
+=== Cleanup (Optional)
+
+To remove the `ActiveMQArtemisSecurity` Custom Resource created in this activity:
+
+[source,bash]
+----
+oc delete -f amq-external-role-targets.yaml
+----
+
+This activity illustrates the foundational step of defining the broker-side authorization model to which external identity provider roles can be mapped, ensuring that users authenticated externally receive the correct permissions within AMQ Broker.

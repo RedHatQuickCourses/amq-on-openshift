@@ -1,0 +1,159 @@
+#  Performance Considerations for Scaling
+
+= Performance Considerations for Scaling AMQ Broker on OpenShift
+
+When scaling your Red Hat AMQ Broker deployment on OpenShift, it's not just about adding more pods or increasing their count; it's crucially about ensuring each pod has the right resources to perform optimally. Misconfigured resource allocations can lead to performance bottlenecks, instability, or inefficient use of your OpenShift cluster, directly impacting message throughput, latency, and overall system reliability. This section delves into the key performance considerations related to resource management when scaling AMQ Broker instances.
+
+== Understanding Resource Allocations for Broker Pods
+
+OpenShift (Kubernetes) provides mechanisms to manage the CPU and memory resources consumed by containers running within a Pod. For AMQ Broker, these settings are vital for stable and performant message processing, especially as you scale your deployment horizontally (adding more pods) or consider the implications for vertical scaling (adjusting resources for new pods).
+
+=== CPU and Memory Requests and Limits
+
+Each broker container within an AMQ Broker Pod can have specific CPU and memory `requests` and `limits` defined in its Custom Resource (CR). These settings directly influence how OpenShift schedules your broker pods and how much host-node resources they can consume.
+
+.CPU and Memory Parameters for AMQ Broker Pods
+[cols="1,3a",options="header"]
+|===
+| Parameter | Description
+| `requests.cpu` | The *minimum* amount of host-node CPU that each broker container requests. This value is used by OpenShift's scheduler to ensure that a node has at least this amount of available CPU before placing a pod on it. It represents the guaranteed CPU allocation.
+| `limits.cpu` | The *maximum* amount of host-node CPU that each broker container can consume. If a broker container attempts to exceed this limit, OpenShift throttles its CPU usage. This prevents a single container from monopolizing host CPU, but consistent throttling can degrade broker performance.
+| `requests.memory` | The *minimum* amount of host-node memory that each broker container requests. Similar to CPU requests, OpenShift uses this value during scheduling to guarantee that a node has at least this much memory available. It's the guaranteed memory allocation.
+| `limits.memory` | The *maximum* amount of host-node memory that each broker container can consume. If a broker container exceeds this limit, OpenShift will terminate the container with an `OOMKilled` (Out Of Memory Killed) error, which will cause the pod to restart. This ensures memory stability for the node but leads to service disruption for the broker.
+|===
+
+[NOTE]
+If you specify `limits` for a resource but do not specify `requests`, the broker container will implicitly request the configured `limits` values for that resource. For instance, if you define `limits.cpu: "500m"` and `limits.memory: "1024Mi"` without `requests`, the container will automatically request `500m` CPU and `1024Mi` memory. While this ensures a guaranteed QoS, it's generally recommended to explicitly define both `requests` and `limits` for clarity and precise control.
+
+[IMPORTANT]
+Any resource limits and requests that you configure for each broker container also apply to the `Init Container` run by the Operator when initializing each broker Pod. This ensures consistent resource availability during the broker's startup phase, which can be resource-intensive during configuration generation or initial data loading.
+
+=== Impact on Performance and Scaling
+
+The careful configuration of these resource parameters has a direct and significant impact on the performance, stability, and scalability of your AMQ Broker deployment:
+
+*   **Guaranteed Performance (`requests`):** Setting appropriate `requests` ensures that your broker pods are scheduled on nodes with sufficient resources, preventing resource contention from the outset. If `requests` are too low, pods might be scheduled on overloaded nodes, leading to poor performance even if `limits` are generous. This directly impacts message processing latency and throughput.
+*   **Preventing Resource Starvation (`limits.cpu`):** `limits.cpu` prevents a single broker pod from consuming all CPU resources on a node, protecting other workloads. However, if your broker frequently hits its CPU limit, its performance will be throttled, causing message backlogs, increased latency, and reduced overall throughput. Careful tuning is required to balance resource sharing and individual broker performance.
+*   **Ensuring Stability (`limits.memory`):** Exceeding `limits.memory` results in an `OOMKilled` event, causing the broker pod to restart. This leads to service disruption, potential message reprocessing, and overall unreliability, especially for critical messaging workflows. Setting an appropriate `limits.memory` is crucial for stable operation under various load conditions.
+*   **Efficient Horizontal Scaling:** When you scale horizontally (adding more broker pods), each new pod will attempt to claim its requested resources. If `requests` are set too high, you might hit node capacity sooner, limiting your ability to scale out your AMQ Broker effectively and potentially leading to "pending" pods due to insufficient resources on available nodes. Conversely, if `requests` are too low, you might end up with many underperforming pods on overloaded nodes.
+
+== Best Practices for Resource Configuration and Tuning
+
+Red Hat cannot recommend specific values for `limits` and `requests` because these are highly dependent on your specific messaging system use-cases, expected message volume, message size, number of clients, persistence requirements, and the resulting architecture. However, several best practices can guide your configuration for optimal performance and scalability:
+
+1.  **Test and Tune in a Development Environment:** It is *critical* to test and tune these values in a development or staging environment that closely mirrors your production setup before configuring them for your production environment. Simulate production loads (peak and average) to accurately understand the broker's resource consumption patterns.
+2.  **Configure Before Initial Deployment:** You *must* add configuration for `limits` and `requests` to the Custom Resource (CR) instance for your broker deployment *before* deploying the CR for the first time. It is *not possible* to add or modify this configuration to an AMQ Broker deployment that is already running. This makes initial sizing and robust testing even more important, as changes require a new deployment or a rolling update strategy if supported by the operator for other configuration fields (but not for resources).
+3.  **Monitor Key Metrics Continuously:** Utilize the Hawtio management console or OpenShift monitoring tools (e.g., Prometheus and Grafana) to track key metrics such as CPU utilization, memory consumption, message throughput, message backlog size, and latency of your broker pods. This data is invaluable for identifying bottlenecks, validating your current settings, and informing future resource adjustments.
+4.  **Balance Requests and Limits for Quality of Service (QoS):**
+    *   **Guaranteed QoS (`requests` = `limits`):** This configuration provides the most stable performance guarantee, as the pod is always allocated its required resources. It's often preferred for critical, performance-sensitive workloads like AMQ Broker, ensuring predictable behavior.
+    *   **Burstable QoS (low `requests`, higher `limits`):** Allows pods to burst to higher resources when available but offers less strict performance guarantees. While it can be more efficient in terms of overall cluster utilization, it can lead to performance variability for your broker if resources become scarce.
+5.  **Use Appropriate Units:** For memory values, always use binary equivalents (Ei, Pi, Ti, Gi, Mi, Ki) to avoid ambiguity (e.g., `1024Mi` for 1 Gigabyte). For CPU values, use milliCPUs (e.g., `500m` for half a CPU core, `1000m` or `1` for one full CPU core).
+
+== Hands-on Activity: Configuring Resource Limits for a New AMQ Broker Instance
+
+This lab demonstrates how to define CPU and memory requests and limits when deploying a new AMQ Broker instance. Understanding how to configure these *at deployment time* is crucial for performance scaling, as they cannot be changed on an already running broker.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   The `oc` CLI tool configured and logged in to your OpenShift cluster with administrative privileges for the chosen project.
+*   A new OpenShift project where you can deploy the broker. For example, `amq-scaling-lab`.
+
+=== Step 1: Create a New Project
+
+First, create a new OpenShift project for this lab.
+
+```bash
+oc new-project amq-scaling-lab
+```
+
+=== Step 2: Define the Broker Custom Resource with Resource Allocations
+
+Create a new file named `broker-with-resources.yaml` with the following content. This configuration defines a single-node broker but includes specific CPU and memory `requests` and `limits` within the `deploymentPlan`.
+
+```yaml
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker-scaled
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12 # Or your preferred AMQ Broker image
+    resources:
+      limits:
+        cpu: "1000m"   # Limit to 1 CPU core
+        memory: "2Gi"  # Limit to 2 Gigabytes
+      requests:
+        cpu: "500m"    # Request a minimum of 0.5 CPU core
+        memory: "1Gi"  # Request a minimum of 1 Gigabyte
+  # Add other basic configuration if needed, e.g., persistence
+  addressSettings:
+    - name: "#"
+      config:
+        maxSizeBytes: "100mb"
+        addressFullMessagePolicy: BLOCK
+  # Consider adding persistence for production deployments
+  # persistent: true
+  # journalType: NIO
+```
+
+In this example:
+*   The broker pod will *request* 0.5 CPU cores (`500m`) and 1 GiB of memory (`1Gi`). These are its guaranteed minimum resources.
+*   The broker pod will be *limited* to 1 CPU core (`1000m` or `1`) and 2 GiB of memory (`2Gi`). If it tries to use more than these limits, its CPU usage will be throttled, or it may be terminated due to out-of-memory (OOMKilled).
+
+=== Step 3: Deploy the AMQ Broker Instance
+
+Apply the Custom Resource definition to your OpenShift cluster.
+
+```bash
+oc apply -f broker-with-resources.yaml -n amq-scaling-lab
+```
+
+=== Step 4: Verify Resource Allocation
+
+Check the deployed pod's description to confirm that the resource requests and limits have been applied correctly.
+
+```bash
+oc get pods -n amq-scaling-lab
+# Wait for the pod to be in a 'Running' state, then get its description
+oc describe pod $(oc get pods -n amq-scaling-lab -o jsonpath='{.items[0].metadata.name}') -n amq-scaling-lab | grep -A 5 "Limits:"
+```
+
+You should see output similar to this, confirming your defined limits and requests under the `Containers` section for the broker container:
+
+```
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:     500m
+      memory:  1Gi
+```
+
+=== Step 5: Horizontally Scale the Broker (Example)
+
+Now, let's demonstrate horizontal scaling. While the resource limits per pod remain static after initial deployment, scaling *out* increases the number of pods, distributing the load across more instances. Each new instance will adhere to the same defined resource profile, which has direct performance implications for the overall cluster.
+
+```bash
+oc scale activemqartemis my-broker-scaled --replicas=2 -n amq-scaling-lab
+```
+
+Verify that a second broker pod is created and running:
+
+```bash
+oc get pods -n amq-scaling-lab
+```
+
+You will observe two pods, typically named `my-broker-scaled-ss-0` and `my-broker-scaled-ss-1`, both running with the same CPU and memory requests and limits you defined in the Custom Resource. This demonstrates that scaling operations replicate the defined resource profiles.
+
+=== Step 6: Clean Up (Optional)
+
+To remove the deployed broker and the project:
+
+```bash
+oc delete activemqartemis my-broker-scaled -n amq-scaling-lab
+oc delete project amq-scaling-lab
+```
+
+This hands-on activity illustrates the fundamental step of defining resource profiles for your AMQ Broker instances, which is a core performance consideration when planning for scaling on OpenShift. Future scaling decisions, whether horizontal (adding more pods) or "vertical" (adjusting resource limits for *new* deployments), will build upon this foundation. Consistent monitoring and iterative tuning are essential for maintaining optimal performance.

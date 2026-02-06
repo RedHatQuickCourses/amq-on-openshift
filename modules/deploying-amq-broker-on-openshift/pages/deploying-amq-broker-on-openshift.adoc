@@ -1,0 +1,11 @@
+#  Deploying AMQ Broker on OpenShift
+
+link:https://access.redhat.com/documentation/en-us/red_hat_amq_broker/7.13/html/deploying_amq_broker_on_openshift/[Deploying AMQ Broker on OpenShift] involves leveraging the OpenShift Container Platform to run Red Hat AMQ Broker. This process is streamlined by the *AMQ Broker Operator*, which automates the deployment and management of broker instances.
+
+Key aspects include:
+
+*   Understanding OpenShift fundamentals relevant to AMQ Broker.
+*   Installing the AMQ Broker Operator via CLI or OperatorHub.
+*   Utilizing *Custom Resource Definitions (CRDs)* to define broker configurations.
+*   Creating and managing broker instances through *Custom Resources (CRs)*.
+*   Monitoring the initial deployment to ensure proper functioning.

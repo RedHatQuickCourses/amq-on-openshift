@@ -1,0 +1,6 @@
+* xref:core-protocol-client-examples.adoc[]
+** xref:introduction-to-amq-core-protocol.adoc[]
+** xref:setting-up-a-core-protocol-client-development-environment.adoc[]
+** xref:developing-producers-and-consumers-with-java-core-protocol.adoc[]
+** xref:implementing-point-to-point-messaging.adoc[]
+** xref:implementing-publishsubscribe-messaging.adoc[]

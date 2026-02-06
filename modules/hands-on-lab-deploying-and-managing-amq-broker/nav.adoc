@@ -1,0 +1,7 @@
+* xref:hands-on-lab-deploying-and-managing-amq-broker.adoc[]
+** xref:lab-deploying-a-basic-amq-broker-instance.adoc[]
+** xref:lab-configuring-external-access-and-testing-client-connectivity.adoc[]
+** xref:lab-implementing-basic-security-encryption-rbac.adoc[]
+** xref:lab-deploying-an-ha-broker-cluster.adoc[]
+** xref:lab-monitoring-with-the-management-console.adoc[]
+** xref:lab-developing-and-testing-core-protocol-and-amqp-clients.adoc[]

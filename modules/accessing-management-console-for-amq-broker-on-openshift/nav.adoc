@@ -1,0 +1,6 @@
+* xref:accessing-management-console-for-amq-broker-on-openshift.adoc[]
+** xref:introduction-to-the-hawtio-management-console.adoc[]
+** xref:exposing-the-console-via-openshift-routes.adoc[]
+** xref:authentication-and-authorization-for-console-access.adoc[]
+** xref:monitoring-broker-metrics-queues-and-topics.adoc[]
+** xref:performing-administrative-tasks-through-the-console.adoc[]

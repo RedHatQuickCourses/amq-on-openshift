@@ -1,0 +1,5 @@
+* xref:overview-of-message-oriented-middleware.adoc[]
+** xref:introduction-to-message-oriented-middleware-mom.adoc[]
+** xref:benefits-and-use-cases-of-asynchronous-messaging.adoc[]
+** xref:core-concepts-producers-consumers-queues-topics.adoc[]
+** xref:common-messaging-patterns-point-to-point-publishsubscribe.adoc[]

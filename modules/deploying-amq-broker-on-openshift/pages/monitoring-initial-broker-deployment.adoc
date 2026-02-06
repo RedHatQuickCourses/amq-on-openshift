@@ -1,0 +1,178 @@
+#  Monitoring Initial Broker Deployment
+
+Here's the detailed educational content for "Monitoring Initial Broker Deployment" in Antora AsciiDoc format:
+
+```asciidoc
+[[monitoring-initial-broker-deployment]]
+= Monitoring Initial Broker Deployment
+
+When deploying Red Hat AMQ Broker on OpenShift, it is crucial to monitor the initial deployment to ensure the broker instance starts correctly, is healthy, and is ready to accept client connections. This section will cover the technical concepts behind Kubernetes health checks and provide hands-on steps to verify the status of your newly deployed AMQ Broker.
+
+== Understanding Kubernetes Probes for AMQ Broker
+
+Kubernetes uses various "probes" to determine the health and readiness of containers within a Pod. These probes are fundamental for ensuring reliable service operation, especially during initial deployment and ongoing lifecycle management. AMQ Broker on OpenShift leverages these probes to indicate its operational status.
+
+=== Technical Explanation of Probes
+
+. *Startup Probe*:
+*   A startup probe indicates whether the application *within* a container has successfully started. It's particularly useful for applications that might take a long time to initialize, preventing other probes (liveness, readiness) from failing prematurely.
+*   If a startup probe is configured, all other probes are disabled until it succeeds. If the startup probe fails, the Pod is restarted.
+
+. *Liveness Probe*:
+*   A liveness probe determines if a container is *still running* and healthy. If the liveness probe fails, Kubernetes assumes the container is unhealthy and restarts the Pod, aiming to bring it back to a working state.
+*   For AMQ Broker, the default liveness probe typically checks if the broker's HTTP port is responsive, indicating the basic process is running.
+
+. *Readiness Probe*:
+*   A readiness probe determines if a container is *ready to accept service requests*. Unlike a liveness probe, a failed readiness probe does not restart the Pod. Instead, it removes the Pod from the service's endpoints, preventing new traffic from being directed to an unhealthy instance. Once the probe succeeds again, the Pod is re-added to the service endpoints.
+*   The default readiness probe for AMQ Broker checks if the broker can accept network traffic by attempting to open a connection to each of the acceptor ports configured for the broker.
+
+=== Default Probes and Their Limitations
+
+AMQ Broker instances deployed via the Operator include default readiness and liveness probes.
+*   The default liveness probe pings the broker’s HTTP management port.
+*   The default readiness probe attempts to open a connection to the broker's configured acceptor ports.
+
+While these default probes provide a basic level of health checking, they have limitations:
+*   They might not identify underlying issues that don't affect port accessibility, such as problems with the broker’s file system (e.g., persistence issues, full disk) or internal broker components.
+*   For example, if the broker process is running and its ports are open, but it's unable to write to its message store, the default probes might still report it as healthy.
+
+=== Custom Probes for Enhanced Monitoring
+
+For more comprehensive health checks, you can configure custom probes using the `artemis` command-line utility, which is included within the AMQ Broker container. This allows you to perform deeper diagnostics specific to the broker's internal state.
+
+For instance, a custom startup probe can use `artemis check node --up` to verify if the broker node is fully operational and connected, rather than just if a port is open.
+
+[source,yaml]
+----
+spec:
+  deploymentPlan:
+    startupProbe:
+      exec:
+        command:
+          - /bin/bash
+          - '-c'
+          - /opt/amq/bin/artemis
+          - 'check'
+          - 'node'
+          - '--up'
+          - '--url'
+          - 'tcp://$HOSTNAME:61616'
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 30
+----
+_Example of a custom `startupProbe` using the `artemis` CLI._
+
+If any configured startup or liveness probe check of a Pod fails, Kubernetes will restart that Pod. Understanding this behavior is key to troubleshooting initial deployment issues.
+
+== Hands-on Activity: Verifying Broker Deployment Status
+
+This activity guides you through using the OpenShift console and `oc` CLI to monitor the status of a newly deployed AMQ Broker instance.
+
+=== Objective
+
+Learn how to observe and interpret the status of AMQ Broker Pods, events, and logs on OpenShift to ensure a successful initial deployment.
+
+=== Steps
+
+==== 1. Access the OpenShift Console
+
+. Log in to your OpenShift Container Platform console.
+. Navigate to the project where you deployed your AMQ Broker instance. You can select the project from the dropdown menu in the top left corner.
+
+==== 2. Monitor Pod Status via OpenShift Console
+
+The primary way to monitor your broker's initial deployment is by observing its Pods.
+
+. In the left-hand navigation pane, click menu:Workloads[Pods].
+. You should see one or more Pods associated with your AMQ Broker deployment. The name will typically follow a pattern like `_broker-name_-_number_-_random-string_`.
++
+image::images/pods-overview.png[Pods Overview, width=800]
++
+. *Check Pod Status*:
+*   Look at the *Status* column. It should show `Running`.
+*   Check the *Ready* column. It should indicate `1/1`, meaning one out of one container in the Pod is ready to serve requests. If it shows `0/1`, the readiness probe is failing.
+. *Inspect a Specific Pod*:
+*   Click on the name of one of your broker Pods.
+*   Review the *Overview* tab. This provides a summary of the Pod's status, restarts, and resource usage.
+*   Navigate to the *Events* tab. This tab is crucial for troubleshooting. It shows a timeline of events related to the Pod, including creation, container startup, probe successes/failures, and any issues that caused restarts. Look for warnings or errors.
+*   Navigate to the *Logs* tab. This displays the standard output and error streams from the broker container. Look for messages indicating successful broker startup, connections, or any error messages that might explain why the broker isn't ready.
+
+==== 3. Inspect the Broker Custom Resource (CR)
+
+The Custom Resource (CR) defines your broker instance and its configuration, including how probes are set up.
+
+. In the left-hand navigation pane, click menu:Administration[Custom Resource Definitions].
+. Click the `ActiveMQArtemis` CRD.
+. Click the menu:Instances[Instances] tab.
+. Click the instance name for your broker deployment.
+. Click the menu:YAML[YAML] tab.
++
+This view shows the entire Custom Resource definition. Scroll down to the `spec.deploymentPlan` section. Here you can see if custom `livenessProbe`, `readinessProbe`, or `startupProbe` sections have been explicitly configured. Even if not explicitly defined in the CR, default probes are active, as described in the technical explanation above.
+
+==== 4. Using `oc` CLI for Quick Checks
+
+The OpenShift command-line interface (`oc`) provides a fast way to check deployment status and logs.
+
+. *Log in to OpenShift via CLI*:
++
+[source,bash]
+----
+oc login --token=<your_token> --server=<your_api_server>
+----
++
+Make sure you are in the correct project:
++
+[source,bash]
+----
+oc project <your-project-name>
+----
+
+. *Get Pod Status*:
++
+To quickly see the status of all Pods in your project:
++
+[source,bash]
+----
+oc get pods -o wide
+----
++
+Look for your broker Pods and verify their `STATUS` (should be `Running`) and `READY` column (should be `1/1`).
+
+. *Describe a Pod for Detailed Information*:
++
+To get detailed information about a specific broker Pod, including its events, container status, and probe results:
++
+[source,bash]
+----
+oc describe pod <broker-pod-name>
+----
++
+Replace `<broker-pod-name>` with the actual name of your broker Pod (e.g., `amq-broker-prod-0-deployer-7df9f8749-jbx5m`).
++
+In the output, pay attention to:
+*   `Status`: Should be `Running`.
+*   `Conditions`: Look for `Ready` condition to be `True`.
+*   `Events`: This section will list all events, including probe failures and restarts.
+
+. *View Pod Logs*:
++
+To view the logs from the broker container within a Pod:
++
+[source,bash]
+----
+oc logs <broker-pod-name> -f
+----
++
+The `-f` flag "follows" the logs, showing new output as it appears. Look for messages indicating successful broker startup, such as "ActiveMQArtemis Message Broker is now started". Any errors or warnings in the logs are critical for troubleshooting.
+
+=== Troubleshooting Tips for Initial Deployment
+
+*   **Pod in `Pending` state**: This usually indicates resource constraints (e.g., not enough CPU or memory in the cluster) or issues with Persistent Volume Claims (PVCs) if persistence is enabled. Check Pod events (`oc describe pod`) for specific reasons.
+*   **Pod in `CrashLoopBackOff`**: This means the container is repeatedly starting and then crashing. This often points to application-level issues (e.g., incorrect configuration, missing dependencies) or liveness probe failures. Check the Pod's logs (`oc logs`) immediately.
+*   **Pod `Running` but `Ready` is `0/1`**: The application is running, but it's not passing its readiness checks. Check the Pod's logs and events for clues related to why the broker isn't fully ready to accept connections. This could be due to issues with its message store, network connectivity, or internal component failures.
+*   **Persistent Volume Issues**: If your broker is configured for persistence, ensure the PersistentVolumeClaim (PVC) is bound and the underlying PersistentVolume (PV) is healthy. Issues here can prevent the broker from starting or restarting correctly.
+
+By diligently monitoring the Pod status, events, and logs, you can quickly identify and address issues during the initial deployment of your AMQ Broker on OpenShift, ensuring a stable and functional messaging environment.
+```

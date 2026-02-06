@@ -1,0 +1,265 @@
+#  Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)
+
+= Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)
+
+This section guides you through the process of establishing a development environment for AMQP clients utilizing the Red Hat build of Apache Qpid JMS. Qpid JMS is an advanced client library that fully implements the AMQP 1.0 specification, enabling Java applications to seamlessly interact with AMQ Broker and other AMQP 1.0 compliant message brokers.
+
+== Understanding Qpid JMS for AMQP Client Development
+
+The Red Hat build of Apache Qpid JMS offers a high-performance, feature-rich Jakarta Messaging (JMS) client specifically designed for the AMQP 1.0 protocol. This allows developers to construct standard JMS applications that communicate effectively with AMQ Broker over AMQP 1.0.
+
+Key aspects that make Qpid JMS a preferred choice for AMQP client development include:
+
+*   **Jakarta Messaging API Compliance**: Qpid JMS adheres to the latest Jakarta Messaging (formerly JMS) specification, providing a familiar and standardized API for developing message producers and consumers. This ensures consistency and simplifies application development for those accustomed to JMS patterns.
+*   **Full AMQP 1.0 Support**: It provides comprehensive support for the AMQP 1.0 protocol, guaranteeing broad interoperability with any AMQP 1.0 compliant message broker, including Red Hat AMQ Broker.
+*   **JNDI (Java Naming and Directory Interface) Integration**: Qpid JMS leverages JNDI for the lookup and management of `ConnectionFactory` and `Destination` (queues or topics) objects. This integration allows for externalizing connection details and destination names from the application code, making configurations more flexible and manageable. This is typically achieved through a `jndi.properties` file.
+
+The fundamental principle behind setting up a Qpid JMS client is to provide it with the necessary configuration to locate and connect to the AMQ Broker and to identify the specific messaging destinations it intends to interact with. This configuration is most commonly provided via a `jndi.properties` file, which is loaded from the client application's classpath.
+
+=== Essential Configuration for Qpid JMS
+
+To enable a Qpid JMS client to establish connections and interact with messaging destinations, specific configuration properties are required. These properties are typically defined within a `jndi.properties` file, which the JNDI `InitialContext` reads upon initialization.
+
+The critical properties to configure within `jndi.properties` are:
+
+*   `java.naming.factory.initial`: This property specifies the fully qualified class name of the JNDI `InitialContextFactory` implementation. For Qpid JMS, this must be set to `org.apache.qpid.jms.jndi.JmsInitialContextFactory`. This factory is responsible for creating the initial context from which other JNDI objects can be looked up.
+*   `connectionfactory.<lookup-name>`: This property defines a named `ConnectionFactory` instance that clients will use to create connections to the broker. The value is an AMQP connection URI, specifying the broker's host and port. For a local development environment, `amqp://localhost:5672` is a common setting. The `<lookup-name>` is an arbitrary string (e.g., `myFactoryLookup`) that the client application will use to retrieve this factory from the JNDI context.
+*   `queue.<lookup-name>`: This property defines a named queue destination. The value is the actual name of the queue on the broker (e.g., `queue`). Similar to the connection factory, `<lookup-name>` is used by the client application to look up this destination. Topics can also be defined using `topic.<lookup-name>`.
+
+[NOTE]
+====
+The provided context explicitly mentions `Jakarta Messaging`. While historically referred to as JMS, the specification has transitioned to Jakarta Messaging. Qpid JMS supports both `javax.jms` and `jakarta.jms` APIs, but for new applications, using `jakarta.jms` with compatible Jakarta EE versions is recommended.
+====
+
+== Hands-on Lab: Setting up a Basic AMQP Client Environment
+
+This lab provides step-by-step instructions for setting up a local AMQ Broker instance and configuring a basic Qpid JMS client development environment. This will allow you to run and test simple AMQP client applications.
+
+=== Prerequisites
+
+Before proceeding with the lab activities, ensure that you have the following software installed and configured on your development machine:
+
+*   **Java Development Kit (JDK)**: Version 8 or newer is required.
+*   **Apache Maven**: Version 3.x or newer is recommended for building Java projects.
+*   **Command Line Interface (CLI)**: Access to a terminal or command prompt.
+
+=== Activity 1: Prepare the AMQ Broker
+
+A running AMQ Broker instance with a predefined queue is a prerequisite for any Qpid JMS client application to function correctly. This activity guides you through installing and configuring a local broker instance.
+
+.  **Install the AMQ Broker**
+
+    *   Follow the instructions provided in the link:https://access.redhat.com/documentation/en-us/red_hat_amq/7.10/getting_started_with_amq_broker/index[Getting Started with AMQ Broker] to download and install Red Hat AMQ Broker.
+    *   Create a new broker instance. For development purposes, enable anonymous access for simplicity.
+    *   For the remainder of this lab, we will refer to the installation directory of your broker instance as `<broker-instance-dir>` (e.g., `~/amq-broker-7.x.x/broker`).
+
+.  **Start the AMQ Broker**
+
+    .  Open a new terminal window.
+    .  Navigate to your broker instance directory.
+    .  Execute the `artemis run` command to start the AMQ Broker.
+        ```bash
+        cd <broker-instance-dir>
+        ./bin/artemis run
+        ```
+    .  Monitor the console output. The broker is ready when you see the message `Server is now live`.
+        [NOTE]
+        ====
+        Keep this terminal window open, as the broker must remain running for the client examples to connect successfully.
+        ====
+
+.  **Create a Queue**
+
+    .  Open *another* new terminal window.
+    .  Navigate to your broker instance directory.
+    .  Use the `artemis queue create` command to create a queue named `queue` on your broker instance. You will be prompted with a series of questions. For a simple development setup, answer `N` (No) to all prompts concerning advanced queue configurations, except for the initial confirmation.
+        ```bash
+        cd <broker-instance-dir>
+        ./bin/artemis queue create --name queue --address queue
+        ```
+        When prompted with "Are you sure you want to create queue 'queue' with address 'queue'?", type `y` and press Enter. If there are subsequent prompts for other configurations, answer `N`.
+        [TIP]
+        ====
+        The `--name queue --address queue` parameters simplify the process by setting both the queue name and its associated address to `queue`, reducing the number of interactive prompts.
+        ====
+
+=== Activity 2: Configure the Qpid JMS Client Environment
+
+With the AMQ Broker running and the `queue` created, you can now set up the client-side configuration files. This activity involves creating the `jndi.properties` file and a basic Maven project structure for a Qpid JMS client.
+
+.  **Create a `jndi.properties` file**
+
+    .  Create a new directory for your client development project (e.g., `amqp-client-dev`).
+    .  Inside this `amqp-client-dev` directory, create a new file named `jndi.properties`.
+    .  Add the following content to the `jndi.properties` file:
+        ```properties
+        # Configure the InitialContextFactory class to use
+        java.naming.factory.initial = org.apache.qpid.jms.jndi.JmsInitialContextFactory
+        # Configure the ConnectionFactory for a local broker on default AMQP port 5672
+        connectionfactory.myFactoryLookup = amqp://localhost:5672
+        # Configure the destination queue we created
+        queue.myDestinationLookup = queue
+        ```
+    .  Save the `jndi.properties` file.
+
+    [TIP]
+    ====
+    For a Java application to locate this configuration, the `jndi.properties` file must be present on the application's classpath. In a Maven project, placing this file in `src/main/resources` will automatically add it to the classpath during the build process.
+    ====
+
+.  **Conceptual Client Application Setup (Maven)**
+
+    To demonstrate how a Qpid JMS client utilizes the `jndi.properties` configuration, let's outline a basic Maven `pom.xml` and a simple Java `Sender` class.
+
+    .  **Create a `pom.xml` file**
+        In your `amqp-client-dev` directory, create a `pom.xml` file. This `pom.xml` will define your project, specify Java version, and include the necessary Qpid JMS client dependency.
+        ```xml
+        <?xml version="1.0" encoding="UTF-8"?>
+        <project xmlns="http://maven.apache.org/POM/4.0.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+            <modelVersion>4.0.0</modelVersion>
+
+            <groupId>com.example.amqp</groupId>
+            <artifactId>amqp-client-dev</artifactId>
+            <version>1.0-SNAPSHOT</version>
+
+            <properties>
+                <maven.compiler.source>11</maven.compiler.source>
+                <maven.compiler.target>11</maven.compiler.target>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <qpid-jms.version>2.7.0</qpid-jms.version> <!-- Matches Red Hat build of Apache Qpid JMS 2.7 -->
+            </properties>
+
+            <dependencies>
+                <!-- Qpid JMS Client Library -->
+                <dependency>
+                    <groupId>org.apache.qpid</groupId>
+                    <artifactId>qpid-jms-client</artifactId>
+                    <version>${qpid-jms.version}</version>
+                </dependency>
+                <!-- Simple logging implementation for runtime messages -->
+                <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                    <version>1.7.32</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <!-- Jakarta Messaging API (if using Jakarta EE environment) -->
+                <!-- Uncomment and adjust version if your project uses jakarta.jms.* imports explicitly -->
+                <!--
+                <dependency>
+                    <groupId>jakarta.platform</groupId>
+                    <artifactId>jakarta.jakartaee-api</artifactId>
+                    <version>9.1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+                -->
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.8.1</version>
+                        <configuration>
+                            <source>${maven.compiler.source}</source>
+                            <target>${maven.compiler.target}</target>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>com.example.amqp.Sender</mainClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </project>
+        ```
+
+    .  **Create a `Sender.java` file**
+        Create the directory structure `src/main/java/com/example/amqp` within your `amqp-client-dev` project. Then, create the `Sender.java` file inside this directory. This minimal `Sender` class illustrates how a client looks up the `ConnectionFactory` and `Destination` from JNDI using the `jndi.properties` file.
+
+        ```java
+        package com.example.amqp;
+
+        // Use javax.jms.* for compatibility with older JMS API versions and simplicity
+        import javax.jms.*;
+        // If using Jakarta Messaging (Jakarta EE environment), use:
+        // import jakarta.jms.*;
+
+        import javax.naming.Context;
+        import javax.naming.InitialContext;
+        import java.util.Hashtable; // Required for InitialContext properties if not using jndi.properties
+
+        public class Sender {
+
+            public static void main(String[] args) throws Exception {
+                // The JNDI InitialContext will automatically load jndi.properties from the classpath
+                Context jndiContext = null;
+                Connection connection = null;
+
+                try {
+                    jndiContext = new InitialContext();
+
+                    // Look up ConnectionFactory and Destination using the names defined in jndi.properties
+                    ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext.lookup("myFactoryLookup");
+                    Destination queue = (Destination) jndiContext.lookup("myDestinationLookup");
+
+                    connection = connectionFactory.createConnection();
+                    connection.start(); // Always start the connection
+
+                    Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // Non-transacted, auto-acknowledge
+                    MessageProducer producer = session.createProducer(queue); // Create a producer for the queue
+
+                    TextMessage message = session.createTextMessage("Hello AMQ Broker from Qpid JMS!");
+                    producer.send(message); // Send the message
+                    System.out.println("Sent message: " + message.getText());
+
+                } finally {
+                    // Ensure resources are closed properly
+                    if (connection != null) {
+                        connection.close();
+                    }
+                    if (jndiContext != null) {
+                        jndiContext.close();
+                    }
+                }
+            }
+        }
+        ```
+        [IMPORTANT]
+        ====
+        If your Java environment strictly uses Jakarta EE and Jakarta Messaging APIs (e.g., in a Jakarta EE application server), you should change the import statements from `javax.jms.*` to `jakarta.jms.*` and ensure the `jakarta.platform:jakarta.jakartaee-api` dependency (or specific Jakarta JMS API dependency) is correctly configured in your `pom.xml`. The Qpid JMS client library itself is compatible with both.
+        ====
+
+.  **Run the Client Application**
+
+    .  Open a terminal and navigate to your `amqp-client-dev` project directory (where your `pom.xml` is located).
+    .  Execute the Maven command to compile and run the `Sender` class:
+        ```bash
+        mvn clean compile exec:java
+        ```
+    .  Upon successful execution, you should observe output similar to the following:
+        ```
+        [INFO] Scanning for projects...
+        [INFO] ... (Maven build output) ...
+        [INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ amqp-client-dev ---
+        Sent message: Hello AMQ Broker from Qpid JMS!
+        [INFO] ------------------------------------------------------------------------
+        [INFO] BUILD SUCCESS
+        [INFO] ------------------------------------------------------------------------
+        [INFO] ... (Maven build output) ...
+        ```
+        This output confirms that your Qpid JMS client development environment is correctly configured, allowing the client application to successfully connect to the AMQ Broker and send a message to the `queue` destination. You have successfully set up a functional AMQP client development environment.

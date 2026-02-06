@@ -1,0 +1,159 @@
+#  OpenShift Storage Considerations (Persistent Volumes)
+
+= OpenShift Storage Considerations (Persistent Volumes)
+:navtitle: Storage Considerations
+
+This section is crucial for understanding how Red Hat AMQ Broker manages data persistence on OpenShift Container Platform. It covers the fundamentals of storage options, the role of Persistent Volumes (PVs), and best practices for configuring reliable message storage.
+
+== The Importance of Persistent Storage for AMQ Broker
+
+When deploying a message broker like Red Hat AMQ Broker, ensuring the persistence of messages, queues, topic subscriptions, and broker state is paramount. Without durable storage, any data residing within the broker would be lost if a broker pod restarts, crashes, or is rescheduled. This leads to unacceptable data loss and unreliable messaging, which is critical for enterprise integration patterns.
+
+OpenShift Container Platform, as a robust container orchestration platform, provides sophisticated mechanisms for managing storage for stateful applications. For AMQ Broker, these mechanisms primarily involve *Persistent Volumes (PVs)* and *Persistent Volume Claims (PVCs)*.
+
+=== Ephemeral vs. Persistent Storage
+
+The AMQ Broker Operator allows you to configure the type of storage your broker instances use via the `persistenceEnabled` flag within the broker's Custom Resource (CR).
+
+*   *Ephemeral Storage* (`persistenceEnabled=false`):
+    When `persistenceEnabled` is set to `false`, the deployed brokers utilize *ephemeral storage*. This is transient local storage tied directly to the lifecycle of the broker pod. Consequently, any data (such as message journals or paging files) written to this storage is irrevocably lost every time the broker pod restarts or is deleted. While this might be suitable for certain development, testing, or truly stateless messaging patterns, it is generally *unsuitable for production environments* where message durability and data integrity are non-negotiable.
+
+*   *Persistent Storage* (`persistenceEnabled=true`):
+    Conversely, setting `persistenceEnabled` to `true` instructs the AMQ Broker Operator to provision *persistent storage* for each broker instance. This ensures that the broker's critical data, including its journal and other data files, are written to a durable storage volume. With persistent storage, if a broker pod restarts or is rescheduled to a different node, it can seamlessly reattach to its dedicated Persistent Volume, and all its data remains intact. This is the *recommended and default approach for production deployments* to guarantee message durability, enable proper failover, and facilitate recovery.
+
+[NOTE]
+====
+It is highly recommended to deploy AMQ Broker instances with `persistenceEnabled=true` for any environment beyond basic development and testing to prevent data loss.
+====
+
+== Persistent Volumes (PVs) and Persistent Volume Claims (PVCs) Explained
+
+OpenShift's storage model is built upon the abstraction of Persistent Volumes and Persistent Volume Claims:
+
+*   *Persistent Volume (PV)*: A PV represents a piece of storage in the cluster that has been provisioned. It is an abstract storage resource available in the OpenShift cluster, independent of any specific pod. PVs can be provisioned manually by an administrator (static provisioning) or automatically by a Storage Class (dynamic provisioning) from various underlying storage technologies like NFS, iSCSI, CephFS, GlusterFS, cloud provider storage (AWS EBS, Azure Disk, GCE Persistent Disk), and OpenShift Data Foundation.
+
+*   *Persistent Volume Claim (PVC)*: A PVC is a request for storage by a user or an application (in our case, by the AMQ Broker Operator). It specifies requirements like storage size, access mode (e.g., ReadWriteOnce), and optionally a Storage Class. The OpenShift control plane then attempts to find an available PV that satisfies the PVC's requirements and binds them together.
+
+When `persistenceEnabled=true` is set in your AMQ Broker Custom Resource, the Operator dynamically creates a Persistent Volume Claim (PVC) for each broker instance. This PVC then seeks to bind with an appropriate Persistent Volume (PV) to provide the necessary durable storage.
+
+=== Broker Storage Requirements
+
+By default, each AMQ Broker instance requires *2 GiB* of storage when configured for persistence (`persistenceEnabled=true`).
+
+[TIP]
+====
+If you are planning to deploy a cluster of multiple brokers with persistent storage (e.g., a two-broker High Availability cluster), you must ensure that a corresponding number of Persistent Volumes are available – for instance, two PVs each providing 2 GiB of storage for a two-node cluster.
+====
+
+You can customize the default storage requirements by specifying the `storage` parameter within your AMQ Broker Custom Resource definition. The storage size supports standard byte notation such as "K", "MB", and "GB".
+
+== Manual Provisioning of Persistent Volumes
+
+While many OpenShift clusters are configured with *container-native storage* (e.g., OpenShift Data Foundation, Rook-Ceph) that enables dynamic provisioning of PVs via xref:https://docs.openshift.com/container-platform/latest/storage/dynamic-provisioning.html[Storage Classes^], there are scenarios where dynamic provisioning might not be available, or a specific, pre-existing storage infrastructure needs to be used.
+
+In such cases, you will need to *manually provision Persistent Volumes (PVs)*. This involves a cluster administrator explicitly creating PV objects in OpenShift, which then become available for PVCs to claim.
+
+[IMPORTANT]
+====
+When manually provisioning PVs, it is *critically important* to set the `persistentVolumeReclaimPolicy` for each PV to `Retain`. If this policy is not set to `Retain` and the Persistent Volume Claim (PVC) that claimed the PV is deleted (for example, if the AMQ Broker instance itself is deleted), the PV will *also be deleted*, leading to the permanent and irrecoverable loss of all data on that volume.
+====
+
+For comprehensive details on provisioning persistent storage, configuring reclaim policies, and managing storage in OpenShift, refer to the official OpenShift Container Platform documentation on xref:https://docs.openshift.com/container-platform/latest/storage/understanding-persistent-storage.html[Understanding persistent storage^].
+
+== Hands-on Activity: Manually Provisioning an NFS Persistent Volume
+
+This practical activity guides you through the process of manually provisioning an NFS-based Persistent Volume (PV) in OpenShift. This is a common requirement when dynamic storage provisioning is not configured or when specific external storage solutions are used.
+
+[NOTE]
+====
+This lab requires an accessible NFS server to be configured beforehand. Ensure you are logged into OpenShift as a cluster administrator (`system:admin`) to perform these steps.
+====
+
+=== Prerequisites
+
+*   An active OpenShift cluster where you have cluster-admin privileges.
+*   The `oc` CLI tool installed and configured to connect to your cluster.
+*   An operational NFS server with an exported directory (e.g., `/nfs/amq-broker-data`). Ensure this directory is accessible and writable by your OpenShift nodes.
+
+=== Procedure
+
+. **Log in to OpenShift as a cluster administrator.**
++
+[source,bash]
+----
+oc login -u system:admin
+----
+
+. **Create a new project for your AMQ Broker deployment (if you haven't already).**
++
+[source,bash]
+----
+oc new-project amq-broker-project
+----
++
+[NOTE]
+====
+It is recommended to deploy broker instances in separate projects for better isolation and management.
+====
+
+. **Switch to your newly created project.**
++
+[source,bash]
+----
+oc project amq-broker-project
+----
+
+. **Create a Persistent Volume (PV) definition file.**
++
+Save the following content to a file named `amq-broker-pv-1.yaml`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: amq-broker-pv-1
+spec:
+  capacity:
+    storage: 2Gi # Default storage required for one broker instance
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce # This access mode allows a volume to be mounted as read-write by a single node.
+  persistentVolumeReclaimPolicy: Retain # CRITICAL: Ensures data is not lost if the PVC is deleted.
+  nfs:
+    path: /nfs/amq-broker-data/broker1 # <1>
+    server: 192.168.1.100 # <2>
+  mountOptions:
+    - hard
+    - nfsvers=4.1 # <3>
+----
+<1> Ensure this path exists and is correctly exported on your NFS server for this specific broker's data.
+<2> Replace `192.168.1.100` with the actual IP address or hostname of your NFS server.
+<3> Specifies NFS mount options for robust connectivity.
+
+. **Apply the PV definition to your OpenShift cluster.**
++
+[source,bash]
+----
+oc apply -f amq-broker-pv-1.yaml
+----
+
+. **Verify that the Persistent Volume has been created and is in an `Available` state.**
++
+[source,bash]
+----
+oc get pv amq-broker-pv-1
+----
++
+You should see output similar to this, indicating the PV is ready to be claimed:
++
+```
+NAME              CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM                  STORAGECLASS   REASON   AGE
+amq-broker-pv-1   2Gi        RWO            Retain           Available                                          10s
+```
+
+. **(Optional) Prepare for a Multi-Broker Cluster:**
++
+If you plan to deploy multiple AMQ Broker instances (e.g., for an HA cluster), you must create a separate, distinct Persistent Volume for each broker. Repeat steps 4 and 5, adjusting the PV name (e.g., `amq-broker-pv-2`), the NFS path (e.g., `/nfs/amq-broker-data/broker2`), and any other relevant parameters in a new YAML file.
+
+This manually provisioned PV is now registered with your OpenShift cluster and is available for the AMQ Broker Operator to claim when you deploy your broker instance with persistent storage enabled (`persistenceEnabled=true`). The Operator will automatically create a PVC, which will then bind to an available PV matching its requirements.

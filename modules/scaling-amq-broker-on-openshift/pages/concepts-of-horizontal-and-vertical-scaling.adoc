@@ -1,0 +1,145 @@
+#  Concepts of Horizontal and Vertical Scaling
+
+:scaling-concepts.adoc
+= Concepts of Horizontal and Vertical Scaling
+
+Asynchronous messaging systems like AMQ Broker are critical components in many modern applications, handling vital communication between services. To ensure these systems can meet varying demands, from handling peak loads to maintaining high availability, understanding and implementing effective scaling strategies is paramount. This section delves into the fundamental concepts of horizontal and vertical scaling, explaining how they apply to applications deployed on platforms like OpenShift.
+
+== Understanding Application Scaling
+
+Scaling refers to the ability to adjust the resources allocated to an application or system to handle changes in workload. The primary goals of scaling are to maintain performance, ensure reliability, and optimize resource utilization. There are two main approaches to scaling: *vertical scaling* and *horizontal scaling*.
+
+=== Vertical Scaling (Scaling Up/Down)
+
+Vertical scaling, often referred to as "scaling up" or "scaling down," involves increasing or decreasing the resources (CPU, memory, storage) of a single instance or node. Imagine upgrading a server by adding more RAM or a faster processor.
+
+*   *Definition:* Enhancing the capabilities of an existing single server or instance by providing it with more powerful hardware resources.
+*   *Mechanism:*
+    *   **CPU:** Assigning more CPU cores or increasing CPU limits/requests.
+    *   **Memory:** Allocating more RAM to the instance.
+    *   **Storage:** Increasing disk space or I/O capacity.
+*   *Pros:*
+    *   Simpler to manage initially for a single instance.
+    *   Can reduce network overhead as all operations occur within one instance.
+    *   Less complex for applications that are not designed for distributed environments.
+*   *Cons:*
+    *   *Single Point of Failure (SPOF):* If the single scaled-up instance fails, the entire application becomes unavailable.
+    *   *Resource Limits:* There's a physical limit to how much you can scale up a single machine.
+    *   *Downtime:* Scaling up often requires restarting the instance, leading to application downtime.
+    *   *Cost Inefficiency:* You might pay for resources you don't always use, as provisioning for peak load means idle resources during off-peak times.
+
+*In the context of OpenShift and AMQ Broker:* Vertical scaling would involve modifying the resource requests and limits (CPU and memory) for the `ActiveMQArtemis` pod(s). While increasing these can provide more horsepower to an individual broker instance, it doesn't address high availability or the ability to distribute load across multiple broker instances.
+
+=== Horizontal Scaling (Scaling Out/In)
+
+Horizontal scaling, also known as "scaling out" or "scaling in," involves adding or removing instances (or nodes) of an application to distribute the workload across multiple, often identical, machines or containers. Instead of making one server more powerful, you add more servers.
+
+*   *Definition:* Increasing the number of instances or replicas of an application to distribute the workload and improve fault tolerance.
+*   *Mechanism:*
+    *   **Adding Instances:** Deploying more identical copies of the application.
+    *   **Load Balancing:** Distributing incoming requests across all available instances.
+    *   **Clustering:** Multiple instances working together as a single logical unit (e.g., AMQ Broker clusters).
+*   *Pros:*
+    *   *High Availability (HA):* If one instance fails, others can continue to process requests, minimizing downtime.
+    *   *Elasticity:* Easily scales up or down based on demand, leading to better resource utilization and cost efficiency.
+    *   *No Single Point of Failure:* Workload is distributed, making the system more resilient.
+    *   *Unlimited Scalability (theoretically):* You can add as many instances as needed, limited only by infrastructure resources.
+*   *Cons:*
+    *   *Increased Complexity:* Requires careful design for state management, data consistency, and inter-instance communication.
+    *   *Load Balancing:* Requires a mechanism to distribute incoming requests effectively.
+    *   *Distributed System Challenges:* Dealing with network latency, consistency models, and potential split-brain scenarios.
+
+*In the context of OpenShift and AMQ Broker:* Horizontal scaling is the preferred method for achieving high availability and handling variable loads. This involves increasing the number of `ActiveMQArtemis` pods (replicas) managed by the AMQ Broker Operator, often configured as part of a cluster. OpenShift's deployment and replica set mechanisms are inherently designed for horizontal scaling.
+
+== Choosing the Right Scaling Strategy
+
+The choice between vertical and horizontal scaling, or often a combination of both, depends on several factors:
+
+*   **Application Architecture:** Is the application stateful or stateless? Is it designed for distributed environments?
+*   **Performance Bottlenecks:** Is the bottleneck CPU, memory, I/O, or network?
+*   **High Availability Requirements:** How critical is it for the application to remain available during failures?
+*   **Cost:** What are the infrastructure and operational costs associated with each approach?
+
+For AMQ Broker on OpenShift, horizontal scaling is generally recommended due to OpenShift's container-native architecture and the need for high availability in messaging systems. Vertical scaling can be used to optimize the performance of *individual* broker instances, but it should be combined with horizontal scaling for robust, highly available deployments.
+
+== Hands-on Activity: Demonstrating Horizontal Scaling with AMQ Broker on OpenShift
+
+This activity demonstrates how to horizontally scale an AMQ Broker instance deployed on OpenShift using the `kubectl` command-line tool. This is a common operation for adjusting the capacity of your messaging infrastructure.
+
+[NOTE]
+====
+This activity assumes you have an AMQ Broker instance already deployed on OpenShift using the AMQ Broker Operator. The `ActiveMQArtemis` custom resource (`broker-dr` and `broker-prod` in the example context) represents your broker deployment.
+====
+
+=== Objective
+
+Understand and execute commands to scale an `ActiveMQArtemis` custom resource horizontally by changing its replica count.
+
+=== Steps
+
+. *Verify Current Broker Replicas:*
+   Before scaling, check the current number of replicas for your AMQ Broker instance. Replace `your-broker-name` and `your-namespace` with your specific broker's name and the OpenShift project (namespace) it's deployed in.
+
+   [source,bash]
+   ----
+   oc get activemqartemis your-broker-name -n your-namespace -o jsonpath='{.spec.deploymentPlan.size}'
+   ----
+   You can also check the pods directly:
+   [source,bash]
+   ----
+   oc get pods -l app.kubernetes.io/name=your-broker-name -n your-namespace
+   ----
+   This will show you the number of running pods associated with your broker. A typical non-HA deployment would show `1`. A clustered HA deployment would likely show `2` or more.
+
+. *Scale Up the Broker Instance:*
+   To horizontally scale out your broker, you'll increase the `replicas` count for the `ActiveMQArtemis` custom resource. The `kubectl scale` command is a convenient way to do this.
+
+   For example, if you want to scale a broker named `broker-dr` in the `dr` namespace to 2 instances:
+
+   [source,bash]
+   ----
+   kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 2
+   ----
+
+   And if you have another broker named `broker-prod` in the `production` namespace:
+
+   [source,bash]
+   ----
+   kubectl -n production scale ActiveMQArtemis broker-prod --replicas 2
+   ----
+
+   After executing these commands, the AMQ Broker Operator will detect the change in the `ActiveMQArtemis` custom resource and provision new pods (or update existing ones) to match the desired replica count.
+
+. *Verify Scaled-Up Broker Instances:*
+   Observe the pod status in your namespace. You should see new pods spinning up for your broker:
+
+   [source,bash]
+   ----
+   oc get pods -l app.kubernetes.io/name=broker-dr -n dr
+   oc get pods -l app.kubernetes.io/name=broker-prod -n production
+   ----
+   Wait until all new pods are in a `Running` state.
+
+. *Scale Down the Broker Instance:*
+   Once you've tested, you can scale the broker back down to its original number of replicas (or any other desired number). This is "scaling in."
+
+   As referenced in the provided context:
+   [source,bash]
+   ----
+   kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 1
+   kubectl -n production scale ActiveMQArtemis broker-prod --replicas 1
+   ----
+
+   Again, the Operator will terminate the excess pods to match the new `replicas` count.
+
+. *Verify Scaled-Down Broker Instances:*
+   Confirm that the replica count has returned to the desired number by checking the pods again:
+
+   [source,bash]
+   ----
+   oc get pods -l app.kubernetes.io/name=broker-dr -n dr
+   oc get pods -l app.kubernetes.io/name=broker-prod -n production
+   ----
+   You should see only the specified number of pods running.
+
+This hands-on activity demonstrates the power and simplicity of horizontal scaling on OpenShift using the AMQ Broker Operator and `kubectl`. By adjusting the `replicas` count, you can dynamically adapt your messaging infrastructure to changing workload demands.

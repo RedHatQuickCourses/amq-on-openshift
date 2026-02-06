@@ -1,0 +1,239 @@
+#  Managing Certificates and Trust Stores on OpenShift
+
+= Managing Certificates and Trust Stores on OpenShift
+include::partial$attributes.adoc[]
+
+_A technical deep dive into securing Red Hat AMQ Broker deployments on OpenShift by effectively managing TLS certificates and trust stores._
+
+Securing message broker communication is paramount for data integrity and confidentiality. On OpenShift, this involves not only configuring TLS (Transport Layer Security) for client-broker communication but also managing the underlying certificates and trust stores using OpenShift's native secret management capabilities. This guide will walk you through the process, from generating self-signed certificates to integrating them with your AMQ Broker deployment.
+
+== Core Concepts of TLS Management
+
+Before diving into the hands-on steps, let's establish a clear understanding of the key components involved in securing your AMQ Broker with TLS.
+
+=== Key Stores
+
+A *key store* is a repository for cryptographic keys and certificates. For an AMQ Broker, the key store typically contains:
+
+*   The broker's private key.
+*   The broker's public key certificate, which clients use to verify the broker's identity.
+
+In the context of TLS, the key store is essential for the broker to prove its identity to clients and to encrypt communication using its private key.
+
+=== Trust Stores
+
+A *trust store* is a repository for certificates from trusted entities, particularly Certificate Authorities (CAs) or other individual public certificates. For an AMQ Broker, a trust store can contain:
+
+*   Certificates of trusted clients (for mutual TLS).
+*   The root CA certificate that signed the broker's own certificate (if the broker needs to trust itself or specific entities).
+
+A client's trust store contains the broker's certificate (or its signing CA) to verify the broker's identity. Conversely, for mutual TLS (mTLS), the broker's trust store contains client certificates (or their signing CA) to verify the client's identity.
+
+=== One-Way TLS (Server Authentication)
+
+In one-way TLS, the client verifies the identity of the server (the AMQ Broker) using the server's public certificate. The server does not verify the client's identity. This ensures data privacy and integrity but doesn't authenticate clients at the TLS layer.
+
+=== Mutual TLS (mTLS - Two-Way Authentication)
+
+Mutual TLS provides authentication in both directions:
+
+*   The client verifies the broker's identity.
+*   The broker *also* verifies the client's identity using a client certificate.
+
+mTLS offers a higher level of security, ensuring that only trusted clients can establish a TLS connection with the broker.
+
+== Hands-on Activity: Preparing Certificates and Trust Stores with `keytool`
+
+For this lab, we will generate self-signed certificates using Java's `keytool` utility. In a production environment, you would typically use certificates issued by a trusted Certificate Authority (CA) or a tool like cert-manager on OpenShift.
+
+.Prerequisites
+*   Access to a Linux/macOS terminal with Java Development Kit (JDK) installed (which includes `keytool`).
+*   Access to an OpenShift cluster with `oc` CLI logged in as an administrator.
+
+=== 1. Generate Broker's Key Store and Certificate
+
+First, create a key store for the AMQ Broker that contains its private key and self-signed certificate. Then, export the public certificate to share with clients.
+
+.Generate broker key store
+[source,bash,subs="attributes+"]
+----
+keytool -genkey -alias broker -keyalg RSA -keystore ~/broker.ks
+----
+. When prompted, provide a password for the keystore and the key. For the certificate details, you can use placeholder values (e.g., `CN=AMQBroker, OU=IT, O=Example, L=Anytown, ST=Anywhere, C=US`).
+
+.Export broker certificate
+[source,bash,subs="attributes+"]
+----
+keytool -export -alias broker -keystore ~/broker.ks -file ~/broker_cert.pem
+----
+. This exports the public certificate of the broker into a Base64-encoded PEM file (`broker_cert.pem`).
+
+=== 2. Generate Client's Key Store and Certificate (for mTLS)
+
+If you plan to implement mutual TLS, you also need a key store and certificate for the client. The broker will use this client certificate to authenticate the client.
+
+.Generate client key store
+[source,bash,subs="attributes+"]
+----
+keytool -genkey -alias client -keyalg RSA -keystore ~/client.ks
+----
+. Use a different alias (e.g., `client`) and distinct details for the client certificate (e.g., `CN=AMQClient, OU=IT, O=Example, L=Anytown, ST=Anywhere, C=US`).
+
+.Export client certificate
+[source,bash,subs="attributes+"]
+----
+keytool -export -alias client -keystore ~/client.ks -file ~/client_cert.pem
+----
+. This exports the public certificate of the client into `client_cert.pem`.
+
+=== 3. Create Broker's Trust Store
+
+The broker's trust store will contain the public certificates of clients it needs to trust for mutual TLS.
+
+.Import client certificate into broker's trust store
+[source,bash,subs="attributes+"]
+----
+keytool -import -alias client -keystore ~/broker.ts -file ~/client_cert.pem
+----
+. When prompted, provide a password for the trust store and confirm that you trust the certificate. This creates `broker.ts`, which the broker will use to verify client identities.
+
+=== 4. Create Client's Trust Store
+
+The client's trust store will contain the public certificate of the broker to verify the broker's identity.
+
+.Import broker certificate into client's trust store
+[source,bash,subs="attributes+"]
+----
+keytool -import -alias broker -keystore ~/client.ts -file ~/broker_cert.pem
+----
+. When prompted, provide a password for the trust store and confirm that you trust the certificate. This creates `client.ts`, which the client will use to verify the broker's identity.
+
+== Hands-on Activity: Storing Certificates and Trust Stores in OpenShift Secrets
+
+OpenShift secrets are the standard way to provide sensitive data like TLS credentials to applications. We will create a secret that holds the broker's key store and its trust store.
+
+=== 1. Log in to OpenShift and Select Your Project
+
+Ensure you are logged in as an administrator and operating within the correct OpenShift project.
+
+.Log in to OpenShift
+[source,bash,subs="attributes+"]
+----
+oc login -u system:admin
+----
+
+.Switch to your project
+[source,bash,subs="attributes+"]
+----
+oc project <your-project-name> <1>
+----
+<1> Replace `<your-project-name>` with the name of your OpenShift project where the AMQ Broker is deployed or will be deployed.
+
+=== 2. Create Broker TLS Credentials Secret
+
+The AMQ Broker Operator expects secrets for TLS to contain two files: `key.store` and `trust.store`.
+
+[IMPORTANT]
+.OpenShift TLS Secret Naming Convention Nuance
+When generating a secret for TLS, OpenShift requires you to specify both a `key.store` and a `trust.store` entry. The `trust.store` entry is generically named within the secret. For two-way TLS (mTLS) with the AMQ Broker, the file you provide for the `trust.store` entry should actually be your broker's trust store (`~/broker.ts`), containing the public certificates of trusted clients.
+
+To align with the `oc create secret` command shown in the context, which specifies `--from-file=trust.store=~/client.ts`, we'll temporarily copy our generated `~/broker.ts` to `~/client.ts` before creating the secret.
+
+.Copy broker trust store for secret creation
+[source,bash,subs="attributes+"]
+----
+cp ~/broker.ts ~/client.ts
+----
+
+.Create a secret for the broker's TLS credentials
+[source,bash,subs="attributes+"]
+----
+oc create secret generic broker-cert-secret \
+  --from-file=key.store=~/broker.ks \
+  --from-file=trust.store=~/client.ts <1>
+----
+<1> Here, `key.store` maps to your `~/broker.ks` file. The `trust.store` key is given the content of `~/client.ts` (which we just copied from `~/broker.ts`), and this file represents the *broker's trust store* for mTLS.
+
+=== 3. (Optional) Create Trust Bundle for `trustSecret`
+
+For highly dynamic environments or more robust mTLS configurations, especially when managing multiple client certificates, you might integrate with tools like *Trust Manager for Kubernetes*. Trust Manager can create and manage a trust bundle (a secret containing a collection of trusted client certificates) that the broker can reference via the `trustSecret` attribute.
+
+For example, if you were using Trust Manager, it might create a secret named `trusted-clients-bundle` containing your trusted client certificates. This would be a separate secret from `broker-cert-secret`.
+
+== Configuring the AMQ Broker Custom Resource for TLS
+
+Once your TLS credentials are securely stored as OpenShift secrets, you can configure your AMQ Broker Custom Resource (CR) to utilize them for secure communication.
+
+=== 1. Enable SSL on an Acceptor
+
+Edit your `Broker` custom resource (CR) to specify that an acceptor should use SSL/TLS.
+
+.Example `Broker` CR snippet for TLS configuration
+[source,yaml,subs="attributes+"]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: Broker
+metadata:
+  name: amq-broker-tls
+spec:
+  acceptors:
+    - name: new-acceptor
+      protocols: all
+      port: 62666
+      sslEnabled: true <1>
+      sslSecret: broker-cert-secret <2>
+      # ... other acceptor configurations
+  # ... other broker configurations
+----
+<1> Set `sslEnabled` to `true` to enable TLS for this acceptor.
+<2> Specify the name of the secret (`broker-cert-secret`) that contains the broker's key store.
+
+=== 2. Configure Mutual TLS (mTLS) for Client Authentication
+
+To enable mutual TLS, you need to instruct the acceptor to require client authentication and provide the secret containing the trusted client certificates.
+
+.Example `Broker` CR snippet for Mutual TLS configuration
+[source,yaml,subs="attributes+"]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: Broker
+metadata:
+  name: amq-broker-mtls
+spec:
+  acceptors:
+    - name: new-acceptor
+      protocols: all
+      port: 62666
+      sslEnabled: true
+      sslSecret: broker-cert-secret
+      needClientAuth: true <1>
+      trustSecret: trusted-clients-bundle <2>
+      # ... other acceptor configurations
+  # ... other broker configurations
+----
+<1> Set `needClientAuth` to `true` to enforce client certificate authentication.
+<2> Specify the name of the secret (`trusted-clients-bundle`) that contains the root CA certificate that signed the client certificates, or the individual client certificates themselves, that the broker should trust. This secret is typically managed by a tool like Trust Manager for Kubernetes.
+
+[NOTE]
+The `sslSecret` provides the broker's *identity* (`key.store` and its certificate). When `needClientAuth: true` and `trustSecret` are specified, the `trustSecret` explicitly defines the trust anchors for *client authentication*. The `trust.store` entry within the `sslSecret` (which we provided from `~/broker.ts` in step 2 of "Create Broker TLS Credentials Secret") can serve as a fallback or be a placeholder if `trustSecret` is in use.
+
+=== 3. Applying the Configuration
+
+After modifying your `Broker` CR, apply the changes to your OpenShift cluster.
+
+.Apply the updated Broker CR
+[source,bash,subs="attributes+"]
+----
+oc apply -f <your-broker-cr-file>.yaml
+----
+
+The AMQ Broker Operator will detect the changes and reconfigure your broker pod(s) accordingly, enabling secure TLS communication.
+
+== Summary and Best Practices
+
+Managing certificates and trust stores on OpenShift is a critical aspect of securing your AMQ Broker. By leveraging OpenShift secrets and configuring your Broker Custom Resource appropriately, you can ensure that your message queues are protected with TLS.
+
+*   **Production Readiness:** While self-signed certificates are useful for development and testing, always use certificates issued by a trusted CA in production environments.
+*   **Automated Certificate Management:** Consider using the link:https://cert-manager.io/docs/[cert-manager Operator for OpenShift] to automate the lifecycle of your certificates (issuance, renewal, revocation). The AMQ Broker Operator can integrate with cert-manager to automatically load renewed broker certificates.
+*   **Automated Trust Bundle Management:** For advanced mTLS, explore the link:https://cert-manager.io/docs/projects/trust-manager/[Trust Manager for Kubernetes] to centralize and automate the distribution of trust bundles containing client certificates to your brokers.
+*   **Root CA Distribution:** Ensure that all clients connecting to your broker have the appropriate root CA certificates in their trust stores to validate the broker's identity.

@@ -1,0 +1,6 @@
+* xref:amqp-protocol-client-examples.adoc[]
+** xref:introduction-to-amqp-10-standard.adoc[]
+** xref:setting-up-an-amqp-client-development-environment-eg-qpid-jms.adoc[]
+** xref:developing-producers-and-consumers-with-amqp-clients-eg-java-python.adoc[]
+** xref:connecting-to-amq-broker-using-amqp.adoc[]
+** xref:exploring-advanced-amqp-features.adoc[]

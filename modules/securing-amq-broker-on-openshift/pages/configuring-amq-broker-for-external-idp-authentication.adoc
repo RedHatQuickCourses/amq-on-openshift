@@ -1,0 +1,212 @@
+#  Configuring AMQ Broker for External IDP Authentication
+
+= Configuring AMQ Broker for External Identity Provider (IDP) Authentication
+
+[[amq-broker-external-idp-authentication-overview]]
+== Overview of External IDP Integration
+
+Integrating an external Identity Provider (IDP) with AMQ Broker on OpenShift centralizes user authentication and authorization, streamlining identity management and enhancing security postures. Instead of managing users and their credentials directly within the broker's internal security realm, you can leverage existing enterprise identity systems like LDAP, Microsoft Active Directory, or Single Sign-On (SSO) solutions such as Red Hat Single Sign-On (Keycloak).
+
+This approach offers several benefits:
+
+*   **Centralized User Management**: Users are managed in one location, simplifying administration and reducing duplication of effort.
+*   **Enhanced Security**: Leverages robust security features of dedicated IDPs, including multi-factor authentication (MFA) and advanced password policies.
+*   **Single Sign-On (SSO)**: Users can authenticate once with the IDP and access multiple services, including AMQ Broker, without re-entering credentials.
+*   **Compliance**: Helps meet organizational security and compliance requirements by enforcing enterprise-wide identity policies.
+
+[[amq-broker-external-idp-how-it-works]]
+== How External IDP Integration Works with AMQ Broker
+
+AMQ Broker uses the Java Authentication and Authorization Service (JAAS) for its security mechanisms. To integrate with external IDPs, you define custom JAAS login modules that delegate authentication requests to your external identity system.
+
+The integration process on OpenShift typically involves the following steps:
+
+.   **JAAS Login Module Configuration**: A JAAS configuration file (`login.config`) defines one or more login modules. Each module specifies how AMQ Broker should authenticate users against a particular external IDP (e.g., an `LdapLoginModule` for LDAP).
+.   **OpenShift Secret Creation**: The JAAS configuration file is stored in an OpenShift `Secret`. This makes the configuration securely available to the AMQ Broker pods without being hardcoded into the `ActiveMQArtemis` Custom Resource (CR).
+.   **`ActiveMQArtemis` Custom Resource (CR) Updates**: The `ActiveMQArtemis` CR is modified to:
+    *   Reference the OpenShift `Secret` containing the JAAS configuration.
+    *   Configure the broker's security settings to use the custom JAAS realms for authentication.
+    *   Map roles provided by the external IDP (or derived from its user groups) to specific broker permissions (e.g., send messages to a queue, create durable subscriptions).
+.   **Broker Pod Integration**: When the broker pod starts, it mounts the `Secret` containing the JAAS configuration and loads the specified login modules. Authentication requests are then routed through these modules to the external IDP.
+
+[[amq-broker-external-idp-example-rh-sso]]
+=== Example: Red Hat Single Sign-On Integration (via JAAS)
+
+The provided context highlights an example of configuring AMQ Broker to use Red Hat Single Sign-On (RHSSO) for authentication and authorization through JAAS login modules. This typically involves:
+
+*   **RHSSO Instance**: A running RHSSO instance, potentially integrated with an LDAP directory for user federation.
+*   **LDAP Directory**: Populated with users and role information relevant to AMQ Broker.
+*   **JAAS Configuration**: A JAAS login module configured to communicate with RHSSO (e.g., via OIDC or SAML, or indirectly through an LDAP module if RHSSO is federating LDAP users). This module would delegate authentication to RHSSO, which in turn might authenticate against LDAP.
+*   **Role Mapping**: Defining how roles obtained from RHSSO (or its federated LDAP) map to broker-specific permissions within the `ActiveMQArtemis` CR.
+
+[[hands-on-external-idp-config]]
+== Hands-on Activity: Configuring AMQ Broker with an External IDP (Conceptual LDAP Integration)
+
+This lab demonstrates how to configure an AMQ Broker instance on OpenShift to authenticate users against a *conceptual* external LDAP directory using a custom JAAS login module. While we won't set up a full LDAP server, this exercise focuses on the critical steps of preparing the JAAS configuration, deploying it as an OpenShift Secret, and integrating it into your `ActiveMQArtemis` custom resource.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed and running.
+*   The `oc` command-line tool configured to access your OpenShift cluster.
+*   A basic `ActiveMQArtemis` broker instance already deployed or the ability to create one.
+*   *Conceptual:* Access to an LDAP directory server and credentials for binding and querying.
+
+=== 1. Define the JAAS Login Module Configuration
+
+First, create a JAAS configuration file that specifies how AMQ Broker should authenticate against your external IDP. For this example, we'll use a standard `org.apache.activemq.artemis.spi.core.security.jaas.LDAPLoginModule` for an LDAP server.
+
+.Create a file named `login.config` with the following content:
++
+[source,text]
+----
+activemq {
+   org.apache.activemq.artemis.spi.core.security.jaas.LDAPLoginModule required
+      initialContextFactory="com.sun.jndi.ldap.LdapCtxFactory"
+      connectionURL="ldap://ldap.example.com:389" // <1>
+      connectionUsername="cn=read-only-user,dc=example,dc=com" // <2>
+      connectionPassword="password" // <3>
+      authentication="simple"
+      userBase="dc=example,dc=com" // <4>
+      userSearchMatching="uid={0}"
+      userSearchSubtree="true"
+      roleBase="dc=example,dc=com" // <5>
+      roleSearchMatching="(member={1})"
+      roleSearchSubtree="true"
+      roleName="cn";
+};
+----
+<1> Replace `ldap.example.com:389` with the actual URL and port of your LDAP server.
+<2> Replace with a read-only user's Distinguished Name (DN) for binding to LDAP.
+<3> Replace with the password for the `connectionUsername`. In a production environment, consider using OpenShift Secrets for this password as well, though the `connectionPassword` parameter in JAAS config typically expects a literal string.
+<4> The base DN for searching for users.
+<5> The base DN for searching for roles/groups.
+
+[NOTE]
+This `login.config` defines a realm named `activemq`. The `LDAPLoginModule` authenticates users against the specified LDAP server and retrieves their group memberships as roles. Ensure the `connectionUsername` has sufficient permissions to read user and group information from the LDAP directory.
+
+=== 2. Create an OpenShift Secret for the JAAS Configuration
+
+Now, create an OpenShift `Secret` to securely store your `login.config` file. This secret will be mounted into your AMQ Broker pods.
+
+.Execute the following `oc` command to create the secret:
++
+[source,bash,subs="attributes+"]
+----
+oc create secret generic my-external-jaas-config --from-file=login.config={login.config} -n <your-project>
+----
+.   Replace `<your-project>` with the actual OpenShift project where your broker is deployed.
+
+This command creates a secret named `my-external-jaas-config` in your specified project, containing the `login.config` file.
+
+=== 3. Update the `ActiveMQArtemis` Custom Resource
+
+Next, you need to modify your `ActiveMQArtemis` Custom Resource (CR) to instruct the broker to use the newly created JAAS configuration secret.
+
+.Edit your existing `ActiveMQArtemis` CR:
++
+[source,bash,subs="attributes+"]
+----
+oc edit ActiveMQArtemis <broker-instance-name> -n <your-project>
+----
+.   Replace `<broker-instance-name>` with the name of your AMQ Broker instance (e.g., `amq-broker-sample`).
+.   Replace `<your-project>` with your OpenShift project name.
+
+.Locate the `spec` section and add or modify the `externalSecurity` and `securitySettings` to reference your JAAS configuration and define permissions.
++
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: amq-broker-sample
+spec:
+  # ... other broker configurations ...
+  deploymentPlan:
+    size: 1
+    # ... other deployment plan configurations ...
+
+  # New section for external security configuration
+  externalSecurity:
+    jaas:
+      loginModules:
+        - name: "activemq" # This name must match the realm name in login.config
+          secretRef:
+            name: "my-external-jaas-config" # Reference to the secret created earlier
+            key: "login.config" # The key in the secret containing the JAAS config
+
+  # New or updated section for security settings
+  securitySettings:
+    - addressMatch: "queue.#" # <1>
+      permissions:
+        - roles: # <2>
+            - "admin"
+            - "developers"
+          send: true
+          consume: true
+          createDurableQueue: true
+          deleteDurableQueue: true
+          createNonDurableQueue: true
+          deleteNonDurableQueue: true
+          manage: true
+          browse: true
+    - addressMatch: "topic.#" # <3>
+      permissions:
+        - roles:
+            - "admin"
+            - "publishers"
+          send: true
+        - roles:
+            - "admin"
+            - "subscribers"
+          consume: true
+          createNonDurableQueue: true
+          deleteNonDurableQueue: true
+          browse: true
+    - addressMatch: "activemq.#" # <4>
+      permissions:
+        - roles:
+            - "admin"
+          manage: true
+          send: true
+          consume: true
+          createDurableQueue: true
+          deleteDurableQueue: true
+          createNonDurableQueue: true
+          deleteNonDurableQueue: true
+          browse: true
+----
+<1> Defines permissions for addresses starting with `queue.`.
+<2> Specifies that users belonging to the `admin` or `developers` roles (as provided by the external IDP via JAAS) have full access to these queues.
+<3> Defines permissions for addresses starting with `topic.`.
+<4> Defines permissions for the internal `activemq` addresses, typically for administrative access.
+
+[IMPORTANT]
+The `roles` defined under `securitySettings.permissions` (e.g., `admin`, `developers`, `publishers`, `subscribers`) must correspond to the group names or role attributes that your external IDP (e.g., LDAP) provides for users. The JAAS `LDAPLoginModule` will extract these roles from the LDAP user's group memberships.
+
+.Save the changes to the `ActiveMQArtemis` CR. The AMQ Broker Operator will detect the changes and restart the broker pods, applying the new security configuration.
+
+=== 4. Verify the Configuration
+
+After the broker pods restart, you can verify that the new JAAS login modules have been loaded correctly.
+
+.Check the broker pod logs:
++
+[source,bash,subs="attributes+"]
+----
+oc logs $(oc get pod -l app.kubernetes.io/name=<broker-instance-name> -o jsonpath='{.items[0].metadata.name}') -n <your-project> | grep -i "JAAS"
+----
+.   Look for messages indicating that the JAAS realm (`activemq`) was successfully configured or that the login modules were initialized.
+
+.Attempt to connect to the broker using an external client with credentials from your LDAP server.
+*   Ensure your client application is configured to use the appropriate authentication mechanism.
+*   Test with users that belong to the roles configured in the `securitySettings` (e.g., `developers`, `publishers`, `admin`) to verify both authentication and authorization.
+
+[[troubleshooting-external-idp]]
+== Troubleshooting External IDP Integration
+
+*   **Incorrect JAAS Configuration**: Carefully review the `login.config` file for syntax errors, incorrect hostnames, ports, DNs, or search filters. Even a small typo can prevent authentication.
+*   **Secret Not Mounted**: Check the broker pod's description (`oc describe pod <broker-pod-name>`) to ensure the `my-external-jaas-config` secret is correctly mounted as a volume and environment variables (if applicable) are referencing it.
+*   **Permissions Issues**: Ensure the `connectionUsername` used by the `LDAPLoginModule` has sufficient read access to the user and group entries in your LDAP directory.
+*   **Role Mapping Mismatch**: Verify that the `roles` specified in the `ActiveMQArtemis` CR's `securitySettings` exactly match the group names or role attributes returned by your external IDP for the authenticated user.
+*   **Broker Logs**: Always consult the AMQ Broker pod logs for detailed error messages related to authentication and authorization. Look for `WARN` or `ERROR` messages from `org.apache.activemq.artemis.core.security` or `org.apache.activemq.artemis.spi.core.security.jaas`.
+*   **External IDP Reachability**: Confirm that the OpenShift cluster and AMQ Broker pods have network connectivity to your external IDP (e.g., LDAP server). This might involve firewall rules, network policies, or specific OpenShift service configurations.

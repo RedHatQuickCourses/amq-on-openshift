@@ -1,0 +1,568 @@
+#  Exploring Advanced AMQP Features
+
+[[exploring-advanced-amqp-features]]
+= Exploring Advanced AMQP Features
+
+This section delves into advanced capabilities of the AMQP 1.0 protocol, allowing you to build more robust, reliable, and sophisticated messaging applications with Red Hat AMQ Broker. While basic message production and consumption form the foundation, understanding these advanced features is crucial for tackling real-world enterprise integration patterns. We will explore how these features enhance message delivery guarantees, provide greater flexibility, and enable more complex messaging workflows.
+
+== Understanding AMQP 1.0 Flow Control (Credits)
+
+AMQP 1.0 uses a credit-based flow control mechanism to regulate the rate at which messages are transferred between a sender and a receiver. Unlike some other protocols that rely on TCP windowing or simple buffer limits, AMQP 1.0 provides explicit control over message flow at the application level.
+
+When a receiver (consumer) is ready to accept messages, it issues *credits* to the sender (producer). Each credit represents permission for the sender to transmit one message. The sender can only send messages as long as it has credits. Once the sender's credit count reaches zero, it must stop sending until the receiver issues more credits.
+
+This mechanism ensures:
+
+*   *Consumer Overload Prevention*: Consumers can control their incoming message rate, preventing them from being overwhelmed by a fast producer. This is especially critical for consumers with limited processing capacity or downstream systems that cannot handle high throughput bursts.
+*   *Efficient Resource Utilization*: By precisely controlling the flow, unnecessary buffering and potential resource exhaustion on either the sender or receiver side can be avoided.
+*   *Fairness*: In complex scenarios with multiple producers and consumers, flow control helps distribute messages equitably and prevents "starvation" of certain consumers.
+
+In most client libraries (like Qpid JMS), flow control is handled automatically. However, understanding its underlying mechanism is vital for troubleshooting performance issues or designing high-performance applications. For instance, a consumer might intentionally reduce its credit issuance if it's experiencing back pressure from its own processing logic.
+
+[[implementing-amqp-transactions]]
+== Implementing AMQP Transactions for Reliable Messaging
+
+Transactional messaging is a cornerstone of reliable enterprise applications. AMQP 1.0 supports transactions, allowing a client to group multiple message production and consumption operations into a single, atomic unit of work. This ensures an "all-or-nothing" outcome: either all operations within the transaction succeed and are committed, or none of them do, and the transaction is rolled back.
+
+The primary benefits of using AMQP transactions are:
+
+*   *Atomicity*: Guarantees that related message operations (e.g., sending a message and acknowledging a received message) are treated as a single indivisible unit. If one part fails, the entire transaction is undone.
+*   *Data Consistency*: Prevents data inconsistencies that could arise from partial message processing or delivery failures.
+*   *Idempotence*: Can help in designing idempotent message handlers by ensuring that messages are only processed once successfully within a transaction.
+
+An AMQP transaction involves the following steps:
+
+1.  *Begin Transaction*: The client signals the broker to start a new transaction context.
+2.  *Perform Operations*: Messages are sent to the broker, or messages are received and acknowledged from the broker, all within the context of the current transaction. These operations are not visible to other clients until the transaction is committed.
+3.  *Commit Transaction*: If all operations are successful, the client signals the broker to commit the transaction. All changes become permanent and visible.
+4.  *Rollback Transaction*: If an error occurs, the client signals the broker to roll back the transaction. All changes made within the transaction are discarded, and messages that were part of the transaction (e.g., messages sent but not committed, or messages received but not acknowledged) are returned to their queues.
+
+=== Hands-on Lab: Implementing AMQP Transactions
+
+In this lab, you will implement a simple AMQP producer and consumer that use transactions to ensure reliable message handling. The producer will send a batch of messages transactionally, and the consumer will receive and process them, acknowledging them within its own transaction.
+
+==== Prerequisites
+
+*   An AMQ Broker instance deployed and accessible (as covered in previous labs, e.g., "Deploying a Basic AMQ Broker Instance").
+*   A Java development environment with Maven configured.
+*   The Qpid JMS client library added to your project's `pom.xml`. If you don't have this, ensure your `pom.xml` includes:
++
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>org.apache.qpid</groupId>
+        <artifactId>qpid-jms-client</artifactId>
+        <version>2.7.0</version>  // Use the version compatible with your broker, context mentions 2.7
+    </dependency>
+</dependencies>
+----
+
+==== Step 1: Create a Transactional AMQP Producer
+
+Create a Java class named `TransactionalProducer.java`. This producer will send three messages in a single transaction.
+
+[source,java]
+----
+import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class TransactionalProducer {
+
+    public static void main(String[] args) throws JMSException {
+        // Connection details for your AMQ Broker
+        String brokerUrl = "amqp://localhost:5672"; // Adjust if your broker is not on localhost:5672
+        String queueName = "transactionalQueue";
+
+        Connection connection = null;
+        Session session = null;
+
+        try {
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+            connection = factory.createConnection();
+            connection.start();
+
+            // Create a transacted session
+            session = connection.createSession(true, Session.SESSION_TRANSACTED); // true for transacted
+            Destination destination = session.createQueue(queueName);
+            MessageProducer producer = session.createProducer(destination);
+
+            System.out.println("Starting transaction...");
+
+            // Send messages within the transaction
+            for (int i = 0; i < 3; i++) {
+                String messageText = "Transactional Message " + (i + 1);
+                TextMessage message = session.createTextMessage(messageText);
+                producer.send(message);
+                System.out.println("Sent: " + messageText);
+            }
+
+            // Simulate an error condition (uncomment to test rollback)
+            // if (true) {
+            //     throw new RuntimeException("Simulating an error before commit!");
+            // }
+
+            // Commit the transaction
+            session.commit();
+            System.out.println("Transaction committed successfully. Messages are now visible.");
+
+        } catch (Exception e) {
+            System.err.println("Error during transaction: " + e.getMessage());
+            if (session != null) {
+                session.rollback(); // Rollback on error
+                System.out.println("Transaction rolled back. Messages were not sent.");
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+}
+----
+
+==== Step 2: Create a Transactional AMQP Consumer
+
+Create a Java class named `TransactionalConsumer.java`. This consumer will receive messages and acknowledge them within its own transaction.
+
+[source,java]
+----
+import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class TransactionalConsumer {
+
+    public static void main(String[] args) throws JMSException, InterruptedException {
+        String brokerUrl = "amqp://localhost:5672"; // Adjust if your broker is not on localhost:5672
+        String queueName = "transactionalQueue";
+
+        Connection connection = null;
+        Session session = null;
+
+        try {
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+            connection = factory.createConnection();
+            connection.start();
+
+            // Create a transacted session
+            session = connection.createSession(true, Session.SESSION_TRANSACTED); // true for transacted
+            Destination destination = session.createQueue(queueName);
+            MessageConsumer consumer = session.createConsumer(destination);
+
+            System.out.println("Waiting for messages. Press Ctrl+C to exit.");
+
+            // Consume messages in a loop
+            for (int i = 0; i < 3; i++) { // Expecting 3 messages
+                Message message = consumer.receive(5000); // Wait up to 5 seconds
+                if (message instanceof TextMessage) {
+                    TextMessage textMessage = (TextMessage) message;
+                    System.out.println("Received: " + textMessage.getText());
+
+                    // Simulate processing failure for the 2nd message (uncomment to test rollback)
+                    // if (i == 1) {
+                    //     System.out.println("Simulating processing failure for message " + (i+1));
+                    //     throw new RuntimeException("Simulated processing error!");
+                    // }
+
+                } else if (message == null) {
+                    System.out.println("No more messages received within timeout.");
+                    break;
+                }
+            }
+
+            // Commit the transaction after successful processing of all messages
+            session.commit();
+            System.out.println("Consumer transaction committed. Messages acknowledged.");
+
+        } catch (Exception e) {
+            System.err.println("Error during consumer transaction: " + e.getMessage());
+            if (session != null) {
+                session.rollback(); // Rollback on error
+                System.out.println("Consumer transaction rolled back. Messages will be redelivered.");
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+}
+----
+
+==== Step 3: Run the Lab
+
+1.  Compile both Java files. If using Maven, run `mvn clean install` in your project directory.
+2.  Start the `TransactionalConsumer` first:
+    `java -cp target/your-app-jar-with-dependencies.jar TransactionalConsumer`
+3.  In a separate terminal, start the `TransactionalProducer`:
+    `java -cp target/your-app-jar-with-dependencies.jar TransactionalProducer`
+
+You should observe:
+
+*   The producer sending messages and committing the transaction.
+*   The consumer receiving and processing the messages, then committing its transaction.
+
+==== Step 4: Test Rollback
+
+1.  **Producer Rollback**:
+    *   Uncomment the `throw new RuntimeException("Simulating an error before commit!");` line in `TransactionalProducer.java`.
+    *   Run the producer. Observe that it reports a rollback.
+    *   Run the consumer. It should not receive any messages, as the producer's transaction was rolled back.
+    *   Comment out the error line again.
+2.  **Consumer Rollback**:
+    *   Ensure the producer error line is commented out.
+    *   Uncomment the `if (i == 1) { ... }` block in `TransactionalConsumer.java`.
+    *   Run the producer (it will commit its messages).
+    *   Run the consumer. It should receive the first message, then simulate an error, causing a rollback. The messages will then be redelivered if you run the consumer again, demonstrating that the acknowledgement was undone.
+    *   Comment out the error line again.
+
+This lab demonstrates how transactions ensure that messages are either fully processed and acknowledged or fully undone and redelivered, maintaining data consistency.
+
+[[leveraging-message-properties-and-headers]]
+== Leveraging Message Properties and Headers
+
+Beyond the message body, AMQP messages can carry a rich set of metadata through properties and headers. This metadata is crucial for routing, filtering, auditing, and conveying application-specific information without embedding it directly into the message payload.
+
+AMQP 1.0 defines several standard header fields (e.g., `message-id`, `correlation-id`, `reply-to`, `content-type`, `delivery-count`). In addition to these, you can define *application-specific properties*, which are custom key-value pairs that your application understands.
+
+Key uses of message properties and headers:
+
+*   *Correlation*: The `correlation-id` is vital for request/reply patterns, linking a response message back to its original request.
+*   *Routing and Filtering*: Brokers can use headers to route messages to specific queues or subscribers. Consumers can use message selectors (if supported by the broker and client) to filter messages based on their properties, receiving only those that match specific criteria.
+*   *Metadata Propagation*: Carry information like the sender's identity, timestamp of creation, message priority, or any other application-specific context that aids in processing.
+*   *Tracing and Auditing*: Properties can include identifiers for tracing a message's journey through a system.
+
+Properties are typically immutable once a message is sent. Clients interact with them using methods provided by the JMS `Message` interface (e.g., `setStringProperty()`, `getIntProperty()`, `getPropertyNames()`).
+
+=== Hands-on Lab: Sending and Receiving Messages with Custom Properties
+
+This lab will demonstrate how to add custom application properties to messages sent by a producer and how a consumer can read these properties.
+
+==== Prerequisites
+
+*   An AMQ Broker instance deployed and accessible.
+*   A Java development environment with Maven and Qpid JMS client library.
+
+==== Step 1: Create a Producer with Custom Properties
+
+Create a Java class named `PropertyProducer.java`. This producer will send messages with custom properties for `category` and `priority`.
+
+[source,java]
+----
+import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class PropertyProducer {
+
+    public static void main(String[] args) throws JMSException {
+        String brokerUrl = "amqp://localhost:5672";
+        String queueName = "propertyQueue";
+
+        Connection connection = null;
+        Session session = null;
+
+        try {
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+            connection = factory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName);
+            MessageProducer producer = session.createProducer(destination);
+
+            // Send Message 1 with specific properties
+            TextMessage message1 = session.createTextMessage("Report for Q4 Financials");
+            message1.setStringProperty("category", "Finance");
+            message1.setIntProperty("priority", 1);
+            message1.setJMSCorrelationID("FIN-Q4-2023"); // Example standard JMS property
+            producer.send(message1);
+            System.out.println("Sent Message 1: " + message1.getText() + " with properties.");
+
+            // Send Message 2 with different properties
+            TextMessage message2 = session.createTextMessage("User Login Failure Alert");
+            message2.setStringProperty("category", "Security");
+            message2.setIntProperty("priority", 5);
+            producer.send(message2);
+            System.out.println("Sent Message 2: " + message2.getText() + " with properties.");
+
+            // Send Message 3 without special properties
+            TextMessage message3 = session.createTextMessage("General Info Update");
+            producer.send(message3);
+            System.out.println("Sent Message 3: " + message3.getText() + " (no custom properties).");
+
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+}
+----
+
+==== Step 2: Create a Consumer that Reads Properties
+
+Create a Java class named `PropertyConsumer.java`. This consumer will receive messages and extract their custom properties.
+
+[source,java]
+----
+import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+import java.util.Enumeration;
+
+public class PropertyConsumer {
+
+    public static void main(String[] args) throws JMSException, InterruptedException {
+        String brokerUrl = "amqp://localhost:5672";
+        String queueName = "propertyQueue";
+
+        Connection connection = null;
+        Session session = null;
+
+        try {
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+            connection = factory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName);
+            MessageConsumer consumer = session.createConsumer(destination);
+
+            System.out.println("Waiting for messages with properties. Press Ctrl+C to exit.");
+
+            int receivedCount = 0;
+            while (receivedCount < 3) { // Expecting 3 messages
+                Message message = consumer.receive(5000); // Wait up to 5 seconds
+                if (message instanceof TextMessage) {
+                    TextMessage textMessage = (TextMessage) message;
+                    System.out.println("\nReceived: " + textMessage.getText());
+
+                    // Read custom properties
+                    String category = textMessage.getStringProperty("category");
+                    int priority = textMessage.getIntProperty("priority"); // Defaults to 0 if not set
+
+                    if (category != null) {
+                        System.out.println("  Custom Property - Category: " + category);
+                    }
+                    if (priority != 0) { // Check if it was explicitly set to a non-zero value
+                        System.out.println("  Custom Property - Priority: " + priority);
+                    }
+
+                    // Read a standard JMS property
+                    String correlationId = textMessage.getJMSCorrelationID();
+                    if (correlationId != null) {
+                        System.out.println("  JMS Correlation ID: " + correlationId);
+                    }
+
+                    // Iterate over all properties (useful for debugging)
+                    System.out.println("  All Properties:");
+                    Enumeration<String> propertyNames = message.getPropertyNames();
+                    while (propertyNames.hasMoreElements()) {
+                        String propName = propertyNames.nextElement();
+                        System.out.println("    - " + propName + ": " + message.getObjectProperty(propName));
+                    }
+                    receivedCount++;
+
+                } else if (message == null) {
+                    System.out.println("No more messages received within timeout.");
+                    break;
+                }
+            }
+
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+}
+----
+
+==== Step 3: Run the Lab
+
+1.  Compile both Java files (e.g., `mvn clean install`).
+2.  Start the `PropertyConsumer` first:
+    `java -cp target/your-app-jar-with-dependencies.jar PropertyConsumer`
+3.  In a separate terminal, start the `PropertyProducer`:
+    `java -cp target/your-app-jar-with-dependencies.jar PropertyProducer`
+
+Observe the output from the consumer. You should see the custom `category` and `priority` properties, along with the standard `JMSCorrelationID` for the first message, demonstrating how metadata can be transmitted alongside the message payload.
+
+[[fine-grained-message-acknowledgement]]
+== Fine-Grained Message Acknowledgement
+
+Message acknowledgement (ACK) is a critical mechanism for guaranteeing message delivery and preventing data loss. It signals to the broker that a consumer has successfully received and processed a message, allowing the broker to remove the message from its store. AMQP 1.0, often through its JMS mapping, offers different acknowledgement modes, giving applications fine-grained control over when and how messages are acknowledged.
+
+The common acknowledgement modes provided by JMS clients like Qpid JMS are:
+
+*   *AUTO_ACKNOWLEDGE (default for non-transacted sessions)*: The session automatically acknowledges a message when it has successfully returned from a `receive()` call or when the `onMessage()` method of a `MessageListener` has completed. This is the simplest mode but offers the least control. Messages might be lost if processing fails *after* auto-acknowledgement but *before* the message is fully handled by the application.
+*   *CLIENT_ACKNOWLEDGE*: The client application is responsible for explicitly acknowledging messages using the `message.acknowledge()` method. This gives the application full control over when a message is considered processed. If processing fails, the application can choose not to acknowledge, and the message will eventually be redelivered.
+*   *DUPS_OK_ACKNOWLEDGE*: This mode is lazier than `CLIENT_ACKNOWLEDGE`. It instructs the session to acknowledge the delivery of messages only when a moderate batch of messages has been received. This can improve performance but may result in duplicate messages being delivered if the client fails between a batch acknowledgement and subsequent message processing.
+*   *SESSION_TRANSACTED*: As seen in the previous lab, in a transacted session, acknowledgements are implicitly handled as part of the transaction commit. Messages are acknowledged only when the transaction is successfully committed. If the transaction is rolled back, any received messages that were part of the transaction are not acknowledged and may be redelivered.
+
+For reliable messaging where "at-least-once" delivery is required and potential message redelivery must be handled, `CLIENT_ACKNOWLEDGE` or `SESSION_TRANSACTED` are generally preferred. `CLIENT_ACKNOWLEDGE` provides explicit control for non-transactional contexts.
+
+[[hands-on-lab-client-controlled-acknowledgement]]
+=== Hands-on Lab: Implementing Client-Controlled Acknowledgement
+
+In this lab, you will implement a consumer that uses `CLIENT_ACKNOWLEDGE` mode. This allows you to explicitly decide when to acknowledge a message, and observe what happens if a message is not acknowledged due to a simulated processing error.
+
+==== Prerequisites
+
+*   An AMQ Broker instance deployed and accessible.
+*   A Java development environment with Maven and Qpid JMS client library.
+
+==== Step 1: Create a Producer
+
+Use a simple producer (similar to the basic examples or `PropertyProducer` without properties). This producer will just send a few messages to a queue. For simplicity, we'll quickly create one:
+
+Create a Java class named `SimpleProducer.java`.
+
+[source,java]
+----
+import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class SimpleProducer {
+
+    public static void main(String[] args) throws JMSException {
+        String brokerUrl = "amqp://localhost:5672";
+        String queueName = "clientAckQueue";
+
+        Connection connection = null;
+        Session session = null;
+
+        try {
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+            connection = factory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName);
+            MessageProducer producer = session.createProducer(destination);
+
+            for (int i = 0; i < 3; i++) {
+                TextMessage message = session.createTextMessage("Message " + (i + 1));
+                producer.send(message);
+                System.out.println("Sent: " + message.getText());
+            }
+
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+}
+----
+
+==== Step 2: Create a Client-Acknowledging Consumer
+
+Create a Java class named `ClientAckConsumer.java`. This consumer will process messages but will explicitly acknowledge them only after successful processing. We will simulate a failure for one message.
+
+[source,java]
+----
+import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class ClientAckConsumer {
+
+    public static void main(String[] args) throws JMSException, InterruptedException {
+        String brokerUrl = "amqp://localhost:5672";
+        String queueName = "clientAckQueue";
+
+        Connection connection = null;
+        Session session = null;
+
+        try {
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+            connection = factory.createConnection();
+            connection.start();
+
+            // Create a session with CLIENT_ACKNOWLEDGE mode
+            session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+            Destination destination = session.createQueue(queueName);
+            MessageConsumer consumer = session.createConsumer(destination);
+
+            System.out.println("Waiting for messages with CLIENT_ACKNOWLEDGE. Press Ctrl+C to exit.");
+
+            int receivedCount = 0;
+            while (receivedCount < 3) { // Try to receive 3 messages
+                Message message = consumer.receive(10000); // Wait up to 10 seconds
+
+                if (message instanceof TextMessage) {
+                    TextMessage textMessage = (TextMessage) message;
+                    String msgText = textMessage.getText();
+                    System.out.println("Received: " + msgText + " (Delivery Count: " + textMessage.getJMSDeliveryMode() + ")"); // JMSDeliveryMode is often DeliveryCount in AMQP 1.0 context
+
+                    // Simulate a processing error for "Message 2"
+                    if (msgText.contains("Message 2") && textMessage.getJMSRedelivered() == false) { // Only fail on first delivery
+                        System.err.println("  Simulating processing failure for: " + msgText + ". NOT ACKNOWLEDGING.");
+                        // DO NOT acknowledge the message. It will be redelivered later.
+                        receivedCount++; // Still count it as received for this attempt
+                        continue; // Skip acknowledgement
+                    }
+
+                    // Acknowledge the message only if processing was successful
+                    message.acknowledge();
+                    System.out.println("  Acknowledged: " + msgText);
+                    receivedCount++;
+
+                } else if (message == null) {
+                    System.out.println("No more messages received within timeout.");
+                    break;
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("An error occurred: " + e.getMessage());
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+}
+----
+
+==== Step 3: Run the Lab
+
+1.  Compile both Java files (e.g., `mvn clean install`).
+2.  Start the `SimpleProducer`:
+    `java -cp target/your-app-jar-with-dependencies.jar SimpleProducer`
+    (It will send 3 messages and exit.)
+3.  Start the `ClientAckConsumer`:
+    `java -cp target/your-app-jar-with-dependencies.jar ClientAckConsumer`
+
+Observe the output:
+
+*   The consumer will receive "Message 1" and acknowledge it.
+*   It will then receive "Message 2", simulate a failure, and *not* acknowledge it.
+*   It will receive "Message 3" and acknowledge it.
+*   The consumer might then exit (if `receivedCount` reaches 3) or wait for more messages.
+
+Now, wait for a few moments (the broker will redeliver unacknowledged messages after a timeout).
+Run the `ClientAckConsumer` *again*:
+`java -cp target/your-app-jar-with-dependencies.jar ClientAckConsumer`
+
+This time, the consumer should eventually receive "Message 2" *again*. Notice the `JMSRedelivered` flag on the message or an increased delivery count (depending on client library specifics, Qpid JMS often maps AMQP's `delivery-count` to `JMSXDeliveryCount` or similar extended property, but the `JMSRedelivered` flag is standard). This demonstrates that messages are kept by the broker until explicitly acknowledged, ensuring "at-least-once" delivery semantics.
+
+This explicit control is crucial for applications where messages drive business processes, and partial processing is unacceptable.

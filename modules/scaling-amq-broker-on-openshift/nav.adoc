@@ -1,0 +1,6 @@
+* xref:scaling-amq-broker-on-openshift.adoc[]
+** xref:concepts-of-horizontal-and-vertical-scaling.adoc[]
+** xref:scaling-broker-pods-and-replicas.adoc[]
+** xref:adjusting-resource-allocations-cpu-memory-for-broker-pods.adoc[]
+** xref:performance-considerations-for-scaling.adoc[]
+** xref:best-practices-for-scaling-in-openshift.adoc[]

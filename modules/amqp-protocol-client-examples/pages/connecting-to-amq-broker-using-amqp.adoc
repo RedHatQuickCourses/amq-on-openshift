@@ -1,0 +1,543 @@
+#  Connecting to AMQ Broker using AMQP
+
+= Connecting to AMQ Broker using AMQP
+
+:toc: left
+:toclevels: 3
+
+This section delves into establishing connections between your applications and Red Hat AMQ Broker using the Advanced Message Queuing Protocol (AMQP) 1.0. We will cover the necessary broker configurations, setting up a client development environment, and demonstrating how to develop simple producer and consumer applications.
+
+== Understanding AMQP 1.0 and AMQ Broker Interoperability
+
+The Advanced Message Queuing Protocol (AMQP) 1.0 is an open standard for asynchronous messaging, designed to provide interoperability between various messaging systems and client libraries. It defines a wire-level protocol for clients to communicate with message brokers, ensuring that messages can be exchanged reliably across different platforms and programming languages.
+
+Red Hat AMQ Broker, built on Apache ActiveMQ Artemis, offers native and robust support for the AMQP 1.0 standard. This means AMQ Broker is designed to seamlessly interoperate with any AMQP 1.0 compliant client, allowing you to leverage a wide ecosystem of AMQP client libraries available in different programming languages. This interoperability is a key advantage, enabling diverse application components to communicate effectively through a central AMQ Broker instance, regardless of their underlying technology stack.
+
+== Prerequisites for AMQP Connectivity on AMQ Broker
+
+Before an AMQP client can successfully connect to an AMQ Broker instance, several prerequisites must be met on both the network and broker configuration levels. These steps ensure that the broker is listening for AMQP connections, accessible from the client, and configured to handle the client's requests securely.
+
+=== Network Firewall and AMQP Port
+
+For AMQP clients to connect, the network firewall between the client and the AMQ Broker must allow traffic on the designated AMQP port.
+
+*   **Default AMQP Port:** The standard and default port for AMQP 1.0 communication is `5672`. For SSL/TLS secured AMQP connections, the default port is often `5671`.
+*   **OpenShift Routing:** When AMQ Broker is deployed on OpenShift, external access typically relies on OpenShift `Route` resources. The `Route` exposes the broker's AMQP acceptor service to the outside world, usually over ports 80 (HTTP) or 443 (HTTPS), which then forward traffic to the internal broker port. Ensure the `Route` is configured correctly and any intermediate network firewalls permit traffic to the OpenShift cluster's ingress.
+
+=== Enabling the AMQP Acceptor
+
+AMQ Broker uses "acceptors" to listen for incoming client connections on specific protocols and ports. By default, AMQ Broker operators usually enable the AMQP acceptor. However, it's crucial to confirm its presence and configuration.
+
+A typical AMQP acceptor configuration within an `ActiveMQArtemis` Custom Resource (CR) might look like this (simplified):
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  # ... other broker configurations
+  acceptors:
+    - name: amqp
+      port: 5672
+      protocols: AMQP
+      # ... other acceptor properties like sslEnabled, keyStorePath, trustStorePath for TLS
+----
+
+If the AMQP acceptor is not explicitly listed or `protocols` does not include `AMQP`, you would need to modify the `ActiveMQArtemis` CR to add or update it.
+
+=== Configuring Addresses and Queues
+
+AMQP clients interact with the broker by sending messages to "addresses" and receiving messages from "queues" or "subscriptions" associated with those addresses. The broker must have the necessary addresses and queues configured to handle the client's messaging patterns.
+
+While AMQ Broker can often auto-create addresses and queues upon the first message or consumer attachment, it's generally best practice to pre-configure them for production environments. This can be done via the `ActiveMQArtemis` CR or dynamically via the management console (Hawtio).
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  # ...
+  addressSettings:
+    - name: "my.amqp.queue" # Defines an address
+      config:
+        maxSizeBytes: 10485760 # 10MB
+        expiryDelay: -1
+        # ...
+  queues:
+    - name: "my.amqp.queue" # Creates a queue on the address
+      address: "my.amqp.queue"
+      routingType: ANYCAST # For point-to-point
+      # For publish/subscribe, you might define an address with MULTICAST routing
+      # and allow consumers to create subscriptions (queues) dynamically.
+----
+
+The provided context mentions `Addresses, Queues, and Topics` as a reference. Ensure that the address name used by your AMQP client (e.g., `my.amqp.queue`) corresponds to a configured address on the broker.
+
+=== Broker Security and Client Credentials
+
+The AMQ Broker needs to be configured to permit access from your client, and the client must be configured to send the required credentials. This involves:
+
+*   **Users and Roles:** Defining users and assigning them roles within AMQ Broker. These roles typically grant permissions to perform operations like producing to or consuming from specific addresses/queues.
+*   **Authentication Mechanisms:** The broker will authenticate clients against its internal user store, or integrate with external identity providers (e.g., LDAP, Keycloak).
+*   **Client Credentials:** The AMQP client application must provide the correct username and password during the connection attempt.
+
+For example, a security configuration in the `ActiveMQArtemis` CR might define users:
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  # ...
+  securitySettings:
+    - addressMatch: "#" # Applies to all addresses
+      permission:
+        - roles: [ 'admin', 'developer' ]
+          operations: [ 'send', 'consume', 'createNonDurableQueue', 'createDurableQueue' ]
+    # ...
+  users:
+    - name: amqpuser
+      password: supersecurepassword
+      roles:
+        - developer
+----
+
+The provided context explicitly mentions `Broker Security` as a crucial reference.
+
+== Setting Up an AMQP Client Development Environment (Java with Qpid JMS)
+
+While various AMQP 1.0 client libraries exist for different languages (Python's `rhea` or `python-qpid-proton`, Node.js' `amqplib`, etc.), we will focus on Java using Red Hat build of Apache Qpid JMS, as hinted by the context. Qpid JMS provides a JMS (Java Message Service) API over AMQP 1.0, allowing Java developers familiar with JMS to easily connect to AMQP brokers.
+
+=== Including Qpid JMS Dependency
+
+If you are using Maven, add the following dependency to your `pom.xml`:
+
+[source,xml]
+----
+<dependencies>
+  <dependency>
+    <groupId>org.apache.qpid</groupId>
+    <artifactId>qpid-jms-client</artifactId>
+    <version>0.63.0.redhat-00001</version> <!-- Use the appropriate Red Hat version -->
+  </dependency>
+</dependencies>
+----
+
+For Gradle, add this to your `build.gradle`:
+
+[source,groovy]
+----
+dependencies {
+    implementation 'org.apache.qpid:qpid-jms-client:0.63.0.redhat-00001' // Use the appropriate Red Hat version
+}
+----
+*NOTE: Always check the latest recommended Red Hat build of Apache Qpid JMS version for compatibility with your AMQ Broker release.*
+
+== Connecting an AMQP Client to AMQ Broker
+
+Connecting an AMQP client involves constructing a connection URL, providing authentication details, and potentially configuring SSL/TLS for secure communication.
+
+=== AMQP Connection URL Format
+
+The connection URL specifies how the client should connect to the broker. For AMQP, it typically follows a format like:
+
+`amqp://<host>:<port>?<connection_options>`
+or for SSL/TLS:
+`amqps://<host>:<port>?<connection_options>`
+
+*   `<host>`: The hostname or IP address of the AMQ Broker. If using OpenShift Routes, this would be the route's hostname.
+*   `<port>`: The port the AMQP acceptor is listening on (e.g., `5672` for plain, `5671` for SSL, or `443` if connecting via an OpenShift HTTPS route).
+*   `<connection_options>`: Optional parameters to configure the connection, such as `amqp.saslMechanisms` for authentication or `amqp.trustStorePath` for SSL/TLS.
+
+Example: `amqp://broker-amqp-route-myproject.apps.cluster.example.com:443`
+
+=== Client Authentication
+
+AMQP clients authenticate with the broker using SASL (Simple Authentication and Security Layer) mechanisms. The most common mechanism is `PLAIN`, which sends username and password.
+
+When using Qpid JMS, you typically pass the username and password directly in the JMS connection factory or the connection URL.
+
+Example with Qpid JMS:
+
+[source,java]
+----
+// Option 1: Using properties
+JmsConnectionFactory factory = new JmsConnectionFactory("amqp://<host>:<port>");
+factory.setUsername("amqpuser");
+factory.setPassword("supersecurepassword");
+Connection connection = factory.createConnection();
+
+// Option 2: Embedding in the URL (less secure for passwords in logs, but common for examples)
+// JmsConnectionFactory factory = new JmsConnectionFactory("amqp://amqpuser:supersecurepassword@<host>:<port>");
+// Connection connection = factory.createConnection();
+----
+
+=== Securing AMQP Connections with SSL/TLS
+
+Encrypting client-broker communication is critical for production environments. For AMQP, this means using SSL/TLS.
+
+To configure SSL/TLS for an AMQP client:
+
+1.  **Broker-side Configuration:** The AMQ Broker's AMQP acceptor must be configured with `sslEnabled: true` and reference appropriate `keyStorePath`, `keyStorePassword`, `trustStorePath`, `trustStorePassword`.
+2.  **Client-side Configuration:** The client needs to trust the broker's certificate. This is typically achieved by providing a `trustStorePath` and `trustStorePassword` in the client's connection properties or URL.
+
+Example Qpid JMS connection URL with SSL/TLS and trust store:
+
+[source,java]
+----
+String connectionUrl = "amqps://broker-amqp-route-myproject.apps.cluster.example.com:443?" +
+                       "amqp.trustStorePath=/path/to/client-truststore.jks&" +
+                       "amqp.trustStorePassword=securepass&" +
+                       "amqp.sslEnabled=true&" +
+                       "amqp.verifyHost=false"; // Set to true for production if hostname verification is needed
+JmsConnectionFactory factory = new JmsConnectionFactory(connectionUrl);
+factory.setUsername("amqpuser");
+factory.setPassword("supersecurepassword");
+Connection connection = factory.createConnection();
+----
+
+This setup ensures that the client verifies the broker's identity using the provided trust store and all communication is encrypted.
+
+== Hands-on Lab: Connecting an AMQP Producer/Consumer
+
+In this lab, you will deploy a basic AMQ Broker on OpenShift, configure it for external AMQP access, and then develop and run simple Java AMQP producer and consumer applications to send and receive messages.
+
+=== Lab Prerequisites
+
+*   An OpenShift cluster where you have `oc` CLI access and administrative permissions.
+*   Java Development Kit (JDK) 11 or later installed.
+*   Maven installed.
+*   An existing AMQ Broker deployed on OpenShift, preferably with a `Route` exposed for external access (e.g., using a YAML similar to the `broker-dr` example from the context, ensuring AMQP acceptor and security are configured).
+    *   **Verify Broker:** Ensure you have an `ActiveMQArtemis` instance named `broker-amqp-lab` running in a dedicated namespace, e.g., `amqp-lab`.
+    *   **Verify Route:** Obtain the hostname of the AMQP route. If you've named your route `broker-amqp-route`, you can get the hostname with:
+        ```bash
+        oc get route broker-amqp-route -n amqp-lab -o jsonpath='{.spec.host}'
+        ```
+        Let's assume this gives `broker-amqp-route-amqp-lab.apps.yourcluster.example.com`.
+
+=== Step 1: Deploy a Basic AMQ Broker with AMQP Acceptor (if not already done)
+
+First, create a new OpenShift project (namespace) for this lab.
+
+[source,bash]
+----
+oc new-project amqp-lab
+----
+
+Now, deploy an AMQ Broker instance. This configuration includes an AMQP acceptor and a basic user for client authentication.
+
+[source,bash]
+----
+oc create -f - <<EOF
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: broker-amqp-lab
+spec:
+  deploymentPlan:
+    size: 1
+  acceptors:
+    - name: amqp
+      port: 5672
+      protocols: AMQP
+      # Ensure external access is enabled for this acceptor via a route
+      expose: true
+      exposedEnvVars:
+        - name: AMQP_HOST
+          valueFromRoute: true
+    - name: console
+      port: 8161
+      protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE,JMS,WEB
+      expose: true
+      exposedEnvVars:
+        - name: CONSOLE_HOST
+          valueFromRoute: true
+  securitySettings:
+    - addressMatch: "#"
+      permission:
+        - roles: [ 'developer' ]
+          operations: [ 'send', 'consume', 'createNonDurableQueue', 'createDurableQueue' ]
+  users:
+    - name: amqpuser
+      password: supersecurepassword
+      roles:
+        - developer
+EOF
+----
+
+Wait for the broker pod to be running and the routes to be created. You can monitor with:
+
+[source,bash]
+----
+oc get pods -n amqp-lab
+oc get route -n amqp-lab
+----
+
+Identify the hostname for the `broker-amqp-lab-amqp` route. This will be your `AMQP_BROKER_HOST`.
+
+=== Step 2: Create a Java Maven Project
+
+Create a new directory for your client code and initialize a Maven project:
+
+[source,bash]
+----
+mkdir amqp-client-lab
+cd amqp-client-lab
+mvn archetype:generate -DgroupId=com.example.amqp -DartifactId=amqp-client -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+cd amqp-client
+----
+
+Now, modify the `pom.xml` to include the Qpid JMS client dependency.
+
+[source,xml]
+----
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example.amqp</groupId>
+  <artifactId>amqp-client</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>amqp-client</name>
+  <url>http://maven.apache.org/project.html</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.qpid</groupId>
+      <artifactId>qpid-jms-client</artifactId>
+      <version>0.63.0.redhat-00001</version> <!-- Use the appropriate Red Hat version -->
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.32</version> <!-- For simple logging output -->
+    </dependency>
+  </dependencies>
+</project>
+----
+
+=== Step 3: Develop an AMQP Producer
+
+Create a Java file `src/main/java/com/example/amqp/AmqpProducer.java`:
+
+[source,java]
+----
+package com.example.amqp;
+
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+import javax.jms.*;
+
+public class AmqpProducer {
+
+    private static final String AMQP_BROKER_HOST = "broker-amqp-lab-amqp-amqp-lab.apps.yourcluster.example.com"; // <<-- REPLACE with your AMQP route hostname
+    private static final String AMQP_BROKER_PORT = "443"; // Use 443 for HTTPS route, 5672 for internal service
+    private static final String AMQP_USER = "amqpuser";
+    private static final String AMQP_PASSWORD = "supersecurepassword";
+    private static final String QUEUE_NAME = "amqpQueue"; // The queue we'll send messages to
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            // Create a connection factory with AMQP protocol
+            JmsConnectionFactory factory = new JmsConnectionFactory(
+                    "amqps://" + AMQP_BROKER_HOST + ":" + AMQP_BROKER_PORT +
+                    "?amqp.saslMechanisms=PLAIN&amqp.idleTimeout=60000&" + // Example options, adjust as needed
+                    "amqp.maxFrameSize=1048576&transport.trustStoreLocation=/dev/null&transport.trustStoreType=JKS&transport.trustAll=true" // For self-signed certs on OpenShift, use trustAll or proper truststore
+            );
+
+            // Set username and password
+            factory.setUsername(AMQP_USER);
+            factory.setPassword(AMQP_PASSWORD);
+
+            // Create a connection
+            System.out.println("Attempting to connect to AMQ Broker at: " + AMQP_BROKER_HOST + ":" + AMQP_BROKER_PORT);
+            connection = factory.createConnection();
+            connection.start();
+            System.out.println("Connection established successfully.");
+
+            // Create a session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+            // Create a queue destination
+            Destination destination = session.createQueue(QUEUE_NAME);
+
+            // Create a message producer
+            producer = session.createProducer(destination);
+            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT); // For persistent messages, use PERSISTENT
+
+            // Send 10 text messages
+            for (int i = 1; i <= 10; i++) {
+                TextMessage message = session.createTextMessage("Hello AMQP from Java! Message #" + i);
+                producer.send(message);
+                System.out.println("Sent message: " + message.getText());
+                Thread.sleep(100); // Small delay
+            }
+
+            System.out.println("Finished sending messages.");
+
+        } catch (Exception e) {
+            System.err.println("Error in AMQP Producer: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Clean up resources
+            try {
+                if (producer != null) producer.close();
+                if (session != null) session.close();
+                if (connection != null) connection.close();
+            } catch (JMSException e) {
+                System.err.println("Error closing JMS resources: " + e.getMessage());
+            }
+        }
+    }
+}
+----
+*IMPORTANT*: Remember to replace `broker-amqp-lab-amqp-amqp-lab.apps.yourcluster.example.com` with the actual hostname of your AMQP route. If your OpenShift cluster uses self-signed certificates and you don't provide a proper trust store, `transport.trustAll=true` is used for demonstration but should be avoided in production.
+
+=== Step 4: Run the AMQP Producer and Verify
+
+Compile and run your producer:
+
+[source,bash]
+----
+mvn clean compile exec:java -Dexec.mainClass="com.example.amqp.AmqpProducer"
+----
+
+You should see output indicating messages being sent.
+
+[.console-output]
+```text
+Attempting to connect to AMQ Broker at: broker-amqp-lab-amqp-amqp-lab.apps.yourcluster.example.com:443
+Connection established successfully.
+Sent message: Hello AMQP from Java! Message #1
+Sent message: Hello AMQP from Java! Message #2
+...
+Sent message: Hello AMQP from Java! Message #10
+Finished sending messages.
+```
+
+To verify, open the Hawtio management console for your broker. Get the console route hostname:
+
+[source,bash]
+----
+oc get route broker-amqp-lab-console -n amqp-lab -o jsonpath='{.spec.host}'
+----
+
+Navigate to the console URL (e.g., `https://broker-amqp-lab-console-amqp-lab.apps.yourcluster.example.com`), log in with `amqpuser`/`supersecurepassword`, and navigate to "Queues". You should see `amqpQueue` listed with 10 messages.
+
+=== Step 5: Develop an AMQP Consumer
+
+Create a Java file `src/main/java/com/example/amqp/AmqpConsumer.java`:
+
+[source,java]
+----
+package com.example.amqp;
+
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+import javax.jms.*;
+
+public class AmqpConsumer {
+
+    private static final String AMQP_BROKER_HOST = "broker-amqp-lab-amqp-amqp-lab.apps.yourcluster.example.com"; // <<-- REPLACE with your AMQP route hostname
+    private static final String AMQP_BROKER_PORT = "443";
+    private static final String AMQP_USER = "amqpuser";
+    private static final String AMQP_PASSWORD = "supersecurepassword";
+    private static final String QUEUE_NAME = "amqpQueue"; // The queue we'll consume from
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+
+        try {
+            JmsConnectionFactory factory = new JmsConnectionFactory(
+                    "amqps://" + AMQP_BROKER_HOST + ":" + AMQP_BROKER_PORT +
+                    "?amqp.saslMechanisms=PLAIN&amqp.idleTimeout=60000&" +
+                    "amqp.maxFrameSize=1048576&transport.trustStoreLocation=/dev/null&transport.trustStoreType=JKS&transport.trustAll=true" // For self-signed certs on OpenShift
+            );
+            factory.setUsername(AMQP_USER);
+            factory.setPassword(AMQP_PASSWORD);
+
+            System.out.println("Attempting to connect to AMQ Broker at: " + AMQP_BROKER_HOST + ":" + AMQP_BROKER_PORT);
+            connection = factory.createConnection();
+            connection.start();
+            System.out.println("Connection established successfully.");
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination destination = session.createQueue(QUEUE_NAME);
+            consumer = session.createConsumer(destination);
+
+            System.out.println("Waiting for messages on queue: " + QUEUE_NAME + " (Press Ctrl+C to exit)");
+
+            // Receive messages synchronously for a simple demonstration
+            // In a real application, you'd typically use a MessageListener
+            for (int i = 0; i < 10; i++) {
+                Message message = consumer.receive(5000); // Wait up to 5 seconds for a message
+                if (message instanceof TextMessage) {
+                    TextMessage textMessage = (TextMessage) message;
+                    System.out.println("Received message: " + textMessage.getText());
+                } else if (message == null) {
+                    System.out.println("No more messages received within timeout.");
+                    break;
+                } else {
+                    System.out.println("Received non-text message: " + message.getClass().getName());
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error in AMQP Consumer: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (consumer != null) consumer.close();
+                if (session != null) session.close();
+                if (connection != null) connection.close();
+            } catch (JMSException e) {
+                System.err.println("Error closing JMS resources: " + e.getMessage());
+            }
+        }
+    }
+}
+----
+*IMPORTANT*: Again, replace `broker-amqp-lab-amqp-amqp-lab.apps.yourcluster.example.com` with your actual AMQP route hostname.
+
+=== Step 6: Run the AMQP Consumer and Verify
+
+Compile and run your consumer:
+
+[source,bash]
+----
+mvn clean compile exec:java -Dexec.mainClass="com.example.amqp.AmqpConsumer"
+----
+
+You should see output showing messages being received from the queue.
+
+[.console-output]
+```text
+Attempting to connect to AMQ Broker at: broker-amqp-lab-amqp-amqp-lab.apps.yourcluster.example.com:443
+Connection established successfully.
+Waiting for messages on queue: amqpQueue (Press Ctrl+C to exit)
+Received message: Hello AMQP from Java! Message #1
+Received message: Hello AMQP from Java! Message #2
+...
+Received message: Hello AMQP from Java! Message #10
+No more messages received within timeout.
+```
+
+After the consumer runs, check the Hawtio console again. The `amqpQueue` should now show 0 messages, indicating they have been successfully consumed.
+
+This lab demonstrates the fundamental steps involved in connecting an AMQP 1.0 client to an AMQ Broker instance deployed on OpenShift, covering broker configuration, client setup, and basic messaging operations.

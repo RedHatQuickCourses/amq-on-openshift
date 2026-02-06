@@ -1,0 +1,231 @@
+#  Enabling Secure Listeners
+
+= Enabling Secure Listeners
+
+In the world of message-oriented middleware, securing the communication channels between clients and the broker is paramount. This module dives into the concept of secure listeners, explaining their importance and providing practical guidance on how to enable and configure them for AMQ Broker instances deployed on OpenShift.
+
+== What are Secure Listeners?
+
+Secure listeners, in the context of AMQ Broker, are network endpoints configured to accept incoming client connections over a secure, encrypted protocol, primarily SSL/TLS (Secure Sockets Layer/Transport Layer Security). Instead of transmitting data in plain text, which is vulnerable to eavesdropping and tampering, secure listeners ensure that all data exchanged between clients and the broker is encrypted.
+
+Key benefits of using secure listeners include:
+
+*   *Data Confidentiality*: Prevents unauthorized parties from reading sensitive message content.
+*   *Data Integrity*: Ensures that messages have not been altered in transit.
+*   *Authentication*: Allows clients to verify the identity of the broker (and optionally, for the broker to verify the client's identity through mutual TLS), preventing spoofing attacks.
+
+Without secure listeners, messages are sent over unencrypted connections, making them susceptible to various security threats, especially in environments where network traffic can be intercepted.
+
+== How AMQ Broker Secures Connections on OpenShift
+
+On OpenShift, enabling secure listeners for AMQ Broker involves leveraging OpenShift's native capabilities for secret management and the AMQ Broker Operator's declarative API for configuration.
+
+=== Role of SSL/TLS
+
+SSL/TLS is the cryptographic protocol that provides secure communication over a computer network. For AMQ Broker, it establishes an encrypted tunnel between the client and the broker. This process typically involves:
+
+1.  **Certificate Exchange**: The broker presents its digital certificate to the client. This certificate contains the broker's public key and is signed by a Certificate Authority (CA) trusted by the client.
+2.  **Key Agreement**: Client and broker use asymmetric cryptography (based on the public key from the certificate) to securely exchange a symmetric key.
+3.  **Encrypted Communication**: All subsequent communication is encrypted using the agreed-upon symmetric key, which is much faster than asymmetric encryption.
+
+For this to work, the broker needs a *key store* containing its private key and server certificate, and clients need a *trust store* that allows them to verify the broker's certificate chain. In more advanced scenarios (mutual TLS), the broker might also require a trust store to verify client certificates.
+
+=== Key Stores and Trust Stores
+
+*   *Key Store (`.jks`, `.p12`)*: A repository for cryptographic keys and certificates. For the AMQ Broker, its key store contains the broker's private key and its corresponding public key certificate. This is what the broker uses to prove its identity to clients and to decrypt data encrypted with its public key. The context refers to `keyStorePath` and `keyStorePassword`.
+*   *Trust Store (`.jks`, `.p12`)*: A repository of certificates from trusted Certificate Authorities (CAs) or directly trusted public keys. Clients use their trust store to validate the broker's certificate. If the broker's certificate is signed by a CA present in the client's trust store, the client trusts the broker. The context refers to `trustStorePath` and `trustStorePassword`. While the broker can also have a trust store (for mutual TLS), the primary use for a trust store when *enabling secure listeners* is on the *client side* to trust the broker.
+
+=== OpenShift Secrets for TLS Assets
+
+On OpenShift, sensitive information like private keys, certificates, and passwords should never be hardcoded directly into configuration files or deployed in plain text. Instead, OpenShift `Secret` objects are used.
+
+The AMQ Broker Operator allows you to reference an OpenShift `Secret` that contains the necessary key store, trust store, and their respective passwords. This secret is then mounted into the broker pods, making the TLS assets available for configuration. The context example `oc create secret generic mytlssecret` demonstrates how these files and passwords can be bundled into a secret.
+
+The properties `enabledCipherSuites` and `enabledProtocols` from the context allow you to specify which cryptographic ciphers and SSL/TLS protocol versions (e.g., `TLSv1.2`, `TLSv1.3`) the secure listener should use, providing granular control over security strength and compatibility.
+
+== Hands-on Lab: Configuring Secure Listeners
+
+This lab guides you through the process of generating self-signed SSL/TLS certificates, creating an OpenShift secret to hold these credentials, and finally, configuring an AMQ Broker instance on OpenShift to use a secure listener.
+
+=== Objective
+
+*   Generate a self-signed certificate and private key for the broker.
+*   Create a client trust store containing the broker's public certificate.
+*   Store TLS credentials securely in an OpenShift Secret.
+*   Modify an `ActiveMQArtemis` Custom Resource to enable an SSL/TLS-secured acceptor (listener).
+*   Verify the secure listener is active.
+
+=== Prerequisites
+
+*   An OpenShift cluster with `oc` CLI configured and logged in.
+*   The AMQ Broker Operator installed in your OpenShift cluster.
+*   `keytool` command-line utility (part of the Java Development Kit - JDK) available on your local machine.
+
+=== Step 1: Generate TLS Certificates and Key Store
+
+First, we will generate a self-signed certificate for our broker and export its public certificate to a client trust store. For a production environment, you would typically obtain certificates from a trusted Certificate Authority (CA).
+
+.Create a directory for your TLS assets:
+[source,bash]
+----
+mkdir -p tls-config
+cd tls-config
+----
+
+.Generate the broker's keystore (`broker.ks`) and a self-signed certificate:
+[source,bash]
+----
+keytool -genkeypair -alias broker -keyalg RSA -keysize 2048 -storetype PKCS12 \
+-keystore broker.ks -storepass password -keypass password \
+-dname "CN=amq-broker-service,OU=IT,O=Red Hat,L=Raleigh,ST=NC,C=US" \
+-ext SAN=DNS:amq-broker-service,DNS:localhost,IP:127.0.0.1
+----
+*   `amq-broker-service`: Replace this with the actual DNS name of your broker service within OpenShift. When creating a Route later, you might also need to include the Route's hostname.
+*   `password`: This is the password for both the keystore and the private key within it. *Always use strong, unique passwords in production.*
+
+.Export the broker's public certificate from `broker.ks` to a separate file:
+[source,bash]
+----
+keytool -exportcert -alias broker -keystore broker.ks -storepass password \
+-file broker_certificate.cer
+----
+
+.Import the broker's public certificate into a client trust store (`client.ts`):
+[source,bash]
+----
+keytool -importcert -alias broker -file broker_certificate.cer -storetype PKCS12 \
+-keystore client.ts -storepass password -noprompt
+----
+This `client.ts` will be used by client applications to trust the broker. For this lab, we'll include it in the same secret for demonstration.
+
+=== Step 2: Create OpenShift Secret for TLS Credentials
+
+Now, package the generated `broker.ks` and `client.ts` files, along with their passwords, into an OpenShift `Secret`.
+
+.Define environment variables for the secret name and passwords:
+[source,bash]
+----
+export SECRET_NAME=amq-broker-tls-secret
+export KEYSTORE_PASSWORD=password
+export TRUSTSTORE_PASSWORD=password
+----
+
+.Create the OpenShift Secret:
+[source,bash]
+----
+oc create secret generic $SECRET_NAME \
+--from-file=broker.ks=./broker.ks \
+--from-file=client.ts=./client.ts \
+--from-literal=keyStorePassword=$KEYSTORE_PASSWORD \
+--from-literal=trustStorePassword=$TRUSTSTORE_PASSWORD \
+-n $(oc project -q) # Or specify your project namespace, e.g., -n my-amq-project
+----
+*   The `broker.ks` and `client.ts` files are included.
+*   `keyStorePassword` and `trustStorePassword` are added as literal keys in the secret. The AMQ Broker Operator will read these from the secret to unlock the respective stores.
+
+=== Step 3: Deploy AMQ Broker with Secure Listeners
+
+Next, we will create an `ActiveMQArtemis` Custom Resource (CR) that configures an acceptor (listener) to use SSL/TLS and references the secret we just created.
+
+.Create a YAML file named `amq-broker-secure-ha.yaml` with the following content:
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: amq-broker-secure-example
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.10
+    journalStorage:
+      size: 2Gi
+    brokerProperties:
+      - "security.enabled=true" # Ensure security is enabled if you plan to configure users later
+  acceptors:
+    - name: amqp-secure
+      port: 5671
+      protocols: [AMQP]
+      sslEnabled: true
+      sslSecret: amq-broker-tls-secret # Name of the Secret created in Step 2
+      # The keyStorePath refers to the file name *inside* the secret
+      keyStorePath: broker.ks
+      # The keyStorePassword refers to the literal key name *inside* the secret
+      keyStorePassword: keyStorePassword
+      enabledProtocols: [TLSv1.2, TLSv1.3]
+      # Uncomment and configure if you need mutual TLS
+      # trustStorePath: client.ts
+      # trustStorePassword: trustStorePassword
+    - name: core-secure
+      port: 61617
+      protocols: [CORE]
+      sslEnabled: true
+      sslSecret: amq-broker-tls-secret
+      keyStorePath: broker.ks
+      keyStorePassword: keyStorePassword
+      enabledProtocols: [TLSv1.2, TLSv1.3]
+  # Expose the secure AMQP port via an OpenShift Route
+  console:
+    expose: true
+  addressSettings:
+    - name: "#"
+      redeliveryDelay: 1000
+      maxDeliveryAttempts: 3
+  # Example for external exposure - use a Route for secure external access
+  # routes:
+  #   - name: amqp-secure-external
+  #     host: amqp-broker-secure.apps.<cluster-hostname>
+  #     servicePort: 5671
+  #     termination: passthrough # Important for TLS termination at the broker
+----
+*   We've defined two acceptors (`amqp-secure` and `core-secure`) with `sslEnabled: true`.
+*   `sslSecret` points to `amq-broker-tls-secret`, the secret we created.
+*   `keyStorePath` and `keyStorePassword` reference the file and literal key within that secret.
+*   `enabledProtocols` explicitly sets `TLSv1.2` and `TLSv1.3` for stronger security.
+
+.Apply the Custom Resource to deploy the broker:
+[source,bash]
+----
+oc apply -f amq-broker-secure-ha.yaml -n $(oc project -q)
+----
+
+.Monitor the deployment:
+[source,bash]
+----
+oc get activemqartemises
+oc get pods -l activemq-artemis-name=amq-broker-secure-example
+----
+Wait for the broker pod(s) to be in the `Running` state.
+
+=== Step 4: Verify Secure Listener Deployment
+
+Once the broker pod is running, check its logs to confirm that the secure listeners have been initialized correctly.
+
+.View the broker pod logs:
+[source,bash]
+----
+oc logs $(oc get pod -l activemq-artemis-name=amq-broker-secure-example -o jsonpath='{.items[0].metadata.name}') -n $(oc project -q) | grep "acceptor"
+----
+You should see log entries indicating that the secure acceptors are starting up on the specified ports (e.g., 5671 and 61617) with SSL enabled. Look for messages similar to:
+`INFO  [org.apache.activemq.artemis.core.server] AMQ221007: Server will be started. AMQP Acceptor 'amqp-secure' is listening on nio://0.0.0.0:5671 for protocols [AMQP] with SSL.`
+
+=== Step 5: Test Client Connectivity (Overview)
+
+To fully test, you would develop a client application (e.g., in Java or Python, using AMQP or Core protocol libraries) that is configured to connect to the broker using SSL/TLS.
+
+*   The client application would need to reference the `client.ts` trust store (or `broker_certificate.cer` imported into a default JVM trust store) to trust the broker's certificate.
+*   The connection URL would specify SSL/TLS (e.g., `amqps://` for AMQP, or specific SSL parameters for Core Protocol).
+
+For example, a Java client connecting via AMQP over SSL might look like:
+[source,java]
+----
+// Example connection URI for AMQP/SSL
+// This URI would be configured to point to your OpenShift Service for the broker,
+// and you would need to set system properties for the trust store.
+// System.setProperty("javax.net.ssl.trustStore", "/path/to/client.ts");
+// System.setProperty("javax.net.ssl.trustStorePassword", "password");
+// ConnectionFactory cf = new JmsConnectionFactory("amqps://amq-broker-secure-example-amqp:5671");
+----
+_Full client examples are covered in detail in the "Core Protocol Client Examples" and "AMQP Protocol Client Examples" modules._
+
+By following these steps, you have successfully deployed an AMQ Broker instance on OpenShift with secure listeners enabled, ensuring encrypted communication between your clients and the broker.

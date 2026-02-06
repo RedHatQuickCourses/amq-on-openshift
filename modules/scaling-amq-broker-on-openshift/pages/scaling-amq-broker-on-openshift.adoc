@@ -1,0 +1,9 @@
+#  Scaling AMQ Broker on OpenShift
+
+=== Scaling AMQ Broker on OpenShift
+
+Scaling AMQ Broker on OpenShift involves adjusting its capacity to handle varying message loads. This includes:
+
+*   **Horizontal Scaling:** Increasing the number of broker pods (replicas).
+*   **Vertical Scaling:** Adjusting CPU and memory resource allocations for individual broker pods.
+*   Considering performance implications and implementing best practices for efficient scaling within the OpenShift environment.

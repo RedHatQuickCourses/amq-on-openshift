@@ -1,0 +1,13 @@
+#  Different Message Stores for AMQ Broker on OpenShift
+
+=== Different Message Stores for AMQ Broker on OpenShift
+
+AMQ Broker uses message stores for persistence, ensuring message durability and reliability. On OpenShift, various strategies are available:
+
+*   *File-Based Message Store:* Stores messages directly on the file system. For large messages, the broker can store them as files on the Persistent Volume (PV) at `/opt/<custom_resource_name>/data/large-messages`.
+*   *JDBC Message Store:* Integrates with external databases, storing message data in database tables.
+*   *Journal vs. Paging:*
+    ** Journaling:: The primary mechanism for persistent message storage, recording messages sequentially.
+    ** Paging:: Used to offload messages from memory to disk when certain thresholds are met, preventing memory exhaustion.
+*   *OpenShift Storage Considerations:* Persistent Volumes (PVs) are crucial for providing durable storage for message stores, ensuring data is retained across broker restarts and scaling events.
+*   *Choosing a Strategy:* The selection depends on performance requirements, scalability needs, and existing infrastructure (e.g., preference for file systems or external databases).

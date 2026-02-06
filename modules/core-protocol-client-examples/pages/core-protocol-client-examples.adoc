@@ -1,0 +1,19 @@
+#  Core Protocol Client Examples
+
+[[Core_Protocol_Client_Examples]]
+=== Core Protocol Client Examples
+
+The AMQ Core Protocol is Red Hat's optimized client protocol for AMQ Broker, primarily accessed by Java applications through the Java Message Service (JMS) API.
+
+Key aspects for developing Core Protocol clients:
+
+*   *Introduction to AMQ Core Protocol:* Leverages the JMS API for developing robust, asynchronous messaging applications.
+*   *Setting Up a Development Environment:* Involves configuring a Java environment to build client applications that connect to the AMQ Broker.
+*   *Core API Entities:*
+    ** `ConnectionFactory`: The starting point for establishing connections.
+    ** `Connection`: Represents a communication channel between the client and the broker, containing sessions.
+    ** `Session`: Provides a context for creating `MessageProducer` and `MessageConsumer` instances.
+    ** `MessageProducer`: Used to send messages to a specific destination (queue or topic).
+    ** `MessageConsumer`: Used to receive messages from a specific destination.
+*   *Configuration:* Often involves using JNDI (Java Naming and Directory Interface) and a `jndi.properties` file to configure `ConnectionFactory` and `Destination` objects.
+*   *Messaging Patterns:* Supports implementing both point-to-point (queues) and publish/subscribe (topics) messaging models using producers and consumers.

@@ -1,0 +1,446 @@
+#  Defining Users, Roles, and Permissions in AMQ Broker
+
+= Defining Users, Roles, and Permissions in AMQ Broker
+
+RBAC (Role-Based Access Control) is a critical security mechanism for AMQ Broker, ensuring that only authorized users can perform specific operations on broker resources. On OpenShift, you configure AMQ Broker's internal RBAC primarily through the `ActiveMQArtemisSecurity` Custom Resource Definition (CRD) provided by the AMQ Broker Operator. This allows you to define users, assign them roles, and grant specific permissions based on these roles, enhancing the security posture of your messaging infrastructure.
+
+== Core Concepts of AMQ Broker RBAC
+
+Before diving into configuration, let's understand the fundamental concepts of RBAC within AMQ Broker:
+
+*   *Users*: These are individual identities that authenticate with the AMQ Broker. Each user attempts to establish a connection to perform messaging or management operations.
+*   *Roles*: Logical groupings of permissions. Users are assigned one or more roles. A user inherits all permissions associated with their assigned roles. This simplifies management, as you can assign a user to a `sender` role, for example, and they automatically gain all "send" related permissions.
+*   *Permissions*: Specific actions that can be performed on broker resources (e.g., sending messages, consuming messages, creating queues) or management operations (e.g., viewing queues, editing configurations). Permissions are granted to roles, and by extension, to all users possessing that role.
+
+== Implementing RBAC with ActiveMQArtemisSecurity CR
+
+The `ActiveMQArtemisSecurity` custom resource is used to define the authentication and authorization configuration for your AMQ Broker instances. It centralizes the definition of login modules, security domains, and security settings.
+
+=== 1. Defining Users and Roles
+
+You define users, their passwords, and their assigned roles within a `propertiesLoginModule`. This type of login module is suitable for scenarios where user credentials and role mappings are managed directly within the broker's configuration, rather than an external identity provider.
+
+.Example: Defining users and roles in `ActiveMQArtemisSecurity` CR
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisSecurity
+metadata:
+  name: my-broker-security # Name of this security configuration
+spec:
+  loginModules:
+    propertiesLoginModules:
+      - name: "prop-module"
+        users:
+          - name: "sam"
+            password: "samspassword"
+            roles:
+              - "sender"
+          - name: "rob"
+            password: "robspassword"
+            roles:
+              - "receiver"
+          - name: "admin" # An additional user for management console access
+            password: "adminpassword"
+            roles:
+              - "sender"
+              - "receiver"
+              - "manager" # Assign the 'manager' role for administrative tasks
+----
+In this example:
+
+*   A `propertiesLoginModule` named `"prop-module"` is declared within the `loginModules` section.
+*   Three users (`sam`, `rob`, `admin`) are defined, each with a unique name, password, and a list of assigned `roles`.
+*   `sam` is assigned the `sender` role, `rob` the `receiver` role, and `admin` is assigned `sender`, `receiver`, and `manager` roles, enabling a broader set of permissions.
+
+[NOTE]
+As specified in the provided context, always ensure that values are defined for elements like `securityDomains.brokerDomain` and `roles`. Omitting these values can lead to unexpected or incomplete security configurations.
+
+=== 2. Defining Security Domains
+
+After defining `loginModules`, you must configure `securityDomains` to link these modules to the broker's authentication mechanism. The `brokerDomain` is a crucial component that specifies which `loginModules` the broker should use for authenticating incoming connections.
+
+.Example: Linking login modules to the broker domain
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisSecurity
+metadata:
+  name: my-broker-security # Must match the name defined above
+spec:
+  # ... (loginModules as defined in the previous step) ...
+  securityDomains:
+    brokerDomain:
+      name: "activemq" # Standard broker domain name
+      loginModules:
+        - name: "prop-module" # Reference the login module defined above
+          flag: "sufficient" # Indicates successful authentication by this module is enough
+----
+Here, the `prop-module` is registered with the `activemq` broker domain. This step makes the users and roles defined within `prop-module` available for authentication against the broker. The `flag: "sufficient"` ensures that if authentication succeeds through this module, no further authentication checks are performed.
+
+=== 3. Defining Permissions
+
+Permissions dictate what actions users (via their assigned roles) can perform on specific broker resources (e.g., addresses, queues) and for management operations. These access rules are configured under the `securitySettings.broker` section of the `ActiveMQArtemisSecurity` CR.
+
+Each permission rule consists of:
+*   `match`: A pattern (e.g., `"#"` for all, `"my.queue.*"` for specific addresses) that the resource name must match.
+*   `permissions`: A list of allowed operations, each specifying an `operationType` and the `roles` that are granted that operation.
+
+.Example: Defining permissions for messaging operations
+This configuration grants permissions for common messaging operations like sending, consuming, and queue creation.
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisSecurity
+metadata:
+  name: my-broker-security
+spec:
+  # ... (loginModules and securityDomains as defined above) ...
+  securitySettings:
+    broker:
+      - match: "#" # This rule applies to all addresses and queues on the broker
+        permissions:
+          - operationType: "send"
+            roles:
+              - "sender" # Users with 'sender' role can send messages
+          - operationType: "createAddress"
+            roles:
+              - "sender" # Users with 'sender' role can create addresses
+          - operationType: "createDurableQueue"
+            roles:
+              - "sender" # Users with 'sender' role can create durable queues
+          - operationType: "consume"
+            roles:
+              - "receiver" # Users with 'receiver' role can consume messages
+          - operationType: "createNonDurableQueue"
+            roles:
+              - "sender"
+              - "receiver" # Both can create non-durable (temporary) queues
+          - operationType: "browse"
+            roles:
+              - "receiver" # Users with 'receiver' role can browse queues
+----
+In this configuration:
+
+*   The `match: "#"` rule acts as a wildcard, applying these permissions to *all* addresses and queues managed by the broker. You can specify more granular patterns (e.g., `"queue.finance"`, `"topic.updates.*"`) to apply permissions only to matching resources.
+*   The `sender` role is granted permissions for `send`, `createAddress`, and `createDurableQueue`.
+*   The `receiver` role is granted permissions for `consume` and `browse`.
+*   Both `sender` and `receiver` roles are allowed to `createNonDurableQueue`, which is common for creating temporary or reply-to queues.
+
+.Example: Defining permissions for management operations
+For managing the broker (e.g., through the Hawtio console or JMX clients), specific permissions are granted to MBeans. The `mops` prefix often refers to management operations.
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisSecurity
+metadata:
+  name: my-broker-security
+spec:
+  # ... (other sections) ...
+  securitySettings:
+    broker:
+      # ... (messaging permissions as defined above) ...
+      - match: "mops.#" # This rule applies to all MBeans for management operations
+        permissions:
+          - operationType: "*" # Grants access to ALL operations on matching MBeans
+            roles:
+              - "manager" # Users with 'manager' role have full management access
+      - match: "activemq.management.#" # More specific management address for Hawtio console
+        permissions:
+          - operationType: "view"
+            roles:
+              - "manager" # Manager can view management resources
+          - operationType: "edit"
+            roles:
+              - "manager" # Manager can edit management resources
+----
+Here:
+
+*   The `manager` role is granted full access (`operationType: "*"`) to all MBeans matching `mops.#`. This is a broad permission typically given to administrators.
+*   For more specific management resources, such as those related to the Hawtio management console (`activemq.management.#`), the `manager` role is explicitly given `view` and `edit` permissions.
+
+[NOTE]
+As highlighted in the context, an asterisk (`*`) in the `operationType` position grants access to all operations for the specified roles. The number sign (`#`) after a prefix (e.g., `mops.#`) grants permissions to all resources matching that prefix.
+
+=== 4. Integrating with the Broker Instance
+
+Once your `ActiveMQArtemisSecurity` CR is defined and applied to the OpenShift cluster, you must associate it with an `ActiveMQArtemis` broker instance. This is achieved by referencing the `ActiveMQArtemisSecurity` CR name in the `extraConfigs.securitySettings.name` field of your `ActiveMQArtemis` CR.
+
+Crucially, when applying custom RBAC through the `ActiveMQArtemisSecurity` CR, you *must* ensure that the broker's default RBAC configuration (typically found in `/amq/init/config/amq-broker/etc/management.xml`) is removed. If not removed, the default configuration might conflict with or override your custom settings, leading to unexpected behavior. This removal is commonly handled using an `initContainer` within your `ActiveMQArtemis` CR.
+
+.Example: Removing default RBAC using an init container in `ActiveMQArtemis` CR
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: <BROKER_NAME> # Replace with the desired name of your broker instance
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12 # Use an appropriate AMQ Broker image
+    extraConfigs:
+      securitySettings:
+        name: my-broker-security # Link to the ActiveMQArtemisSecurity CR by its name
+    resourceTemplates:
+      initContainers:
+        - name: remove-default-rbac
+          image: busybox:latest # A lightweight image with 'rm' command
+          command: ["sh", "-c", "rm -f /amq/init/config/amq-broker/etc/management.xml"]
+          volumeMounts:
+            - name: amq-broker-config # Mount the configuration volume
+              mountPath: /amq/init/config/amq-broker/etc/
+  # ... other broker configurations like acceptors, connectors, console ...
+----
+Replace `<BROKER_NAME>` with the actual `metadata.name` attribute you define for your `ActiveMQArtemis` CR instance. The `initContainer` named `remove-default-rbac` runs before the main broker container starts, deleting the default `management.xml` file. This ensures your custom security configuration from `my-broker-security` takes precedence.
+
+== Hands-on Activity: Configuring and Testing Broker RBAC
+
+This lab guides you through deploying an AMQ Broker instance with custom users, roles, and permissions, and then testing these configurations.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed and running.
+*   `oc` CLI configured and logged into your OpenShift cluster with administrative privileges in your target project.
+*   A text editor to create YAML files.
+
+=== Lab Steps
+
+.Create a new project for the lab (optional)
++
+It's good practice to create a dedicated project for your lab resources.
++
+[source,bash]
+----
+oc new-project amq-rbac-lab
+----
++
+Switch to the new project:
++
+[source,bash]
+----
+oc project amq-rbac-lab
+----
+
+.Define the `ActiveMQArtemisSecurity` Custom Resource
++
+Create a file named `amq-security-rbac.yaml`. This file defines the `prop-module` login module, `sam` (sender), `rob` (receiver), and `admin` (manager) users with their respective roles, links the login module to the broker domain, and sets up granular permissions for messaging and management operations.
++
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisSecurity
+metadata:
+  name: rbac-security-config # Name of the security configuration
+spec:
+  loginModules:
+    propertiesLoginModules:
+      - name: "prop-module"
+        users:
+          - name: "sam"
+            password: "samspassword"
+            roles:
+              - "sender"
+          - name: "rob"
+            password: "robspassword"
+            roles:
+              - "receiver"
+          - name: "admin"
+            password: "adminpassword"
+            roles:
+              - "sender"
+              - "receiver"
+              - "manager"
+  securityDomains:
+    brokerDomain:
+      name: "activemq"
+      loginModules:
+        - name: "prop-module"
+          flag: "sufficient"
+  securitySettings:
+    broker:
+      - match: "#" # General permissions for all addresses/queues
+        permissions:
+          - operationType: "send"
+            roles:
+              - "sender"
+          - operationType: "createAddress"
+            roles:
+              - "sender"
+          - operationType: "createDurableQueue"
+            roles:
+              - "sender"
+          - operationType: "consume"
+            roles:
+              - "receiver"
+          - operationType: "createNonDurableQueue"
+            roles:
+              - "sender"
+              - "receiver"
+          - operationType: "browse"
+            roles:
+              - "receiver"
+      - match: "mops.#" # Permissions for JMX/management operations
+        permissions:
+          - operationType: "*" # All operations
+            roles:
+              - "manager"
+      - match: "activemq.management.#" # Permissions for Hawtio console access
+        permissions:
+          - operationType: "view"
+            roles:
+              - "manager"
+          - operationType: "edit"
+            roles:
+              - "manager"
+----
+
+.Apply the `ActiveMQArtemisSecurity` CR
++
+Apply the YAML file to your OpenShift cluster.
++
+[source,bash]
+----
+oc apply -f amq-security-rbac.yaml
+----
++
+Verify that the custom resource has been created:
++
+[source,bash]
+----
+oc get activemqartemissecurity
+----
++
+You should see `rbac-security-config` listed.
+
+.Deploy an AMQ Broker instance with RBAC enabled
++
+Create a file named `amq-broker-rbac.yaml`. This broker instance will reference the `rbac-security-config` security CR and include the `initContainer` to remove the default `management.xml`.
++
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-rbac-broker
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12 # Ensure this is a valid image for your environment
+    extraConfigs:
+      securitySettings:
+        name: rbac-security-config # Link to the ActiveMQArtemisSecurity CR by name
+    resourceTemplates:
+      initContainers:
+        - name: remove-default-rbac
+          image: busybox:latest
+          command: ["sh", "-c", "rm -f /amq/init/config/amq-broker/etc/management.xml"]
+          volumeMounts:
+            - name: amq-broker-config
+              mountPath: /amq/init/config/amq-broker/etc/
+  addressSettings:
+    - match: "my.queue" # Define a specific queue for testing client access
+      maxSizeBytes: 10485760 # 10MB
+      defaultAddressRoutingType: "ANYCAST"
+  console:
+    expose: true # Expose the Hawtio management console
+  acceptors:
+    - name: "amqp"
+      port: 5672
+      protocols: "AMQP"
+      connectionsAllowed: "2000"
+    - name: "core"
+      port: 61616
+      protocols: "CORE"
+      connectionsAllowed: "2000"
+  connectors:
+    - name: "core-connector"
+      port: 61616
+      host: "my-rbac-broker-hdls-svc.amq-rbac-lab.svc.cluster.local" # Internal service hostname
+----
+
+.Apply the `ActiveMQArtemis` CR
++
+[source,bash]
+----
+oc apply -f amq-broker-rbac.yaml
+----
++
+Monitor the broker pod deployment until it reaches a `Running` state:
++
+[source,bash]
+----
+oc get pods -w
+----
++
+Look for the `my-rbac-broker-ss-0` pod to show `1/1 Running`.
+
+.Expose the Broker Console for Management Access
++
+The `ActiveMQArtemis` CR already includes `console: expose: true`, which creates a service for the Hawtio console. Now, create an OpenShift Route to make the console accessible from outside the cluster.
++
+Create a file `amq-console-route.yaml`:
++
+[source,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: my-rbac-broker-console-route
+spec:
+  to:
+    kind: Service
+    name: my-rbac-broker-console
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+  wildcardPolicy: None
+----
++
+Apply the route and get its URL:
++
+[source,bash]
+----
+oc apply -f amq-console-route.yaml
+oc get route my-rbac-broker-console-route -o jsonpath='{.spec.host}'
+----
++
+Copy the output (the URL for the console).
+
+.Test RBAC with the Management Console
++
+1.  Open the console URL obtained in the previous step in your web browser.
+2.  When prompted for credentials, use `admin` for the username and `adminpassword` for the password.
+3.  You should be successfully logged in to the Hawtio console. Navigate through the broker's queues, topics, and connections. The `admin` user, having the `manager` role, should have full access to view and manage broker resources.
+
+.Test RBAC with Sample Messaging Clients (Conceptual)
++
+For detailed client examples, refer to the "Core Protocol Client Examples" and "AMQP Protocol Client Examples" objectives. Here, we outline the expected outcomes based on the RBAC configuration:
++
+*   *Scenario 1: `sam` (sender role) connects and sends a message to `my.queue`.*
+    *Expected Behavior*: `sam` should be able to connect and successfully send messages to `my.queue` because the `sender` role has `send` permission on all addresses (`#`).
++
+*   *Scenario 2: `rob` (receiver role) connects and consumes a message from `my.queue`.*
+    *Expected Behavior*: `rob` should be able to connect and successfully consume messages from `my.queue` because the `receiver` role has `consume` permission on all addresses (`#`).
++
+*   *Scenario 3: `sam` (sender role) attempts to consume a message from `my.queue`.*
+    *Expected Behavior*: `sam` should be denied access to consume messages. The broker will reject this operation because the `sender` role does not have the `consume` permission.
++
+*   *Scenario 4: `rob` (receiver role) attempts to send a message to `my.queue`.*
+    *Expected Behavior*: `rob` should be denied access to send messages. The broker will reject this operation because the `receiver` role does not have the `send` permission.
+
+.Clean up (optional)
++
+To remove all resources created during this lab:
++
+[source,bash]
+----
+oc delete -f amq-broker-rbac.yaml
+oc delete -f amq-security-rbac.yaml
+oc delete route my-rbac-broker-console-route # If you created an external route
+oc delete project amq-rbac-lab # Only if you created a new project for this lab
+----

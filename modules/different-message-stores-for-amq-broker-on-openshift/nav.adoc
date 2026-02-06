@@ -1,0 +1,7 @@
+* xref:different-message-stores-for-amq-broker-on-openshift.adoc[]
+** xref:overview-of-message-store-options.adoc[]
+** xref:file-based-message-store-configuration.adoc[]
+** xref:jdbc-message-store-integration-with-external-databases.adoc[]
+** xref:journal-vs-paging-for-message-persistence.adoc[]
+** xref:choosing-the-appropriate-message-store-strategy.adoc[]
+** xref:openshift-storage-considerations-persistent-volumes.adoc[]

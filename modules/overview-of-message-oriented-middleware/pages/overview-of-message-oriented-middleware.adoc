@@ -1,0 +1,19 @@
+#  Overview of Message-Oriented Middleware
+
+=== Overview of Message-Oriented Middleware
+
+Message-Oriented Middleware (MOM) is a software layer that enables communication between distributed applications by sending and receiving messages. It facilitates asynchronous messaging, decoupling senders (producers) from receivers (consumers).
+
+Key aspects include:
+
+*   *Benefits and Use Cases*:
+    ** Decoupling applications, enhancing scalability, and improving reliability.
+    ** Ideal for background processing, integrating disparate systems, and building resilient microservices architectures.
+*   *Core Concepts*:
+    ** *Producers*: Applications that send messages.
+    ** *Consumers*: Applications that receive and process messages.
+    ** *Queues*: Message destinations used for point-to-point communication, where each message is consumed by only one receiver.
+    ** *Topics*: Message destinations used for publish/subscribe communication, where each message can be consumed by multiple subscribed receivers.
+*   *Common Messaging Patterns*:
+    ** *Point-to-Point*: A producer sends a message to a queue, and one consumer retrieves it.
+    ** *Publish/Subscribe*: A publisher sends a message to a topic, and all active subscribers to that topic receive a copy of the message.

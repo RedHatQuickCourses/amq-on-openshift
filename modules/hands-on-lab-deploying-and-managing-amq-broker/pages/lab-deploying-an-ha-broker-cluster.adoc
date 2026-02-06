@@ -1,0 +1,156 @@
+#  Lab: Deploying an HA Broker Cluster
+
+[[ha-broker-cluster-lab]]
+= Lab: Deploying an HA Broker Cluster
+
+This lab guides you through deploying a highly available (HA) AMQ Broker cluster on OpenShift Container Platform. You will learn how to configure multiple broker instances and persistent storage to ensure message data integrity and availability, even in the event of pod or node failures.
+
+== Overview of High Availability for AMQ Broker
+
+High availability (HA) for AMQ Broker on OpenShift is critical for ensuring that your messaging infrastructure remains operational and that message data is never lost, even if individual components fail. The core objective of an HA deployment is to provide continuous service availability and data integrity for your message queues and topics.
+
+As described in xref:./amq-broker-high-availability-on-openshift.adoc#_introduction_to_high_availability_ha_concepts[Introduction to High Availability (HA) Concepts], AMQ Broker leverages the built-in HA capabilities provided by OpenShift Container Platform to mitigate various types of failures, including pod and node failures.
+
+Key mechanisms enabling HA for AMQ Broker on OpenShift include:
+
+*   *Pod and Node Failure Mitigation*: OpenShift's orchestrator automatically detects failed pods and nodes. It then takes action to restart failed pods or reschedule them to healthy nodes, ensuring that the desired number of broker instances remains operational.
+*   *Persistent Storage for Data Integrity*: A crucial component of HA is ensuring that message data survives component failures. When persistent storage is enabled for AMQ Broker, each broker pod writes its message data to a dedicated xref:./different-message-stores-for-amq-broker-on-openshift.adoc#_openshift_storage_considerations_persistent_volumes[Persistent Volume (PV)] which is claimed by a xref:./different-message-stores-for-amq-broker-on-openshift.adoc#_openshift_storage_considerations_persistent_volumes[Persistent Volume Claim (PVC)]. As highlighted in xref:./amq-broker-high-availability-on-openshift.adoc#_overview_of_high_availability_ha[Overview of High Availability (HA)], if a broker pod fails, OpenShift restarts the pod with the same name. This newly restarted pod then re-attaches to its *existing PV*, which still contains all the messaging data, effectively preventing data loss and ensuring data integrity across pod lifecycle events.
+*   *Broker Clustering Strategies*: While AMQ Broker offers various xref:./amq-broker-high-availability-on-openshift.adoc#_broker_clustering_strategies_shared_store_vs_replicated_live_backup[clustering strategies] like Shared Store HA and Replicated Live-Backup, deploying multiple broker pods with persistent storage via the Operator forms the basis for a robust HA setup. The AMQ Broker Operator simplifies the deployment of such configurations by managing the underlying OpenShift resources like StatefulSets, which are ideal for stateful applications requiring stable network identities and persistent storage.
+
+By deploying an HA broker cluster, you establish a resilient messaging infrastructure capable of maintaining service continuity and data consistency, even under adverse conditions.
+
+== Hands-on Activity: Deploying an HA Broker Cluster
+
+In this activity, you will deploy an AMQ Broker cluster with multiple replicas and persistent storage enabled. This setup forms a basic highly available configuration on OpenShift, managed by the AMQ Broker Operator.
+
+=== Prerequisites
+
+Before starting this lab, ensure you have:
+
+*   Access to an OpenShift cluster with administrative privileges.
+*   The AMQ Broker Operator installed on your cluster. If you haven't installed it yet, please refer to xref:./deploying-amq-broker-on-openshift.adoc#_installing_the_amq_broker_operator_via_cli_or_operatorhub[Installing the AMQ Broker Operator via CLI or OperatorHub] for detailed instructions.
+*   The `oc` command-line tool configured and logged in to your OpenShift cluster.
+
+=== Procedure
+
+Follow these steps to deploy your HA AMQ Broker cluster:
+
+.  *Log in to OpenShift and Create a Project*
+    Ensure you are logged in to your OpenShift cluster and create a new project (namespace) dedicated to this lab. This isolates your resources.
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc login -u <YOUR_USER> -p <YOUR_PASSWORD> <YOUR_OPENSHIFT_CLUSTER_URL>
+    oc new-project amq-ha-lab
+    ----
+    Replace `<YOUR_USER>`, `<YOUR_PASSWORD>`, and `<YOUR_OPENSHIFT_CLUSTER_URL>` with your actual OpenShift credentials and cluster URL.
+
+.  *Define the HA Broker Custom Resource (CR)*
+    Create a YAML file named `amq-ha-broker.yaml` with the following content. This Custom Resource (CR) defines an AMQ Broker deployment with two replicas and enables persistent storage for message data.
+
+    [source,yaml,subs="attributes+"]
+    ----
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-ha-broker
+      namespace: amq-ha-lab
+    spec:
+      deploymentPlan:
+        size: 2 # Deploy 2 broker pods for HA
+        autoCreateResources: true
+        persistenceEnabled: true # Enable persistent storage for message data
+        persistentVolumeClaim:
+          size: 1Gi # Allocate 1 GB for each broker's PVC
+      acceptors:
+        - name: amqp
+          protocols: AMQP
+          port: 5672
+          sslEnabled: false # For simplicity in this lab; use SSL in production
+        - name: core
+          protocols: CORE
+          port: 61616
+          sslEnabled: false # For simplicity in this lab; use SSL in production
+      console:
+        expose: true # Expose the Hawtio management console
+    ----
+
+    *Explanation of the Custom Resource:*
+    *   `size: 2`: This critical parameter instructs the AMQ Broker Operator to deploy two independent broker pods. The Operator will then manage these pods as a cluster.
+    *   `persistenceEnabled: true`: This ensures that each broker pod is provisioned with its own xref:./different-message-stores-for-amq-broker-on-openshift.adoc#_openshift_storage_considerations_persistent_volumes[Persistent Volume Claim (PVC)] and corresponding Persistent Volume (PV). This makes message data durable across pod restarts, a cornerstone of HA.
+    *   `persistentVolumeClaim.size: 1Gi`: Specifies the storage capacity requested for each broker's PVC. Adjust this based on your expected message volume.
+    *   `acceptors`: Defines the network endpoints (listeners) through which clients can connect to the broker. We've included AMQP and CORE protocols for basic connectivity in this lab. For production environments, refer to xref:./securing-amq-broker-on-openshift.adoc#_encrypting_connections[Securing AMQ Broker on OpenShift] to configure SSL/TLS encryption.
+    *   `console.expose: true`: Configures the Operator to expose the Hawtio management console via an OpenShift Route, which allows you to monitor and manage your broker. This will be explored further in xref:./accessing-management-console-for-amq-broker-on-openshift.adoc[Accessing Management Console for AMQ Broker on OpenShift].
+
+.  *Apply the Custom Resource*
+    Deploy the broker cluster onto your OpenShift project by applying the `amq-ha-broker.yaml` file:
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc apply -f amq-ha-broker.yaml
+    ----
+    The AMQ Broker Operator will now begin creating the necessary OpenShift resources (StatefulSet, Pods, Services, PVCs, Routes) to fulfill the `ActiveMQArtemis` CR.
+
+.  *Verify the Deployment*
+    Monitor the creation and status of the broker pods and associated resources to ensure the HA cluster is successfully deployed.
+
+    a.  *Check the `ActiveMQArtemis` instance status:*
+        [source,bash,subs="attributes+"]
+        ----
+        oc get activemqartemis my-ha-broker -o yaml
+        ----
+        Look for `status.deploymentStatus.readyState: true` and `status.deploymentStatus.size: 2` in the output, which indicates that both broker instances are ready.
+
+    b.  *Verify broker pods:*
+        [source,bash,subs="attributes+"]
+        ----
+        oc get pods -l app=my-ha-broker
+        ----
+        You should see two pods running, typically named `my-ha-broker-ss-0` and `my-ha-broker-ss-1`. The `-ss` suffix denotes that these pods are part of an OpenShift StatefulSet, which provides stable unique network identifiers and persistent storage for stateful applications like AMQ Broker.
+
+    c.  *Verify Persistent Volume Claims (PVCs):*
+        [source,bash,subs="attributes+"]
+        ----
+        oc get pvc -l app=my-ha-broker
+        ----
+        You should observe two PVCs, one for each broker pod (e.g., `data-my-ha-broker-ss-0` and `data-my-ha-broker-ss-1`). These PVCs are crucial for xref:./amq-broker-high-availability-on-openshift.adoc#_persistence_and_data_replication_for_ha[persistence and data replication], ensuring that message data is preserved even if a broker pod is deleted or rescheduled.
+
+    d.  *Verify Services and Routes:*
+        [source,bash,subs="attributes+"]
+        ----
+        oc get svc,route -l app=my-ha-broker
+        ----
+        You will see services created for each broker instance (e.g., `my-ha-broker-ss-amqp`, `my-ha-broker-ss-core`) and a route for the Hawtio management console.
+
+.  *Simulate a Broker Pod Failure (Optional but Recommended)*
+    To visually confirm OpenShift's HA capabilities and the resilience of your setup, you can intentionally delete one of the broker pods. The StatefulSet controller will automatically detect the missing pod and recreate it, leveraging the existing PVC for data recovery.
+
+    a.  *Identify a broker pod to delete:*
+        [source,bash,subs="attributes+"]
+        ----
+        oc get pods -l app=my-ha-broker
+        ----
+
+    b.  *Delete one of the pods (e.g., `my-ha-broker-ss-0`):*
+        [source,bash,subs="attributes+"]
+        ----
+        oc delete pod my-ha-broker-ss-0
+        ----
+
+    c.  *Observe OpenShift recreating the pod:*
+        [source,bash,subs="attributes+"]
+        ----
+        oc get pods -l app=my-ha-broker -w
+        ----
+        You will observe the old pod terminating (`Terminating` status) and a new pod (with the *same name*, e.g., `my-ha-broker-ss-0`) being created and eventually transitioning to `Running` state. This demonstrates how OpenShift, in conjunction with persistent storage, ensures the continuous availability of your broker instances and their data even during failures.
+
+.  *Connect a Client to the HA Cluster (Conceptual)*
+    Connecting clients to an HA broker cluster requires careful planning to ensure proper load balancing and failover mechanisms. While a full client implementation is detailed in xref:./core-protocol-client-examples.adoc[Core Protocol Client Examples] and xref:./amqp-protocol-client-examples.adoc[AMQP Protocol Client Examples], it's important to understand the high-level considerations for an HA setup.
+
+    For external clients, you would typically expose the broker listeners via OpenShift Routes, as covered in xref:./enabling-external-access-to-brokers-deployed-on-openshift.adoc[Enabling External Access to Brokers Deployed on OpenShift]. When aiming for client-side failover across multiple broker instances:
+
+    *   You can configure your client's connection URL to include the hostnames or IP addresses of multiple broker endpoints. The client library will then attempt to connect to the first available broker in the list.
+    *   As noted in the context, if you do not want external clients to rely on the cluster's internal load balancing and prefer explicit client-side failover: "In each client’s connection URL, specify the full host name of the route for each broker pod. The client attempts to connect to the first host name in the connection URL. However, if the first host name is unavailable, the client automatically connects to the next host name in the connection URL, and so on."
+    *   For Core protocol clients, you might also explicitly set the `useTopologyForLoadBalancing=false` key in the client's connection URL to prevent the client from automatically using the broker's cluster topology information for load balancing, giving you more control over failover logic.
+
+This lab has provided a foundational understanding and hands-on experience in deploying an HA AMQ Broker cluster on OpenShift, emphasizing the role of the Operator, persistent storage, and OpenShift's inherent resilience features.

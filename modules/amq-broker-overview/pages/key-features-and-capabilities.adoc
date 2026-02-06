@@ -1,0 +1,69 @@
+#  Key Features and Capabilities
+
+[[amq-broker-key-features]]
+= Key Features and Capabilities
+
+Red Hat AMQ Broker, built on the robust foundations of Apache ActiveMQ Artemis, is a high-performance, open-source message broker designed for enterprise-grade asynchronous messaging. It plays a pivotal role in decoupling applications, enabling reliable communication, and facilitating scalable distributed systems. Understanding its core features and capabilities is fundamental for effective deployment, management, and application development within modern architectures.
+
+== High Performance and Scalability
+
+AMQ Broker is engineered for optimal performance, ensuring it can handle demanding message loads with efficiency.
+
+*   *Asynchronous Architecture*: Its non-blocking and event-driven architecture allows the broker to process a high volume of concurrent operations, leading to excellent throughput and low latency.
+*   *Optimized Persistence Journal*: The broker utilizes a highly optimized, append-only journal for persisting messages to disk. This design minimizes disk I/O contention and maximizes performance, even when dealing with durable messages at very high rates.
+*   *Clustering Capabilities*: AMQ Broker supports various clustering strategies, allowing you to scale horizontally by distributing message queues and topics across multiple broker instances. This enhances both message processing capacity and overall system resilience.
+
+== Broad Protocol Support
+
+One of AMQ Broker's most significant strengths is its extensive support for industry-standard messaging protocols, enabling seamless integration with a diverse ecosystem of applications and client technologies.
+
+*   *AMQP 1.0*: The Advanced Message Queuing Protocol (AMQP) 1.0 is an open, interoperable wire-level protocol for message queuing. AMQ Broker provides full support for AMQP 1.0, making it compatible with a wide range of AMQP-compliant clients and other brokers. This includes clients like the Red Hat build of Apache Qpid JMS, which, as noted in the documentation, supports Version 1.0 of the AMQP standard. You will explore this further in the xref:amqp-protocol-client-examples.adoc[AMQP Protocol Client Examples] section.
+*   *JMS 1.1/2.0*: The Java Message Service (JMS) API is a standard for sending and receiving messages between Java applications. AMQ Broker fully implements JMS, allowing Java applications to utilize both point-to-point (queues) and publish/subscribe (topics) messaging models. The Red Hat build of Apache Qpid JMS client supports Version 2.0 of the Java Message Service API.
+*   *MQTT*: Message Queuing Telemetry Transport (MQTT) is a lightweight publish/subscribe messaging protocol, ideally suited for constrained devices, mobile applications, and Internet of Things (IoT) scenarios due to its small code footprint and low network bandwidth usage.
+*   *STOMP*: The Simple (or Streaming) Text Orientated Messaging Protocol (STOMP) provides an easy-to-use, text-based wire format that enables STOMP clients written in various languages to communicate efficiently with the broker.
+*   *OpenWire*: For backward compatibility, AMQ Broker supports the OpenWire protocol, the native protocol of Apache ActiveMQ 5.x. This facilitates easier migration and integration with existing ActiveMQ 5.x client applications.
+*   *Core Protocol*: The native, high-performance protocol inherited from HornetQ (the predecessor to ActiveMQ Artemis). This protocol offers the lowest latency and highest throughput for Java clients developed directly against the AMQ Broker's API. We will demonstrate its usage in xref:core-protocol-client-examples.adoc[Core Protocol Client Examples].
+
+== Flexible Messaging Models
+
+AMQ Broker supports the two primary enterprise messaging patterns, offering flexibility for different application communication needs.
+
+*   *Point-to-Point Messaging (Queues)*: Messages are sent to a named queue, and each message is delivered to exactly one consumer. This model is ideal for reliable task distribution, workload balancing, and ensuring that processing of a message occurs only once.
+*   *Publish/Subscribe Messaging (Topics)*: Messages are published to a named topic, and all active subscribers to that topic receive a copy of the message. This pattern is excellent for broadcasting information, event notifications, and scenarios where multiple applications need to react to the same event.
+
+== Robust Persistence and High Availability
+
+Ensuring message durability and continuous operation are critical requirements for enterprise messaging systems. AMQ Broker provides advanced features for both persistence and high availability (HA).
+
+*   *Journal-Based Persistence*: Messages can be durably stored in a highly optimized, append-only journal. This offers excellent performance and ensures messages are not lost in the event of a broker restart or failure.
+*   *JDBC Persistence*: For scenarios requiring integration with existing database infrastructure, AMQ Broker can persist messages to a relational database via JDBC. This provides flexibility in storage management.
+*   *Shared Store High Availability (HA)*: This strategy involves multiple broker instances sharing the same persistent storage. One broker acts as the live instance, while others serve as passive backups, ready to take over if the live broker fails.
+*   *Replicated High Availability (HA)*: In this model, broker instances actively replicate their message journals to each other. This eliminates the need for shared storage, provides faster failover times, and enhances data isolation.
+*   *Automatic Failover and Recovery*: Clients can be configured to automatically detect broker failures and reconnect to an available backup broker in an HA cluster, minimizing service disruption.
+
+== Comprehensive Security Features
+
+Security is a paramount concern for any messaging infrastructure. AMQ Broker offers a rich set of features to secure your messages and broker instances.
+
+*   *Authentication*: Supports various authentication mechanisms, including JAAS (Java Authentication and Authorization Service), LDAP integration, and the ability to integrate with external identity providers (IDPs) like Keycloak.
+*   *Authorization (Role-Based Access Control - RBAC)*: Fine-grained access control allows administrators to define roles and assign specific permissions for operations on queues, topics, and broker management functions.
+*   *SSL/TLS Encryption*: All client-broker communication can be encrypted using SSL/TLS, protecting sensitive data in transit from eavesdropping and tampering. Configuring secure listeners and managing certificates are key aspects covered in xref:securing-amq-broker-on-openshift.adoc#encrypting-connections[Securing AMQ Broker on OpenShift].
+
+== Management and Monitoring
+
+Effective management and monitoring tools are essential for maintaining the health, performance, and operational efficiency of your messaging system.
+
+*   *Hawtio Management Console*: A user-friendly, web-based management console (built on the Hawtio framework) provides a centralized interface for monitoring broker metrics, managing queues, topics, durable subscriptions, connections, and performing various administrative tasks. Details on accessing and utilizing this console are provided in xref:accessing-management-console.adoc[Accessing Management Console for AMQ Broker on OpenShift].
+*   *JMX Support*: AMQ Broker exposes a comprehensive set of JMX (Java Management Extensions) MBeans, allowing programmatic monitoring and management using standard JMX tools and enterprise monitoring systems.
+*   *Metrics Reporting*: The broker can expose various metrics related to its performance, message rates, connection counts, and resource utilization, which can be integrated with external monitoring and alerting systems like Prometheus and Grafana.
+
+== Integration with OpenShift
+
+When deployed on Red Hat OpenShift Container Platform, AMQ Broker leverages OpenShift's cloud-native capabilities to provide an agile and resilient messaging solution.
+
+*   *AMQ Broker Operator*: The AMQ Broker Operator simplifies the deployment and lifecycle management of broker instances on OpenShift. It automates tasks such as provisioning, scaling, updating, and ensuring high availability, as introduced in xref:deploying-amq-broker-on-openshift.adoc#introduction-to-amq-broker-operator[Introduction to the AMQ Broker Operator].
+*   *Custom Resource Definitions (CRDs)*: Broker instances are managed through OpenShift's Kubernetes-native API using Custom Resources, enabling a declarative approach to define the desired state of your messaging infrastructure.
+*   *Containerization*: AMQ Broker runs as containerized applications, benefiting from OpenShift's robust orchestration features, including self-healing capabilities, automated rollouts, and efficient resource management.
+*   *OpenShift Networking*: Utilizes OpenShift Services and Routes to expose broker listeners and the Hawtio management console securely, allowing internal and external clients to connect. This is thoroughly explained in xref:enabling-external-access.adoc[Enabling External Access to Brokers Deployed on OpenShift].
+
+These combined features make Red Hat AMQ Broker a powerful, flexible, and reliable choice for building asynchronous communication patterns in complex enterprise environments, especially when deployed on OpenShift.

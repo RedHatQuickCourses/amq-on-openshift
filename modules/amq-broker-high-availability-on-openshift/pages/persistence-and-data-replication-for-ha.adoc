@@ -1,0 +1,261 @@
+#  Persistence and Data Replication for HA
+
+= Persistence and Data Replication for HA
+
+Ensuring high availability (HA) for AMQ Broker on OpenShift fundamentally relies on how message data is persistently stored and made continuously available, even in the event of component failures. This involves leveraging OpenShift's storage capabilities and configuring brokers to use resilient message stores that facilitate failover.
+
+== Persistence in AMQ Broker HA on OpenShift
+
+Persistence is a critical component for achieving high availability in AMQ Broker deployments on OpenShift Container Platform. It guarantees that important messaging data – such as messages waiting in queues, durable topic subscriptions, and transaction states – survives unpredictable events like individual pod restarts or even node failures.
+
+When persistent storage is enabled for an AMQ Broker instance, each broker pod writes its operational and message data to a *Persistent Volume (PV)*. This PV is an abstract storage resource in OpenShift, which is then claimed and bound to the broker pod through a *Persistent Volume Claim (PVC)*.
+
+The integration of Persistent Volumes with AMQ Broker is key to its resilience:
+
+*   If an AMQ Broker pod unexpectedly fails or is intentionally terminated (for example, during a scaledown operation or a redeployment), the underlying Persistent Volume that stored its data remains intact and available.
+*   Should the broker pod need to be restarted or a new pod be created to replace it, OpenShift ensures that the new pod, identified by the same name, reclaims and utilizes the *existing PV*.
+*   This mechanism guarantees that all previously stored messaging data is preserved and immediately accessible to the restarted broker instance. The broker can then resume operations from its last known state, preventing data loss and ensuring service continuity.
+
+This inherent capability of OpenShift to manage and reattach persistent storage to new or restarted pods significantly contributes to the robustness and HA posture of AMQ Broker deployments, effectively mitigating data loss in scenarios involving individual pod failures.
+
+== Data Sharing for High Availability: The Shared Store Approach
+
+Beyond OpenShift's foundational persistence, AMQ Broker supports specific clustering strategies that leverage shared data stores to achieve high availability. The *leader-follower* deployment model is a prime example of how persistence is intertwined with HA architecture.
+
+In a leader-follower configuration, multiple broker instances are deployed as part of a cluster. At any given moment, only one instance assumes the role of the *leader*, actively processing client requests and managing message flow. The other instances function as *followers*, operating in a passive state, ready to take over if the leader becomes unavailable.
+
+A fundamental requirement for this HA strategy is that *all brokers within the leader-follower pair must be configured to persist messages to the same shared journal or JDBC database*. This shared storage acts as the single source of truth for all messaging data.
+
+.Mechanism of Shared Store HA:
+*   **Shared Persistent Resource**: Both the leader and follower brokers are configured to connect to and utilize a common persistent storage backend. This can be a shared file system acting as the broker's journal or a shared external JDBC database.
+*   **Lock Acquisition**: High availability is dynamically managed by the brokers competing to acquire an exclusive lock on this shared database or shared volume.
+*   **Leader Role**: The broker instance that successfully acquires the lock transitions into the *leader broker*. It then becomes responsible for serving all client requests, performing all read, write, and update operations directly on the shared message store.
+*   **Follower Role**: Any other broker instance that is unable to acquire the lock remains a *follower*. A follower is a passive broker that continuously monitors the shared resource and persistently attempts to obtain the lock.
+*   **Failover and Recovery**: If the current leader broker fails (e.g., due to a pod crash, node failure, or intentional shutdown) or voluntarily releases the lock, one of the waiting follower brokers will detect this. The follower will then successfully acquire the lock, immediately transition into the new leader role, and begin serving clients from the same shared message store. This swift transition from follower to leader, leveraging pre-existing data, results in a faster mean time to repair (MTTR) for node failures compared to simply restarting a single broker pod.
+
+In this shared store HA model, "data replication" is achieved not through active, synchronous copying of data between separate storage instances, but by ensuring that all potential leader brokers access and operate on the *same centralized physical message store*. This approach inherently guarantees data consistency and availability without the overhead of explicit data synchronization protocols between distinct broker storage units, as only the active leader modifies the shared data.
+
+== Hands-on Activity: Deploying a Broker with Persistent Storage
+
+This activity guides you through deploying a basic AMQ Broker instance on OpenShift with persistent storage enabled. You will then verify that messages stored in the broker survive a pod restart, demonstrating the effectiveness of persistence for HA.
+
+=== Prerequisites
+
+*   Access to an OpenShift cluster with the `oc` CLI tool configured and authenticated.
+*   The AMQ Broker Operator must be installed in your target OpenShift project (e.g., `amq-broker-operator` or `amq-broker-operator-dev`).
+
+=== Steps
+
+. Create a new OpenShift project for this lab:
++
+If you don't have a dedicated project, create one:
++
+[source,bash]
+----
+oc new-project amq-broker-ha-test
+----
++
+Switch to your new project:
++
+[source,bash]
+----
+oc project amq-broker-ha-test
+----
+
+. Deploy a basic AMQ Broker instance with persistence.
++
+Create a file named `broker-persistence.yaml` with the following `ActiveMQArtemis` custom resource definition:
++
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker-ha
+spec:
+  deploymentPlan:
+    size: 1
+    persistenceEnabled: true <1>
+    storage:
+      size: 1Gi <2>
+      storageClassName: standard <3>
+  console:
+    expose: true
+  acceptors:
+    - name: amqp
+      protocols: AMQP
+      port: 5672
+    - name: core
+      protocols: CORE
+      port: 61616
+----
+<1> Set `persistenceEnabled` to `true` to instruct the operator to provision and use persistent storage.
+<2> `storage.size` defines the requested size for the Persistent Volume Claim (PVC).
+<3> `storageClassName` specifies the storage class to be used. *Important*: Replace `standard` with a valid storage class available in your OpenShift cluster (e.g., `ocs-storagecluster-cephfs`, `hostpath`, `gp2`, `ibmc-block-gold`, etc.). You can list available storage classes using `oc get sc`.
+
+. Apply the Custom Resource to deploy the broker:
++
+[source,bash]
+----
+oc apply -f broker-persistence.yaml
+----
+
+. Verify the broker deployment and Persistent Volume Claim status:
++
+Monitor the broker pod creation and confirm the PVC:
++
+[source,bash]
+----
+oc get pods -w -l app.kubernetes.io/name=my-broker-ha
+oc get pvc -l app.kubernetes.io/name=my-broker-ha
+----
++
+You should see a pod similar to `my-broker-ha-ss-0` enter the `Running` state and a PVC similar to `my-broker-ha-data-my-broker-ha-ss-0` in the `Bound` state.
+
+. Send test messages to the broker.
++
+To demonstrate persistence, we'll send some messages to a queue. First, make the broker's Core protocol accessible (e.g., via port-forwarding):
++
+[source,bash]
+----
+oc port-forward service/my-broker-ha-ss 61616:61616 &
+----
++
+Now, create a temporary pod to act as a message producer. Create a file named `client-producer.yaml`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: amq-client-producer
+spec:
+  containers:
+  - name: client
+    image: registry.redhat.io/amq7/amq-client-java:latest
+    command: ["sh", "-c"]
+    args:
+    - "java -jar /opt/amq-client/artemis-jms-example.jar --url tcp://localhost:61616 --destination queue://myQueue --message-count 10 --sleep 1000 --send"
+    env:
+    - name: KUBERNETES_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+  restartPolicy: Never
+----
++
+Apply the client producer pod:
++
+[source,bash]
+----
+oc apply -f client-producer.yaml
+----
++
+Monitor the client pod logs to ensure messages are successfully sent:
++
+[source,bash]
+----
+oc logs -f amq-client-producer
+----
++
+Once the messages are sent, the client pod will complete. You can now stop the `oc port-forward` process (press `Ctrl+C`).
+
+. Verify messages via the Hawtio Management Console (Optional but Recommended).
++
+Get the route URL for the Hawtio console:
++
+[source,bash]
+----
+oc get route my-broker-ha-console -o jsonpath='{.spec.host}'
+----
++
+Navigate to the console URL in your web browser. Log in (default username: `amq`, password: `amq`).
++
+In the console, navigate to the `myQueue` queue and confirm that it contains 10 messages.
+
+. Simulate a broker pod failure and observe persistence in action.
++
+Delete the running broker pod. OpenShift will automatically restart it:
++
+[source,bash]
+----
+oc delete pod my-broker-ha-ss-0
+----
++
+Observe the pod's lifecycle as OpenShift terminates the old pod and provisions a new one with the same name, attaching the existing PVC:
++
+[source,bash]
+----
+oc get pods -w -l app.kubernetes.io/name=my-broker-ha
+----
++
+Wait until the new `my-broker-ha-ss-0` pod is in the `Running` state.
+
+. Verify message persistence after the restart.
++
+Once the new broker pod is running, re-establish the port-forward connection:
++
+[source,bash]
+----
+oc port-forward service/my-broker-ha-ss 61616:61616 &
+----
++
+Now, deploy a message consumer client to check if the previously sent messages are still available. Create `client-consumer.yaml`:
++
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: amq-client-consumer
+spec:
+  containers:
+  - name: client
+    image: registry.redhat.io/amq7/amq-client-java:latest
+    command: ["sh", "-c"]
+    args:
+    - "java -jar /opt/amq-client/artemis-jms-example.jar --url tcp://localhost:61616 --destination queue://myQueue --receive --message-count 10 --sleep 1000"
+    env:
+    - name: KUBERNETES_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+  restartPolicy: Never
+----
++
+Apply the consumer pod:
++
+[source,bash]
+----
+oc apply -f client-consumer.yaml
+----
++
+Monitor the consumer pod logs:
++
+[source,bash]
+----
+oc logs -f amq-client-consumer
+----
++
+You should observe the 10 messages being successfully consumed by the client, unequivocally confirming that they persisted through the broker pod restart.
++
+You can also re-check the Hawtio console to confirm that `myQueue` is now empty.
+
+=== Cleanup
+
+. Stop any active port-forward processes:
++
+[source,bash]
+----
+kill %1
+----
+
+. Delete all resources created during this lab:
++
+[source,bash]
+----
+oc delete -f broker-persistence.yaml
+oc delete -f client-producer.yaml
+oc delete -f client-consumer.yaml
+oc delete project amq-broker-ha-test
+----

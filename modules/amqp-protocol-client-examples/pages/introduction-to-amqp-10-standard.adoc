@@ -1,0 +1,63 @@
+#  Introduction to AMQP 1.0 Standard
+
+= Introduction to AMQP 1.0 Standard
+:page-aliases: amqp-intro.adoc
+:page-tag: amqp, messaging, protocol, amq-broker
+
+The Advanced Message Queuing Protocol (AMQP) is an open standard application layer protocol for message-oriented middleware. Specifically, version 1.0 of AMQP is a robust, interoperable, and efficient wire-level protocol that enables diverse applications, systems, and organizations to communicate reliably across a variety of platforms and programming languages.
+
+== What is AMQP 1.0?
+
+AMQP 1.0 is a binary wire-level protocol designed for high-performance and reliable message exchange between messaging clients and brokers. Unlike earlier versions, AMQP 1.0 focuses on interoperability and does not prescribe a specific broker architecture, allowing for greater flexibility in implementation. It is standardized as an ISO/IEC international standard (ISO/IEC 19464).
+
+Key characteristics of AMQP 1.0 include:
+
+*   *Interoperability:* Being a wire-level protocol, AMQP 1.0 ensures that clients developed in different languages and on different platforms can seamlessly communicate with any AMQP 1.0 compliant broker. This is a fundamental advantage for heterogeneous enterprise environments.
+*   *Reliability:* It provides various levels of message delivery guarantees, from "at-most-once" to "exactly-once," ensuring messages are not lost or duplicated, which is crucial for mission-critical applications.
+*   *Flexibility:* AMQP 1.0 supports complex messaging patterns beyond simple point-to-point and publish/subscribe, allowing for sophisticated routing and distribution of messages.
+*   *Security:* Built-in mechanisms for authentication and encryption (e.g., TLS/SSL) ensure secure communication channels.
+*   *Performance:* Designed for efficient data transfer, minimizing overhead and maximizing throughput.
+
+== AMQP 1.0 and Red Hat AMQ Broker
+
+Red Hat AMQ Broker, built on Apache ActiveMQ Artemis, fully supports the AMQP 1.0 protocol. This support means that clients adhering to the AMQP 1.0 standard can reliably connect to and exchange messages with an AMQ Broker instance.
+
+The inclusion of AMQP 1.0 support in AMQ Broker is highly beneficial for several reasons:
+
+*   *Vendor Neutrality:* Organizations can avoid vendor lock-in by using a widely adopted open standard for their messaging needs.
+*   *Cross-Platform Compatibility:* Developers can choose their preferred programming language (e.g., Java, Python, C#, Node.js) and an AMQP client library, confident that it will work with AMQ Broker.
+*   *Cloud-Native Ready:* AMQP 1.0's efficiency and reliability make it well-suited for cloud-native applications and microservices architectures, where distributed communication is paramount.
+
+[NOTE]
+====
+The provided context explicitly mentions support for "Version 1.0 of the Advanced Message Queueing Protocol (AMQP)" by Red Hat AMQ Broker, underlining its significance as a core communication standard.
+====
+
+== AMQP JMS Mapping
+
+While AMQP is a wire-level protocol, the Java Message Service (JMS) is an API specification for accessing message-oriented middleware from Java applications. To bridge the gap between these two, there is an `AMQP JMS Mapping`.
+
+This mapping allows Java applications written against the JMS API to communicate over the AMQP 1.0 wire protocol. This means developers can leverage the familiarity and robust features of JMS while benefiting from the interoperability and advanced capabilities of AMQP 1.0.
+
+[NOTE]
+====
+The context highlights "Version 1.0 of the AMQP JMS Mapping," indicating its importance for Java developers who wish to utilize AMQP 1.0 through the standardized JMS API.
+====
+
+== Preparing for AMQP Client Development
+
+To interact with AMQ Broker using AMQP 1.0, developers typically use client libraries that implement the AMQP 1.0 standard. For Java applications, a common choice is Red Hat's build of Apache Qpid JMS.
+
+When you prepare to develop AMQP clients, you will generally follow these conceptual steps:
+
+.   *Choose a Client Library:* Select an AMQP 1.0 compliant client library for your preferred programming language. For Java, this often means utilizing `Red Hat build of Apache Qpid JMS`.
+.   *Set up Development Environment:* Ensure your development environment is configured to include the necessary dependencies for the chosen client library. For Java applications, this would involve adding the Qpid JMS JAR files or Maven/Gradle dependencies to your project.
+.   *Understand Core Concepts:* Familiarize yourself with how AMQP concepts (e.g., connections, sessions, links, messages, addresses) map to the client library's API. For JMS clients using AMQP, this involves understanding how JMS queues, topics, producers, and consumers translate to the underlying AMQP protocol.
+.   *Secure Communication:* Be aware of the need to configure SSL/TLS certificates and authentication if the AMQ Broker is secured (a common best practice).
+
+[NOTE]
+====
+The context explicitly points to "Red Hat build of Apache Qpid JMS 2.7 Using Qpid JMS" for "Developing an AMQ messaging client using Jakarta." This library is crucial for Java developers wanting to build AMQP clients for AMQ Broker. Subsequent labs will delve into practical implementations using such clients.
+====
+
+This introductory understanding of AMQP 1.0 forms the foundation for developing robust and interoperable messaging applications that leverage the power of Red Hat AMQ Broker on OpenShift.

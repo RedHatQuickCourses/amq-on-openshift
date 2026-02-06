@@ -1,0 +1,461 @@
+#  Lab: Configuring External Access and Testing Client Connectivity
+
+= Lab: Configuring External Access and Testing Client Connectivity
+:description: This lab guides you through exposing an AMQ Broker on OpenShift externally and testing client connectivity.
+:page-aliases: amq-broker:labs:lab-external-access.adoc
+
+[abstract]
+This lab demonstrates how to enable external access to an AMQ Broker instance deployed on OpenShift by creating OpenShift Routes. You will then develop and run a simple Core Protocol client application to send and receive messages, verifying successful external connectivity to your broker.
+
+== Prerequisites
+*   A running OpenShift cluster.
+*   xref:amq-broker:labs:lab-deploying-a-basic-amq-broker-instance.adoc[Lab: Deploying a Basic AMQ Broker Instance] completed, resulting in a deployed AMQ Broker instance.
+*   `oc` (OpenShift CLI) configured and logged in to your cluster.
+*   Java Development Kit (JDK) 11 or later installed.
+*   Apache Maven 3.6 or later installed.
+
+== Exposing the Broker via OpenShift Route
+
+When AMQ Broker is deployed on OpenShift, the AMQ Broker Operator typically creates an OpenShift `Service` to expose the broker's internal network listeners. To allow clients *outside* the OpenShift cluster to connect, you need to create an OpenShift `Route`. A `Route` exposes a `Service` at a hostname, allowing external clients to reach it.
+
+For non-HTTP connections like the AMQ Core Protocol, clients must explicitly specify the port number as part of the connection URL. When using an OpenShift Route with TLS `termination: edge`, the default external port is usually `443`. The OpenShift router handles the TLS termination and then forwards the traffic to the broker's internal service, potentially re-encrypting it depending on the `service.spec.tls` configuration.
+
+. Navigate to your project namespace.
++
+Ensure you are in the OpenShift project where your AMQ Broker is deployed.
++
+[,bash]
+----
+oc project <your-project-name>
+----
++
+Replace `<your-project-name>` with the OpenShift project name.
+
+. Identify the AMQ Broker Service.
++
+The AMQ Broker Operator typically names the service based on the broker's Custom Resource (CR) name. If your broker CR is named `my-broker`, the service might be `my-broker-amq-broker-acceptors`. You can list services to confirm:
++
+[,bash]
+----
+oc get svc
+----
++
+Look for a service related to your broker, typically exposing ports like `61616` (Core protocol), `5672` (AMQP), etc. For this lab, we'll assume the Core protocol port (61616) is exposed.
+
+. Create an OpenShift Route for the broker.
++
+We will create an `Edge` terminated TLS route for secure external access. This means OpenShift handles the TLS certificate, and the client connects via TLS to the route's hostname. The OpenShift router then forwards the traffic to the internal broker service.
+
++
+Create a file named `broker-route.yaml` with the following content:
++
+[,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: my-broker-external-route
+  labels:
+    app: my-broker
+spec:
+  to:
+    kind: Service
+    name: <your-broker-service-name> # <1>
+    weight: 100
+  port:
+    targetPort: 61616 # <2>
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+----
+<1> Replace `<your-broker-service-name>` with the actual name of your broker's service (e.g., `my-broker-amq-broker-acceptors`).
+<2> This is the default target port for the AMQ Core protocol.
+
+. Apply the Route configuration.
++
+[,bash]
+----
+oc apply -f broker-route.yaml
+----
+
+. Verify the Route and retrieve its hostname.
++
+[,bash]
+----
+oc get route my-broker-external-route
+----
++
+Note down the `HOST/PORT` value from the output (e.g., `my-broker-external-route-your-project.apps.cluster.example.com`). This is the external URL your clients will use to connect to the broker.
+
+== Developing a Core Protocol Client
+
+We will create a simple Java client that uses the AMQ Core Protocol to send and receive messages. This client will demonstrate how to configure connectivity to the OpenShift Route.
+
+. Create a new directory for your client project.
++
+[,bash]
+----
+mkdir amq-client-external-access
+cd amq-client-external-access
+----
+
+. Create a `pom.xml` file for Maven.
++
+This `pom.xml` defines the project structure, dependencies, and uses the `maven-shade-plugin` to create self-contained executable JARs for both the producer and consumer.
++
+[,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.redhat.amq</groupId>
+    <artifactId>amq-external-client</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <activemq.version>2.31.0</activemq.version> <!-- <1> -->
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-jakarta-client</artifactId> <!-- <2> -->
+            <version>${activemq.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.redhat.amq.external.Producer</mainClass>
+                                </transformer>
+                            </transformers>
+                            <finalName>amq-client-producer</finalName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>consumer</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.redhat.amq.external.Consumer</mainClass>
+                                </transformer>
+                            </transformers>
+                            <finalName>amq-client-consumer</finalName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+----
+<1> Use a recent compatible version of the Apache ActiveMQ Artemis client.
+<2> For Jakarta EE compatible APIs. If you require Java EE (JMS 1.1) APIs, use `artemis-jms-client`.
+
+. Create the Producer class.
++
+Create the directory `src/main/java/com/redhat/amq/external` and then create `Producer.java` inside it. This producer will connect to the broker and send 10 messages to a queue.
++
+[,java]
+----
+package com.redhat.amq.external;
+
+import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
+import org.apache.activemq.artemis.api.core.client.ClientMessage;
+import org.apache.activemq.artemis.api.core.client.ClientProducer;
+import org.apache.activemq.artemis.api.core.client.ClientSession;
+import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
+import org.apache.activemq.artemis.api.core.client.ServerLocator;
+import org.apache.activemq.artemis.api.core.SimpleString;
+
+import java.util.logging.Logger;
+
+public class Producer {
+
+    private static final Logger logger = Logger.getLogger(Producer.class.getName());
+    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61616"); // <1>
+    private static final String QUEUE_NAME = System.getProperty("queue.name", "myQueue");
+
+    public static void main(String[] args) throws Exception {
+        ServerLocator locator = null;
+        ClientSessionFactory sessionFactory = null;
+        ClientSession session = null;
+        ClientProducer producer = null;
+
+        try {
+            logger.info("Connecting to broker at: " + CONNECTION_URI);
+            locator = ActiveMQClient.createServerLocator(CONNECTION_URI); // <2>
+
+            // Important: For external access to a single broker via a static Route,
+            // prevent the client from trying to discover topology information from the broker
+            // if you don't want it to load balance or find other brokers in a cluster.
+            // This is especially relevant if the route only exposes a single broker pod.
+            locator.setUseTopologyForLoadBalancing(false); // <3>
+            locator.setCallTimeout(10000); // Set a reasonable timeout for blocking calls
+            locator.setConnectionTTL(10000); // Set connection time-to-live
+
+            sessionFactory = locator.createSessionFactory();
+            session = sessionFactory.createSession();
+            producer = session.createProducer(new SimpleString(QUEUE_NAME));
+
+            for (int i = 0; i < 10; i++) {
+                ClientMessage message = session.createMessage(true);
+                String messageText = "Hello AMQ Broker! Message " + i;
+                message.writeBodyBufferString(messageText);
+                producer.send(message);
+                logger.info("Sent message: " + messageText);
+                Thread.sleep(1000);
+            }
+
+            session.start(); // Start the session to enable message flow
+
+        } finally {
+            if (producer != null) producer.close();
+            if (session != null) session.close();
+            if (sessionFactory != null) sessionFactory.close();
+            if (locator != null) locator.close();
+            logger.info("Producer finished.");
+        }
+    }
+}
+----
+<1> The connection URI can be overridden via a system property for flexibility.
+<2> `createServerLocator` automatically parses connection options from the URI string, including `sslEnabled`, `trustAll`, etc.
+<3> As per the documentation, for Core protocol clients, `useTopologyForLoadBalancing=false` should be set if you don’t want external clients to load balance connections across brokers in a cluster when connecting to specific route hostnames.
+
+. Create the Consumer class.
++
+Create `Consumer.java` in the same directory. This consumer will connect to the broker and listen for messages on the specified queue for a minute.
++
+[,java]
+----
+package com.redhat.amq.external;
+
+import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
+import org.apache.activemq.artemis.api.core.client.ClientConsumer;
+import org.apache.activemq.artemis.api.core.client.ClientMessage;
+import org.apache.activemq.artemis.api.core.client.ClientSession;
+import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
+import org.apache.activemq.artemis.api.core.client.ServerLocator;
+import org.apache.activemq.artemis.api.core.QueueConfiguration;
+import org.apache.activemq.artemis.api.core.RoutingType;
+import org.apache.activemq.artemis.api.core.SimpleString;
+
+import java.util.logging.Logger;
+
+public class Consumer {
+
+    private static final Logger logger = Logger.getLogger(Consumer.class.getName());
+    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61616");
+    private static final String QUEUE_NAME = System.getProperty("queue.name", "myQueue");
+
+    public static void main(String[] args) throws Exception {
+        ServerLocator locator = null;
+        ClientSessionFactory sessionFactory = null;
+        ClientSession session = null;
+        ClientConsumer consumer = null;
+
+        try {
+            logger.info("Connecting to broker at: " + CONNECTION_URI);
+            locator = ActiveMQClient.createServerLocator(CONNECTION_URI);
+            locator.setUseTopologyForLoadBalancing(false);
+            locator.setCallTimeout(10000);
+            locator.setConnectionTTL(10000);
+
+            sessionFactory = locator.createSessionFactory();
+            session = sessionFactory.createSession();
+
+            // Create the queue if it does not exist (idempotent operation)
+            session.createQueue(new QueueConfiguration(QUEUE_NAME).setRoutingType(RoutingType.ANYCAST).setDurable(true));
+
+            consumer = session.createConsumer(new SimpleString(QUEUE_NAME));
+            consumer.setMessageHandler(message -> { // Asynchronous message processing
+                try {
+                    String messageText = message.getBodyBuffer().readString();
+                    logger.info("Received message: " + messageText);
+                    message.acknowledge(); // Acknowledge the message
+                } catch (Exception e) {
+                    logger.severe("Error processing message: " + e.getMessage());
+                }
+            });
+
+            session.start(); // Start the session to begin receiving messages
+            logger.info("Consumer started. Waiting for messages on queue: " + QUEUE_NAME);
+
+            // Keep the consumer alive for a certain period (e.g., 60 seconds)
+            // or until manually stopped to allow message processing.
+            Thread.sleep(60000);
+
+        } finally {
+            if (consumer != null) consumer.close();
+            if (session != null) session.close();
+            if (sessionFactory != null) sessionFactory.close();
+            if (locator != null) locator.close();
+            logger.info("Consumer finished.");
+        }
+    }
+}
+----
+
+== Testing Client Connectivity
+
+Now, let's compile and run our clients to test the external connection to the AMQ Broker via the OpenShift Route.
+
+. Build the client applications.
++
+From the `amq-client-external-access` directory, execute the Maven build command:
++
+[,bash]
+----
+mvn clean package
+----
++
+This command compiles the Java code and uses the `maven-shade-plugin` to generate two executable JARs in the `target/` directory: `amq-client-producer.jar` and `amq-client-consumer.jar`.
+
+. Determine the Broker Connection URI.
++
+Recall the `HOST/PORT` value from your `my-broker-external-route` (e.g., `my-broker-external-route-your-project.apps.cluster.example.com`).
+Since we created an `edge` terminated route, the client must initiate a TLS connection, and the default HTTPS port `443` is typically used for routes. The Core protocol uses `tcp://` as its scheme, so for TLS, we append `?sslEnabled=true`.
+
++
+For lab environments, where the OpenShift cluster might use self-signed certificates or certificates not trusted by your local JDK's truststore, you might need to instruct the client to trust all certificates and bypass hostname verification. *This is not recommended for production environments.*
+
++
+Construct your `BROKER_URI` by replacing `<your-route-hostname>` with the actual hostname from your `oc get route` output:
++
+[,bash]
+----
+export BROKER_URI="tcp://<your-route-hostname>:443?sslEnabled=true&trustAll=true&verifyHost=false"
+----
+
+. Run the Consumer.
++
+Open a *new terminal window or tab* and run the consumer application. This consumer will connect to the broker and wait for messages.
++
+[,bash]
+----
+java -Dbroker.uri="${BROKER_URI}" -Dqueue.name="myQueue" -jar target/amq-client-consumer.jar
+----
++
+You should see output indicating the consumer is connecting and waiting for messages on `myQueue`.
+
+. Run the Producer.
++
+In your *original terminal*, run the producer application. This producer will connect to the same broker and send 10 messages to `myQueue`.
++
+[,bash]
+----
+java -Dbroker.uri="${BROKER_URI}" -Dqueue.name="myQueue" -jar target/amq-client-producer.jar
+----
++
+You should see output from the producer sending messages.
+
+. Observe the Output.
++
+Simultaneously, in the consumer's terminal, you should see messages being received.
+
+*   **Producer Output Example**:
++
+[,text]
+----
+INFO: Connecting to broker at: tcp://my-broker-external-route-your-project.apps.cluster.example.com:443?sslEnabled=true&trustAll=true&verifyHost=false
+INFO: Sent message: Hello AMQ Broker! Message 0
+INFO: Sent message: Hello AMQ Broker! Message 1
+...
+INFO: Sent message: Hello AMQ Broker! Message 9
+INFO: Producer finished.
+----
+
+*   **Consumer Output Example**:
++
+[,text]
+----
+INFO: Connecting to broker at: tcp://my-broker-external-route-your-project.apps.cluster.example.com:443?sslEnabled=true&trustAll=true&verifyHost=false
+INFO: Consumer started. Waiting for messages on queue: myQueue
+INFO: Received message: Hello AMQ Broker! Message 0
+INFO: Received message: Hello AMQ Broker! Message 1
+...
+INFO: Received message: Hello AMQ Broker! Message 9
+INFO: Consumer finished.
+----
++
+If you see messages being sent by the producer and successfully received by the consumer, congratulations! You have successfully configured external access to your AMQ Broker on OpenShift and tested client connectivity using the AMQ Core Protocol.
+
+[IMPORTANT]
+For production environments, directly using `trustAll=true` and `verifyHost=false` is a significant security risk as it disables crucial TLS security checks. Always use proper TLS configuration with trusted certificates and hostname verification. Refer to xref:amq-broker:securing-amq-broker-on-openshift.adoc[Securing AMQ Broker on OpenShift] for detailed guidance on configuring SSL/TLS, managing certificates, and client trust stores.
+
+== Troubleshooting Tips
+
+*   **Route Not Found**:
+    *   Double-check the route name and project using `oc get route`.
+    *   Ensure the `broker-route.yaml` was applied correctly with `oc apply -f broker-route.yaml`.
+*   **Connection Refused / Failed to connect**:
+    *   Ensure the AMQ Broker pod is running (`oc get pod`).
+    *   Verify the `targetPort` in the `Route` (`broker-route.yaml`) matches the broker's listener port (e.g., `61616`).
+    *   Check your `BROKER_URI` for correct hostname and port `443`.
+    *   If OpenShift network policies are in place, they might be blocking external traffic to the route or internal traffic from the router to the service.
+*   **SSL Handshake Failure**:
+    *   If using an `edge` terminated route, ensure `sslEnabled=true` is present in your client's `CONNECTION_URI`.
+    *   If you are not using `trustAll=true` (which is the recommended approach for production), ensure your client's trust store contains the certificate authority (CA) that signed the OpenShift Route's certificate, or the certificate itself.
+    *   If the broker itself uses TLS (e.g., with a `passthrough` route), ensure the broker's TLS configuration is correct and its certificate is trusted by the client.
+*   **Client Timeout**:
+    *   Increase `locator.setCallTimeout()` and `locator.setConnectionTTL()` in the client code if your network has high latency or is congested.
+*   **Messages Not Received**:
+    *   Ensure the `QUEUE_NAME` is consistent between the producer and consumer.
+    *   Check the broker's logs (`oc logs <broker-pod-name>`) for any errors related to messages or connections.
+    *   Verify the queue actually exists on the broker (this can be confirmed via the Hawtio management console, covered in xref:amq-broker:accessing-management-console-for-amq-broker-on-openshift.adoc[Accessing Management Console for AMQ Broker on OpenShift]).
+
+== Cleaning Up (Optional)
+
+To remove the resources created in this lab, follow these steps:
+
+. Stop the running consumer application in its terminal by pressing `Ctrl+C`.
+. Delete the client project directory:
++
+[,bash]
+----
+cd ..
+rm -rf amq-client-external-access
+----
+
+. Delete the OpenShift Route:
++
+[,bash]
+----
+oc delete -f broker-route.yaml
+----
+
+. If you wish to also delete the AMQ Broker instance itself, refer to the cleanup steps in xref:amq-broker:labs:lab-deploying-a-basic-amq-broker-instance.adoc[Lab: Deploying a Basic AMQ Broker Instance].

@@ -1,0 +1,82 @@
+#  Introduction to the AMQ Broker Operator
+
+= Introduction to the AMQ Broker Operator
+
+The Red Hat AMQ Broker Operator is a critical component for deploying and managing AMQ Broker instances efficiently on OpenShift Container Platform. It extends the OpenShift API with custom resources, enabling users to provision, configure, and manage AMQ Broker deployments using a declarative approach native to Kubernetes.
+
+== What is a Kubernetes Operator?
+
+At its core, a Kubernetes Operator is an application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex stateful applications on behalf of a Kubernetes user. Operators follow the "Kubernetes Way" of automating operational knowledge by encoding human operational experience into software.
+
+For complex applications like message brokers, which require careful lifecycle management, scaling, and high availability configurations, an Operator streamlines operations by automating tasks that would traditionally require manual intervention or custom scripting.
+
+== The AMQ Broker Operator: Automating Broker Management
+
+The AMQ Broker Operator specifically addresses the challenges of deploying and managing AMQ Broker on OpenShift. Instead of manually creating various Kubernetes primitives (Deployments, Services, ConfigMaps, PersistentVolumeClaims), users interact with a single, high-level Custom Resource (CR) provided by the Operator. The Operator then translates these high-level requests into the necessary underlying OpenShift resources.
+
+=== Key Responsibilities and Capabilities
+
+The AMQ Broker Operator automates numerous aspects of AMQ Broker's lifecycle and day-2 operations, including:
+
+*   **Deployment:** Provisioning new AMQ Broker instances with specified configurations.
+*   **Scaling:** Adjusting the number of broker pods (horizontal scaling) or resource allocations (vertical scaling) based on demand.
+*   **High Availability (HA):** Configuring and managing broker clusters for fault tolerance and failover, including shared-store or replicated live-backup strategies.
+*   **Security:** Automating the setup of TLS/SSL encryption, Role-Based Access Control (RBAC), and integration with external identity providers.
+*   **Persistence:** Managing Persistent Volumes for message storage and ensuring data integrity across restarts and failovers.
+*   **Networking:** Exposing broker listeners and management consoles via OpenShift Services and Routes for internal and external access.
+*   **Monitoring:** Integrating with OpenShift's monitoring stack and exposing metrics.
+*   **Upgrades:** Facilitating seamless upgrades of broker instances to newer versions.
+*   **Troubleshooting:** Providing insights and simplifying diagnostics through unified logging and event reporting.
+
+=== How the Operator Works: Custom Resources (CRs) and Custom Resource Definitions (CRDs)
+
+The AMQ Broker Operator introduces a new API object type to OpenShift: the `Broker` Custom Resource Definition (CRD). This CRD defines the schema for creating `Broker` Custom Resources (CRs).
+
+*   **Custom Resource Definition (CRD):** A CRD is like a blueprint that defines a new kind of object (e.g., `Broker`) that you can create in Kubernetes. It specifies the properties and configuration options available for that object.
+*   **Custom Resource (CR):** A CR is an actual instance of an object defined by a CRD. When you want to deploy an AMQ Broker, you create a `Broker` CR (e.g., `kind: Broker`), specifying its desired state (number of replicas, persistence settings, security configurations, etc.).
+
+The AMQ Broker Operator constantly monitors the OpenShift API for changes to `Broker` CRs. When a `Broker` CR is created, updated, or deleted, the Operator reconciles the desired state (defined in the CR) with the actual state of the cluster, creating or modifying the necessary underlying OpenShift resources (Deployments, StatefulSets, Services, ConfigMaps, Routes, etc.) to achieve the desired configuration.
+
+This declarative approach simplifies complex deployments and ensures consistency, as you define *what* you want, and the Operator figures out *how* to achieve it.
+
+== Hands-on Activity: Preparing for AMQ Broker Operator Installation
+
+Before you can deploy AMQ Broker instances using the Operator, you need to download the Operator's installation and example files. This activity will guide you through acquiring these essential files.
+
+.Procedure: Download and Extract Operator Installation Files
+.   Create a dedicated directory for your AMQ Broker Operator files. This helps in organizing your workspace.
++
+[source,bash]
+----
+mkdir -p ~/broker/operator
+----
+.   Navigate to the newly created directory.
++
+[source,bash]
+----
+cd ~/broker/operator
+----
+.   Download the AMQ Broker Operator installation and example files.
++
+[NOTE]
+The exact version number (e.g., `7.13.3`) may vary depending on the latest release. Always refer to the official Red Hat documentation for the most current download links and instructions. The following example uses `7.13.3`.
++
+You would typically download this from the Red Hat Customer Portal. For demonstration purposes, assume you've downloaded `amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip` to your `Downloads` directory.
++
+[source,bash]
+----
+mv ~/Downloads/amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip .
+----
+.   Extract the contents of the downloaded archive.
++
+[source,bash]
+----
+unzip amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip
+----
++
+You should now have a directory structure containing the Operator's deployment files (e.g., `deploy/operator.yaml`) and example Custom Resources. These files will be used in subsequent steps to install the Operator and deploy AMQ Broker instances.
+
+[NOTE]
+The `operator.yaml` file found within the extracted `deploy` directory is a crucial component that defines the AMQ Broker Operator itself, including its deployment specifications and role-based access control configurations. It's used to install the Operator onto your OpenShift cluster.
+
+With the Operator files ready, you're prepared to proceed with installing the AMQ Broker Operator onto your OpenShift cluster, which is the next step in deploying and managing AMQ Broker instances.

@@ -1,0 +1,256 @@
+#  OpenShift Networking Concepts: Services, Routes, Ingress
+
+= OpenShift Networking Concepts: Services, Routes, Ingress
+
+As a Content Architect, our journey into deploying and managing AMQ Broker on OpenShift requires a solid understanding of how applications communicate within and outside the cluster. OpenShift, built upon Kubernetes, provides sophisticated networking primitives to ensure reliable and secure connectivity. This section will demystify the core OpenShift networking concepts: Services, Routes, and Ingress.
+
+== Services: The Stable Front-End for Pods
+
+In a dynamic container environment like OpenShift, pods are ephemeral. They can be created, destroyed, or rescheduled, leading to changing IP addresses. Directly connecting to a pod's IP address is therefore unreliable. This is where **Services** come into play.
+
+A Kubernetes/OpenShift Service is an abstraction that defines a logical set of pods and a policy by which to access them. It acts as a stable internal IP address and DNS name for a group of pods, typically determined by a label selector. When you create a Service, OpenShift automatically assigns it a ClusterIP (a virtual IP address) and makes it discoverable via DNS within the cluster.
+
+Services enable:
+
+*   **Load Balancing:** Distribute network traffic across multiple pods that belong to the same service.
+*   **Decoupling:** Clients don't need to know the specific IP addresses of the pods; they just connect to the Service's stable IP or DNS name.
+*   **Service Discovery:** Other applications within the cluster can easily find and communicate with a service using its name.
+
+There are several types of Services, each serving a different purpose for exposure:
+
+*   **ClusterIP (Default):** Exposes the Service on an internal IP in the cluster. This Service is only reachable from within the cluster.
+*   **NodePort:** Exposes the Service on a static port on each Node's IP. A NodePort Service is routed through an external load balancer, providing a way to reach the Service from outside the cluster.
+*   **LoadBalancer:** Exposes the Service externally using a cloud provider's load balancer. This type is common in public cloud environments.
+*   **ExternalName:** Maps the Service to the contents of the `externalName` field (e.g., a `CNAME` record) by returning a `CNAME` record with its value.
+
+For AMQ Broker, the Operator automatically creates Services for components like acceptors and the console. These services are typically of `ClusterIP` type initially, providing internal cluster access. To expose them externally, we often use Routes or Ingress.
+
+=== Hands-on Activity: Exploring Services
+
+Let's inspect how Services work by looking at an existing Service in an OpenShift project.
+
+.Procedure
+. Log in to your OpenShift cluster via the `oc` CLI.
++
+[,bash]
+----
+oc login -u developer -p developer https://<openshift-cluster-url>:8443
+oc new-project amq-broker-project
+----
+. Deploy a simple application (e.g., an Nginx deployment) to create some pods and a service.
++
+[,bash]
+----
+oc create deployment nginx --image=nginx
+oc expose deployment nginx --port=80
+----
+. List the services in your current project.
++
+[,bash]
+----
+oc get svc
+----
++
+You should see an output similar to this:
++
+[,console]
+----
+NAME    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+nginx   ClusterIP   172.30.200.123   <none>        80/TCP    2m
+----
+. Describe the `nginx` service to see its details, including its IP and selector.
++
+[,bash]
+----
+oc describe svc nginx
+----
++
+You'll notice the `Selector` field, which links this Service to pods with the label `app=nginx`. The `Cluster-IP` is the stable internal IP.
+
+This `ClusterIP` service is only accessible from within the `amq-broker-project` or other projects if network policies allow. To access it from outside the OpenShift cluster, we need Routes or Ingress.
+
+== Routes: OpenShift's External Gateway
+
+**Routes** are an OpenShift-specific resource that provide a way to expose services to external clients using hostnames. They are essentially entry points for HTTP/HTTPS traffic from outside the OpenShift cluster to services running inside. The OpenShift router component handles incoming traffic and forwards it to the appropriate service based on the hostname in the request.
+
+Key characteristics of Routes:
+
+*   **Hostname-based Routing:** The OpenShift router uses the requested hostname to determine which service to send the traffic to. The full host name of the route must resolve to the node hosting the OpenShift router.
+*   **HTTP/HTTPS Support:** By default, the OpenShift router listens on port 80 for non-secured (HTTP) traffic and port 443 for secured (HTTPS) traffic. If you specify an `https` URL, the router automatically directs traffic to port 443.
+*   **Automatic Service and Route Creation:** When you expose an acceptor or the management console for AMQ Broker to external clients, "the Operator automatically creates a dedicated service and OpenShift route for the acceptor on each broker pod in the deployment." (Referenced from *CONTEXT*)
+*   **Custom Hostnames:** You can customize the hostname of the route to match your internal routing configuration or specific domain requirements. This is achieved using the `ingressHost` and `ingressDomain` attributes in the Custom Resource (CR) configuration.
+    *   The `ingressHost` attribute replaces the default hostname with a custom one for a specific route (e.g., for an acceptor).
+    *   The `ingressDomain` attribute appends a custom domain to the hostname. "The custom domain is also applied to all other routes, such as routes for other acceptors and the console, that are exposed by the CR configuration." (Referenced from *CONTEXT*)
+*   **Load Balancing for External Clients:** To enable external clients to load balance connections across multiple brokers in a cluster, you can configure the `haproxy.router.openshift.io/balance` option on the OpenShift route with `roundrobin`. (Referenced from *CONTEXT*)
+    *   For Core protocol clients using this load balancing, you might also need to set `useTopologyForLoadBalancing=false` in the client's connection URL. (Referenced from *CONTEXT*)
+
+Routes are the standard and recommended way to expose HTTP/HTTPS services in OpenShift.
+
+=== Hands-on Activity: Exposing a Service with an OpenShift Route
+
+Let's expose our `nginx` service using an OpenShift Route.
+
+.Procedure
+. Create a Route for the `nginx` service.
++
+[,bash]
+----
+oc create route edge --service=nginx
+----
++
+This command creates an edge-terminated TLS route, which is a common type.
+. Get the route information to find its hostname.
++
+[,bash]
+----
+oc get route nginx
+----
++
+You'll see output similar to:
++
+[,console]
+----
+NAME    HOST/PORT                                                         PATH   SERVICES   PORT   TERMINATION          WILDCARD
+nginx   nginx-amq-broker-project.apps.cluster-abc.example.com             nginx   8080   edge/Redirect      None
+----
++
+The `HOST/PORT` column shows the external URL for your service.
+. Access the `nginx` application using the provided `HOST/PORT` in a web browser or with `curl`.
++
+[,bash]
+----
+curl http://$(oc get route nginx -o jsonpath='{.spec.host}')
+----
++
+You should receive the Nginx welcome page HTML.
+
+.Customizing a Route Hostname
+Now, let's see how `ingressHost` and `ingressDomain` relate to customizing routes. While we usually apply these in the `ActiveMQArtemis` CR for AMQ Broker, we can demonstrate the concept by editing our `nginx` route's hostname.
+
+.Procedure
+. Edit the `nginx` route.
++
+[,bash]
+----
+oc edit route nginx
+----
+. Modify the `spec.host` field to a custom value, for example, `mycustomnginx.apps.cluster-abc.example.com`.
++
+[,yaml]
+----
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nginx
+spec:
+  host: mycustomnginx.apps.cluster-abc.example.com # <1>
+  to:
+    kind: Service
+    name: nginx
+  # ... other fields
+----
+<1> Replace `mycustomnginx` and the domain with values appropriate for your cluster. Ensure the domain resolves to your OpenShift router.
+. Save and exit the editor.
+. Access the service using the new custom hostname:
++
+[,bash]
+----
+curl http://mycustomnginx.apps.cluster-abc.example.com
+----
++
+This demonstrates how `ingressHost` or `ingressDomain` in an AMQ Broker CR would influence the generated route's hostname.
+
+== Ingress: The Kubernetes Standard for External Access
+
+While OpenShift Routes are powerful and feature-rich, **Ingress** is the native Kubernetes resource for exposing HTTP/HTTPS services to external clients. An Ingress resource manages external access to the services in a cluster, typically HTTP. It provides load balancing, SSL termination, and name-based virtual hosting.
+
+In OpenShift, the Ingress controller acts similarly to the OpenShift router for Routes. Often, you might find that OpenShift's Ingress controller (which is usually an instance of the OpenShift router) processes both `Route` and `Ingress` resources.
+
+Key differences and considerations:
+
+*   **Portability:** `Ingress` is a standard Kubernetes API object, making your deployment configurations more portable across different Kubernetes distributions.
+*   **Feature Parity:** For many use cases, OpenShift Routes and Ingress offer similar functionality for exposing HTTP/HTTPS services.
+*   **Explicit Choice:** For AMQ Broker, the context indicates that "If your organization’s network policy require that you expose acceptors by using an ingress instead of a route," you explicitly add the `exposeMode` attribute and set its value to `ingress` in the `ActiveMQArtemis` CR. (Referenced from *CONTEXT*)
+*   **Custom Hostnames (Similar to Routes):** When using `ingress` mode, you can still customize the hostnames of the ingresses that are exposed using the `ingressHost` and `ingressDomain` attributes, functioning identically to how they work for Routes. "The custom domain is also applied to all other ingresses, such as ingresses for other acceptors and the console, that are exposed by the CR configuration." (Referenced from *CONTEXT*)
+
+In essence, while Routes are OpenShift's opinionated and often preferred way, Ingress provides a Kubernetes-native alternative when required by specific policies or for cross-platform compatibility.
+
+=== Hands-on Activity: Exposing a Service with Kubernetes Ingress
+
+Let's modify our approach to use Ingress for the `nginx` service. (Note: For this to work seamlessly, your OpenShift cluster must have an Ingress Controller configured and running, which is typically the case by default.)
+
+.Procedure
+. First, remove the previously created `nginx` route.
++
+[,bash]
+----
+oc delete route nginx
+----
+. Create an Ingress resource for the `nginx` service.
++
+[,yaml]
+.ingress.yaml
+----
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    # Example annotation for an IngressClass, might vary based on your cluster setup
+    kubernetes.io/ingress.class: "openshift-default"
+spec:
+  rules:
+  - host: mynginx.apps.cluster-abc.example.com # <1>
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+----
+<1> Replace `mynginx` and the domain with values appropriate for your cluster. This hostname needs to be resolvable externally to your OpenShift Ingress controller.
+. Apply the Ingress resource.
++
+[,bash]
+----
+oc apply -f ingress.yaml
+----
+. Get the Ingress details.
++
+[,bash]
+----
+oc get ingress nginx-ingress
+----
++
+You'll see output similar to:
++
+[,console]
+----
+NAME          CLASS    HOSTS                              ADDRESS                               PORTS   AGE
+nginx-ingress   <none>   mynginx.apps.cluster-abc.example.com   <router-ip-or-hostname>   80      1m
+----
++
+The `HOSTS` column shows the external URL. The `ADDRESS` typically points to your OpenShift router's external IP or hostname.
+. Access the `nginx` application using the provided `HOSTS` in a web browser or with `curl`.
++
+[,bash]
+----
+curl http://mynginx.apps.cluster-abc.example.com
+----
++
+You should again receive the Nginx welcome page HTML. This demonstrates how Ingress can be used to expose services externally, similar to Routes.
+
+== Relevance to AMQ Broker Deployment
+
+Understanding Services, Routes, and Ingress is critical for managing AMQ Broker on OpenShift:
+
+*   **Internal Communication:** AMQ Broker pods within a cluster communicate using Services (e.g., for clustering and client connections from other applications within OpenShift).
+*   **External Access to Console:** The Hawtio management console for AMQ Broker is typically exposed via an OpenShift Route or Ingress to allow administrators external access. "When you expose the console, the Operator automatically creates a dedicated service and Openshift route for the console on each broker pod in the deployment." (Referenced from *CONTEXT*)
+*   **External Client Connections:** Broker acceptors (the network listeners for client connections) must be exposed externally for clients outside OpenShift to connect. This is also achieved using Routes or Ingress. "When you expose an acceptor to clients outside OpenShift, the Operator automatically creates a dedicated service and Openshift route for the acceptor on each broker pod in the deployment." (Referenced from *CONTEXT*)
+*   **Customization:** As seen in the context, the `ActiveMQArtemis` Custom Resource (CR) allows you to specify `ingressHost` and `ingressDomain` to customize the hostnames for both console and acceptor Routes/Ingresses, aligning with your organization's DNS and routing policies.
+*   **Security Implications:** Exposing components externally necessitates careful security configurations, such as configuring SSL/TLS on routes/ingresses and implementing network policies to restrict access.
+
+By mastering these networking primitives, you gain precise control over how your AMQ Broker instances are accessed and managed, both internally within OpenShift and by external applications.

@@ -1,0 +1,435 @@
+#  Configuring Client Connections for External Access
+
+= Configuring Client Connections for External Access
+
+When deploying Red Hat AMQ Broker on OpenShift, ensuring that external clients can reliably and securely connect to the broker instances is a critical aspect of your messaging architecture. This involves understanding OpenShift's networking constructs and configuring client-side connection parameters appropriately.
+
+== OpenShift Networking for External Access
+
+Before configuring clients, it's essential to understand how AMQ Broker instances are exposed outside the OpenShift cluster. The primary mechanisms are:
+
+*   **OpenShift Routes**: The most common and recommended way to expose services. Routes provide a hostname and often handle TLS termination, directing external traffic to the appropriate service within the cluster.
+*   **NodePorts**: An alternative that exposes a service on a static port on each node's IP address. Clients connect directly to an OpenShift node's IP and the specified NodePort.
+
+For this topic, we will primarily focus on connecting clients via OpenShift Routes, as it aligns with common production deployment patterns.
+
+== Client Connection URL Structure
+
+Regardless of the protocol, the fundamental goal for an external client is to specify a connection URL that correctly points to the AMQ Broker instance exposed via its OpenShift Route.
+
+A typical connection URL will include:
+
+*   The protocol (e.g., `tcp://` for Core, `ssl://` for OpenWire, `amqp://` for AMQP).
+*   The fully qualified domain name (FQDN) of the OpenShift Route.
+*   The port number (explicitly required for non-HTTP connections, e.g., `443` for TLS-enabled routes).
+*   Optional query parameters for advanced configurations like HA, reconnection, or TLS settings.
+
+[NOTE]
+====
+When connecting to a broker exposed via an OpenShift Route, the client *must* explicitly specify the port number as part of the connection URL, even for standard ports like `443`. For example: `my-broker-route.apps.cluster.domain:443`.
+====
+
+== Configuring Core Protocol Clients for External Access
+
+Red Hat AMQ Broker's Core protocol is highly performant and offers robust features. Configuring external Core clients requires careful consideration of load balancing, failover, and TLS.
+
+=== Preventing External Load Balancing with `useTopologyForLoadBalancing`
+
+By default, an internal Core client can receive topology information from the broker to intelligently load balance connections across a broker cluster. However, external clients cannot reliably use this topology information as their network perspective differs from the internal cluster.
+
+To prevent an external Core client from attempting to use potentially misleading topology information, you *must* set the `useTopologyForLoadBalancing=false` key in the client's connection URL. If this key is not set, or set to `true`, it may result in `DEBUG` log messages from the client as it tries to process irrelevant topology data.
+
+For example, to connect to a specific broker pod's route without external load balancing:
+
+[source,text]
+----
+tcp://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443?useTopologyForLoadBalancing=false
+----
+
+=== Configuring TLS for Core Protocol Clients
+
+Securing client-broker communication with TLS is a best practice. Core protocol clients support both one-way and two-way TLS authentication.
+
+==== One-Way TLS (Client Trusts Broker)
+
+In one-way TLS, the client verifies the broker's identity using a trust store containing the broker's certificate or the Certificate Authority (CA) certificate that signed it.
+
+To configure one-way TLS for a Core client:
+
+1.  Enable SSL in the connection URL: `sslEnabled=true`.
+2.  Specify the path to the client's trust store: `transport.trustStoreLocation=<path_to_truststore>`.
+3.  Provide the trust store password: `transport.trustStorePassword=<password>`.
+
+[source,text]
+----
+tcp://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443? \
+useTopologyForLoadBalancing=false&sslEnabled=true& \
+transport.trustStoreLocation=~/client.ts&transport.trustStorePassword=myTrustStorePassword
+----
+
+==== Two-Way TLS (Mutual Authentication)
+
+Two-way TLS adds an extra layer of security by requiring the broker to also verify the client's identity. This means the client must present its own certificate to the broker.
+
+To configure two-way TLS for a Core client, in *addition* to the one-way TLS settings:
+
+1.  Specify the path to the client's key store: `keyStorePath=<path_to_keystore>`.
+2.  Provide the key store password: `keyStorePassword=<password>`.
+
+[source,text]
+----
+tcp://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443? \
+useTopologyForLoadBalancing=false&sslEnabled=true& \
+keyStorePath=~/client.ks&keyStorePassword=myKeyStorePassword& \
+transport.trustStoreLocation=~/client.ts&transport.trustStorePassword=myTrustStorePassword
+----
+
+=== Configuring Failover for Core Protocol Clients
+
+For high availability, clients should be configured to automatically fail over to a backup broker if the currently connected live broker becomes unavailable. This is achieved using the `ha=true` query parameter.
+
+The `host:port` part of the connection URL *only* serves for the initial connection. When `ha=true` is set, the client receives connection information for the backup broker from the live broker and manages subsequent failover itself.
+
+*   **Single initial connection point**:
+
+    [source,text]
+    ----
+    connectionFactory.ConnectionFactory=tcp://broker-initial-host:61616?ha=true&reconnectAttempts=3
+    ----
+
+    In this case, `broker-initial-host:61616` should point to the route of a master broker that is properly configured with a backup.
+
+*   **Multiple initial connection points (for initial connection resilience)**:
+
+    You can specify multiple `host:port` entries for the initial connection, which the client will try in order until it establishes a connection.
+
+    [source,text]
+    ----
+    connectionFactory.ConnectionFactory=(tcp://broker1-route:61616,tcp://broker2-route:61616)?ha=true&reconnectAttempts=3
+    ----
+
+    Here, `broker1-route:61616` and `broker2-route:61616` would be the routes to different broker pods or an HAProxy/load balancer in front of them, for establishing the initial connection.
+
+== Configuring OpenWire Protocol Clients for External Access
+
+OpenWire is another widely used protocol, especially for compatibility with Apache ActiveMQ. External OpenWire clients also need specific configurations for TLS.
+
+=== Configuring TLS for OpenWire Protocol Clients
+
+OpenWire clients typically use Java system properties (JVM flags) to configure trust stores and key stores for TLS.
+
+==== One-Way TLS (Client Trusts Broker)
+
+To enable one-way TLS for an OpenWire client:
+
+1.  Use the `ssl://` prefix in the connection URL.
+2.  Specify the path to the client's trust store and its password using JVM flags.
+
+[source,text]
+----
+ssl://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443"
+# Also, specify the following JVM flags when running the client application:
+-Djavax.net.ssl.trustStore=~/client.ts -Djavax.net.ssl.trustStorePassword=myTrustStorePassword
+----
+
+==== Two-Way TLS (Mutual Authentication)
+
+For two-way TLS with OpenWire clients, in *addition* to the one-way TLS settings, you must specify the client's key store details via JVM flags.
+
+[source,text]
+----
+ssl://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443"
+# Also, specify the following JVM flags when running the client application:
+-Djavax.net.ssl.keyStore=~/client.ks -Djavax.net.ssl.keyStorePassword=myKeyStorePassword \
+-Djavax.net.ssl.trustStore=~/client.ts -Djavax.net.ssl.trustStorePassword=myTrustStorePassword
+----
+
+== Alternative: Connecting via NodePort
+
+While OpenShift Routes are generally preferred, you can also expose AMQ Broker services using NodePorts. This method involves directly connecting to an OpenShift node's IP address on a specific port.
+
+1.  **Configure NodePort on Broker**: Define a `NodePort` service that maps to one of the broker's protocol-specific acceptor ports. NodePorts typically fall within the range 30000 to 32767.
+2.  **Client Connection**: Clients connect using the IP address of any OpenShift node and the assigned NodePort.
+
+[source,text]
+----
+tcp://<openshift_node_ip>:<node_port>
+----
+
+[IMPORTANT]
+====
+Using NodePorts for external access can introduce security and management complexities compared to OpenShift Routes, as it bypasses the ingress capabilities and often requires direct network access to worker nodes. It's generally recommended for specific use cases or development environments.
+====
+
+== Hands-on Lab: Connecting an External Core Protocol Client
+
+This lab demonstrates how to connect a simple Java-based Core protocol client to an AMQ Broker instance deployed on OpenShift and exposed via a Route.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the Red Hat AMQ Broker Operator installed.
+*   An AMQ Broker instance deployed on OpenShift, exposed via an insecure (non-TLS) Route.
+    *   You can create a basic broker using a command similar to:
+        ```bash
+        oc apply -f - <<EOF
+        apiVersion: broker.amq.io/v1beta1
+        kind: ActiveMQArtemis
+        metadata:
+          name: my-broker
+        spec:
+          deploymentPlan:
+            size: 1
+            image: registry.redhat.io/amq7/amq-broker:7.11
+          externalConfigs:
+            console:
+              expose: true
+            acceptors:
+              - name: my-acceptor
+                port: 61616
+                protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE
+                expose: true
+        EOF
+        ```
+    *   Verify the Route for the `my-acceptor` (e.g., `my-broker-my-acceptor-0-svc-rte-my-openshift-project.my-openshift-domain`) is created and accessible.
+*   Java Development Kit (JDK) 11 or newer installed on your local machine.
+*   Maven installed on your local machine.
+
+=== Activity Steps
+
+==== 1. Get the Broker Route Hostname
+
+Identify the hostname of the external route pointing to your broker's `my-acceptor`.
+
+.Execute the following command on your OpenShift CLI:
++
+[source,bash]
+----
+OCP_PROJECT=$(oc project -q)
+BROKER_ROUTE=$(oc get route my-broker-my-acceptor -o jsonpath='{.spec.host}')
+echo "AMQ Broker Route: ${BROKER_ROUTE}"
+----
++
+[output]
+----
+AMQ Broker Route: my-broker-my-acceptor-my-openshift-project.apps.your-openshift-domain.com
+----
++
+Make a note of this hostname; you will use it in your client application.
+
+==== 2. Create a Maven Project for the Client
+
+Create a new Maven project for your Java Core client.
+
+.On your local machine, create a new directory for your project:
++
+[source,bash]
+----
+mkdir amq-external-client && cd amq-external-client
+----
+
+.Create a `pom.xml` file with the necessary dependencies for the AMQ Broker Core client:
++
+[source,xml]
+----
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.redhat.amq</groupId>
+  <artifactId>amq-external-client</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>amq-external-client</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>11</java.version>
+    <activemq.version>2.31.0.redhat-00001</activemq.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>redhat-ga</id>
+      <url>https://maven.repository.redhat.com/ga/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>artemis-jms-client-all</artifactId>
+      <version>${activemq.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>com.redhat.amq.client.ProducerClient</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+==== 3. Create the Java Producer Client
+
+Create a simple Java class that acts as a message producer using the Core protocol.
+
+.In the `amq-external-client` directory, create the `src/main/java/com/redhat/amq/client/ProducerClient.java` file:
++
+[source,java]
+----
+package com.redhat.amq.client;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+
+import javax.jms.Connection;
+import javax.jms.Session;
+import javax.jms.Queue;
+import javax.jms.MessageProducer;
+import javax.jms.TextMessage;
+import java.util.logging.Logger;
+
+public class ProducerClient {
+
+    private static final Logger LOGGER = Logger.getLogger(ProducerClient.class.getName());
+    private static final String BROKER_URL_ENV = "BROKER_URL";
+    private static final String QUEUE_NAME = "myQueue";
+
+    public static void main(String[] args) throws Exception {
+        String brokerUrl = System.getenv(BROKER_URL_ENV);
+        if (brokerUrl == null || brokerUrl.isEmpty()) {
+            LOGGER.severe("BROKER_URL environment variable not set. Please set it to your broker's route.");
+            LOGGER.info("Example: export BROKER_URL='tcp://my-broker-my-acceptor-my-openshift-project.apps.your-openshift-domain.com:61616'");
+            return;
+        }
+
+        Connection connection = null;
+        Session session = null;
+        try {
+            // Use ActiveMQConnectionFactory for Core Protocol
+            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
+            LOGGER.info("Attempting to connect to broker at: " + brokerUrl);
+            connection = connectionFactory.createConnection();
+            connection.start(); // Start the connection
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Queue queue = session.createQueue(QUEUE_NAME);
+            MessageProducer producer = session.createProducer(queue);
+
+            for (int i = 0; i < 5; i++) {
+                TextMessage message = session.createTextMessage("Hello from external client! Message #" + (i + 1));
+                producer.send(message);
+                LOGGER.info("Sent message: " + message.getText());
+                Thread.sleep(1000); // Simulate some work
+            }
+
+            LOGGER.info("Messages sent successfully.");
+
+        } catch (Exception e) {
+            LOGGER.severe("Error connecting to or sending messages to the broker: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+}
+----
+
+==== 4. Compile and Run the Client
+
+Now, compile and run your client, providing the broker's route hostname as an environment variable.
+
+.Compile the Java client:
++
+[source,bash]
+----
+mvn clean install
+----
+
+.Run the client, replacing `YOUR_BROKER_ROUTE_HOSTNAME` with the actual hostname you obtained in Step 1. Remember to include the port `61616`.
++
+[source,bash]
+----
+export BROKER_URL="tcp://YOUR_BROKER_ROUTE_HOSTNAME:61616"
+mvn exec:java
+----
++
+[output]
+----
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -------------------< com.redhat.amq:amq-external-client >--------------------
+[INFO] Building amq-external-client 1.0.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ amq-external-client ---
+Sep 05, 2023 10:30:00 AM com.redhat.amq.client.ProducerClient main
+INFO: Attempting to connect to broker at: tcp://my-broker-my-acceptor-my-openshift-project.apps.your-openshift-domain.com:61616
+Sep 05, 2023 10:30:02 AM com.redhat.amq.client.ProducerClient main
+INFO: Sent message: Hello from external client! Message #1
+Sep 05, 2023 10:30:03 AM com.redhat.amq.client.ProducerClient main
+INFO: Sent message: Hello from external client! Message #2
+Sep 05, 2023 10:30:04 AM com.redhat.amq.client.ProducerClient main
+INFO: Sent message: Hello from external client! Message #3
+Sep 05, 2023 10:30:05 AM com.redhat.amq.client.ProducerClient main
+INFO: Sent message: Hello from external client! Message #4
+Sep 05, 2023 10:30:06 AM com.redhat.amq.client.ProducerClient main
+INFO: Sent message: Hello from external client! Message #5
+Sep 05, 2023 10:30:06 AM com.redhat.amq.client.ProducerClient main
+INFO: Messages sent successfully.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.846 s
+[INFO] Finished at: 2023-09-05T10:30:06+00:00
+[INFO] ------------------------------------------------------------------------
+----
++
+You should see output indicating that messages were successfully sent.
+
+==== 5. Verify Messages in Hawtio Console (Optional)
+
+You can verify that the messages were received by the broker by accessing the Hawtio management console.
+
+1.  Get the Hawtio console route:
+    +
+    [source,bash]
+    ----
+    oc get route my-broker-console -o jsonpath='{.spec.host}'
+    ----
+2.  Open the Hawtio console URL in your browser.
+3.  Navigate to the `Connections` -> `Queues` tab.
+4.  Find `myQueue` and observe the `Message Count` increasing, or browse the messages to see the content.
+
+This lab demonstrates a basic external client connection. For production scenarios, always consider implementing TLS and robust failover mechanisms as described in the preceding sections.

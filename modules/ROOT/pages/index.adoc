@@ -1,22 +1,43 @@
-= An Example Quick Course
+=  AMQ Broker on OpenShift: Deployment and Management
 :navtitle: Home
 
 == Introduction
 
-Course Title: Course title FIXME
+Course Title:  AMQ Broker on OpenShift: Deployment and Management
 
 Description:
 Course description FIXME
 
 Duration: FIXME hours
 
-== Objectives
+== Topics covered in this course
 
-On completing this course, you should be able to:
 
-* Observable, measurable objective...
-* Observable, measurable objective...
-* Observable, measurable objective...
+*  Overview of Message-Oriented Middleware
+
+*  AMQ Broker Overview
+
+*  Deploying AMQ Broker on OpenShift
+
+*  Scaling AMQ Broker on OpenShift
+
+*  Securing AMQ Broker on OpenShift
+
+*  AMQ Broker High Availability on OpenShift
+
+*  Different Message Stores for AMQ Broker on OpenShift
+
+*  Accessing Management Console for AMQ Broker on OpenShift
+
+*  Enabling External Access to Brokers Deployed on OpenShift
+
+*  Core Protocol Client Examples
+
+*  AMQP Protocol Client Examples
+
+*  Hands-on Lab: Deploying and Managing AMQ Broker
+
+
 
 == Prerequisites
 

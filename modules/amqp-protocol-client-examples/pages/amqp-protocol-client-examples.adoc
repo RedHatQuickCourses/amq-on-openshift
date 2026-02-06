@@ -1,0 +1,9 @@
+#  AMQP Protocol Client Examples
+
+=== AMQP Protocol Client Examples
+
+* Introduces the AMQP 1.0 standard, a widely adopted messaging protocol.
+* Covers setting up development environments for AMQP clients, such as using Red Hat build of Apache Qpid JMS for Java.
+* Explains how to develop producers and consumers using AMQP clients (e.g., Java, Python) to send and receive messages from AMQ Broker.
+* Highlights AMQP's common message format (AMQP type system), which enables interoperability between clients developed in different languages.
+* Discusses how various JMS message types map to AMQP message payloads for seamless communication.

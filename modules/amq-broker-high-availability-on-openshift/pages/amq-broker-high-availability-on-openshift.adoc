@@ -1,0 +1,15 @@
+#  AMQ Broker High Availability on OpenShift
+
+=== AMQ Broker High Availability on OpenShift
+
+Configuring xref:amq-broker-overview.adoc[AMQ Broker] for high availability (HA) on OpenShift ensures continuous message processing even if a broker instance fails.
+
+Key aspects include:
+
+*   **HA Concepts**: Understanding failover, recovery, and uptime goals.
+*   **Clustering Strategies**:
+    *   **Shared Store**: Multiple brokers share a single persistent message store.
+    *   **Replicated Live-Backup**: A live broker's state is replicated to a backup, enabling seamless takeover upon failure.
+*   **Deployment**: Deploying and configuring an HA broker pair or cluster.
+*   **Failover and Recovery**: Mechanisms for automatic detection of failures and smooth transition to a backup broker.
+*   **Persistence and Data Replication**: Ensuring message data integrity and availability across HA instances.

@@ -1,0 +1,214 @@
+#  Installing the AMQ Broker Operator via CLI or OperatorHub
+
+The AMQ Broker Operator simplifies the deployment and management of AMQ Broker instances on OpenShift Container Platform. Before you can create and manage brokers, you must first install this operator. This section will guide you through the process of installing the AMQ Broker Operator using either the OpenShift command-line interface (CLI) or the OperatorHub graphical interface.
+
+:leveloffset: 1
+
+= Installing the AMQ Broker Operator
+
+The AMQ Broker Operator acts as a critical component for deploying and managing Red Hat AMQ Broker instances within OpenShift. It leverages the Kubernetes Operator pattern to encapsulate operational knowledge, automating tasks such as installation, scaling, upgrades, and failover of AMQ Broker deployments. Installing the Operator is the foundational step before you can provision any message brokers.
+
+There are two primary methods for installing the AMQ Broker Operator on OpenShift:
+
+*   **Using the OpenShift CLI**: This method is often preferred for automation, scripted deployments, or when you need to install a specific version of the Operator that might not be the latest offered in OperatorHub channels.
+*   **Using the OperatorHub in the OpenShift Web Console**: This graphical interface provides a user-friendly experience for discovering and installing Operators with just a few clicks. It's ideal for manual deployments and provides visibility into available Operators and their channels.
+
+Regardless of the method chosen, once the Operator is deployed, it continuously watches for Custom Resources (CRs) that define your AMQ Broker instances, ensuring they are configured and maintained according to your specifications.
+
+:leveloffset: 2
+
+== Installing the Operator using the CLI
+
+The CLI method offers precise control over the installation process, making it suitable for environments requiring specific version deployments or integration into CI/CD pipelines.
+
+=== Prerequisites
+
+Before proceeding with the CLI installation, ensure you have the following:
+
+*   Access to an OpenShift Container Platform cluster with sufficient permissions to install cluster-scoped Operators.
+*   The `oc` command-line tool installed and configured to connect to your OpenShift cluster.
+*   The AMQ Broker Operator installation archive (`amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip` or similar) downloaded from the Red Hat Customer Portal. This archive contains the necessary deployment files, including `operator.yaml`.
+*   An existing OpenShift project where you intend to manage your AMQ Broker deployments.
+
+=== Hands-on Activity: Deploying the Operator via CLI
+
+Follow these steps to install the AMQ Broker Operator using the OpenShift CLI.
+
+.Download and Prepare the Operator Files
+You need to download the AMQ Broker Operator installation files from the Red Hat Customer Portal.
+
+. From the Red Hat Customer Portal, navigate to the AMQ Broker downloads section for version `7.13.3` (or the desired version).
+. Locate the `AMQ Broker 7.13.3 Operator Installation and Example Files` and click `Download`. The `amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip` archive will download automatically.
+
+.Extract the Operator Files
+Once downloaded, prepare a directory and extract the contents of the archive.
+
+. Create a new directory for your operator files:
++
+[source,bash]
+----
+$ mkdir ~/broker/operator
+----
+
+. Move the downloaded archive to this new directory:
++
+[source,bash]
+----
+$ mv amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip ~/broker/operator
+----
+
+. Navigate into the directory:
++
+[source,bash]
+----
+$ cd ~/broker/operator
+----
+
+. Extract the contents of the archive:
++
+[source,bash]
+----
+$ unzip amq-broker-operator-operator-7.13.3-ocp-install-examples-rhel8.zip
+----
++
+This will create a `amq-broker-operator-7.13.3-ocp-install-examples` directory containing the `deploy` folder and other example files.
+
+.Log in to OpenShift and Select Project
+You need to log in to your OpenShift cluster as an administrator and switch to the project where you want to install the Operator.
+
+. Log in to your OpenShift cluster:
++
+[source,bash]
+----
+$ oc login -u <your-admin-user> <your-openshift-api-url>
+----
++
+Replace `<your-admin-user>` and `<your-openshift-api-url>` with your OpenShift administrator credentials and API endpoint.
+
+. Switch to the OpenShift project where you want to deploy the Operator. If the project does not exist, you may need to create it first.
++
+[source,bash]
+----
+$ oc project <project-name>
+----
++
+Replace `<project-name>` with the name of your target OpenShift project (e.g., `amq-broker-project`).
+
+.Deploy the Operator
+The necessary deployment manifests are found within the extracted `deploy` directory.
+
+. Navigate to the `deploy` directory within the extracted operator files:
++
+[source,bash]
+----
+$ cd amq-broker-operator-7.13.3-ocp-install-examples/deploy
+----
+
+. Apply the `operator.yaml` manifest to deploy the AMQ Broker Operator:
++
+[source,bash]
+----
+$ oc apply -f operator.yaml
+----
++
+This command creates the necessary Kubernetes resources (Deployment, Service Account, ClusterRole, ClusterRoleBinding, etc.) that constitute the AMQ Broker Operator.
+
+.Verify Operator Deployment
+Confirm that the Operator pod is running successfully.
+
+. Check the status of the Operator's deployment:
++
+[source,bash]
+----
+$ oc get deployment amq-broker-operator -n <project-name>
+----
++
+You should see output similar to this, indicating the deployment is ready:
++
+[source,text]
+----
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+amq-broker-operator   1/1     1            1           2m
+----
+
+. Check the Operator's pod status:
++
+[source,bash]
+----
+$ oc get pods -n <project-name> -l name=amq-broker-operator
+----
++
+You should see a pod with a `Running` status:
++
+[source,text]
+----
+NAME                                  READY   STATUS    RESTARTS   AGE
+amq-broker-operator-xxxxxxxxxx-xxxxx  1/1     Running   0          2m
+----
+
+Once the Operator pod is running, the AMQ Broker Operator is successfully installed and ready to manage broker instances in your project.
+
+:leveloffset: 2
+
+== Installing the Operator using OperatorHub
+
+For a more guided and graphical installation experience, OperatorHub in the OpenShift web console is the recommended method.
+
+=== Prerequisites
+
+Before installing via OperatorHub, ensure you meet the following conditions:
+
+*   You have cluster administrator privileges or sufficient permissions to install Operators from OperatorHub.
+*   The `Red Hat Integration - AMQ Broker for RHEL 9 (Multiarch)` Operator is available and visible in your OpenShift cluster's OperatorHub.
+*   Access to the OpenShift Container Platform web console.
+
+[NOTE]
+====
+In OperatorHub, you can typically only install the latest Operator version provided in each channel. If you require an earlier version of an Operator, you *must* install it by using the CLI, as described in xref:deploying-amq-broker-on-openshift.adoc#installing-the-operator-using-the-cli[Installing the Operator using the CLI].
+====
+
+=== Hands-on Activity: Deploying the Operator via OperatorHub
+
+Follow these steps to install the AMQ Broker Operator using the OpenShift web console's OperatorHub.
+
+.Access the OpenShift Web Console
+Log in to your OpenShift cluster's web console.
+
+. Navigate to your OpenShift cluster's web console URL in your browser.
+. Log in with your credentials, ensuring you have cluster administrator privileges.
+
+.Navigate to OperatorHub
+The OperatorHub is where you can discover and install pre-packaged Operators.
+
+. In the OpenShift web console, use the left-hand navigation pane.
+. Click on *Operators* and then select *OperatorHub*.
+
+.Find the AMQ Broker Operator
+Search for the AMQ Broker Operator within the OperatorHub.
+
+. In the *Filter by keyword* search box, type `AMQ Broker`.
+. Locate and click on the *Red Hat Integration - AMQ Broker for RHEL 9 (Multiarch)* Operator tile.
++
+This will open a page with details about the Operator.
+
+.Install the Operator
+Configure the installation parameters for the Operator.
+
+. On the Operator details page, click the *Install* button.
+. On the *Install Operator* page:
+    *   For *Installation Mode*, select *A specific namespace on the cluster*. This is recommended for isolating your AMQ Broker deployments to a particular project.
+    *   For *Installed Namespace*, select an existing project or choose *Create new namespace* to create a dedicated project for the Operator (e.g., `amq-broker-operator-project`). This project will house the Operator's own pods and resources.
+    *   For *Update Channel*, keep the default stable channel (e.g., `7.13.x`).
+    *   For *Approval Strategy*, keep *Automatic* (recommended for automatic updates).
+. Click the *Install* button at the bottom of the page.
+
+.Verify Operator Installation
+Monitor the installation process and confirm the Operator is running.
+
+. After clicking *Install*, you will be redirected to the *Installed Operators* page (within the selected project).
+. Wait for the Operator's status to change from `Installing` to `Succeeded`. This indicates that the Operator's deployment has completed successfully.
+. Click on the *Red Hat Integration - AMQ Broker for RHEL 9 (Multiarch)* Operator name to view its details.
+. Navigate to the *Operator Details* tab and then the *All Instances* tab. You should see `ActiveMQArtemis` listed, and its status should eventually show `Ready` or `Running`.
+. You can also verify the Operator's pod running by navigating to *Workloads* > *Pods* in the left navigation and filtering by the installed namespace. Look for a pod named `amq-broker-operator-xxxxxxxxxx-xxxxx` with a `Running` status.
+
+With the AMQ Broker Operator successfully installed, you can now proceed to create and manage AMQ Broker instances using Custom Resources.

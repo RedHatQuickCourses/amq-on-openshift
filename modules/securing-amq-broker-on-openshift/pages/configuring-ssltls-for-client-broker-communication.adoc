@@ -1,0 +1,232 @@
+#  Configuring SSL/TLS for Client-Broker Communication
+
+AMQ Broker on OpenShift: Deployment and Management
+:icons: font
+:source-highlighter: highlight.js
+:toc: macro
+:toc-title: On this page
+
+toc::[]
+
+[[securing-amq-broker-on-openshift]]
+== Securing AMQ Broker on OpenShift
+
+This section details how to secure your AMQ Broker deployments on OpenShift.
+
+=== Configuring SSL/TLS for Client-Broker Communication
+
+Transport Layer Security (TLS), commonly referred to as SSL/TLS, is essential for securing communication between your AMQ Broker clients and the broker itself. It encrypts data in transit, protecting sensitive information from eavesdropping and tampering. This section covers configuring both one-way and two-way (mutual) TLS authentication.
+
+==== Overview of TLS Authentication
+
+*   *One-Way TLS*: The client verifies the identity of the broker using the broker's certificate. This ensures that the client is connecting to the legitimate broker and encrypts the communication channel. The broker does not verify the client's identity.
+*   *Two-Way TLS (Mutual TLS - mTLS)*: Both the client and the broker verify each other's identities. The client verifies the broker's certificate, and the broker verifies the client's certificate. This provides a higher level of security, ensuring that only trusted clients can connect to the broker.
+
+==== Prerequisites
+
+Before configuring SSL/TLS, ensure you have:
+
+*   Access to an OpenShift cluster with the AMQ Broker Operator installed.
+*   `oc` CLI configured and logged into your target OpenShift project.
+*   Understanding of certificate management concepts (KeyStores, TrustStores, certificates, private keys).
+*   Java `keytool` utility (for generating self-signed certificates in the hands-on lab).
+
+==== Hands-on Activity: Preparing Certificates and OpenShift Secrets
+
+This activity guides you through generating self-signed certificates and creating OpenShift secrets required for SSL/TLS configuration. While self-signed certificates are suitable for development and testing, in production environments, you should use certificates issued by a trusted Certificate Authority (CA) or managed by solutions like OpenShift's `cert-manager` Operator.
+
+. Create a working directory for your certificates:
++
+[source,bash]
+----
+mkdir ~/amq-tls-certs
+cd ~/amq-tls-certs
+----
+
+. Generate a self-signed certificate and private key for the AMQ Broker. This will be stored in a Java Keystore (`broker.ks`). Ensure the Common Name (CN) matches the hostname clients will use to connect to the broker if hostname verification is enabled. For OpenShift, this might be the service name or route hostname.
++
+[source,bash]
+----
+keytool -genkeypair -alias broker -keyalg RSA -keysize 2048 -validity 365 -keystore broker.ks -storepass password -keypass password -dname "CN=amq-broker-service.my-project.svc.cluster.local, OU=IT, O=RedHat, L=Raleigh, ST=NC, C=US"
+----
++
+NOTE: Replace `amq-broker-service.my-project.svc.cluster.local` with your actual broker service hostname or route hostname if you are exposing the broker externally. `my-project` should be your OpenShift project name.
+
+. Export the broker's public certificate (`broker.cer`) from `broker.ks`. Clients will need this certificate (or the CA's certificate that signed it) to trust the broker.
++
+[source,bash]
+----
+keytool -exportcert -alias broker -file broker.cer -keystore broker.ks -storepass password -noprompt
+----
+
+. Create an OpenShift secret containing the broker's keystore. This secret will be referenced by the AMQ Broker Custom Resource (CR).
++
+[source,bash]
+----
+oc create secret generic broker-tls-secret \
+  --from-file=broker.ks=./broker.ks \
+  --from-literal=keyStorePassword=password \
+  -n $(oc project -q)
+----
++
+NOTE: `-n $(oc project -q)` automatically uses your current OpenShift project.
+
+. Link the secret to the `amq-broker-operator` service account. This allows the operator to access the secret and inject the certificate configuration into the broker pods.
++
+[source,bash]
+----
+oc secrets link sa/amq-broker-operator secret/broker-tls-secret -n $(oc project -q)
+----
+
+==== Configuring One-Way TLS on the AMQ Broker
+
+After preparing the certificates and secrets, you can configure the AMQ Broker to use SSL/TLS for client connections.
+
+. **Edit the AMQ Broker Custom Resource (CR)**
++
+Locate your broker CR (e.g., `broker-cr.yaml`) and modify the `acceptors` section to enable SSL/TLS. You need to specify `sslEnabled: true` and reference the `sslSecret` you created.
++
+[source,yaml]
+----
+# broker-cr.yaml
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  deploymentPlan:
+    size: 1
+  acceptors:
+    - name: my-secure-acceptor
+      protocols: amqp,openwire
+      port: 5671 # Or your desired secure port, e.g., 61617 for OpenWire/JMS
+      sslEnabled: true
+      sslSecret: broker-tls-secret # Name of the OpenShift secret created earlier
+      # Optional: To automatically reload certificates when renewed by cert-manager
+      # brokerProperties:
+      #   - "artemis.ssl.auto-reload=true"
+----
+
+. **Apply the changes:**
++
+[source,bash]
+----
+oc apply -f broker-cr.yaml -n $(oc project -q)
+----
++
+The operator will detect the changes and update the broker deployment.
+
+. **Client Trust Store Configuration:**
++
+Clients connecting to this secure acceptor will need to trust the broker's certificate. You achieve this by importing the `broker.cer` (or the root CA certificate if using a CA-signed cert) into the client's trust store.
++
+[source,bash]
+----
+# On the client machine:
+keytool -importcert -trustcacerts -alias broker -file ~/amq-tls-certs/broker.cer -keystore client.ts -storepass password -noprompt
+----
++
+Clients then configure their connection to use SSL/TLS and point to `client.ts` as their trust store.
+
+==== Configuring Two-Way TLS (Mutual TLS - mTLS) on the AMQ Broker
+
+For mTLS, both the client and the broker authenticate each other. This requires the broker to have a trust store containing the trusted client certificates (or the CA certificate that signed them).
+
+. **Hands-on Activity: Prepare Client Certificates for mTLS**
+
+. Generate a self-signed certificate and private key for a client. This will be stored in `client.ks`.
++
+[source,bash]
+----
+keytool -genkeypair -alias client -keyalg RSA -keysize 2048 -validity 365 -keystore client.ks -storepass password -keypass password -dname "CN=my-client, OU=IT, O=RedHat, L=Raleigh, ST=NC, C=US"
+----
+
+. Export the client's public certificate (`client.cer`) from `client.ks`. The broker will need this to trust the client.
++
+[source,bash]
+----
+keytool -exportcert -alias client -file client.cer -keystore client.ks -storepass password -noprompt
+----
+
+. Create a broker trust store (`broker.ts`) and import the client's public certificate into it. This trust store will be used by the broker to verify client identities.
++
+[source,bash]
+----
+keytool -importcert -trustcacerts -alias client -file client.cer -keystore broker.ts -storepass password -noprompt
+----
+
+. Create an OpenShift secret containing the broker's trust store for client authentication.
++
+[source,bash]
+----
+oc create secret generic broker-trust-secret \
+  --from-file=broker.ts=./broker.ts \
+  --from-literal=trustStorePassword=password \
+  -n $(oc project -q)
+----
++
+. Link the `broker-trust-secret` to the `amq-broker-operator` service account:
++
+[source,bash]
+----
+oc secrets link sa/amq-broker-operator secret/broker-trust-secret -n $(oc project -q)
+----
+
+. **Edit the AMQ Broker Custom Resource (CR) for mTLS**
++
+Modify the `acceptors` section in your broker CR to enable `needClientAuth: true` and reference the `trustSecret` containing the client certificates.
++
+[source,yaml]
+----
+# broker-cr.yaml
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  deploymentPlan:
+    size: 1
+  acceptors:
+    - name: my-secure-mtls-acceptor
+      protocols: amqp,openwire
+      port: 5672 # Or your desired secure port for mTLS
+      sslEnabled: true
+      sslSecret: broker-tls-secret     # Secret containing broker's keystore
+      needClientAuth: true             # Require clients to present certificates
+      trustSecret: broker-trust-secret # Secret containing broker's truststore with client certificates
+----
+
+. **Apply the changes:**
++
+[source,bash]
+----
+oc apply -f broker-cr.yaml -n $(oc project -q)
+----
+
+. **Client Configuration for mTLS:**
++
+For mTLS, clients must also present their certificate to the broker. This involves configuring the client application to use its own keystore (`client.ks`) containing its private key and certificate, along with a trust store (`client.ts`) containing the broker's public certificate.
++
+[source,bash]
+----
+# On the client machine:
+# If you followed the steps above, you have client.ks (for client's identity)
+# and client.ts (for trusting the broker)
+#
+# A Java client example might look like this (conceptual):
+# System.setProperty("javax.net.ssl.keyStore", "client.ks");
+# System.setProperty("javax.net.ssl.keyStorePassword", "password");
+# System.setProperty("javax.net.ssl.trustStore", "client.ts");
+# System.setProperty("javax.net.ssl.trustStorePassword", "password");
+#
+# Connect using the SSL/TLS protocol to the secure port.
+----
+
+==== Troubleshooting and Best Practices
+
+*   **Certificate Expiry**: Regularly monitor certificate expiry dates. For production, consider integrating with OpenShift's `cert-manager` for automated certificate lifecycle management.
+*   **Hostname Verification**: Ensure the `CN` (Common Name) or `SAN` (Subject Alternative Name) in your broker's certificate matches the hostname clients use to connect. If not, clients may fail hostname verification.
+*   **Keystore/Truststore Passwords**: Use strong, unique passwords for keystores and truststores. Manage them securely, potentially using OpenShift secrets with encrypted storage.
+*   **Protocol Support**: Verify that your chosen acceptor `protocols` are compatible with SSL/TLS (e.g., `amqps` for AMQP over SSL/TLS, `ssl` for OpenWire over SSL/TLS often uses the same port as plain OpenWire but with `sslEnabled: true`).
+*   **Firewall/Networking**: Ensure OpenShift network policies and external firewalls (if applicable) allow traffic on the secure ports you configure (e.g., 5671, 61617).
+*   **Operator Logs**: If the broker fails to deploy or come up after changes, check the `amq-broker-operator` logs and the broker pod logs for detailed error messages related to certificate loading or SSL/TLS configuration.

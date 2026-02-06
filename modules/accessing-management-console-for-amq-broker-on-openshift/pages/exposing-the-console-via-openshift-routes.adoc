@@ -1,0 +1,182 @@
+#  Exposing the Console via OpenShift Routes
+
+= Exposing the Hawtio Management Console via OpenShift Routes
+
+The Hawtio management console provides a web-based interface for monitoring and administering your AMQ Broker instances. To access this console from outside your OpenShift cluster, or even from within the cluster via a stable URL, you need to expose it. This section details how to enable and configure console exposure using OpenShift Routes.
+
+== Overview of Hawtio Console Exposure
+
+When you deploy an AMQ Broker instance on OpenShift, the AMQ Broker Operator manages its lifecycle. By default, the Hawtio management console, which runs within the broker pod, is not directly accessible externally. To enable access, you instruct the Operator to create the necessary OpenShift networking resources.
+
+The Operator simplifies this process significantly. By setting a single attribute in your `ActiveMQArtemis` Custom Resource (CR), the Operator automatically:
+
+*   Creates a dedicated OpenShift `Service` for the console.
+*   Creates an OpenShift `Route` that exposes this service, making the console accessible via a hostname and URL.
+
+This default behavior uses OpenShift `Routes`, which are typically used to expose services running within the cluster to external clients. Routes allow you to define hostnames, paths, and TLS termination for external access.
+
+=== Customizing Console Route Hostnames
+
+OpenShift automatically generates a hostname for routes based on your cluster's routing subdomain. However, you might need to customize this hostname to align with your organization's DNS policies or for easier memorability. The AMQ Broker Operator provides attributes within the `ActiveMQArtemis` CR to achieve this:
+
+*   `ingressHost`: This attribute allows you to *replace* the default generated hostname with a completely custom one for the console route.
+*   `ingressDomain`: This attribute allows you to *append* a custom domain to the default or `ingressHost` value. The context clarifies that this custom domain is applied to *all* other routes exposed by the CR, not just the console.
+
+While these attributes include "ingress" in their name, the documentation confirms their applicability to customizing hostnames for routes as well, particularly for the console's exposed routes.
+
+[[hands-on-expose-console]]
+== Hands-on Activity: Exposing and Customizing the Hawtio Console Route
+
+This lab walks you through enabling the Hawtio management console and customizing its OpenShift Route.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   An `ActiveMQArtemis` broker instance already deployed. (If not, you can refer to "Deploying a Basic AMQ Broker Instance" lab for deployment.)
+*   `oc` CLI tool configured and logged in to your OpenShift cluster.
+
+=== Step 1: Verify Current Broker Configuration (Optional)
+
+First, let's inspect your existing `ActiveMQArtemis` CR to ensure the console is not already exposed.
+
+.Get the `ActiveMQArtemis` CR:
+```bash
+oc get activemqartemises -o yaml
+```
+Identify your broker instance's CR. For example, if your broker is named `my-broker`, you would see output similar to this:
+```yaml
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+  # ...
+spec:
+  # ... you should NOT see a 'console' section or it will have expose: false
+  # ...
+```
+
+=== Step 2: Expose the Management Console
+
+Now, we will modify the `ActiveMQArtemis` CR to expose the Hawtio management console.
+
+.Edit the `ActiveMQArtemis` CR:
+```bash
+oc edit activemqartemises <your-broker-name>
+```
+.Add the `console` attribute to the `spec` section and set `expose: true`:
+```yaml
+# ... (existing content)
+spec:
+  # ... (other broker configurations)
+  console:
+    expose: true
+# ... (rest of the CR)
+```
+Save and exit the editor. The Operator will detect the change and reconcile the broker deployment, creating the necessary service and route.
+
+.Verify the console route:
+```bash
+oc get route -l app.kubernetes.io/name=<your-broker-name>-console
+```
+You should see output similar to this, showing the generated route:
+```
+NAME                           HOST/PORT                                  PATH   SERVICES                   PORT    TERMINATION            WILDCARD
+my-broker-console              my-broker-console-project.apps.cluster.example.com   /      my-broker-console          <all>   reencrypt/Redirect     None
+```
+Note down the `HOST/PORT` for your console.
+
+.Access the Hawtio Console:
+Open a web browser and navigate to the `HOST/PORT` URL obtained in the previous step. You should see the Hawtio login page.
+
+=== Step 3: Customize the Console Route Hostname (Optional)
+
+Let's modify the route's hostname for easier access. We'll use the `ingressDomain` attribute to append a custom domain.
+
+.Edit the `ActiveMQArtemis` CR again:
+```bash
+oc edit activemqartemises <your-broker-name>
+```
+.Modify the `spec.console` section to include `ingressDomain`:
+```yaml
+# ... (existing content)
+spec:
+  # ... (other broker configurations)
+  console:
+    expose: true
+    ingressDomain: custom-domain.io << Add this line
+# ... (rest of the CR)
+```
+Alternatively, to entirely replace the hostname:
+```yaml
+# ... (existing content)
+spec:
+  # ... (other broker configurations)
+  console:
+    expose: true
+    ingressHost: haw-console.mycompany.com << Use ingressHost to replace
+# ... (rest of the CR)
+```
+Choose either `ingressDomain` or `ingressHost` as per your requirement. For this example, we'll use `ingressDomain`. Save and exit the editor.
+
+.Verify the updated console route:
+```bash
+oc get route -l app.kubernetes.io/name=<your-broker-name>-console
+```
+You should observe that the `HOST/PORT` has been updated to include your `custom-domain.io` or `haw-console.mycompany.com` (depending on which attribute you used).
+```
+NAME                           HOST/PORT                                  PATH   SERVICES                   PORT    TERMINATION            WILDCARD
+my-broker-console              my-broker-console-project.custom-domain.io   /      my-broker-console          <all>   reencrypt/Redirect     None
+```
+
+.Access the Hawtio Console with the new URL:
+Open a web browser and navigate to the new `HOST/PORT` URL. The console should be accessible via your custom hostname.
+
+=== Step 4: Clean up (Optional)
+
+To stop exposing the console and remove the created route:
+
+.Edit the `ActiveMQArtemis` CR:
+```bash
+oc edit activemqartemises <your-broker-name>
+```
+.Remove the `console` section or set `expose: false`:
+```yaml
+# ... (existing content)
+spec:
+  # ... (other broker configurations)
+  # console: << Remove this entire section
+  #   expose: true
+  #   ingressDomain: custom-domain.io
+# ... (rest of the CR)
+```
+Alternatively:
+```yaml
+# ... (existing content)
+spec:
+  # ... (other broker configurations)
+  console:
+    expose: false << Set to false
+    # ingressDomain: custom-domain.io << Can be left or removed
+# ... (rest of the CR)
+```
+Save and exit. The Operator will remove the console service and route.
+
+.Verify the route is removed:
+```bash
+oc get route -l app.kubernetes.io/name=<your-broker-name>-console
+```
+This command should now return "No resources found".
+
+== Expert Insights and Troubleshooting
+
+*   **Route Not Appearing**: If the route doesn't appear after updating the CR, check the `ActiveMQArtemis` CR's `status` section for any errors or events. Also, check the logs of the AMQ Broker Operator pod for reconciliation issues.
+    ```bash
+    oc logs -f $(oc get pod -l app=amq-broker-operator -o jsonpath='{.items[0].metadata.name}')
+    ```
+*   **"Application is not available"**: This often indicates an issue with the underlying service or broker pod. Ensure the broker pod is running and healthy:
+    ```bash
+    oc get pods -l app.kubernetes.io/name=<your-broker-name>
+    oc logs <your-broker-pod-name>
+    ```
+*   **Security Implications**: Exposing the management console creates an external access point. Ensure you have proper authentication and authorization configured for the console. By default, the console often uses a simple username/password combination. For production environments, integrate with OpenShift's authentication mechanisms or an external identity provider, as covered in the "Securing AMQ Broker on OpenShift" section.
+*   **`exposeMode: ingress`**: While this lab focused on OpenShift Routes (the default), the Operator also supports exposing the console via OpenShift `Ingress` resources. This is configured by adding `exposeMode: ingress` under the `console` section. If using `ingress`, you *must* specify `ingressHost` or `ingressDomain`. Choose `Route` or `Ingress` based on your OpenShift cluster's networking configuration and your specific requirements. The default `route` is generally simpler for basic exposure on OpenShift.

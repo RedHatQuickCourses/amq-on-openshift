@@ -1,0 +1,6 @@
+* xref:amq-broker-high-availability-on-openshift.adoc[]
+** xref:introduction-to-high-availability-ha-concepts.adoc[]
+** xref:broker-clustering-strategies-shared-store-vs-replicated-live-backup.adoc[]
+** xref:deploying-and-configuring-an-ha-broker-pair.adoc[]
+** xref:understanding-failover-and-recovery-mechanisms.adoc[]
+** xref:persistence-and-data-replication-for-ha.adoc[]

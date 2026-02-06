@@ -1,0 +1,340 @@
+#  Lab: Implementing Basic Security (Encryption, RBAC)
+
+= Lab: Implementing Basic Security (Encryption, RBAC)
+
+This lab guides you through the process of securing your AMQ Broker deployment on OpenShift using two fundamental security mechanisms: SSL/TLS encryption for client-broker communication and Role-Based Access Control (RBAC) for user authentication and authorization. By the end of this lab, you will have a secure AMQ Broker instance, capable of encrypting network traffic and managing access based on user roles.
+
+== Prerequisites
+
+Before you begin this lab, ensure you have:
+
+*   Access to an OpenShift cluster with `oc` CLI configured and logged in.
+*   The AMQ Broker Operator installed in your OpenShift cluster. If not, refer to the "Installing the AMQ Broker Operator via CLI or OperatorHub" section.
+*   A basic `ActiveMQArtemis` broker instance deployed in a dedicated namespace (e.g., `amq`). For this lab, we'll assume a broker named `mybroker` in the `amq` namespace. If you don't have one, deploy a simple broker first:
+
+.Create a file named `mybroker-initial.yaml`:
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: mybroker
+  namespace: amq
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker:7.12 # Use an appropriate image for your OpenShift version
+----
+
+.Deploy the broker and switch to the `amq` project:
+[source,bash]
+----
+oc new-project amq || oc project amq
+oc apply -f mybroker-initial.yaml -n amq
+oc wait --for=condition=Ready pod -l app.kubernetes.io/name=mybroker -n amq --timeout=300s
+----
+
+== Part 1: Configuring SSL/TLS Encryption
+
+SSL/TLS (Secure Sockets Layer/Transport Layer Security) is essential for encrypting data transmitted between messaging clients and the AMQ Broker. This prevents unauthorized access to sensitive message content and ensures data integrity. On OpenShift, certificates and keys required for SSL/TLS are managed through Secrets, which the AMQ Broker Operator then utilizes to configure secure listeners for your broker pods.
+
+=== Technical Explanation: SSL/TLS with AMQ Broker on OpenShift
+
+When configuring SSL/TLS, the AMQ Broker acts as a server, requiring a *keystore* that contains its private key and public certificate. This certificate is what clients will use to verify the broker's identity. Conversely, clients connecting to the broker need a *truststore* containing the broker's public certificate (or the certificate of a Certificate Authority that signed the broker's certificate) to trust the broker.
+
+In an OpenShift environment, these keystore and truststore files (typically in JKS or PKCS12 format) are packaged into an OpenShift Secret. The `ActiveMQArtemis` Custom Resource (CR) allows you to specify the name of this secret, along with the passwords for the keystore and truststore. The AMQ Broker Operator then mounts this secret into the broker pods, enabling the broker to establish secure listeners.
+
+=== Hands-on Activity: Prepare TLS Certificates and Keys
+
+For this lab, we will generate self-signed certificates using the `keytool` utility. In a production environment, you would typically obtain certificates from a trusted Certificate Authority (CA) or use OpenShift's built-in certificate management (e.g., using `ServiceServingCert` annotations).
+
+. Create a temporary directory for certificates and navigate into it:
++
+[source,bash]
+----
+mkdir -p tls-certs
+cd tls-certs
+----
+
+. Generate a self-signed certificate and private key for the broker. This will be stored in a PKCS12 keystore named `broker.ks`. Ensure the Common Name (CN) matches the hostname your clients will use to connect to the broker. For in-cluster clients, this is typically the headless service name (`<broker-name>-hdls-svc.<namespace>.svc`).
++
+[source,bash]
+----
+keytool -genkeypair -alias broker -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore broker.ks -validity 365 -dname "CN=mybroker-hdls-svc.amq.svc, OU=IT, O=MyOrg, L=MyCity, ST=MyState, C=US" -storepass password -keypass password
+----
++
+*   For simplicity in this lab, both `storepass` and `keypass` are set to `password`. *Always use strong, unique passwords in production.*
+
+. Export the broker's public certificate from `broker.ks` to a file (`broker.cer`). This file will be imported into the client's truststore.
++
+[source,bash]
+----
+keytool -exportcert -alias broker -file broker.cer -keystore broker.ks -storepass password
+----
+
+. Create a client truststore (`client.ts`) and import the broker's public certificate into it. This truststore will be used by clients to verify the broker's identity during the TLS handshake.
++
+[source,bash]
+----
+keytool -importcert -alias broker -file broker.cer -keystore client.ts -storepass password -noprompt
+----
++
+*   The `-noprompt` option prevents `keytool` from asking for confirmation to trust the certificate.
+
+. Verify the contents of your newly created keystore and truststore:
++
+[source,bash]
+----
+keytool -list -keystore broker.ks -storepass password
+keytool -list -keystore client.ts -storepass password
+----
+
+=== Hands-on Activity: Create OpenShift Secret for TLS Credentials
+
+Now, package the `broker.ks` and `client.ts` files, along with their passwords, into an OpenShift Secret. This secret will then be referenced by your `ActiveMQArtemis` Custom Resource.
+
+. Create the secret named `mytlssecret` in your `amq` OpenShift project:
++
+[source,bash]
+----
+export SECRET_NAME=mytlssecret
+export keyStorePassword=password # Must match the password used during keystore creation
+export trustStorePassword=password # Must match the password used during truststore creation
+
+oc create secret generic $SECRET_NAME \
+  --from-file=broker.ks=broker.ks \
+  --from-file=client.ts=client.ts \
+  --from-literal=keyStorePassword=$keyStorePassword \
+  --from-literal=trustStorePassword=$trustStorePassword -n amq
+----
++
+*   This command aligns with the example provided in the context.
+
+. Verify that the secret has been successfully created:
++
+[source,bash]
+----
+oc get secret $SECRET_NAME -n amq
+----
+
+=== Hands-on Activity: Configure AMQ Broker for TLS
+
+Modify your `ActiveMQArtemis` Custom Resource to enable SSL/TLS on one of its network listeners and instruct it to use the `mytlssecret` secret.
+
+. Edit your `mybroker-initial.yaml` file to add an `acceptor` that enables SSL/TLS:
++
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: mybroker
+  namespace: amq
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker:7.12
+  acceptors: # <1>
+    - name: insecure-acceptor # <2>
+      port: 61616
+      protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE
+    - name: my-secure-acceptor # <3>
+      port: 61617 # Use a different port for the secure acceptor
+      protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE
+      sslEnabled: true # <4>
+      sslSecret: mytlssecret # <5>
+  console: # <6>
+    expose: true
+    sslSecret: mytlssecret
+    sslEnabled: true
+----
+<1> The `acceptors` array defines network listeners.
+<2> An example of an insecure acceptor (default if not specified).
+<3> Defines a new acceptor for secure connections.
+<4> Enables SSL/TLS for this acceptor.
+<5> References the OpenShift Secret containing the TLS credentials.
+<6> If you are exposing the management console, you should also secure it with SSL/TLS.
+
+. Apply the updated `ActiveMQArtemis` CR:
++
+[source,bash]
+----
+oc apply -f mybroker-initial.yaml -n amq
+----
+
+. Monitor the broker pods. They will restart to pick up the new configuration. Wait until they are `Running` and `Ready`.
++
+[source,bash]
+----
+oc get pods -n amq -w
+----
+
+=== Hands-on Activity: Verify TLS Configuration
+
+Once the broker pods are running, you can verify that the SSL/TLS listener is active.
+
+. Examine the broker logs for messages indicating secure listener startup. Look for references to SSL:
++
+[source,bash]
+----
+oc logs -f $(oc get pod -l app.kubernetes.io/name=mybroker -o jsonpath='{.items[0].metadata.name}') -n amq | grep -i ssl
+----
++
+You should see output similar to `Creating SSL server socket factory` or other messages indicating successful SSL context initialization.
+
+. (Optional) Access the Hawtio management console via HTTPS. If you exposed the console (as shown in the CR above), you should be able to access it securely through the generated OpenShift Route.
++
+[source,bash]
+----
+oc get route mybroker-console -n amq -o jsonpath='{.spec.host}'
+----
++
+Navigate to `https://<route-host>` in your browser. You might encounter a certificate warning because you used a self-signed certificate.
+
+== Part 2: Implementing Role-Based Access Control (RBAC)
+
+Role-Based Access Control (RBAC) is a security mechanism that restricts system access to authorized users based on their assigned roles. In AMQ Broker, RBAC involves defining users, assigning them roles, and then granting permissions to those roles for various broker resources (e.g., queues, topics, management operations). AMQ Broker utilizes JAAS (Java Authentication and Authorization Service) login modules for authentication and authorization. The `PropertiesLoginModule` is a common choice for managing users and roles from simple properties files.
+
+=== Technical Explanation: RBAC with `PropertiesLoginModule`
+
+The `PropertiesLoginModule` is a JAAS module that authenticates users by comparing provided credentials against a list of usernames and hashed passwords stored in a properties file (e.g., `users.properties`). It then authorizes users by assigning them roles, which are also defined in another properties file (e.g., `roles.properties`). These properties files are typically managed within OpenShift Secrets.
+
+The AMQ Broker Operator simplifies this process significantly. You define your users and their roles directly within an `ActiveMQArtemisSecurity` Custom Resource. The Operator then takes this definition, automatically creates the necessary internal properties files (`users.properties`, `roles.properties`), and packages them into an OpenShift Secret. This secret is then mounted into the broker pods, and the broker is configured to use the `PropertiesLoginModule` for authentication and authorization.
+
+=== Hands-on Activity: Create Secret for Users and Passwords
+
+First, create an OpenShift Secret to store the usernames and their passwords. This secret must follow a specific naming convention: `security-properties-<module_name>`, where `<module_name>` is the name you'll give your `PropertiesLoginModule` later in the `ActiveMQArtemisSecurity` CR.
+
+. Choose a module name, for instance, `prop-module`. This name will be used in both the secret name and the `ActiveMQArtemisSecurity` CR.
+. Create the secret named `security-properties-prop-module` with your desired users and passwords:
++
+[source,bash]
+----
+oc create secret generic security-properties-prop-module \
+  --from-literal=sam=samspassword \
+  --from-literal=rob=robspassword -n amq
+----
++
+*   This command creates a secret containing user `sam` with password `samspassword` and user `rob` with password `robspassword`.
+
+. Verify the secret has been created:
++
+[source,bash]
+----
+oc get secret security-properties-prop-module -n amq
+----
+
+=== Hands-on Activity: Define Roles and Permissions using `ActiveMQArtemisSecurity` CR
+
+Now, create an `ActiveMQArtemisSecurity` Custom Resource to define the `PropertiesLoginModule` configuration and map your users to their respective roles.
+
+. Create a file named `activemqartemis-security-prop.yaml` with the following content:
++
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisSecurity
+metadata:
+  name: ex-prop # Name of this security configuration instance
+  namespace: amq
+spec:
+  loginModules:
+    propertiesLoginModules: # <1>
+      - name: "prop-module" # <2> This name *must* match the module_name used in the secret name
+        users:
+          - name: "sam" # <3> User defined in the secret
+            roles:
+              - "sender"
+              - "admin" # Sam can send messages and perform administrative tasks
+          - name: "rob" # <4> User defined in the secret
+            roles:
+              - "receiver" # Rob can only receive messages
+----
+<1> Specifies that we are configuring a properties-based login module.
+<2> The `name` field here (`"prop-module"`) is crucial as it creates the link to the `security-properties-prop-module` secret you created earlier.
+<3> `sam` is assigned `sender` and `admin` roles.
+<4> `rob` is assigned the `receiver` role.
+
+. Apply the `ActiveMQArtemisSecurity` CR to your cluster:
++
+[source,bash]
+----
+oc apply -f activemqartemis-security-prop.yaml -n amq
+----
+
+. Verify that the security CR has been created:
++
+[source,bash]
+----
+oc get activemqartemissecurity -n amq
+----
+
+=== Hands-on Activity: Associate Security Configuration with the Broker
+
+The final step for RBAC is to instruct your `ActiveMQArtemis` broker instance (`mybroker`) to use the `ex-prop` security configuration that you just defined.
+
+. Edit your existing `mybroker-initial.yaml` file. Add a reference to the `ActiveMQArtemisSecurity` CR under `spec.loginModules`:
++
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: mybroker
+  namespace: amq
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker:7.12
+  acceptors:
+    - name: insecure-acceptor
+      port: 61616
+      protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE
+    - name: my-secure-acceptor
+      port: 61617
+      protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE
+      sslEnabled: true
+      sslSecret: mytlssecret
+  console:
+    expose: true
+    sslSecret: mytlssecret
+    sslEnabled: true
+  loginModules: # <1>
+    activeMQArtemisSecurityRef: ex-prop # <2>
+----
+<1> This section defines the JAAS login modules the broker will use.
+<2> This references the `ActiveMQArtemisSecurity` instance by its `metadata.name` (`ex-prop`).
+
+. Apply the updated `ActiveMQArtemis` CR:
++
+[source,bash]
+----
+oc apply -f mybroker-initial.yaml -n amq
+----
+
+. Monitor the broker pods. They will restart to apply the new security configuration.
++
+[source,bash]
+----
+oc get pods -n amq -w
+----
+
+=== Hands-on Activity: Test RBAC Configuration
+
+Once the broker is running with the new security configuration, you can test the RBAC. This involves using client applications to connect and perform actions with different user credentials, verifying that permissions are enforced as defined by their roles.
+
+. *Conceptual Test Steps:*
+    *   **Authorization Configuration (Broker.xml):** The `ActiveMQArtemisSecurity` CR handles user authentication and role mapping. Granular permissions (e.g., which roles can send to `queueA`, which can create queues) are typically defined in the broker's `broker.xml` configuration, specifically within the `<security-settings>` and `<address-settings>` sections. For basic RBAC, the `admin` role usually has full access, while other roles like `sender` and `receiver` would have permissions tailored to sending/receiving messages on specific destinations.
+    *   **As `sam` (roles: `sender`, `admin`):**
+        *   Using a messaging client (e.g., a simple Java/AMQP client), attempt to connect to the secure acceptor (`61617`) using `sam`'s credentials (`samspassword`). The connection should succeed.
+        *   Try to create a new queue, send messages to it, and receive messages from it. All operations should succeed due to the `admin` role.
+    *   **As `rob` (role: `receiver`):**
+        *   Attempt to connect to the secure acceptor (`61617`) using `rob`'s credentials (`robspassword`). The connection should succeed.
+        *   Try to create a new queue or send messages to an existing queue. These operations should *fail* with an authorization error, as `rob` only has the `receiver` role, which typically implies read-only access to messages.
+        *   Try to receive messages from an existing queue. This operation should succeed.
+
+    Developing full client code to demonstrate this is beyond the scope of *this specific lab objective* but is crucial for a complete understanding of RBAC in action. You would typically use a Java JMS, AMQP, or Core protocol client, configuring it with the `client.ts` truststore and the appropriate username/password.
+
+== Summary
+
+In this lab, you successfully implemented basic security for your AMQ Broker on OpenShift. You configured SSL/TLS encryption for secure client-broker communication by generating self-signed certificates, packaging them into an OpenShift Secret, and updating your `ActiveMQArtemis` Custom Resource. You then implemented RBAC using the `PropertiesLoginModule` by creating a secret for user credentials, defining users and roles in an `ActiveMQArtemisSecurity` CR, and associating it with your broker instance. These steps lay a robust foundation for securing your messaging infrastructure on OpenShift.

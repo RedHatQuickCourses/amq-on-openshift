@@ -1,0 +1,155 @@
+#  Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup
+
+[[amq-broker-ha-strategies]]
+= Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup
+
+High Availability (HA) is paramount for messaging systems to ensure continuous operation and message delivery, even in the event of component failures. Red Hat AMQ Broker, leveraging Apache ActiveMQ Artemis, provides robust strategies to achieve HA on OpenShift. These strategies fundamentally differ in how they manage message persistence and coordinate between broker instances. Understanding these core differences—*Shared Store HA* versus *Replicated Live-Backup HA*—is crucial for designing a resilient and performant messaging infrastructure.
+
+== Shared Store High Availability
+
+The Shared Store HA strategy is characterized by multiple broker instances sharing a single, common persistence mechanism, such as a shared file system journal or a JDBC database. In this configuration, only one broker instance is active at any given time, serving client requests, while other instances remain passive, ready to take over if the active broker fails. This active-passive model is often referred to as a *leader-follower* configuration.
+
+[[how-shared-store-ha-works]]
+=== How Shared Store HA Works
+
+A Shared Store HA setup operates on the principle of exclusive access to a shared resource:
+
+.  *Shared Persistence Layer*: All participating broker instances are configured to connect to and use the *same* underlying storage for message persistence. This could be a shared Persistent Volume (PV) for the broker's journal or an external, highly available JDBC database.
+.  *Leader Election*: When broker instances start, they compete to acquire an exclusive lock on this shared persistence mechanism (e.g., a file lock on the shared volume or a database lock). The broker that successfully acquires this lock becomes the *leader*.
+.  *Leader Role*: The leader broker is the active instance. It processes all incoming client requests, manages queues and topics, and persists messages to the shared store.
+.  *Follower Role*: Any broker instance that fails to acquire the lock enters a *follower* (or backup) state. A follower is a passive instance; it continuously monitors the leader and repeatedly attempts to obtain the lock. It does not process client requests.
+.  *Failover Mechanism*: If the leader broker fails (e.g., its pod crashes, the underlying OpenShift node becomes unavailable, or it loses network connectivity), its lock on the shared persistence is released. One of the waiting follower brokers will then successfully acquire the lock, transition immediately into the leader role, and resume processing client requests from where the previous leader left off. This mechanism ensures data consistency and fast recovery.
+
+[NOTE]
+====
+As noted in the context, "Only the leader broker processes client requests at any given time." and "Leader-follower deployments provide a faster mean time to repair (MTTR) for a node failure than that provided by OpenShift for a single deployment."
+====
+
+[[shared-store-persistence-requirements]]
+=== Persistence for Shared Store HA
+
+For Shared Store HA, *persistent storage is a fundamental requirement*. The `persistenceEnabled` flag in your `ActiveMQArtemis` custom resource (CR) must be set to `true`.
+
+.  *Shared Volume Provisioning*: If using file-based persistence, you need a shared Persistent Volume (PV) that can be simultaneously accessed by multiple broker pods. This typically requires a storage class that supports `ReadWriteMany` access mode, which can be challenging in some OpenShift environments without specific container-native storage solutions.
+.  *JDBC Database Integration*: Alternatively, brokers can be configured to use a JDBC database for persistence. In this scenario, the database itself acts as the shared store, and its high availability and transactional guarantees ensure data integrity.
+.  *Separate Deployments*: It's a best practice to deploy your leader and follower brokers in separate OpenShift projects or on different nodes/availability zones for enhanced isolation. The context states, "It is recommended that you create broker deployments in separate projects."
+
+[CAUTION]
+====
+The context highlights the risk of non-persistent storage: "If you specify `persistenceEnabled=false` in your CR, the deployed brokers uses ephemeral storage. Ephemeral storage means that that every time you restart the broker pods, any existing data is lost." This makes ephemeral storage unsuitable for any HA setup where message durability is required.
+====
+
+[[shared-store-pros-cons]]
+=== Advantages and Disadvantages of Shared Store HA
+
+.Advantages:
+*   *Simplicity in Data Management*: Conceptually, data consistency is straightforward as only one broker ever writes to the shared journal.
+*   *Fast Failover*: Once the new leader acquires the lock, it can quickly take over message processing.
+*   *Resource Efficiency*: Only the leader actively consumes CPU/memory for message processing.
+
+.Disadvantages:
+*   *Shared Storage Bottleneck*: The shared storage can become a performance bottleneck under high message loads or if the underlying storage solution is not highly performant.
+*   *Single Point of Failure (for Storage)*: While brokers are HA, the shared storage itself becomes a critical dependency and a potential single point of failure if not highly available and robust.
+*   *Complex Storage Requirements*: Provisioning `ReadWriteMany` PVs can be complex depending on your OpenShift cluster's storage provider.
+
+== Replicated Live-Backup High Availability
+
+Replicated Live-Backup HA, often referred to as *broker mirroring* or *replication*, achieves high availability by actively replicating message data between broker instances. Unlike Shared Store HA, each broker maintains its own dedicated persistent storage. One broker acts as the "live" instance, processing requests, while one or more "backup" brokers receive a continuous stream of data updates from the live broker, ensuring their local journals are always in sync.
+
+[[how-replicated-ha-works]]
+=== How Replicated Live-Backup HA Works
+
+Replicated Live-Backup focuses on real-time data synchronization:
+
+.  *Separate Persistence*: Each broker instance (live and backup) has its own independent persistent storage for its message journal. This eliminates the need for a single shared volume.
+.  *Live and Backup Roles*: Brokers are configured in a pair or a small cluster. One broker assumes the "live" role, actively processing client connections and messages. The other assumes a "backup" role.
+.  *Active Data Replication (Mirroring)*: The live broker continuously streams its journal writes to its configured backup broker(s). This process, known as mirroring, keeps the backup's journal an exact, up-to-date copy of the live broker's journal.
+.  *Failover Mechanism*: If the live broker fails, the backup broker detects this failure (e.g., via network heartbeat loss). The backup then activates, transitions into the live role, and starts accepting client connections using its already synchronized message journal. Clients are reconnected to the newly active broker.
+
+[[replicated-topology-considerations]]
+=== Replicated Topology Considerations
+
+The context provides specific guidance on replication topologies:
+
+[NOTE]
+====
+"mirroring data from broker 3 to broker 1. Similarly, do not create a topology of 3 or more brokers where each broker mirrors data to all of the other brokers."
+
+"You can implement a dual mirror topology where both brokers are mirrors of each other."
+====
+This strongly recommends a *dual mirror topology* for simplicity and reliability. In this setup, two brokers are configured such that each acts as a backup for the other, ensuring mutual replication and failover capabilities without the complexities of multi-way or circular replication.
+
+[[replicated-persistence-requirements]]
+=== Persistence for Replicated Live-Backup HA
+
+Similar to Shared Store HA, `persistenceEnabled=true` is essential for Replicated Live-Backup to ensure message durability. However, the storage requirement differs:
+
+.  *Independent Persistent Volumes*: For a Replicated Live-Backup pair, you will provision *two separate Persistent Volumes (PVs)*, one for each broker instance. Each broker manages its own message journal on its dedicated storage. The replication process synchronizes the content of these independent journals.
+.  *OpenShift Storage*: When deploying with `persistenceEnabled=true`, the AMQ Broker Operator will dynamically provision Persistent Volume Claims (PVCs) for each broker instance (if a storage class is configured). If not, manual PV provisioning is required, as mentioned in the context: "you need to manually provision Persistent Volumes (PVs) and ensure that these are available to be claimed by the Operator."
+
+[[replicated-pros-cons]]
+=== Advantages and Disadvantages of Replicated Live-Backup HA
+
+.Advantages:
+*   *No Shared Storage Bottleneck*: Eliminates the shared storage as a potential performance bottleneck, offering better scalability for high-throughput scenarios.
+*   *Reduced Single Point of Failure*: The absence of a single shared storage resource for the message journal itself reduces the overall risk of a single point of failure related to storage.
+*   *Distributed by Design*: Aligns well with cloud-native principles and distributed architectures.
+
+.Disadvantages:
+*   *Increased Complexity*: Configuration, especially for network replication parameters and security, can be more involved than Shared Store.
+*   *Potential for Replication Lag*: While generally very low, there's a theoretical possibility of a small replication lag during peak load or network issues, which could lead to minimal data loss in extreme scenarios just before a failover.
+*   *Higher Resource Consumption*: Each broker maintains its own storage and actively performs replication, potentially consuming more CPU, memory, and network resources compared to a passive follower.
+
+== Choosing the Right Strategy
+
+The selection between Shared Store and Replicated Live-Backup HA depends on your specific requirements and environment:
+
+*   *Storage Infrastructure*: If your OpenShift environment provides a robust, high-performance shared storage solution (e.g., `ReadWriteMany` PVs or a highly available external database), Shared Store might be a simpler choice. If shared storage is a constraint or performance concern, Replicated Live-Backup is often preferred.
+*   *Performance Requirements*: For extremely high-throughput or low-latency messaging, Replicated Live-Backup can offer better performance due to the lack of a shared storage bottleneck.
+*   *Operational Overhead*: Shared Store can sometimes be simpler to operate from a broker perspective, but managing the underlying shared storage itself can add complexity. Replicated HA might require more tuning for replication parameters.
+*   *Network Characteristics*: Replicated HA is more sensitive to network latency and bandwidth between broker instances, as data is constantly being streamed.
+
+In cloud-native environments like OpenShift, where distributed storage solutions are common and shared file systems can be challenging, Replicated Live-Backup is often a popular choice due to its inherent distributed nature and elimination of the shared storage bottleneck.
+
+== Hands-on Conceptual Setup: Deploying an HA Pair
+
+Regardless of the chosen HA strategy, deploying an AMQ Broker HA pair on OpenShift involves creating multiple `ActiveMQArtemis` custom resource (CR) instances. These CRs will define the individual brokers and their specific HA configurations. This section outlines the conceptual steps, which will be elaborated in subsequent hands-on labs.
+
+.Conceptual Steps for HA Deployment:
+.  *Plan Persistent Storage*:
+    *   For *Shared Store HA*: Identify or provision a single shared Persistent Volume (PV) or an external JDBC database. This single resource will be used by both broker CRs for message persistence.
+    *   For *Replicated Live-Backup HA*: Identify or provision two *separate* Persistent Volumes (PVs), one for each broker instance in the pair. Each broker will have its own dedicated storage.
+.  *Define `ActiveMQArtemis` Custom Resources*:
+    You will create at least two `ActiveMQArtemis` CR instances, typically within the same or separate OpenShift projects as recommended for HA. Each CR represents one broker instance in your HA pair.
+
+    [source,yaml]
+    ----
+    # Simplified example structure for an ActiveMQArtemis CR
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: broker-ha-instance-a # Name for the first broker
+      namespace: amq-ha-project
+    spec:
+      deploymentPlan:
+        size: 1
+        persistenceEnabled: true # MUST be true for HA configurations
+        storage:
+          size: 2Gi # Example size, matches default
+          # storageClassName: my-ha-storage-class # Optional: Specify if needed
+        # ... other common broker configurations ...
+      # Specific HA configuration (sharedStore or replication) goes here
+      # For Shared Store:
+      # sharedStore: {}
+      # For Replication:
+      # replication:
+      #   liveBackup: {} # Or dualMirror
+    ----
+
+.  *Configure HA Properties within CRs*:
+    The primary distinction in your CRs will be the `spec` section related to HA:
+
+    *   For *Shared Store HA*: You will configure the `sharedStore` element within the `ActiveMQArtemis` CR. This tells the broker to compete for a lock on the shared persistence.
+    *   For *Replicated Live-Backup HA*: You will configure the `replication` element, specifying the type of replication (e.g., `liveBackup` or `dualMirror`) and potentially peer discovery settings. Each broker's CR will define its role in the replication topology.
+
+The context states: "Configure two `ActiveMQArtemis` custom resource (CR) instances to create a source broker". This is the foundational step that sets up the individual components of your HA solution before their specific HA roles are configured. Subsequent labs will delve into the precise YAML configurations for each strategy.

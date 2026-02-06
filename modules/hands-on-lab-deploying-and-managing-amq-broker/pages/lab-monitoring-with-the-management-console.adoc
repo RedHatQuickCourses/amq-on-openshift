@@ -1,0 +1,126 @@
+#  Lab: Monitoring with the Management Console
+
+= Lab: Monitoring with the Management Console
+
+[role="summary"]
+This lab guides you through the process of exposing and accessing the AMQ Management Console on OpenShift. You will learn how to monitor essential broker runtime data and understand crucial security considerations associated with management console access.
+
+== Prerequisites
+
+To complete this lab, you will need:
+
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   The `oc` CLI configured and logged into your OpenShift cluster.
+*   An AMQ Broker instance already deployed. If you haven't deployed one yet, please refer to the "Lab: Deploying a Basic AMQ Broker Instance" topic and complete it first.
+
+== 1. Expose the AMQ Management Console
+
+The AMQ Management Console provides a web-based interface that allows you to view runtime data, manage queues and topics, and perform administrative operations on your AMQ Broker instance. Each broker pod hosts its own instance of this console, typically on port `8161`. To make this console accessible from outside your OpenShift cluster, you must enable its exposure by modifying your `Broker` custom resource (CR). The AMQ Broker Operator will then automatically create the necessary OpenShift `Service` and `Route` to enable external access.
+
+.  **Identify your Broker Custom Resource (CR)**
+    First, ensure you are in the correct OpenShift project where your broker is deployed.
+
+    ```bash
+    oc project <your-project-name>
+    ```
+
+    Next, identify the name of your deployed broker instance:
+
+    ```bash
+    oc get broker
+    ```
+
+    You should see an output similar to this:
+
+    ```
+    NAME           AGE
+    my-broker      5m
+    ```
+    In this example, `my-broker` is the name of our broker custom resource.
+
+.  **Edit the Broker CR to enable the web console**
+    Now, edit the `Broker` custom resource. We will enable the web console by adding a `webConsole` configuration block within the `spec` section of your CR, setting `expose` to `true`.
+
+    ```bash
+    oc edit broker my-broker
+    ```
+
+    Locate the `spec:` section in the YAML file. Add or modify the `webConsole` configuration as shown below.
+
+    [source,yaml]
+    ----
+    # ... other spec configurations
+    spec:
+      # ... other broker configurations
+      webConsole:
+        expose: true
+      # ...
+    ----
+
+    Save and exit the editor (usually by typing `:wq` in `vim` or `Ctrl+X`, `Y`, `Enter` in `nano`). The OpenShift Operator will detect this change and begin reconfiguring your broker deployment to expose the console.
+
+== 2. Retrieve the Management Console Route
+
+After the Operator processes your CR update, it creates a dedicated OpenShift `Service` and `Route` for the AMQ Management Console associated with each broker pod. You can use the `oc get routes` command to find the external URL for your console.
+
+.  **Get the console route URL**
+    You can filter routes by the `app.kubernetes.io/name=amq-broker` label, or specifically search for routes matching the console naming pattern:
+
+    ```bash
+    oc get routes -l app.kubernetes.io/name=amq-broker
+    ```
+
+    Alternatively, based on the provided context, the route name follows the pattern `<custom-resource-name>-wconsj-<broker-pod-ordinal>-svc-rte`. You can use `grep` to find it:
+
+    ```bash
+    oc get routes | grep <your-broker-cr-name>-wconsj
+    ```
+
+    You should see an output similar to this:
+
+    ```
+    NAME                         HOST/PORT                                           PATH   SERVICES                   PORT       TERMINATION   WILDCARD
+    my-broker-wconsj-0-svc-rte   my-broker-wconsj-0-svc-rte-myproject.apps.cluster.example.com          my-broker-wconsj-0-svc   wconsj     <none>        None
+    ```
+
+    The `HOST/PORT` column provides the full URL for accessing the AMQ Management Console.
+
+== 3. Access the Management Console
+
+With the route URL obtained, you can now access the AMQ Management Console from your web browser.
+
+.  **Open the console in your browser**
+    Copy the `HOST/PORT` URL from the previous step and paste it into the address bar of your preferred web browser.
+
+    You will be presented with the AMQ Management Console interface. Depending on your broker's security configuration (which will be covered in more detail in the "Securing AMQ Broker on OpenShift" objective), you might be prompted for login credentials. For a basic deployment without specific authentication configured, you might access the console directly or use default credentials if they are enabled.
+
+== 4. Explore Basic Monitoring Features
+
+The AMQ Management Console offers a comprehensive dashboard to monitor your broker's status and manage its message-oriented middleware components.
+
+.  **Navigate and explore the console**
+    *   On the left-hand navigation pane, you will typically find sections such as `Queues`, `Topics`, `Connections`, `Sessions`, and `Subscribers`.
+    *   Click on `Queues` or `Topics` to view a list of all configured message destinations. Here, you can inspect details like the number of messages currently in the queue, messages enqueued/dequeued, and the number of active consumers.
+    *   Explore the `Runtime` section to view general broker metrics, system properties, thread information, and memory usage.
+    *   You can also perform basic administrative tasks, such as creating new queues or sending test messages, directly from the console interface.
+
+    Spend some time exploring the different tabs and views to familiarize yourself with the wealth of information and management capabilities available through the AMQ Management Console. This console is an indispensable tool for diagnosing issues, monitoring performance, and understanding message flow in real-time.
+
+== 5. Important Security Considerations for Management Consoles
+
+When deploying and accessing management consoles, understanding the inherent security implications is paramount. The provided context highlights a critical warning regarding the `managementRBACEnabled` setting:
+
+[quote]
+If you set the value of `managementRBACEnabled` to `false` to enable use of Fuse Console, management MBeans for the brokers no longer require authorization. You _should not_ use the AMQ management console while `managementRBACEnabled` is set to `false` because this potentially exposes all management operations on the brokers to unauthorized use.
+
+.  **Understanding `managementRBACEnabled`**
+    *   The `managementRBACEnabled` property within your `Broker` CR determines whether role-based access control (RBAC) is enforced for management operations exposed via JMX MBeans on the broker.
+    *   For the *AMQ Management Console* (the native console we are using in this lab), it is generally recommended to keep `managementRBACEnabled` as `true` (or its default state, which usually implies `true`) to ensure that all management operations require proper authorization.
+    *   Conversely, if you were configuring your broker for monitoring via *Red Hat Fuse Console for OpenShift*, the context explicitly states that you *must* set `managementRBACEnabled: false`. However, as the warning indicates, doing so *disables authorization for the AMQ Management Console itself*, making it a significant security risk if the AMQ Management Console is also exposed and accessible.
+
+.  **Best Practices**
+    *   Always be acutely aware of how your broker's management interfaces are exposed and authenticated.
+    *   Ensure that RBAC is correctly configured and enabled for your chosen management console (be it the AMQ Management Console or the Fuse Console) to prevent unauthorized access and control over your critical messaging infrastructure.
+    *   If using the AMQ Management Console, verify that `managementRBACEnabled` is not set to `false`, unless you have a robust compensating security control in place.
+
+This lab provides the foundational steps for exposing and monitoring an AMQ Broker instance using its built-in management console. For production environments, further security configurations—such as defining custom users, roles, and integrating with OpenShift's authentication mechanisms—are essential, as will be discussed in subsequent topics like "Securing AMQ Broker on OpenShift" and "Authentication and Authorization for Console Access."

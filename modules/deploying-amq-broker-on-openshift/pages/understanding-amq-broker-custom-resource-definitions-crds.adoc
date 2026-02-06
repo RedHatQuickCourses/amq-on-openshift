@@ -1,0 +1,132 @@
+#  Understanding AMQ Broker Custom Resource Definitions (CRDs)
+
+Here's the detailed educational content on "Understanding AMQ Broker Custom Resource Definitions (CRDs)" in Antora AsciiDoc format.
+
+```asciidoc
+[[understanding-amq-broker-crds]]
+== Understanding AMQ Broker Custom Resource Definitions (CRDs)
+
+In the OpenShift ecosystem, managing complex applications like Red Hat AMQ Broker is greatly simplified through the use of Operators. A cornerstone of the Operator pattern is the Custom Resource Definition (CRD), which allows you to extend the Kubernetes API with your own object kinds. This section delves into what CRDs are, their role in OpenShift, and specifically how they are utilized by the AMQ Broker Operator to manage broker instances.
+
+=== What are Custom Resource Definitions (CRDs)?
+
+A Custom Resource Definition (CRD) is essentially a blueprint or schema that defines a new, custom object type within OpenShift (and Kubernetes). Think of it as extending the vocabulary of your OpenShift cluster. Just as OpenShift has built-in object types like `Deployment`, `Service`, or `Pod`, CRDs allow you to introduce new types specific to your applications.
+
+When an Operator, like the AMQ Broker Operator, is installed, it registers one or more CRDs with the OpenShift API server. These CRDs then become available for users to interact with, just like native Kubernetes objects.
+
+*   **Schema for Configuration**: A CRD specifies the structure and validation rules for the data that a Custom Resource (CR) instance will hold. It defines the configuration items you can set for a custom OpenShift object.
+*   **API Extension**: CRDs extend the Kubernetes API, allowing new resource types to be managed using standard Kubernetes tools like `kubectl` or OpenShift's `oc` CLI.
+*   **Operator's Interface**: For an Operator developer, the CRD acts as the API through which users configure and interact with the deployed application. The Operator watches for changes to CR instances based on its CRDs and takes action to reconcile the desired state.
+
+IMPORTANT: You can directly access the CRD through regular HTTP `curl` commands, because the CRD gets exposed automatically through Kubernetes.
+
+=== Custom Resources (CRs)
+
+While a CRD defines *what* a new object type looks like, a Custom Resource (CR) is an actual instance of that object type. A CR is a specific configuration you provide based on the CRD's schema.
+
+For example, if a CRD defines an `ActiveMQArtemis` object, a CR would be a YAML file where you specify the name, version, resource limits, and other properties for *your particular* AMQ Broker deployment.
+
+*   **Instance of a CRD**: A CR is a specific configuration you apply to create or modify an instance of the custom object defined by a CRD.
+*   **Declarative Configuration**: You create a CR (typically a YAML file) that declares the desired state of your application component. The Operator reads this CR and ensures the actual state matches the declared state.
+
+TIP: Think of a CRD as a cookie cutter defining the shape, and a CR as an individual cookie made using that cutter, each with its own unique flavor (configuration).
+
+=== AMQ Broker Specific Custom Resource Definitions
+
+The AMQ Broker Operator comes bundled with several CRDs that enable you to deploy, configure, and manage AMQ Broker instances on OpenShift. The primary CRDs you will interact with are:
+
+1.  **`ActiveMQArtemis` CRD**:
+    *   This is the main CRD used for deploying and configuring AMQ Broker instances.
+    *   When you want to create a new AMQ Broker deployment, you create a Custom Resource (CR) based on this `ActiveMQArtemis` CRD.
+    *   This CR allows you to specify details like the broker's name, image version (e.g., `7.13.3`), resource allocations (CPU, memory), persistence settings, network listeners, and more.
+    *   The `ActiveMQArtemis` CRD is foundational for creating and managing the broker pods themselves within an OpenShift project.
+    *   *Reference*: For detailed configuration options, refer to the "Broker custom resource configuration reference" (Section 8.1.1 in the provided context).
+
+2.  **`ActiveMQArtemisAddress` CRD**:
+    *   This CRD is used to define messaging addresses and queues that exist *within* your deployed AMQ Broker instances.
+    *   Instead of configuring addresses and queues directly on the broker's filesystem or through its management console (though that's still an option), you can declaratively define them using `ActiveMQArtemisAddress` CRs.
+    *   Each address and/or queue you wish to create on the broker requires a separate, uniquely named CR instance based on this CRD.
+    *   This allows for GitOps-style management of your messaging topology.
+    *   *Reference*: For detailed configuration options, refer to the "Address Custom Resource configuration reference" (Section 8.1.2 in the provided context).
+
+The AMQ Broker Operator installs these CRDs when it is deployed onto your OpenShift cluster. This makes it a prerequisite for creating any AMQ Broker-related Custom Resources.
+
+=== Hands-on Activity: Exploring AMQ Broker CRDs
+
+Let's explore the AMQ Broker CRDs installed by the Operator in your OpenShift cluster. This activity assumes you have the AMQ Broker Operator already installed. If not, please refer to the "Installing the AMQ Broker Operator via CLI or OperatorHub" objective.
+
+.Prerequisites
+*   An OpenShift cluster with the `oc` CLI tool configured and authenticated.
+*   The AMQ Broker Operator installed in your cluster.
+
+.Activity Steps
+
+.  **Log in to your OpenShift Cluster**:
+    Ensure you are logged into your OpenShift cluster with sufficient permissions to view Custom Resource Definitions.
+
+    [source,bash]
+    ----
+    oc login --token=<your_token> --server=<your_api_server>
+    ----
+
+.  **List all Custom Resource Definitions (CRDs) in the Cluster**:
+    To see all CRDs available in your cluster, use the `oc get crd` command. This will show a long list.
+
+    [source,bash]
+    ----
+    oc get crd
+    ----
+    You will see output similar to this (truncated for brevity):
+    ```
+    NAME                                     CREATED AT
+    activemqartemises.broker.amq.io          2023-10-26T10:00:00Z
+    activemqartemisaddresses.broker.amq.io   2023-10-26T10:00:00Z
+    ...
+    ```
+
+.  **Filter for AMQ Broker Specific CRDs**:
+    To specifically find the CRDs related to AMQ Broker, you can filter the output. The AMQ Broker CRDs typically have the group `broker.amq.io`.
+
+    [source,bash]
+    ----
+    oc get crd | grep "broker.amq.io"
+    ----
+    Expected output:
+    [source,text]
+    ----
+    activemqartemisaddresses.broker.amq.io                     2023-10-26T10:00:00Z
+    activemqartemises.broker.amq.io                            2023-10-26T10:00:00Z
+    ----
+    This confirms the presence of the `ActiveMQArtemis` and `ActiveMQArtemisAddress` CRDs.
+
+.  **Inspect a Specific CRD (Optional)**:
+    You can inspect the full definition of a CRD to understand its schema, supported versions, and other details. Let's look at the `ActiveMQArtemis` CRD.
+
+    [source,bash]
+    ----
+    oc describe crd activemqartemises.broker.amq.io
+    ----
+    This command will output a detailed description including the API versions, scope (namespace-scoped or cluster-scoped), validation schema, and how it's handled by the Kubernetes API. Pay attention to the `spec.versions.schema.openAPIV3Schema` section, which describes the fields available when creating an `ActiveMQArtemis` Custom Resource.
+
+.  **View a Minimal `ActiveMQArtemis` Custom Resource Example (Conceptual)**:
+    While we won't create a live broker here, understanding the structure of a Custom Resource is key. A minimal `ActiveMQArtemis` CR would look something like this:
+
+    [source,yaml]
+    ----
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-broker
+      namespace: my-amq-project
+    spec:
+      deploymentPlan:
+        size: 1
+        image: registry.redhat.io/amq7/amq-broker:7.13
+        # Other optional configurations can go here, e.g., persistence, resources
+    ----
+    *   `apiVersion` and `kind` are crucial; they tell OpenShift which CRD this Custom Resource adheres to.
+    *   `metadata.name` provides a unique identifier for this specific broker instance.
+    *   `spec` contains the actual configuration defined by the `ActiveMQArtemis` CRD's schema.
+
+By completing this activity, you have seen how CRDs extend OpenShift's capabilities and how the AMQ Broker Operator leverages them to manage messaging infrastructure. This declarative approach simplifies deployment and management, aligning with modern cloud-native practices.
+```

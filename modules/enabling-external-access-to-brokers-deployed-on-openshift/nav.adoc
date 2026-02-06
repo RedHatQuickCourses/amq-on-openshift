@@ -1,0 +1,5 @@
+* xref:enabling-external-access-to-brokers-deployed-on-openshift.adoc[]
+** xref:openshift-networking-concepts-services-routes-ingress.adoc[]
+** xref:exposing-broker-listeners-via-openshift-routes.adoc[]
+** xref:configuring-client-connections-for-external-access.adoc[]
+** xref:security-implications-and-best-practices-for-external-access.adoc[]

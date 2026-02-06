@@ -1,0 +1,10 @@
+#  Accessing Management Console for AMQ Broker on OpenShift
+
+To access the AMQ Broker Management Console on OpenShift:
+
+*   Each broker pod hosts its own AMQ Management Console instance.
+*   You must expose the console by configuring the broker's Custom Resource (CR).
+*   The AMQ Broker Operator then creates a dedicated OpenShift `Service` and `Route` for each broker pod's console, typically named `<custom-resource-name>-wconsj-<broker-pod-ordinal>-svc-rte`.
+*   Access the console by navigating to the URL provided by its OpenShift `Route`.
+*   Login credentials are required if the `requireLogin` property of the CR is set to `true`.
+*   Alternatively, the Fuse Console for OpenShift can be configured to discover and display brokers, offering similar runtime data and basic management operations.

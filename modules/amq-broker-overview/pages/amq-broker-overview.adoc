@@ -1,0 +1,18 @@
+#  AMQ Broker Overview
+
+=== AMQ Broker Overview
+
+Red Hat AMQ Broker is a flexible, high-performance, and lightweight message broker built on xref:amq-broker-on-openshift-deployment-and-management.adoc#_foundations_in_apache_activemq_artemis[Apache ActiveMQ Artemis]. It facilitates asynchronous messaging by acting as xref:amq-broker-on-openshift-deployment-and-management.adoc#_introduction_to_message_oriented_middleware_mom[Message-Oriented Middleware (MOM)].
+
+Key aspects include:
+
+*   **Foundation**: Built upon Apache ActiveMQ Artemis, ensuring robust and proven messaging capabilities.
+*   **Purpose**: Enables applications to communicate asynchronously through messages, supporting various xref:amq-broker-on-openshift-deployment-and-management.adoc#_common_messaging_patterns_point_to_point_publish_subscribe[messaging patterns] like Point-to-Point and Publish/Subscribe.
+*   **Protocols**: Supports a wide range of standard messaging protocols, including:
+    *   JMS (Java Message Service)
+    *   AMQP (Advanced Message Queuing Protocol)
+    *   MQTT (Message Queuing Telemetry Transport)
+    *   STOMP (Simple Text Oriented Messaging Protocol)
+    *   OpenWire
+*   **Architecture**: Designed for high performance, scalability, and high availability, making it suitable for enterprise-grade messaging solutions.
+*   **Extensibility**: Functionality can be extended by xref:amq-broker-on-openshift-deployment-and-management.adoc#_registering_plugins_with_amq_broker[registering plugins] in the broker's Custom Resource (CR).

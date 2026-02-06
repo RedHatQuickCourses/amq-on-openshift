@@ -1,0 +1,189 @@
+#  File-Based Message Store Configuration
+
+[[file-based-message-store-configuration]]
+= File-Based Message Store Configuration
+
+This section delves into configuring Red Hat AMQ Broker to utilize file-based message stores for message persistence, focusing on its implementation within an OpenShift Container Platform environment. File-based message stores are crucial for ensuring message durability and recovering messages after a broker restart or failure.
+
+== Understanding File-Based Message Stores
+
+A file-based message store, as the name suggests, persists all broker-related data directly to the file system. This includes message journals, paging files for large message volumes, binding information, and the large message store itself. This approach is generally simpler to configure compared to JDBC stores and offers excellent performance for many use cases.
+
+When deploying AMQ Broker on OpenShift, file-based persistence typically leverages *Persistent Volumes* (PVs) and *Persistent Volume Claims* (PVCs) to ensure that the underlying storage is decoupled from the ephemeral nature of pods. This means your message data can survive pod restarts, rescheduling, or even node failures (depending on the PV's underlying storage class).
+
+=== Key Directories for File-Based Persistence
+
+AMQ Broker uses several directories to manage its persistent data. These are specified within the `brokerProperties` attribute of the `ActiveMQArtemis` Custom Resource:
+
+*   `journalDirectory`: This is the most critical directory. It stores the *message journal*, which is an append-only log of all messages and transactions. The journal ensures that messages are never lost, even in the event of a sudden broker shutdown.
+*   `pagingDirectory`: When a queue accumulates a very large number of messages, or if the broker's memory limits are reached, AMQ Broker can *page* messages to disk in this directory. This prevents memory exhaustion and maintains broker stability by offloading messages from RAM.
+*   `bindingsDirectory`: This directory stores the *bindings journal*, which contains crucial information about queues, topics, and their corresponding message destinations and subscriptions.
+*   `largeMessagesDirectory`: For messages that exceed a configured size threshold (often around 100KB by default), AMQ Broker treats them as *large messages*. These are stored separately in this directory to optimize journal write performance and reduce the in-memory footprint for large payloads.
+
+All these directories are typically configured to point to paths within a mounted *Persistent Volume* when running on OpenShift, ensuring the data's persistence across pod lifecycles.
+
+== Configuring File-Based Stores on OpenShift
+
+On OpenShift, AMQ Broker instances are managed by the AMQ Broker Operator using Custom Resources (CRs). To configure file-based persistence, you define the desired storage within the `spec.container.storage` and `spec.brokerProperties` sections of your `ActiveMQArtemis` CR. The Operator then provisions the necessary PVCs and mounts them to the broker pods.
+
+[NOTE]
+====
+For a production environment, it is highly recommended to use a robust, network-attached storage solution for your Persistent Volumes (e.g., Ceph RBD, GlusterFS, Azure Disk, AWS EBS) rather than local storage. This ensures data availability and facilitates High Availability (HA) setups.
+====
+
+Here's an example of how you might define these directories and storage in an `ActiveMQArtemis` Custom Resource:
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker-fs
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.11
+    # Enable persistence for this broker instance
+    persistenceEnabled: true
+  brokerProperties:
+    # Specify the full directory paths on the mounted persistent volume
+    # These paths are relative to the root of the mounted volume, which is /var/lib/amq/data by default
+    - journalDirectory=/var/lib/amq/data/journal
+    - pagingDirectory=/var/lib/amq/data/paging
+    - bindingsDirectory=/var/lib/amq/data/bindings
+    - largeMessagesDirectory=/var/lib/amq/data/large-messages
+  # Define the storage requirements for the broker's persistence
+  container:
+    storage:
+      size: 5Gi # Request a 5Gi persistent volume for the broker data
+      # Optional: specify a storage class if you don't want to use the default
+      # storageClassName: "ocs-storagecluster-cephfs"
+----
+
+In this configuration:
+
+*   `spec.deploymentPlan.persistenceEnabled: true` explicitly enables persistence for the broker instance.
+*   `spec.container.storage.size` requests a Persistent Volume Claim (PVC) of 5Gi. The AMQ Broker Operator will automatically create this PVC if one with the specified size and access mode doesn't already exist and bind it to the broker pod. The Operator mounts this PVC at `/var/lib/amq/data` within the broker container.
+*   The `brokerProperties` define the *paths* within the mounted volume (`/var/lib/amq/data`) where AMQ Broker will store its data. The Operator ensures these subdirectories are created and managed correctly.
+
+=== OpenShift Storage Considerations (Persistent Volumes)
+
+When the `storage` field is specified in the `ActiveMQArtemis` CR, the Operator automatically creates a `PersistentVolumeClaim` (PVC) for each broker instance if it doesn't already exist. This PVC then binds to an available `PersistentVolume` (PV) that provides the actual storage.
+
+Key considerations for OpenShift storage when configuring file-based message stores:
+
+*   **Storage Class**: It's crucial to have a `StorageClass` defined in your OpenShift cluster. The Operator will use the default `StorageClass` or one specified in your CR (e.g., `storageClassName: "your-storage-class-name"`).
+*   **Access Modes**: For single-instance brokers, `ReadWriteOnce` (RWO) is typically sufficient. For Shared Store High Availability setups, `ReadWriteMany` (RWX) is required, which fewer storage providers support natively. Ensure your chosen `StorageClass` supports the necessary access mode.
+*   **Capacity**: Ensure the requested `size` in the CR is adequate for your expected message volume, message retention policies, and overhead for the various journals and paging files. Underestimating capacity can lead to broker instability or message loss.
+*   **Performance**: The performance of your message store is directly tied to the underlying storage solution. High-throughput, low-latency storage is critical for production AMQ Broker deployments to ensure efficient message processing.
+
+== Hands-on Activity: Deploying an AMQ Broker with File-Based Persistence
+
+In this lab, you will deploy a basic AMQ Broker instance on OpenShift, explicitly configuring its file-based message store using a Persistent Volume Claim.
+
+=== Prerequisites
+
+*   An OpenShift cluster with `oc` CLI configured and logged in.
+*   The AMQ Broker Operator installed in your OpenShift project.
+*   A `StorageClass` available in your OpenShift cluster (e.g., `ocs-storagecluster-cephfs`, `standard`, `gp2`). You can check available storage classes with `oc get sc`.
+
+=== Steps
+
+.   **Log in to your OpenShift Cluster**
+    Ensure you are logged in to the correct OpenShift cluster and project.
+
+    [source,bash]
+    ----
+    oc login -u developer -p developer https://your-openshift-api-url:6443
+    oc project my-amq-project # Replace with your project name where the Operator is installed
+    ----
+
+.   **Create a Custom Resource for AMQ Broker with File-Based Persistence**
+    Create a file named `broker-file-store.yaml` with the following content. This configuration deploys a single broker instance and requests a 2Gi Persistent Volume for its message store.
+
+    [source,yaml]
+    ----
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-file-broker
+    spec:
+      deploymentPlan:
+        size: 1
+        image: registry.redhat.io/amq7/amq-broker-rhel8:7.11
+        # Crucial: Enable persistence using the storage configuration below
+        persistenceEnabled: true
+      brokerProperties:
+        # Define the directory paths for persistence within the mounted volume
+        - journalDirectory=/var/lib/amq/data/journal
+        - pagingDirectory=/var/lib/amq/data/paging
+        - bindingsDirectory=/var/lib/amq/data/bindings
+        - largeMessagesDirectory=/var/lib/amq/data/large-messages
+      container:
+        storage:
+          size: 2Gi # Request a 2Gi Persistent Volume Claim
+          # Optional: Uncomment and specify a storage class if your cluster has multiple
+          # and you don't want to use the default one.
+          # storageClassName: "your-preferred-storage-class"
+    ----
+
+    [IMPORTANT]
+    ====
+    The `persistenceEnabled: true` flag explicitly tells the Operator to manage persistent storage for the broker instance. While setting `container.storage.size` implicitly implies persistence, this flag makes the intent clear and is considered a best practice.
+    ====
+
+.   **Apply the Custom Resource**
+    Deploy the broker instance by applying the YAML file:
+
+    [source,bash]
+    ----
+    oc apply -f broker-file-store.yaml
+    ----
+
+.   **Verify the Deployment and PVC**
+    Monitor the pod creation and verify that a PVC has been created and bound successfully.
+
+    a.  Check the broker pod status:
+        [source,bash]
+        ----
+        oc get pods -l app=my-file-broker
+        ----
+        Wait until the pod shows `Running` and `READY 1/1`.
+
+    b.  Verify the Persistent Volume Claim:
+        [source,bash]
+        ----
+        oc get pvc -l app=my-file-broker
+        ----
+        You should see a PVC named `my-file-broker-pvc-0` (or similar, depending on the operator's naming convention) with status `Bound`.
+
+    c.  Inspect the mounted volume inside the pod to confirm the PVC is being used:
+        [source,bash]
+        ----
+        oc exec -it $(oc get pod -l app=my-file-broker -o jsonpath='{.items[0].metadata.name}') -- df -h /var/lib/amq/data
+        ----
+        This command will show the mounted file system at `/var/lib/amq/data` and its usage, confirming the PV is correctly mounted within the broker pod.
+
+    d.  List the created persistence directories within the mounted volume:
+        [source,bash]
+        ----
+        oc exec -it $(oc get pod -l app=my-file-broker -o jsonpath='{.items[0].metadata.name}') -- ls -l /var/lib/amq/data
+        ----
+        You should observe the `journal`, `paging`, `bindings`, and `large-messages` directories, confirming the broker is set up for file-based persistence.
+
+.   **Clean Up (Optional)**
+    When you are finished with the lab, delete the broker instance and its associated PVC.
+
+    [source,bash]
+    ----
+    oc delete -f broker-file-store.yaml
+    # The Operator typically deletes the PVC when the CR is deleted.
+    # However, if the PVC persists due to specific reclaim policies, you might need:
+    # oc delete pvc -l app=my-file-broker
+    ----
+    [NOTE]
+    ====
+    By default, the Operator will delete the PVC when the `ActiveMQArtemis` CR is deleted. However, in some cases, especially if the `reclaimPolicy` on the underlying Persistent Volume (PV) is set to `Retain`, the PV might need to be manually cleaned up by a cluster administrator.
+    ====
+
+This hands-on activity demonstrates how to successfully deploy an AMQ Broker instance with file-based persistence, leveraging OpenShift's storage capabilities to ensure message durability.

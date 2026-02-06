@@ -1,0 +1,173 @@
+#  Introduction to the Hawtio Management Console
+
+= Introduction to the Hawtio Management Console
+
+The Hawtio Management Console, often referred to as the AMQ Management Console in the context of Red Hat AMQ Broker on OpenShift, is a powerful web-based interface for monitoring and managing your AMQ Broker instances. It provides a comprehensive view into the broker's operational status, message queues, topics, connections, and other critical metrics, enabling administrators to oversee and perform administrative tasks efficiently.
+
+== What is the Hawtio Management Console?
+
+At its core, Hawtio is a pluggable management console for Java applications. For AMQ Broker, it provides a tailored set of views and functionalities to interact with the underlying Apache ActiveMQ Artemis broker. Each broker pod within an AMQ Broker deployment hosts its own instance of the Hawtio Management Console, typically accessible on port `8161`.
+
+Its key capabilities include:
+
+*   **Real-time Monitoring**: View message counts, queue depths, consumer counts, and connection details.
+*   **Administrative Tasks**: Browse and purge messages, create/delete queues and topics, manage connections, and more.
+*   **Runtime Metrics**: Access JMX metrics exposed by the broker for in-depth performance analysis.
+*   **Configuration Management**: (Though often managed via Custom Resources on OpenShift, certain runtime configurations might be inspected or adjusted).
+
+== Exposing and Accessing the Console on OpenShift
+
+To make the Hawtio Management Console accessible from outside the OpenShift cluster or within the cluster via a web browser, it must be explicitly exposed. This is achieved by configuring the `ActiveMQArtemis` Custom Resource (CR) instance for your broker deployment.
+
+When you configure the CR to expose the console, the AMQ Broker Operator automatically performs the following actions:
+
+.  **Creates a Dedicated Service**: For each broker pod, the Operator creates an OpenShift `Service` resource. This service routes internal cluster traffic to the console running on port `8161` within the broker pod. The default naming convention for this service is `<custom-resource-name>-wconsj-<broker-pod-ordinal>-svc`.
+.  **Creates a Route**: The Operator also creates an OpenShift `Route` resource. This route exposes the console's service to external network traffic, typically providing a public-facing URL. The default naming convention for this route is `<custom-resource-name>-wconsj-<broker-pod-ordinal>-svc-rte`.
+
+By accessing the URL provided by the generated route, users can then log into and interact with the Hawtio Management Console for the respective broker pod.
+
+== Authentication and Authorization for Console Access
+
+Access to the Hawtio Management Console is secured through authentication. The configuration for this security is also managed within the `ActiveMQArtemis` Custom Resource.
+
+=== Login Requirements
+
+By default, the Hawtio Management Console requires login credentials if the `requireLogin` attribute is set to `true` in the broker's `ActiveMQArtemis` CR.
+
+*   *Configuring Credentials*: You can specify the `adminUser` and `adminPassword` attributes directly in the `ActiveMQArtemis` CR. These credentials will then be used to log into the console.
++
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker-deployment
+spec:
+  console:
+    expose: true
+    requireLogin: true
+    adminUser: superadmin
+    adminPassword: <your-secure-password> # xref:../securing-amq-broker/defining-users-roles.adoc[Refer to security guidelines for strong passwords]
+  # ... other broker configurations
+----
+
+*   *Automatically Generated Credentials*: If `requireLogin` is `true` but `adminUser` and `adminPassword` are *not* explicitly configured in the CR, the Operator automatically generates these credentials. You can typically find these auto-generated credentials in a secret created by the Operator, often by inspecting the broker deployment's status or related secrets.
+
+=== Role-Based Access Control (RBAC)
+
+For a user to successfully log in to the Hawtio Management Console, they must belong to a security role that has the necessary permissions. This is typically configured via the `hawtio.roles` system property within the broker, with `admin` being the default role that grants comprehensive access.
+
+[NOTE]
+====
+The context provided mentions that a user must belong to a security role specified for the `hawtio.roles` system property. The default role is `admin`, which the preconfigured user (either specified or auto-generated `adminUser`) belongs to.
+====
+
+=== Important Security Considerations
+
+While the `jolokiaAgentEnabled` and `managementRBACEnabled` attributes in the `ActiveMQArtemis` CR might seem related to console access, it's crucial to understand their implications:
+
+*   `jolokiaAgentEnabled`: Setting this to `true` allows tools like Fuse Console to discover and display runtime data for the brokers. Hawtio leverages JMX, which Jolokia exposes, to gather its data.
+*   `managementRBACEnabled`: This attribute specifies whether role-based access control is enabled for the *broker's management MBeans*.
+    *   If you intend to use *Fuse Console* (which is a different management tool often co-located with Hawtio), you *must* set `managementRBACEnabled` to `false` because Fuse Console uses its own RBAC mechanism.
+    *   However, if you are using the *AMQ Management Console (Hawtio)* directly, you **should not** set `managementRBACEnabled` to `false`. Doing so effectively disables authorization for *all* management operations on the brokers, potentially exposing them to unauthorized use.
+
+[WARNING]
+====
+If you set `managementRBACEnabled` to `false` to enable use of Fuse Console, management MBeans for the brokers no longer require authorization. You *should not* use the AMQ Management Console while `managementRBACEnabled` is set to `false` because this potentially exposes all management operations on the brokers to unauthorized use. Ensure you understand the security implications before modifying this setting.
+====
+
+== Hands-on Activity: Enabling and Accessing the Hawtio Management Console
+
+In this activity, you will enable the Hawtio Management Console for an existing AMQ Broker deployment on OpenShift, configure basic authentication, and then access it via a web browser.
+
+=== Prerequisites
+
+*   An OpenShift cluster with `oc` CLI configured and logged in.
+*   An existing AMQ Broker deployment named `my-broker-deployment` in your current project. If you don't have one, deploy a basic instance first using a command similar to:
+    +
+    [source,bash,subs="attributes+"]
+    ----
+    oc apply -f - <<EOF
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-broker-deployment
+    spec:
+      deploymentPlan:
+        size: 1
+        image: registry.redhat.io/amq7/amq-broker:7.10
+    EOF
+    ----
+
+=== Steps
+
+.  **Switch to your project**:
+   Ensure you are in the OpenShift project where your broker is deployed.
+   [source,bash]
+   ----
+   oc project <your-project-name>
+   ----
+   (Replace `<your-project-name>` with the actual name of your OpenShift project.)
+
+.  **Edit the `ActiveMQArtemis` Custom Resource**:
+   You will modify the existing `my-broker-deployment` CR to enable the console and configure login credentials.
+   [source,bash]
+   ----
+   oc edit activemqartemis my-broker-deployment
+   ----
+
+.  **Add the `console` section to the CR**:
+   Locate the `spec` section in the YAML and add the `console` attribute as shown below. For this lab, we'll set `requireLogin: true` and configure a simple `adminUser` and `adminPassword`. In a production environment, use strong, unique passwords and consider integrating with external identity providers.
+
+   [source,yaml]
+   ----
+   # ... (previous parts of the ActiveMQArtemis CR)
+   spec:
+     console:
+       expose: true
+       requireLogin: true
+       adminUser: amqadmin
+       adminPassword: supersecretpassword123
+     # ... (rest of the spec)
+   ----
+
+   Save and exit the editor (e.g., `:wq` in `vim`). The Operator will detect the change and reconcile the deployment.
+
+.  **Verify the new `Service` and `Route`**:
+   The Operator should now create the necessary networking resources. Wait a moment for the Operator to apply the changes, then check for the `Service` and `Route`:
+   [source,bash]
+   ----
+   oc get svc | grep wconsj
+   oc get route | grep wconsj
+   ----
+   You should see output similar to this:
+   [source,text]
+   ----
+   my-broker-deployment-wconsj-0-svc   ClusterIP   172.30.155.20   <none>        8161/TCP             47s
+   ----
+   [source,text]
+   ----
+   my-broker-deployment-wconsj-0-svc-rte   my-broker-deployment-wconsj-0-svc-rte-my-project.apps.cluster.example.com   my-broker-deployment-wconsj-0-svc   8161   None
+   ----
+
+.  **Access the Hawtio Management Console**:
+   Obtain the URL for the console from the route you just identified:
+   [source,bash]
+   ----
+   oc get route my-broker-deployment-wconsj-0-svc-rte -o jsonpath='{"https://"}{.spec.host}{"\n"}'
+   ----
+   Copy the `https://` URL returned by the command and paste it into your web browser.
+
+.  **Log in to the console**:
+   You will be presented with the Hawtio login page.
+   *   **Username**: `amqadmin`
+   *   **Password**: `supersecretpassword123`
+   Enter these credentials and click "Log In".
+
+.  **Explore the console**:
+   Once logged in, take a moment to explore the different sections of the Hawtio console:
+   *   Navigate to *Runtime* -> *Brokers* to see an overview of your broker instance.
+   *   Under your broker, explore *Addresses* and *Queues* to see default destinations.
+   *   (Optional) If you have a client sending messages, observe the message counts and queue sizes changing in real-time.
+
+You have successfully enabled and accessed the Hawtio Management Console for your AMQ Broker deployment on OpenShift. This provides a crucial tool for monitoring and managing your messaging infrastructure.

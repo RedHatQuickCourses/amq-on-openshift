@@ -1,0 +1,260 @@
+#  OpenShift Container Platform Fundamentals for AMQ Broker
+
+ifndef::internal[]
+:keywords: OpenShift, OCP, Kubernetes, AMQ Broker, Container Platform, Pods, Services, Routes, Persistent Volumes, Operators, Custom Resources
+:description: Understand the foundational concepts of OpenShift Container Platform essential for deploying and managing Red Hat AMQ Broker.
+endif::internal[]
+
+= OpenShift Container Platform Fundamentals for AMQ Broker
+
+This section provides an essential overview of OpenShift Container Platform (OCP) concepts critical for deploying, managing, and scaling Red Hat AMQ Broker. Understanding these fundamentals will empower you to effectively leverage the power of OCP for your messaging infrastructure.
+
+== Introduction to OpenShift Container Platform
+
+OpenShift Container Platform is an enterprise-grade Kubernetes distribution from Red Hat. It provides a comprehensive platform for developing, deploying, and managing containerized applications. Built on top of Kubernetes, OpenShift adds developer and operations tools, enhanced security features, and an integrated experience for managing the entire application lifecycle.
+
+For stateful applications like AMQ Broker, OpenShift offers robust capabilities for:
+
+*   **Containerization:** Packaging AMQ Broker and its dependencies into isolated, portable containers.
+*   **Orchestration:** Automating the deployment, scaling, and management of these containers across a cluster of hosts.
+*   **Resource Management:** Efficiently allocating CPU, memory, and storage resources.
+*   **High Availability:** Ensuring the continuous operation of the broker through features like replication and failover.
+*   **Developer Workflow:** Streamlining the process of building, deploying, and updating applications.
+
+Red Hat AMQ Broker 7.13 is specifically designed to run as a containerized application on OpenShift Container Platform versions 4.16, 4.17, 4.18, 4.19, and 4.20, utilizing RHEL 8-based images for robust performance and security.
+
+== Core OpenShift Concepts for AMQ Broker
+
+To effectively manage AMQ Broker on OpenShift, it's crucial to grasp several core concepts:
+
+=== 1. Pods
+
+A pod is the smallest deployable unit in Kubernetes and OpenShift. It represents a single instance of a running process in your cluster. A pod can contain one or more containers, sharing the same network namespace, storage, and a unique IP address within the cluster.
+
+In the context of AMQ Broker:
+
+*   Each AMQ Broker instance (e.g., a single broker, or a broker participating in a high-availability pair or cluster) runs within its own pod.
+*   The pod encapsulates the AMQ Broker container, configuration, and potentially other helper containers (e.g., for sidecar patterns, though not typical for a basic AMQ Broker deployment).
+
+.Pod Diagram
+image::amq-broker-pod.png[AMQ Broker Pod,width=600,align=center]
+_Figure: A single AMQ Broker instance running inside a Pod._
+
+=== 2. Deployments
+
+A Deployment is a Kubernetes API object that manages a set of identical pods. It allows you to declaratively describe the desired state for your application, such as the number of replica pods, the container image to use, and how to update pods.
+
+For AMQ Broker:
+
+*   Deployments are commonly used to manage single, non-HA broker instances or as part of more complex HA setups by an Operator.
+*   They ensure that the specified number of AMQ Broker pods are always running and automatically handle restarts in case of failures.
+
+=== 3. Services
+
+A Service is an abstract way to expose an application running on a set of pods as a network service. Services provide a stable IP address and DNS name, acting as a load balancer across the pods that match a defined selector. This decouples client access from the ephemeral nature of pod IPs.
+
+For AMQ Broker:
+
+*   Services are essential for internal client applications within the OpenShift cluster to connect to AMQ Broker pods.
+*   They provide a stable endpoint for clients, even if broker pods are restarted or scaled.
+*   AMQ Broker typically requires services for each protocol listener (e.g., AMQP, Core, MQTT, STOMP) and for the management console.
+
+.Service Diagram
+image::amq-broker-service.png[AMQ Broker Service,width=600,align=center]
+_Figure: A Service providing stable access to AMQ Broker Pods._
+
+=== 4. Routes
+
+Routes in OpenShift are a way to expose a service at a host name, making it reachable from outside the OpenShift cluster. Routes define rules for how external network traffic is routed to internal services. They can provide features like SSL/TLS termination, custom hostnames, and load balancing.
+
+For AMQ Broker:
+
+*   Routes are used to enable external clients (outside the OpenShift cluster) to connect to the AMQ Broker.
+*   They are also used to expose the Hawtio management console for external access.
+*   Configuring secure routes with TLS termination is crucial for encrypting client-broker communication over external networks.
+
+=== 5. Persistent Volumes (PV) and Persistent Volume Claims (PVC)
+
+AMQ Broker is a stateful application; it stores messages, durable subscriptions, and transaction logs. When a pod restarts or moves to a different node, this data must persist. OpenShift addresses this with Persistent Volumes (PVs) and Persistent Volume Claims (PVCs).
+
+*   **Persistent Volume (PV):** A piece of storage in the cluster that has been provisioned by an administrator or dynamically provisioned. It's a resource in the cluster, like a node.
+*   **Persistent Volume Claim (PVC):** A request for storage by a user. It's a claim on a PV resource.
+
+For AMQ Broker:
+
+*   AMQ Broker pods use PVCs to request persistent storage for their message stores and journals.
+*   This ensures that even if a broker pod fails or is rescheduled, its messages and configuration data remain intact and available when a new pod starts up.
+
+.Persistence Diagram
+image::amq-broker-persistence.png[AMQ Broker Persistence,width=600,align=center]
+_Figure: AMQ Broker using Persistent Volume Claim for durable storage._
+
+=== 6. Projects (Namespaces)
+
+Projects in OpenShift (which are Kubernetes Namespaces with added capabilities) provide a mechanism for isolating resources within a cluster. They allow teams or applications to operate in their own isolated environments, preventing naming conflicts and accidental interference.
+
+For AMQ Broker:
+
+*   It's best practice to deploy AMQ Broker instances within a dedicated OpenShift project (e.g., `amq-broker-dev`, `amq-broker-prod`).
+*   This isolation helps manage resources, apply specific security policies, and organize your deployments.
+
+=== 7. Operators and Custom Resources (CR/CRD)
+
+OpenShift's extensibility comes largely from Operators, which are software extensions to Kubernetes that use Custom Resources to manage applications and their components.
+
+*   **Custom Resource Definition (CRD):** Extends the Kubernetes API with new, custom resource types. For example, the AMQ Broker Operator defines a `Broker` CRD.
+*   **Custom Resource (CR):** An instance of a CRD. When you create a `Broker` CR, you are essentially telling the AMQ Broker Operator to deploy and manage an AMQ Broker instance according to your specifications.
+*   **Operator:** An application-specific controller that extends the Kubernetes API to create, configure, and manage instances of complex applications on behalf of a user. The AMQ Broker Operator automates the deployment, scaling, and lifecycle management of AMQ Broker instances.
+
+For AMQ Broker:
+
+*   The AMQ Broker Operator is the recommended way to deploy and manage AMQ Broker on OpenShift.
+*   You interact with the Operator by creating and modifying `Broker` Custom Resources, rather than directly managing pods, deployments, services, and routes yourself. This simplifies complex tasks like HA deployment and upgrades.
+
+.Operator Diagram
+image::amq-broker-operator.png[AMQ Broker Operator,width=600,align=center]
+_Figure: The AMQ Broker Operator managing Broker Custom Resources and underlying OpenShift resources._
+
+=== 8. Resource Quotas and Limits
+
+OpenShift allows you to define resource quotas and limits to control the amount of compute resources (CPU and memory) that pods can consume.
+
+*   **Requests:** The minimum amount of CPU and memory a container is guaranteed to get.
+*   **Limits:** The maximum amount of CPU and memory a container can use.
+
+For AMQ Broker:
+
+*   Properly configuring resource requests and limits for AMQ Broker pods is crucial for performance and stability.
+*   Under-provisioning can lead to performance bottlenecks, while over-provisioning can waste cluster resources.
+
+== Hands-on Activity: Exploring OpenShift Fundamentals
+
+This activity will guide you through basic OpenShift CLI (command-line interface) commands to observe these fundamental concepts in a cluster. You won't deploy AMQ Broker yet, but you'll get familiar with the environment.
+
+*Prerequisites:*
+
+*   Access to an OpenShift Container Platform cluster.
+*   The `oc` CLI tool installed and configured to connect to your cluster.
+
+.Steps:
+
+.  **Log in to your OpenShift Cluster:**
+    Open your terminal and use the `oc login` command. If you have an existing session, this step might be optional.
++
+[source,bash]
+----
+oc login --token=<your_token> --server=<your_api_server>
+# Or, if using a browser-based login flow:
+oc login --server=<your_api_server>
+----
++
+NOTE: Replace `<your_token>` and `<your_api_server>` with your actual cluster credentials. You can usually find these by clicking "Copy Login Command" in the OpenShift console.
+
+.  **Create a New Project (Namespace):**
+    For organizational purposes, let's create a new project.
++
+[source,bash]
+----
+oc new-project amq-broker-fundamentals
+----
++
+This command creates a new project and automatically switches your current context to it.
+
+.  **Deploy a Sample Application (nginx) to see Pods and Deployments:**
+    To see pods and deployments in action, let's deploy a simple `nginx` web server.
++
+[source,bash]
+----
+oc new-app --docker-image=nginx:latest --name=my-nginx
+----
++
+TIP: The `oc new-app` command simplifies the creation of deployments, services, and routes from images or source code.
+
+.  **Observe Pods:**
+    Check the pods running in your project. You should see an `nginx` pod being created.
++
+[source,bash]
+----
+oc get pods
+----
++
+[source,text]
+----
+NAME                          READY   STATUS      RESTARTS   AGE
+my-nginx-6677f59d4c-abcde   1/1     Running     0          30s
+----
+
+.  **Observe Deployments:**
+    Check the deployment created for `my-nginx`.
++
+[source,bash]
+----
+oc get deployments
+----
++
+[source,text]
+----
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+my-nginx    1/1     1            1           45s
+----
+
+.  **Observe Services:**
+    Check the service created for `my-nginx`. Note the ClusterIP, which is the internal stable IP.
++
+[source,bash]
+----
+oc get services
+----
++
+[source,text]
+----
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+my-nginx     ClusterIP   172.30.xxx.xxx   <none>        80/TCP     1m
+----
+
+.  **Observe Routes:**
+    Check if a route was automatically created for `my-nginx`. If not, you can expose it manually (optional).
++
+[source,bash]
+----
+oc get routes
+----
++
+[source,text]
+----
+# If no route is shown, expose the service:
+oc expose service my-nginx
+oc get routes
+----
++
+[source,text]
+----
+NAME         HOST/PORT                                  PATH   SERVICES   PORT   TERMINATION   WILDCARD
+my-nginx     my-nginx-amq-broker-fundamentals.apps.cluster.example.com          my-nginx   8080-tcp         None
+----
++
+You can now access the Nginx web server from your browser using the `HOST/PORT` provided by the route.
+
+.  **Clean up the Sample Application:**
+    Remove the `my-nginx` application and its associated resources.
++
+[source,bash]
+----
+oc delete all -l app=my-nginx
+----
++
+This command deletes the Deployment, Pods, Service, and Route associated with `my-nginx`.
+
+.  **Switch back to the default project or delete the project:**
+    You can switch back to the `default` project or delete the `amq-broker-fundamentals` project if you no longer need it.
++
+[source,bash]
+----
+oc project default
+# Or to delete the project:
+oc delete project amq-broker-fundamentals
+----
++
+WARNING: Deleting a project will remove all resources within that project.
+
+This activity provides a basic understanding of how you interact with core OpenShift resources. In subsequent sections, you will learn how the AMQ Broker Operator simplifies the deployment and management of AMQ Broker by automating the creation and configuration of these underlying OpenShift components.

@@ -1,0 +1,119 @@
+#  Introduction to AMQ Core Protocol
+
+As a Content Architect, I've developed the following detailed educational content on "Introduction to AMQ Core Protocol" in Antora AsciiDoc format, combining technical accuracy, clarity, and hands-on guidance, based on the provided context and objectives.
+
+```asciidoc
+= Introduction to AMQ Core Protocol
+
+This module introduces the AMQ Core Protocol, its purpose, and its key features. We will also delve into the AMQ Core Protocol JMS client, which enables Java applications to interact with AMQ Broker using this protocol. Understanding the core protocol is foundational for developing robust messaging solutions with Red Hat AMQ Broker.
+
+== What is AMQ Core Protocol?
+
+The AMQ Core Protocol is the native, high-performance wire protocol of Apache ActiveMQ Artemis, which serves as the upstream project for Red Hat AMQ Broker. It is a binary messaging protocol specifically designed for efficient and reliable communication between messaging clients and the broker. Unlike open standards such as AMQP or MQTT, the AMQ Core Protocol is optimized for environments where ActiveMQ Artemis or Red Hat AMQ Broker is deployed, offering a comprehensive set of features for enterprise-grade messaging.
+
+While not an open industry standard, its tight integration with the broker allows for optimized performance and access to specific ActiveMQ Artemis features.
+
+== AMQ Core Protocol JMS Client
+
+Red Hat AMQ Broker supports various messaging protocols to accommodate diverse client applications. For Java developers, the AMQ Core Protocol JMS client provides a powerful and familiar interface to interact with the broker using its native protocol.
+
+The xref:../../amq-clients/core-protocol-jms/index.adoc[AMQ Core Protocol JMS] client is a Java Message Service (JMS) 2.0 compliant client. Its primary role is to enable Java applications to send and receive messages by communicating with AMQ Broker using the underlying Artemis Core Protocol. As part of the AMQ Clients suite, it represents one of several messaging libraries supporting multiple languages and platforms, ensuring broad development flexibility.
+
+=== Foundations
+
+The AMQ Core Protocol JMS client is built upon the robust JMS implementation inherited from xref:https://activemq.apache.org/artemis[Apache ActiveMQ Artemis]. This lineage ensures deep integration and optimal performance when establishing connections and exchanging messages with AMQ Broker instances. For developers already proficient with the standard JMS API, adapting to AMQ Core Protocol JMS is a seamless process, as it fully adheres to both JMS 1.1 and 2.0 specifications. This adherence means standard JMS programming models and practices can be directly applied.
+
+=== Key Features
+
+The AMQ Core Protocol JMS client is engineered with a set of crucial features that make it suitable for demanding enterprise messaging environments:
+
+*   **JMS 1.1 and 2.0 Compatible:** It offers full support for the Java Message Service API, allowing developers to leverage established and standard JMS programming models and features, including new capabilities introduced in JMS 2.0.
+*   **SSL/TLS for Secure Communication:** Data confidentiality and integrity are paramount. The client ensures secure communication channels through encryption, supporting versions 1.0, 1.1, 1.2, and 1.3 of the Transport Layer Security (TLS) protocol, which is the successor to SSL. This enables secure client-broker interactions, especially over untrusted networks.
+*   **Automatic Reconnect and Failover:** To enhance application resilience and continuity, the client can automatically re-establish connections to the broker if a connection is lost. In high-availability (HA) setups, it supports automatic failover to backup broker instances, ensuring minimal disruption to messaging operations.
+*   **Distributed Transactions (XA):** The client supports XA transactions, a critical feature for enterprise integration patterns. This allows messaging operations to participate in broader distributed transactions, coordinating with other transactional resources (like databases) to ensure atomicity across multiple systems.
+*   **Pure-Java Implementation:** Being entirely written in Java, the client offers broad compatibility and ease of deployment across various Java environments and platforms, simplifying dependency management and integration.
+
+=== Supported Standards and Protocols
+
+The AMQ Core Protocol JMS client specifically supports the following industry-recognized standards and network protocols, as outlined in the context:
+
+*   **Java Message Service (JMS) API:** Version 2.0, providing the programmatic interface for messaging operations.
+*   **Transport Layer Security (TLS) protocol:** Versions 1.0, 1.1, 1.2, and 1.3, for secure network communication.
+*   **TCP:** As the fundamental underlying network protocol for client-broker connectivity.
+
+[NOTE]
+It is important to distinguish between the AMQ Core Protocol *itself* and the AMQ Core Protocol *JMS client*. The core protocol is the native, highly optimized binary protocol specific to ActiveMQ Artemis/AMQ Broker. The AMQ Core Protocol JMS client is a Java library that *uses* this native protocol while providing a standard JMS API to Java developers, abstracting the complexities of the underlying wire protocol.
+
+== Hands-on Activity: Preparing for Core Protocol Client Development
+
+Before we proceed with developing actual client applications using AMQ Core Protocol JMS, it is crucial to establish a foundational environment. This activity guides you through setting up a basic AMQ Broker instance and creating a specific queue, which are prerequisites for testing future client examples.
+
+[IMPORTANT]
+While our overall curriculum focuses on deploying AMQ Broker on OpenShift, the provided context for "Using AMQ Core Protocol JMS" uses a local broker setup for its examples. Therefore, for this introductory hands-on activity, we will adhere to the context's guidance and set up a local AMQ Broker instance. Future labs will cover client development against OpenShift-deployed brokers.
+
+=== Objective
+
+Set up a local AMQ Broker instance and create a queue named `exampleQueue`. This queue is explicitly required for the AMQ Core Protocol JMS examples referenced in the documentation.
+
+=== Prerequisites
+
+*   A local installation of xref:../../getting-started/install-broker.adoc[AMQ Broker].
+*   Access to a terminal or command prompt.
+
+=== Procedure
+
+Follow these steps to prepare your local development environment:
+
+. **Install the AMQ Broker and Create an Instance**
++
+If you haven't already, install AMQ Broker on your local machine and create a new broker instance. For this introductory setup, ensure that anonymous access is enabled, simplifying initial client connections.
++
+[source,bash]
+----
+# Example: Create a broker instance named 'mybroker'
+# For detailed installation and instance creation steps, refer to "Getting Started with AMQ Broker" documentation.
+# For instance, if you extracted the broker archive to /opt/amq-broker-7.x, you might do:
+# cd /opt/amq-broker-7.x/bin
+# ./artemis create mybroker --user admin --password admin --allow-anonymous --force
+----
++
+_Refer to the "Getting Started with AMQ Broker" documentation to install the broker and create a broker instance. Ensure you enable anonymous access as specified in the context._
+
+. **Start the Broker Instance**
++
+Navigate to your newly created broker instance directory (e.g., `<broker-instance-dir>`) and start the broker using the `artemis run` command.
++
+[source,bash]
+----
+cd <broker-instance-dir>
+./artemis run
+----
++
+Monitor the console output. The broker is ready when you see the message `Server is now live`.
++
+[TIP]
+Keep this terminal window open. The broker needs to remain running for the next steps and for subsequent client development labs.
+
+. **Create the `exampleQueue`**
++
+Open a *new* terminal window.
++
+Navigate back to your broker instance directory.
++
+Use the `artemis queue` command to create a queue named `exampleQueue`. If prompted for configuration options, answer `N` (no) to all questions for this basic setup.
++
+[source,bash]
+----
+cd <broker-instance-dir>
+./artemis queue create --name exampleQueue --address exampleQueue --user admin --password admin
+----
++
+You will be prompted to answer a series of yes or no questions. For this initial setup, answer `N` for no to all of them.
++
+[NOTE]
+The `--user` and `--password` flags are included to authenticate with the broker's management interface, which is typically required even if anonymous client access is enabled for message production/consumption. If your broker instance was created without management authentication, these flags might not be strictly necessary, but it's good practice to include them.
+
+=== Verification
+
+Upon successful completion of these steps, you will have a running AMQ Broker instance on your local machine with a message queue named `exampleQueue`. This setup provides the necessary messaging infrastructure for you to begin developing and testing AMQ Core Protocol JMS client applications in the subsequent modules.
+```

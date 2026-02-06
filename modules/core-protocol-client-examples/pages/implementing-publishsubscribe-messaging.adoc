@@ -1,0 +1,614 @@
+#  Implementing Publish/Subscribe Messaging
+
+:pub-sub-messaging:
+= Implementing Publish/Subscribe Messaging
+
+The Publish/Subscribe (Pub/Sub) messaging model is a fundamental concept in message-oriented middleware, allowing for broadcasting messages to multiple interested consumers. Unlike the Point-to-Point model where a message is consumed by only one receiver, Pub/Sub enables one message to be delivered to many subscribers.
+
+== Overview of Publish/Subscribe Messaging
+
+The Pub/Sub model is ideal for scenarios where information needs to be disseminated to a dynamic set of interested parties without direct knowledge of who those parties are.
+
+=== Core Concepts
+
+*   *Topics*: In the Pub/Sub model, messages are published to a named destination called a *topic*. Topics act as logical channels for message distribution.
+*   *Publishers*: Applications that create and send messages to a specific topic. Publishers do not need to know anything about the subscribers.
+*   *Subscribers*: Applications that register their interest in a specific topic. When a message is published to that topic, all active subscribers receive a copy of the message.
+
+=== Key Characteristics
+
+*   *Decoupling*: Publishers and subscribers are completely decoupled. They don't need to know each other's existence or location, improving system flexibility and maintainability.
+*   *Asynchronous Communication*: Messages are sent and received asynchronously, allowing components to operate independently.
+*   *Broadcasting*: A single message can be delivered to multiple subscribers.
+*   *Durability*: Subscribers can be configured as *durable* or *non-durable*.
+    *   *Non-durable subscriptions*: Messages are only delivered to subscribers that are actively connected and listening to the topic when the message is published. If a non-durable subscriber is offline, it misses any messages published during its downtime.
+    *   *Durable subscriptions*: Messages are persisted by the broker for a specific subscriber, even if the subscriber is temporarily offline. When the durable subscriber reconnects, it receives all messages that were published while it was disconnected. This ensures message reliability for critical applications.
+
+=== Use Cases
+
+Pub/Sub messaging is widely used in:
+
+*   *News feeds and alerts*: Broadcasting real-time updates (e.g., stock prices, weather alerts, breaking news).
+*   *Event-driven architectures*: Notifying various microservices about events that have occurred (e.g., "order placed," "user registered").
+*   *Application integration*: Distributing data changes or commands to multiple consuming systems.
+*   *Monitoring systems*: Broadcasting metrics or log events to different monitoring tools.
+
+== AMQ Broker Support for Publish/Subscribe
+
+Red Hat AMQ Broker, built on Apache ActiveMQ Artemis, provides robust support for the Publish/Subscribe messaging model through various protocols, including:
+
+*   *JMS (Java Message Service)*: Specifically, JMS Topics are the primary mechanism for Pub/Sub in Java applications.
+*   *AMQP (Advanced Message Queuing Protocol)*: AMQP uses exchanges and bindings to achieve Pub/Sub semantics, where messages are sent to an exchange and then routed to multiple queues based on binding keys.
+*   *MQTT (MQ Telemetry Transport)*: Often used for IoT and mobile applications, MQTT inherently supports Pub/Sub with its topic-based messaging.
+*   *STOMP (Simple Text Oriented Messaging Protocol)*: STOMP also supports Pub/Sub concepts using `/topic/` destinations.
+
+When using JMS with AMQ Broker, a *JMS Topic* directly maps to the Pub/Sub model. The broker manages the distribution of messages to all active and durable subscribers.
+
+== Hands-on Activity: Deploying and Testing Publish/Subscribe with JMS
+
+This lab guides you through deploying a basic AMQ Broker instance on OpenShift, configuring a topic, and then creating simple Java-based producer (publisher) and consumer (subscriber) applications to demonstrate Publish/Subscribe messaging using JMS.
+
+=== Prerequisites
+
+*   An OpenShift cluster with `oc` CLI configured.
+*   The AMQ Broker Operator installed on your OpenShift cluster.
+*   Java Development Kit (JDK) 11 or newer.
+*   Apache Maven for building Java applications.
+
+=== Step 1: Deploy a Basic AMQ Broker Instance
+
+If you don't already have an AMQ Broker instance running, deploy one. We will create a simple instance with a `basic` configuration.
+
+. Create a Project
++
+Create a new OpenShift project for your broker and applications.
++
+[source,bash,subs="attributes+"]
+----
+oc new-project amq-pubsub-demo
+----
+
+. Deploy the Broker Instance
++
+Create a file named `broker-pubsub.yaml` with the following content:
++
+[source,yaml,subs="attributes+"]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: amq-pubsub-broker
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
+    # Define a network via an OpenShift Route for external access
+    expose: true
+    # Configure the console for monitoring
+    console: true
+  brokerProperties:
+    - addressSettings.#.default.durable-topic-paging=true
+    - addressSettings.#.default.topic-paging=true
+----
++
+Apply this YAML to deploy the broker:
++
+[source,bash,subs="attributes+"]
+----
+oc apply -f broker-pubsub.yaml
+----
++
+Wait for the broker pod to be running and the route to be created. You can check the status:
++
+[source,bash,subs="attributes+"]
+----
+oc get pods -l app=amq-pubsub-broker
+oc get route amq-pubsub-broker-amqp # Or amq-pubsub-broker-jolokia for the console
+----
++
+Note down the AMQP route hostname. You'll need it for client connections.
++
+[source,bash,subs="attributes+"]
+----
+oc get route amq-pubsub-broker-amqp --output=jsonpath='{.spec.host}'
+----
+
+=== Step 2: Access the Management Console (Hawtio)
+
+You can use the Hawtio console to verify topic creation and message flow.
+
+. Get the Hawtio Console Route
++
+[source,bash,subs="attributes+"]
+----
+oc get route amq-pubsub-broker-jolokia --output=jsonpath='{.spec.host}'
+----
++
+Open this URL in your browser. You might need to log in using your OpenShift credentials or the default `admin`/`admin` if configured.
+. Navigate to `Runtime` -> `org.apache.activemq.artemis` -> `Broker` -> `Addresses`. You'll see dynamically created addresses when publishers and subscribers connect.
+
+=== Step 3: Develop the Publisher Application
+
+Create a Java publisher application that sends messages to a topic.
+
+. Create a Maven Project
++
+[source,bash,subs="attributes+"]
+----
+mkdir pubsub-publisher
+cd pubsub-publisher
+mvn archetype:generate -DgroupId=com.example.pubsub -DartifactId=publisher -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+----
+
+. Update `pom.xml`
++
+Edit `publisher/pom.xml` to include the necessary AMQ Broker JMS client dependency:
++
+[source,xml,subs="attributes+"]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.pubsub</groupId>
+    <artifactId>publisher</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-jms-client-all</artifactId>
+            <version>2.31.0.redhat-00003</version> <!-- Use the version compatible with your broker image -->
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.32</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.example.pubsub.publisher.Publisher</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.example.pubsub.publisher.Publisher</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+----
+
+. Create the Publisher Class
++
+Create `src/main/java/com/example/pubsub/publisher/Publisher.java` with the following content. Replace `YOUR_AMQP_ROUTE_HOSTNAME` with the actual hostname you obtained earlier.
++
+[source,java,subs="attributes+"]
+----
+package com.example.pubsub.publisher;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+
+import javax.jms.*;
+import java.util.Scanner;
+
+public class Publisher {
+
+    private static final String BROKER_URL = "amqp://YOUR_AMQP_ROUTE_HOSTNAME:5672"; // Replace with your AMQP route hostname
+    private static final String TOPIC_NAME = "myTopic";
+
+    public static void main(String[] args) throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+        Scanner scanner = new Scanner(System.in);
+
+        try {
+            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
+            connection = connectionFactory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(TOPIC_NAME);
+            producer = session.createProducer(topic);
+
+            System.out.println("Publisher connected to topic: " + TOPIC_NAME);
+            System.out.println("Enter messages to send (or 'quit' to exit):");
+
+            String text;
+            while (true) {
+                System.out.print("> ");
+                text = scanner.nextLine();
+                if ("quit".equalsIgnoreCase(text)) {
+                    break;
+                }
+                TextMessage message = session.createTextMessage(text);
+                producer.send(message);
+                System.out.println("Sent message: '" + text + "'");
+            }
+
+        } catch (JMSException e) {
+            System.err.println("JMS Exception occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (scanner != null) {
+                scanner.close();
+            }
+            if (producer != null) {
+                producer.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            System.out.println("Publisher gracefully shut down.");
+        }
+    }
+}
+----
+
+=== Step 4: Develop the Subscriber Application (Non-Durable and Durable)
+
+Create two subscriber applications: one non-durable and one durable, to observe the difference.
+
+. Create a Maven Project for Subscriber
++
+[source,bash,subs="attributes+"]
+----
+cd ..
+mkdir pubsub-subscriber
+cd pubsub-subscriber
+mvn archetype:generate -DgroupId=com.example.pubsub -DartifactId=subscriber -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+----
+
+. Update `pom.xml`
++
+Edit `subscriber/pom.xml` to include the same dependencies as the publisher:
++
+[source,xml,subs="attributes+"]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.pubsub</groupId>
+    <artifactId>subscriber</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-jms-client-all</artifactId>
+            <version>2.31.0.redhat-00003</version> <!-- Use the version compatible with your broker image -->
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.32</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.example.pubsub.subscriber.NonDurableSubscriber</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.example.pubsub.subscriber.NonDurableSubscriber</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+----
+
+. Create the Non-Durable Subscriber Class
++
+Create `src/main/java/com/example/pubsub/subscriber/NonDurableSubscriber.java`. Replace `YOUR_AMQP_ROUTE_HOSTNAME`.
++
+[source,java,subs="attributes+"]
+----
+package com.example.pubsub.subscriber;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+
+import javax.jms.*;
+
+public class NonDurableSubscriber {
+
+    private static final String BROKER_URL = "amqp://YOUR_AMQP_ROUTE_HOSTNAME:5672"; // Replace with your AMQP route hostname
+    private static final String TOPIC_NAME = "myTopic";
+
+    public static void main(String[] args) throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+
+        try {
+            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
+            connection = connectionFactory.createConnection();
+            // Start the connection *before* creating the consumer for non-durable
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(TOPIC_NAME);
+
+            consumer = session.createConsumer(topic);
+            consumer.setMessageListener(new MessageListener() {
+                @Override
+                public void onMessage(Message message) {
+                    try {
+                        if (message instanceof TextMessage) {
+                            TextMessage textMessage = (TextMessage) message;
+                            System.out.println("[Non-Durable] Received: " + textMessage.getText());
+                        }
+                    } catch (JMSException e) {
+                        System.err.println("Error processing message: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            System.out.println("[Non-Durable Subscriber] Listening on topic: " + TOPIC_NAME);
+            System.out.println("Press Ctrl+C to exit.");
+
+            // Keep the main thread alive to receive messages
+            Thread.currentThread().join();
+
+        } catch (JMSException e) {
+            System.err.println("JMS Exception occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("Non-Durable Subscriber interrupted.");
+        } finally {
+            if (consumer != null) {
+                consumer.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            System.out.println("Non-Durable Subscriber gracefully shut down.");
+        }
+    }
+}
+----
+
+. Create the Durable Subscriber Class
++
+Create `src/main/java/com/example/pubsub/subscriber/DurableSubscriber.java`. Replace `YOUR_AMQP_ROUTE_HOSTNAME`.
++
+[source,java,subs="attributes+"]
+----
+package com.example.pubsub.subscriber;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+
+import javax.jms.*;
+
+public class DurableSubscriber {
+
+    private static final String BROKER_URL = "amqp://YOUR_AMQP_ROUTE_HOSTNAME:5672"; // Replace with your AMQP route hostname
+    private static final String TOPIC_NAME = "myTopic";
+    private static final String CLIENT_ID = "durable-sub-client-1"; // Unique ID for the client
+    private static final String SUBSCRIPTION_NAME = "myDurableSubscription"; // Unique name for the subscription
+
+    public static void main(String[] args) throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        TopicSubscriber subscriber = null;
+
+        try {
+            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
+            connection = connectionFactory.createConnection();
+            connection.setClientID(CLIENT_ID); // Set a unique client ID for durable subscription
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(TOPIC_NAME);
+
+            // Create a durable topic subscriber
+            subscriber = session.createDurableSubscriber(topic, SUBSCRIPTION_NAME);
+            subscriber.setMessageListener(new MessageListener() {
+                @Override
+                public void onMessage(Message message) {
+                    try {
+                        if (message instanceof TextMessage) {
+                            TextMessage textMessage = (TextMessage) message;
+                            System.out.println("[Durable     ] Received: " + textMessage.getText());
+                        }
+                    } catch (JMSException e) {
+                        System.err.println("Error processing message: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            System.out.println("[Durable Subscriber] Listening on topic: " + TOPIC_NAME + " with client ID: " + CLIENT_ID);
+            System.out.println("Press Ctrl+C to exit.");
+
+            // Keep the main thread alive to receive messages
+            Thread.currentThread().join();
+
+        } catch (JMSException e) {
+            System.err.println("JMS Exception occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("Durable Subscriber interrupted.");
+        } finally {
+            if (subscriber != null) {
+                // For durable subscribers, it's good practice to unsubscribe if it's no longer needed
+                // session.unsubscribe(SUBSCRIPTION_NAME);
+                subscriber.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            System.out.println("Durable Subscriber gracefully shut down.");
+        }
+    }
+}
+----
+
+=== Step 5: Build and Run the Applications
+
+. Build the Publisher
++
+In the `pubsub-publisher` directory, build the project:
++
+[source,bash,subs="attributes+"]
+----
+mvn clean install
+----
+
+. Build the Subscriber
++
+In the `pubsub-subscriber` directory, build the project:
++
+[source,bash,subs="attributes+"]
+----
+mvn clean install
+----
+
+. Run the Subscribers (First)
++
+Open two separate terminal windows.
++
+*   In Terminal 1, run the non-durable subscriber:
++
+    [source,bash,subs="attributes+"]
+    ----
+    java -jar pubsub-subscriber/target/subscriber-1.0-SNAPSHOT-jar-with-dependencies.jar com.example.pubsub.subscriber.NonDurableSubscriber
+    ----
++
+*   In Terminal 2, run the durable subscriber:
++
+    [source,bash,subs="attributes+"]
+    ----
+    java -jar pubsub-subscriber/target/subscriber-1.0-SNAPSHOT-jar-with-dependencies.jar com.example.pubsub.subscriber.DurableSubscriber
+    ----
++
+Both subscribers should report that they are listening.
+
+. Run the Publisher
++
+Open a third terminal window.
++
+*   In Terminal 3, run the publisher:
++
+    [source,bash,subs="attributes+"]
+    ----
+    java -jar pubsub-publisher/target/publisher-1.0-SNAPSHOT-jar-with-dependencies.jar
+    ----
++
+Now, type messages into the publisher's terminal and press Enter. You should see both subscriber terminals receiving the messages immediately.
+
+. Test Non-Durable vs. Durable Behavior
++
+*   **Stop the Non-Durable Subscriber (Terminal 1)** by pressing `Ctrl+C`.
+*   Send a few more messages from the Publisher (Terminal 3).
+*   Observe that only the Durable Subscriber (Terminal 2) continues to receive messages.
+*   **Restart the Non-Durable Subscriber (Terminal 1)**. It will only receive new messages published *after* it restarts. It will not receive the messages it missed while it was offline.
+*   **Stop the Durable Subscriber (Terminal 2)** by pressing `Ctrl+C`.
+*   Send a few more messages from the Publisher (Terminal 3). These messages are *not* received by any active subscriber.
+*   **Restart the Durable Subscriber (Terminal 2)**. It *will* receive all the messages that were published while it was offline. This demonstrates the message persistence provided by durable subscriptions.
+
+. Clean Up Durable Subscription (Optional)
++
+After you are done with a durable subscription, you can explicitly "unsubscribe" it using the Hawtio console or programmatically, otherwise, the broker continues to store messages for it. In the Hawtio console, navigate to `Runtime` -> `org.apache.activemq.artemis` -> `Broker` -> `Addresses`, find your `myTopic` address, and you should see a `Consumer` entry for the durable subscriber. You can manage or remove it there.
+
+== Troubleshooting Tips
+
+*   *Connection Issues*: Ensure the `BROKER_URL` in your Java code correctly points to the AMQP route hostname and port (`5672`) of your AMQ Broker. Check `oc get route` for the correct hostname.
+*   *JMS Client Version*: Make sure the `artemis-jms-client-all` version in your `pom.xml` is compatible with your AMQ Broker image version.
+*   *`CLIENT_ID` for Durable Subscribers*: Each connection used to create a durable subscriber *must* have a unique `setClientID()` value. If you try to create another durable subscriber with the same `CLIENT_ID` and `SUBSCRIPTION_NAME` while the first is active, it will fail.
+*   *Missing Messages (Non-Durable)*: Remember that non-durable subscribers only receive messages published *while they are active*. If they are offline, they miss messages.
+*   *Durable Subscription Persistence*: If messages are not being delivered to a restarted durable subscriber, ensure that `connection.setClientID()` is called *before* `connection.start()`, and that the `SUBSCRIPTION_NAME` is unique for that client ID. Also, verify that the broker's persistence is correctly configured.
+*   *Firewall/Network Policy*: If running clients outside OpenShift, ensure your OpenShift cluster's network policies or firewalls allow external access to the broker's AMQP route.
+
+This hands-on lab provides a practical understanding of how Publish/Subscribe messaging works with Red Hat AMQ Broker on OpenShift, highlighting the critical difference between non-durable and durable subscriptions.

@@ -1,0 +1,235 @@
+#  Setting Up a Core Protocol Client Development Environment
+
+= Setting Up a Core Protocol Client Development Environment
+
+This section guides you through establishing a robust development environment for building applications that interact with Red Hat AMQ Broker using its native *Core Protocol*. The AMQ Core Protocol is a high-performance, low-latency messaging protocol foundational to Apache ActiveMQ Artemis, on which Red Hat AMQ Broker is built.
+
+Developing Core Protocol clients in Java primarily involves using the Red Hat AMQ Core Protocol JMS client library. This library provides a Java Message Service (JMS) interface, allowing developers to leverage the powerful features of AMQ Broker with standard JMS APIs.
+
+== Introduction to the Core Protocol Client Environment
+
+A well-configured development environment is crucial for efficiently creating, building, and testing your messaging applications. For Java-based AMQ Core Protocol clients, this environment typically comprises:
+
+*   **Java Development Kit (JDK):** To compile and run your Java applications.
+*   **Apache Maven:** A powerful build automation tool essential for managing project dependencies, compiling code, and packaging applications.
+*   **Red Hat AMQ Core Protocol JMS Client Library:** The specific library that enables your Java applications to communicate with the AMQ Broker using its core protocol via JMS APIs.
+
+This setup ensures that you have all the necessary tools and libraries to develop robust and performant messaging solutions.
+
+== Prerequisites for Development
+
+Before you begin setting up your client development environment, ensure the following foundational tools are installed on your workstation:
+
+=== Software Requirements
+
+*   **Java Development Kit (JDK) 8 or newer:** Required for compiling and running Java applications.
+*   **Apache Maven 3.6.x or newer:** Essential for project build automation and dependency management.
+
+[NOTE]
+While not strictly required, an Integrated Development Environment (IDE) such as Visual Studio Code, IntelliJ IDEA, or Eclipse is highly recommended for an enhanced development experience, offering features like code completion, debugging, and project management.
+
+== Hands-on Activity: Prepare Your Development Workstation
+
+This activity walks you through verifying and, if necessary, installing the essential software components.
+
+.Procedure
+.  **Install Java Development Kit (JDK):**
+    If you don't have JDK installed, download and install a suitable version (e.g., OpenJDK 8 or 11) from a reputable provider. Follow the installation instructions for your operating system.
+.  **Verify JDK Installation:**
+    Open a terminal or command prompt and run the following command to verify that Java is correctly installed and accessible in your system's PATH:
++
+[source,bash]
+----
+java -version
+javac -version
+----
++
+You should see output indicating the installed Java version.
+.  **Install Apache Maven:**
+    If you don't have Maven installed, download the binary zip archive from the Apache Maven website and extract it to a directory on your system.
+    Add the `bin` directory of your Maven installation to your system's PATH environment variable.
+.  **Verify Maven Installation:**
+    Open a *new* terminal or command prompt and run the following command to verify Maven is correctly installed:
++
+[source,bash]
+----
+mvn -v
+----
++
+You should see output detailing the Maven version, Java version, and operating system.
+
+[TIP]
+If you encounter issues with `java -version` or `mvn -v`, ensure that your system's `PATH` environment variable is correctly configured to include the `bin` directories of your JDK and Maven installations.
+
+== Hands-on Activity: Configure Maven to Access Red Hat Repositories
+
+To access the Red Hat AMQ Core Protocol JMS client libraries and other Red Hat dependencies, your Maven installation must be configured to use the Red Hat Maven repositories. This ensures that Maven can locate and download the necessary artifacts for your projects.
+
+.Technical Explanation
+Red Hat provides its own Maven repositories containing certified versions of various software components, including the AMQ client libraries. By default, Maven projects resolve dependencies from the central Maven repository. To access Red Hat-specific artifacts, you need to inform Maven about the Red Hat repository by adding a profile to your Maven `settings.xml` file. This profile directs Maven to search the Red Hat GA (General Availability) repository when resolving dependencies.
+
+.Procedure
+.  **Locate your Maven `settings.xml` file:**
+    The `settings.xml` file is typically located in your Maven user directory (`~/.m2/` on Linux/macOS or `%USERPROFILE%\.m2\` on Windows). If it doesn't exist, you can copy the template from your Maven installation directory (`<M2_HOME>/conf/settings.xml`) to your user directory and customize it.
+.  **Add the Red Hat GA repository profile:**
+    Edit your `settings.xml` file and add the following `<profile>` entry within the `<profiles>` section. This profile defines the Red Hat GA repository and sets up a plugin group.
++
+[source,xml]
+----
+<profiles>
+  <profile>
+    <id>redhat-ga</id>
+    <repositories>
+      <repository>
+        <id>redhat-ga</id>
+        <url>https://maven.repository.redhat.com/ga/</url>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+        <snapshots>
+          <enabled>false</enabled>
+        </snapshots>
+      </repository>
+    </repositories>
+    <pluginRepositories>
+      <pluginRepository>
+        <id>redhat-ga</id>
+        <url>https://maven.repository.redhat.com/ga/</url>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+        <snapshots>
+          <enabled>false</enabled>
+        </snapshots>
+      </pluginRepository>
+    </pluginRepositories>
+  </profile>
+  <!-- Other profiles can go here -->
+</profiles>
+----
+.  **Activate the `redhat-ga` profile:**
+    To ensure Maven uses this profile by default for all your projects, add the `<activeProfile>redhat-ga</activeProfile>` entry within the `<activeProfiles>` section of your `settings.xml` file.
++
+[source,xml]
+----
+<activeProfiles>
+  <activeProfile>redhat-ga</activeProfile>
+  <!-- Other active profiles can go here -->
+</activeProfiles>
+----
+
+[IMPORTANT]
+As stated in the link:red:amq-broker-7-getting-started@amq-clients::index.adoc#prerequisites[Red Hat AMQ Core Protocol JMS documentation], Maven *must* be configured to use the Red Hat repository. Failing to do so will result in `ArtifactNotFoundException` errors when building your client applications.
+
+== Hands-on Activity: Create a New Core Protocol Client Project
+
+Now that your workstation is prepared and Maven is configured, you can create a new Maven project and add the necessary AMQ Core Protocol JMS client dependency.
+
+.Technical Explanation
+Maven archetypes provide a templating system to generate a project structure quickly. While you could create a `pom.xml` file manually, using an archetype simplifies the initial setup. Once the project is generated, you declare the `amq-broker-client` dependency in the `pom.xml`. This dependency is crucial as it includes all the necessary classes and libraries for your Java application to communicate with the AMQ Broker.
+
+.Procedure
+.  **Create a new Maven project using an archetype:**
+    Open a terminal or command prompt and navigate to your desired workspace directory. Execute the following Maven command to create a new project:
++
+[source,bash]
+----
+mvn archetype:generate \
+    -DgroupId=com.example.amq.client \
+    -DartifactId=amq-core-client-app \
+    -Dversion=1.0.0-SNAPSHOT \
+    -DarchetypeArtifactId=maven-archetype-quickstart \
+    -DarchetypeVersion=1.4 \
+    -DinteractiveMode=false
+----
++
+This command creates a directory named `amq-core-client-app` containing a basic Maven project structure.
+.  **Navigate into your new project directory:**
++
+[source,bash]
+----
+cd amq-core-client-app
+----
+.  **Add the AMQ Core Protocol JMS client dependency:**
+    Open the `pom.xml` file located in your `amq-core-client-app` directory. Add the `amq-broker-client` dependency within the `<dependencies>` section.
++
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.amq.client</groupId>
+    <artifactId>amq-core-client-app</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <amq.version>7.12.0.redhat-00001</amq.version> <!-- Use the relevant Red Hat AMQ Core Protocol JMS version -->
+    </properties>
+
+    <dependencies>
+        <!-- AMQ Core Protocol JMS Client Library -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-jms-client</artifactId>
+            <version>${amq.version}</version>
+        </dependency>
+        <!-- The context mentions "Red Hat AMQ Core Protocol JMS 7.12 Using AMQ Core Protocol JMS" -->
+        <!-- For typical usage, the 'artemis-jms-client' dependency is sufficient and pulls in core components. -->
+        <!-- Alternatively, you might see 'qpid-jms-client' for AMQP clients, but for core protocol, artemis-jms-client is more direct. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.32</version> <!-- Or a newer version -->
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+----
++
+[IMPORTANT]
+Ensure you use the correct Red Hat AMQ Core Protocol JMS version in the `<amq.version>` property. The context mentions *Red Hat AMQ Core Protocol JMS 7.12*, so using `7.12.0.redhat-00001` or a similar specific build version is appropriate. Check the official Red Hat documentation for the exact version string if you encounter issues.
+
+== Verifying the Setup
+
+After configuring your Maven project, it's good practice to verify that Maven can resolve all dependencies and successfully build the project.
+
+.Procedure
+.  **Build your project:**
+    In the `amq-core-client-app` directory, run the following Maven command:
++
+[source,bash]
+----
+mvn clean install
+----
+.  **Review the output:**
+    A successful build will show messages indicating that dependencies are being downloaded from the configured repositories (including Red Hat GA) and that the project is building without errors. The final line should be similar to:
++
+[source,text]
+----
+[INFO] BUILD SUCCESS
+----
++
+If you encounter `ArtifactNotFoundException` errors, double-check your `settings.xml` file to ensure the `redhat-ga` profile is correctly defined and activated.
+
+You have now successfully set up your development environment for creating AMQ Core Protocol clients! You are ready to develop producers and consumers that can communicate with your AMQ Broker instances.

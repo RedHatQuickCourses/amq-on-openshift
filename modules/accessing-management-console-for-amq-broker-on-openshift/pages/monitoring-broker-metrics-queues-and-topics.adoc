@@ -1,0 +1,114 @@
+#  Monitoring Broker Metrics, Queues, and Topics
+
+[[monitoring-broker-metrics-queues-topics]]
+= Monitoring Broker Metrics, Queues, and Topics
+
+This section details how to monitor the health and performance of your AMQ Broker instances on OpenShift, focusing on key metrics, queues, and topics. Effective monitoring is crucial for ensuring the reliability, performance, and stability of your messaging infrastructure.
+
+[[monitoring-overview]]
+== Overview of AMQ Broker Monitoring
+
+AMQ Broker, being built on Apache ActiveMQ Artemis, exposes a wealth of operational data through Java Management Extensions (JMX). On OpenShift, this JMX data is typically exposed via a Jolokia agent, which provides a REST-like interface over HTTP for accessing JMX MBeans. The Hawtio management console, often deployed alongside the AMQ Broker, serves as a primary tool for visualizing and interacting with this JMX data.
+
+The OpenShift monitoring stack can also integrate with this, as indicated by the presence of a `ServiceMonitor` that can target the `console-jolokia` port. This allows tools like Prometheus to scrape metrics exposed by the broker. However, for interactive exploration and detailed insights into queues and topics, the Hawtio console is indispensable.
+
+=== Key Areas to Monitor
+
+Monitoring an AMQ Broker involves keeping an eye on several key aspects:
+
+*   *Broker Health Metrics*: These provide an overall picture of the broker's operational state. Key metrics include:
+    *   CPU usage and memory consumption of broker pods.
+    *   JVM statistics (heap usage, garbage collection activity).
+    *   File descriptor usage.
+    *   Total connection counts and session counts.
+    *   Message processing rates (messages added, delivered, acknowledged).
+*   *Queue Metrics*: These offer insights into message flow and potential bottlenecks within specific queues. Important queue metrics include:
+    *   `MessageCount`: The number of messages currently awaiting consumption in the queue.
+    *   `Consumers`: The count of active message consumers connected to the queue.
+    *   `Producers`: The count of active message producers sending to the queue.
+    *   `MessagesAdded`: The total number of messages ever added to the queue since the broker started.
+    *   `MessagesAcknowledged`: The total number of messages successfully processed and acknowledged by consumers.
+    *   `DeliveringCount`: Messages currently in the process of being delivered to consumers.
+    *   `ScheduledCount`: Messages scheduled for future delivery.
+    *   `ExpiredCount`: Messages that have passed their Time-To-Live (TTL) and have expired.
+*   *Topic Metrics*: While ActiveMQ Artemis internally manages topics via durable subscriptions on specific queues, monitoring involves observing the queues associated with these subscriptions. Key topic-related metrics (observed on durable subscription queues) include:
+    *   `MessageCount`: Messages pending for a specific durable subscriber.
+    *   `ConsumerCount`: Number of active consumers for a durable subscription.
+    *   Message publication rates and consumption rates.
+*   *Connection Metrics*: Details about client connections can help diagnose connectivity issues. This includes:
+    *   Number of active client connections per protocol.
+    *   Connection duration.
+    *   Remote address of connected clients.
+*   *Message Store Metrics*: These indicate the health and performance of message persistence.
+    *   Disk usage for the message journal and paging files.
+    *   Journal write rates.
+    *   Paging file sizes and counts.
+
+[[hawtio-console-for-monitoring]]
+== Monitoring with the Hawtio Management Console
+
+The Hawtio console provides a user-friendly web interface to inspect the internal state of your AMQ Broker. It leverages the Jolokia API to interact with the broker's JMX MBeans, presenting information about queues, topics, connections, sessions, and various other operational parameters in an organized, navigable tree structure.
+
+When an `ActiveMQArtemis` custom resource is created with the console enabled, the AMQ Broker Operator automatically deploys the Hawtio console along with the broker and exposes it via an OpenShift Route, making it easily accessible from a web browser.
+
+[[hands-on-monitoring]]
+== Hands-on Activity: Monitoring Broker Resources via Hawtio
+
+In this activity, you will access the Hawtio management console for your deployed AMQ Broker and navigate through its interface to observe broker metrics, queues, and topics.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   An AMQ Broker instance deployed on OpenShift with the Hawtio console enabled and exposed via a Route. If you haven't deployed one yet, refer to the "Deploying AMQ Broker on OpenShift" and "Accessing Management Console for AMQ Broker on OpenShift" sections.
+*   `oc` CLI configured and logged in to your OpenShift cluster.
+*   Some message activity on your broker (e.g., from client examples) will make monitoring more illustrative.
+
+=== Steps
+
+. *Identify the Hawtio Console Route:*
+   First, you need to find the URL for your Hawtio management console. This is typically exposed as an OpenShift Route.
+
+   .Execute the following command to list routes in your project and identify the one for the Hawtio console:
+   [source,bash]
+   ----
+   oc get routes -n <your-project-name>
+   ----
+   .Look for a route named similar to `<broker-name>-console`. The `HOST/PORT` column will contain the URL. For example:
+   ```
+   NAME               HOST/PORT                                   PATH   SERVICES          PORT       TERMINATION          WILDCARD
+   mybroker-console   mybroker-console-myproject.apps.cluster.com        mybroker-console  jolokia    reencrypt/Redirect   None
+   ```
+   .Note down the `HOST/PORT` for your console.
+
+. *Access the Hawtio Console:*
+   .Open your web browser and navigate to the URL you obtained in the previous step (e.g., `https://mybroker-console-myproject.apps.cluster.com`).
+   .You might be prompted to log in. Use your OpenShift credentials or the credentials configured for the console.
+
+. *Navigate to Broker Overview and Metrics:*
+   .Once logged in, you should see the Hawtio dashboard. On the left navigation pane, expand the `JMX` section.
+   .Under JMX, you will typically find entries like `org.apache.activemq.artemis`. Expand this to see various MBeans.
+   .Navigate to `org.apache.activemq.artemis` -> `broker` -> `amq-broker`. This typically represents your main broker instance.
+   .Clicking on `amq-broker` will display a summary of broker-wide metrics and attributes in the main content area. Look for general health metrics like `Version`, `TotalConnections`, `TotalMessagesAdded`, `MemoryUsage`, `JournalFileSize`, and other operational attributes.
+
+. *Monitor Queues:*
+   .Within the `JMX` tree, navigate to `org.apache.activemq.artemis` -> `broker` -> `amq-broker` -> `addresses`.
+   .Expand an `address` (e.g., `myqueue.0`) that you know has message traffic.
+   .Under the address, you'll see `queues`. Expand a specific `queue` (e.g., `myqueue.0` or a queue created by your client examples).
+   .Click on the queue name. The main panel will now display detailed metrics for that queue. Observe:
+     *   `MessageCount`: Current number of messages.
+     *   `Consumers`: Number of active consumers.
+     *   `MessagesAdded`: Total messages ever added.
+     *   `MessagesAcknowledged`: Total messages ever acknowledged.
+     *   `DeliveringCount`: Messages currently being delivered.
+     .Periodically refresh the page or observe the metrics change if there is active message traffic through this queue.
+
+. *Monitor Topics (Durable Subscriptions):*
+   .While ActiveMQ Artemis primarily uses addresses and queues, topics are implemented using durable subscriptions that manifest as specific queues. To monitor "topic-like" behavior for a durable subscription, you would look at the queues created for these subscriptions.
+   .Follow the same navigation path as for queues: `org.apache.activemq.artemis` -> `broker` -> `amq-broker` -> `addresses`.
+   .If you have created a durable subscription, you might find an address and a corresponding queue with a client ID prefix (e.g., `my.topic::my_client_id` where `my.topic` is the topic name and `my_client_id` is the durable subscriber's client ID).
+   .Click on this queue to view its metrics, similar to regular queues. The `MessageCount` will indicate messages pending for that specific durable subscriber.
+
+. *Explore Connections and Sessions:*
+   .Back under `org.apache.activemq.artemis` -> `broker` -> `amq-broker`, you can also explore `connections` and `sessions` to see active client connections and their details (e.g., protocol, remote address, consumer/producer counts). This is useful for troubleshooting connectivity issues or identifying misbehaving clients.
+
+By regularly monitoring these metrics through the Hawtio console, you can gain a deep understanding of your AMQ Broker's operational state, identify patterns in message flow, and proactively address potential performance or availability issues before they impact your applications.

@@ -1,0 +1,192 @@
+#  Performing Administrative Tasks through the Console
+
+Here's the detailed educational content for "Performing Administrative Tasks through the Console" in Antora AsciiDoc format.
+
+```asciidoc
+[[performing-admin-tasks]]
+= Performing Administrative Tasks through the Console
+
+As a message broker administrator, having robust tools to manage and monitor your broker instances is critical for maintaining system health, troubleshooting issues, and ensuring optimal performance. The Red Hat AMQ Broker on OpenShift leverages the powerful Hawtio management console (often referred to as the Fuse Console when packaged with Red Hat Fuse) to provide a web-based interface for these administrative tasks.
+
+== Understanding Console Administration Capabilities
+
+The Hawtio console offers a graphical interface to interact with your AMQ Broker instances. Through this console, administrators can:
+
+*   **Monitor Broker Metrics**: Gain insights into message counts, queue sizes, connection activity, memory usage, and CPU load.
+*   **Manage Destinations**: Create, delete, pause, or purge messages from queues and topics.
+*   **Manage Connections and Sessions**: View active client connections, inspect session details, and potentially close errant connections.
+*   **Inspect Messages**: Browse messages within queues or topics, examine their headers and payloads for debugging purposes.
+*   **Manage Users and Roles**: While the broker itself might handle authentication, the console often provides an interface for its *own* user management or to visualize authenticated users.
+*   **Perform Runtime Operations**: Execute JMX operations exposed by the broker for various administrative functions.
+
+To enable these capabilities, specific configurations must be set on the broker instance.
+
+=== Critical Configuration for Console Administration
+
+For the Hawtio console to discover runtime data and allow administrative operations, two key properties in the `ActiveMQArtemis` Custom Resource (CR) are essential:
+
+1.  `jolokiaAgentEnabled`:
+    The Hawtio console relies on the Jolokia agent to access JMX MBeans exposed by the AMQ Broker. JMX (Java Management Extensions) is a standard technology for managing and monitoring applications, devices, and service-oriented networks. Jolokia provides a REST-like interface over HTTP for JMX, making it accessible to web-based consoles like Hawtio.
+    *   **Configuration**: To enable this, you must set `jolokiaAgentEnabled: true` in your `ActiveMQArtemis` CR.
+
+2.  `managementRBACEnabled`:
+    This property controls whether role-based access control (RBAC) is enforced for the broker's management MBeans. The Hawtio console has its *own* built-in RBAC mechanism for authenticating and authorizing users accessing the console itself. To avoid conflicts and allow the Hawtio console to fully manage the broker without interference from the broker's internal management RBAC, you *must* disable the broker's internal management RBAC.
+    *   **Configuration**: Set `managementRBACEnabled: false` in your `ActiveMQArtemis` CR.
+
+.Important Security Warning
+====
+If you set `managementRBACEnabled` to `false` to enable the use of Hawtio (Fuse Console), it means that the broker's internal management MBeans no longer require authorization. This is a critical security consideration.
+
+*You should **not** use the default, built-in AMQ management console (which might be accessible on a different port or path) while `managementRBACEnabled` is set to `false`, because this potentially exposes all management operations on the brokers to unauthorized use.*
+
+Always ensure that external access to the broker's JMX ports is restricted, and that the Hawtio console itself is secured with strong authentication and authorization mechanisms (e.g., `adminUser`/`adminPassword` as configured in the CR, or integration with OpenShift OAuth/external identity providers for the console).
+====
+
+In addition to enabling these agents, you must configure the `console:` section of your `ActiveMQArtemis` CR to expose the Hawtio console via an OpenShift Route and define initial administrative credentials.
+
+The `console:` section typically includes:
+
+*   `expose: true`: To create an OpenShift Route for external access to the console.
+*   `adminUser`: The username for console access.
+*   `adminPassword`: The password for console access.
+
+Let's look at an example configuration and then perform a hands-on activity.
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  deploymentPlan:
+    size: 1
+    persistenceEnabled: false
+  jolokiaAgentEnabled: true # <1>
+  managementRBACEnabled: false # <2>
+  console:
+    expose: true # <3>
+    adminUser: admin # <4>
+    adminPassword: admin # <5>
+  # ... other broker configurations
+----
+<1> Enables the Jolokia agent for runtime data exposure to the console.
+<2> Disables the broker's internal management RBAC, which is required for Hawtio to function correctly. *Be aware of the security implications.*
+<3> Exposes the Hawtio console via an OpenShift Route.
+<4> Defines the administrative username for logging into the Hawtio console.
+<5> Defines the administrative password for logging into the Hawtio console.
+
+== Hands-on Activity: Configuring the Broker for Console Administration
+
+In this activity, you will modify an existing `ActiveMQArtemis` broker deployment to enable the Hawtio management console for administrative tasks.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   An existing `ActiveMQArtemis` broker instance deployed in a project. If you don't have one, you can create a basic instance using:
+    [source,yaml]
+    ----
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-console-broker
+    spec:
+      deploymentPlan:
+        size: 1
+        persistenceEnabled: false
+        journalType: MAPPED_FILE
+    ----
+    Save this as `my-console-broker.yaml` and apply it:
+    `oc apply -f my-console-broker.yaml`
+*   `oc` command-line tool configured and logged into your OpenShift cluster.
+
+=== Steps
+
+1.  **Switch to your project**:
+    Ensure you are in the OpenShift project where your broker is deployed. Replace `<project_name>` with your actual project name.
+
+    [source,bash,subs="attributes+"]
+    ----
+    oc project <project_name>
+    ----
+
+2.  **Edit the `ActiveMQArtemis` Custom Resource**:
+    You will edit the `ActiveMQArtemis` instance named `my-console-broker` (or the name of your existing broker).
+
+    [source,bash]
+    ----
+    oc edit ActiveMQArtemis my-console-broker
+    ----
+
+3.  **Add/Modify Configuration for Console Administration**:
+    In the editor, navigate to the `spec:` section and add or modify the following lines:
+
+    [source,yaml]
+    ----
+    spec:
+      # ... other configurations
+      jolokiaAgentEnabled: true
+      managementRBACEnabled: false
+      console:
+        expose: true
+        adminUser: admin
+        adminPassword: admin
+      # ... other configurations
+    ----
+
+    *   Ensure `jolokiaAgentEnabled` is `true`.
+    *   Set `managementRBACEnabled` to `false`. Re-read the security warning above to understand the implications.
+    *   Configure the `console:` section with `expose: true`, `adminUser: admin`, and `adminPassword: admin`. You can choose different credentials if desired.
+
+4.  **Save and Apply the Changes**:
+    Save the changes and exit the editor. The OpenShift Operator will detect the changes to the `ActiveMQArtemis` CR and reconfigure the broker instance. This might trigger a rolling restart of the broker pod(s).
+
+    You can monitor the status of the broker pod:
+
+    [source,bash]
+    ----
+    oc get pod -l app.kubernetes.io/name=my-console-broker -w
+    ----
+    Wait until the pod shows `Running` and is ready.
+
+5.  **Access the Hawtio Management Console**:
+    Once the broker is reconfigured, the Operator will create an OpenShift Route to expose the console.
+    Get the URL of the console Route:
+
+    [source,bash]
+    ----
+    oc get route my-console-broker-console -o jsonpath='{.spec.host}'
+    ----
+
+    Copy the output (e.g., `my-console-broker-console-myproject.apps.cluster.example.com`).
+    Open your web browser and navigate to `http://<console_route_host>` (or `https://` if your cluster uses TLS for routes).
+
+    You will be presented with a login page. Use the `adminUser` and `adminPassword` you configured (`admin`/`admin` in this example) to log in.
+
+6.  **Perform Administrative Tasks**:
+    Once logged into the Hawtio console, you can navigate through the interface to perform various administrative tasks:
+
+    *   **Broker**: View general broker status, connections, sessions, and consumers.
+    *   **Queues**: Navigate to the `AMQ Broker` -> `artemis` -> `broker` -> `Queues` section. Here you can see existing queues, their message counts, and perform actions like creating new queues, purging messages, or browsing messages.
+    *   **Topics**: Similar to queues, under `Topics`, you can manage publish/subscribe destinations.
+    *   **Metrics**: Explore various JMX metrics related to the broker's performance and health.
+
+    Experiment with browsing messages on a queue, for instance. If you don't have messages, you can use a simple client to send some.
+
+    .Example: Purging Messages from a Queue
+    Assuming you have a queue named `exampleQueue` with messages:
+    *   In the Hawtio console, navigate to the `Queues` section for your broker.
+    *   Locate `exampleQueue` in the list.
+    *   Click on the queue name to view its details.
+    *   You should find actions like "Purge" or "Browse Messages" available.
+    *   Click "Purge" to remove all messages from the queue. Confirm the action when prompted.
+
+=== Troubleshooting Console Access
+
+*   **Console Route not available**: Ensure `console.expose: true` is set in your CR and allow a few moments for the Operator to create the route. Check `oc get route -l app.kubernetes.io/name=my-console-broker`.
+*   **Login Issues**: Double-check the `adminUser` and `adminPassword` configured in your `ActiveMQArtemis` CR. Passwords are case-sensitive.
+*   **No Broker Data**: If you log in but don't see any broker data or encounter errors, verify `jolokiaAgentEnabled: true` is set. Also, check the broker pod logs for any JMX or Jolokia-related errors: `oc logs <broker_pod_name>`.
+*   **Security Warning on Login**: You might see warnings related to security if not using HTTPS for the console or if self-signed certificates are in use. For production environments, ensure proper TLS configuration for the route.
+
+By successfully completing this activity, you have configured your AMQ Broker on OpenShift to expose its management interface through the Hawtio console, allowing you to perform essential administrative and monitoring tasks. Remember to always be mindful of the security implications when `managementRBACEnabled` is set to `false`.
+```

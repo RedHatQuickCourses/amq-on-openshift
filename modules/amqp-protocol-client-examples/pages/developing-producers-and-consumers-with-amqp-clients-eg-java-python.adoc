@@ -1,0 +1,431 @@
+#  Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)
+
+= Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)
+
+This section guides you through the process of developing messaging clients using the Advanced Message Queuing Protocol (AMQP) 1.0 standard to interact with Red Hat AMQ Broker. We will cover setting up development environments and writing basic producer and consumer applications in both Java and Python.
+
+== Understanding AMQP 1.0 Clients
+
+AMQP 1.0 is a robust, open standard for asynchronous messaging that provides reliable and interoperable communication between applications and messaging brokers. Unlike earlier versions or proprietary protocols, AMQP 1.0 defines a wire-level protocol, allowing for different implementations of clients and brokers to communicate seamlessly. Red Hat AMQ Broker fully supports AMQP 1.0, enabling a wide range of clients to connect.
+
+Key characteristics of AMQP 1.0 include:
+
+*   **Interoperability**: Clients developed in different languages using various AMQP 1.0 libraries can communicate with each other and with any AMQP 1.0 compliant broker.
+*   **Reliability**: Supports various delivery guarantees, from "at-most-once" to "exactly-once," ensuring messages are processed reliably.
+*   **Flexibility**: Allows for complex routing, message annotations, and flow control mechanisms.
+*   **Flow Control**: Producers request "credits" from the broker before sending messages, preventing the broker from being overwhelmed. Consumers also manage credit flow to ensure they can process messages at their own pace.
+
+Developing clients for AMQ Broker using AMQP 1.0 involves establishing a connection, creating sessions, linking to specific addresses (queues or topics), and then sending or receiving messages.
+
+== Developing AMQP Clients in Java
+
+For Java development, the recommended client library for AMQP 1.0 is the Red Hat build of Apache Qpid JMS. This library provides a Java Message Service (JMS) interface over the AMQP 1.0 protocol, allowing you to leverage the familiar JMS API while benefiting from AMQP's interoperability.
+
+[.reference]
+--
+*   Refer to `Red Hat build of Apache Qpid JMS 2.7, Using Qpid JMS` in the provided context for more details on developing AMQ messaging clients using Jakarta (which includes Qpid JMS).
+--
+
+=== Setting Up the Java Development Environment
+
+To start developing Java AMQP clients, you'll need:
+
+*   Java Development Kit (JDK) 11 or later.
+*   A build automation tool like Maven or Gradle.
+*   The Qpid JMS client library.
+
+For a Maven project, add the following dependency to your `pom.xml`:
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.apache.qpid</groupId>
+    <artifactId>qpid-jms-client</artifactId>
+    <version>2.7.0.redhat-00001</version>
+</dependency>
+----
+
+[.note]
+--
+The exact version of `qpid-jms-client` may vary. Always refer to the official Red Hat documentation for the latest recommended version.
+--
+
+=== Creating an AMQP Java Producer
+
+A producer is an application that sends messages to a destination (queue or topic) on the AMQ Broker.
+
+==== Technical Explanation
+
+The Java producer will use the JMS API, specifically `javax.jms.ConnectionFactory`, `javax.jms.Connection`, `javax.jms.Session`, `javax.jms.MessageProducer`, and `javax.jms.TextMessage`. The `QpidJMSConnectionFactory` is the concrete implementation that understands how to establish an AMQP connection. The connection URL specifies the AMQP protocol, the broker's hostname or IP, and the AMQP port (typically `5672`).
+
+==== Hands-on Activity: Simple AMQP Java Producer
+
+Let's create a simple Java application that sends messages to a queue named `myAMQPQueue`.
+
+. **Step 1: Create the Java file**
+Create a file named `AmqpProducer.java` with the following content:
+
+[source,java]
+----
+import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class AmqpProducer {
+
+    public static void main(String[] args) throws Exception {
+        // Broker connection details
+        String brokerUrl = System.getProperty("broker.url", "amqp://localhost:5672");
+        String queueName = System.getProperty("queue.name", "myAMQPQueue");
+        int messageCount = Integer.parseInt(System.getProperty("message.count", "10"));
+
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            // 1. Create a JMS ConnectionFactory
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+
+            // 2. Create a Connection
+            connection = factory.createConnection();
+            connection.start(); // Start the connection
+
+            // 3. Create a Session
+            // Arguments: transacted (false), acknowledgeMode (AUTO_ACKNOWLEDGE)
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(queueName);
+
+            // 5. Create a MessageProducer
+            producer = session.createProducer(destination);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT); // Ensure message persistence
+
+            // 6. Send messages
+            for (int i = 1; i <= messageCount; i++) {
+                String text = "Hello from AMQP Java Producer! Message #" + i;
+                TextMessage message = session.createTextMessage(text);
+                producer.send(message);
+                System.out.println("Sent message: " + text);
+            }
+
+            System.out.println("Successfully sent " + messageCount + " messages.");
+
+        } finally {
+            // 7. Clean up resources
+            if (producer != null) producer.close();
+            if (session != null) session.close();
+            if (connection != null) connection.close();
+            System.out.println("Producer resources closed.");
+        }
+    }
+}
+----
+
+. **Step 2: Compile and Run the Producer**
+From your project root (assuming a Maven setup):
+
+Compile:
+[source,bash]
+----
+mvn compile
+----
+
+Run:
+[source,bash]
+----
+mvn exec:java -Dexec.mainClass="AmqpProducer" -Dbroker.url="amqp://<AMQ_BROKER_HOST>:5672" -Dqueue.name="myAMQPQueue" -Dmessage.count="50"
+----
+
+Replace `<AMQ_BROKER_HOST>` with the actual hostname or IP address of your AMQ Broker instance. If you have exposed your broker via an OpenShift Route for AMQP, use the Route's hostname.
+
+You should see output indicating messages being sent.
+
+=== Creating an AMQP Java Consumer
+
+A consumer is an application that receives messages from a destination on the AMQ Broker.
+
+==== Technical Explanation
+
+The Java consumer also uses the JMS API, specifically `javax.jms.MessageConsumer` and `javax.jms.MessageListener` (for asynchronous consumption) or `receive()` methods (for synchronous consumption). The consumer needs to establish a connection to the broker and then create a subscription to the desired queue or topic. Flow control is automatically handled by the Qpid JMS client and the AMQP protocol, where the broker grants credits to the consumer to control the rate of message delivery.
+
+==== Hands-on Activity: Simple AMQP Java Consumer
+
+Let's create a simple Java application that consumes messages from `myAMQPQueue`.
+
+. **Step 1: Create the Java file**
+Create a file named `AmqpConsumer.java` with the following content:
+
+[source,java]
+----
+import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class AmqpConsumer {
+
+    public static void main(String[] args) throws Exception {
+        // Broker connection details
+        String brokerUrl = System.getProperty("broker.url", "amqp://localhost:5672");
+        String queueName = System.getProperty("queue.name", "myAMQPQueue");
+
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+
+        try {
+            // 1. Create a JMS ConnectionFactory
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+
+            // 2. Create a Connection
+            connection = factory.createConnection();
+            connection.start(); // Start the connection
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(queueName);
+
+            // 5. Create a MessageConsumer
+            consumer = session.createConsumer(destination);
+
+            System.out.println("Waiting for messages on queue: " + queueName + ". Press Ctrl+C to exit.");
+
+            // 6. Receive messages synchronously
+            // You could also use an asynchronous MessageListener for real-world apps
+            while (true) {
+                Message message = consumer.receive(1000); // Wait for 1 second
+                if (message instanceof TextMessage) {
+                    TextMessage textMessage = (TextMessage) message;
+                    System.out.println("Received message: " + textMessage.getText());
+                    // message.acknowledge(); // Not needed with AUTO_ACKNOWLEDGE
+                } else if (message != null) {
+                    System.out.println("Received non-text message: " + message.getClass().getName());
+                }
+            }
+
+        } catch (JMSException e) {
+            System.err.println("JMS Exception: " + e.getMessage());
+        } finally {
+            // 7. Clean up resources
+            if (consumer != null) consumer.close();
+            if (session != null) session.close();
+            if (connection != null) connection.close();
+            System.out.println("Consumer resources closed.");
+        }
+    }
+}
+----
+
+. **Step 2: Compile and Run the Consumer**
+From your project root:
+
+Compile:
+[source,bash]
+----
+mvn compile
+----
+
+Run:
+[source,bash]
+----
+mvn exec:java -Dexec.mainClass="AmqpConsumer" -Dbroker.url="amqp://<AMQ_BROKER_HOST>:5672" -Dqueue.name="myAMQPQueue"
+----
+
+Replace `<AMQ_BROKER_HOST>` with the actual hostname or IP address of your AMQ Broker instance.
+
+Run the consumer, then run the producer from the previous step. You should see the consumer receiving the messages sent by the producer.
+
+== Developing AMQP Clients in Python
+
+For Python development, a common and robust library for AMQP 1.0 is `python-qpid-proton`. It provides a flexible API for building AMQP clients and services.
+
+=== Setting Up the Python Development Environment
+
+To start developing Python AMQP clients, you'll need:
+
+*   Python 3.x installed.
+*   The `python-qpid-proton` library.
+
+. **Step 1: Install `python-qpid-proton`**
+
+[source,bash]
+----
+pip install python-qpid-proton
+----
+
+=== Creating an AMQP Python Producer
+
+==== Technical Explanation
+
+The `python-qpid-proton` library allows you to create a `Proton` `Container` to manage connections, sessions, and links. A `Sender` link is used to send messages to a specific target address (queue or topic). Messages are created as `Message` objects and then sent. The `send()` method typically returns a `Delivery` object, which can be used to track the status of the sent message (e.g., acknowledged, rejected).
+
+==== Hands-on Activity: Simple AMQP Python Producer
+
+Let's create a simple Python application that sends messages to a queue named `myAMQPQueue`.
+
+. **Step 1: Create the Python file**
+Create a file named `amqp_producer.py` with the following content:
+
+[source,python]
+----
+import sys
+from proton import Message
+from proton.handlers import MessagingHandler
+from proton.reactor import Container
+
+class AmqpProducer(MessagingHandler):
+    def __init__(self, broker_url, address, message_count):
+        super(AmqpProducer, self).__init__()
+        self.broker_url = broker_url
+        self.address = address
+        self.message_count = message_count
+        self.sent = 0
+        self.confirmed = 0
+        self.total = message_count
+
+    def on_start(self, event):
+        print(f"Connecting to broker: {self.broker_url}")
+        event.container.create_sender(self.broker_url + "/" + self.address)
+
+    def on_sendable(self, event):
+        while self.sent < self.total and event.sender.credit > 0:
+            message = Message(body=f"Hello from AMQP Python Producer! Message #{self.sent + 1}")
+            event.sender.send(message)
+            print(f"Sent message: {message.body}")
+            self.sent += 1
+
+    def on_accepted(self, event):
+        self.confirmed += 1
+        if self.confirmed == self.total:
+            print(f"All {self.total} messages sent and accepted.")
+            event.connection.close()
+
+    def on_disconnected(self, event):
+        if self.sent < self.total:
+            print(f"Disconnected before all messages were sent. Sent: {self.sent}, Remaining: {self.total - self.sent}")
+        else:
+            print("Disconnected.")
+
+if __name__ == "__main__":
+    broker_url = "amqp://localhost:5672" # Default broker URL
+    address = "myAMQPQueue"             # Default queue name
+    message_count = 10                  # Default number of messages
+
+    if len(sys.argv) > 1:
+        broker_url = sys.argv[1]
+    if len(sys.argv) > 2:
+        address = sys.argv[2]
+    if len(sys.argv) > 3:
+        message_count = int(sys.argv[3])
+
+    try:
+        Container(AmqpProducer(broker_url, address, message_count)).run()
+    except KeyboardInterrupt:
+        pass
+----
+
+. **Step 2: Run the Python Producer**
+[source,bash]
+----
+python amqp_producer.py amqp://<AMQ_BROKER_HOST>:5672 myAMQPQueue 50
+----
+
+Replace `<AMQ_BROKER_HOST>` with the actual hostname or IP address of your AMQ Broker instance.
+
+You should see output indicating messages being sent and confirmed.
+
+=== Creating an AMQP Python Consumer
+
+==== Technical Explanation
+
+A Python consumer using `python-qpid-proton` also runs within a `Container`. It establishes a `Receiver` link to a source address (queue or topic). When messages arrive, the `on_message` callback method is invoked. Within this method, the message can be processed, and an appropriate disposition (e.g., `ACCEPT`, `RELEASE`, `REJECT`) can be sent back to the broker to confirm or reject delivery. Flow control is handled automatically by the receiver link, which sends credits to the broker when it's ready to receive more messages.
+
+==== Hands-on Activity: Simple AMQP Python Consumer
+
+Let's create a simple Python application that consumes messages from `myAMQPQueue`.
+
+. **Step 1: Create the Python file**
+Create a file named `amqp_consumer.py` with the following content:
+
+[source,python]
+----
+import sys
+from proton import Message
+from proton.handlers import MessagingHandler
+from proton.reactor import Container
+
+class AmqpConsumer(MessagingHandler):
+    def __init__(self, broker_url, address, desired_messages=0):
+        super(AmqpConsumer, self).__init__()
+        self.broker_url = broker_url
+        self.address = address
+        self.received = 0
+        self.desired_messages = desired_messages
+        self.receiver = None
+
+    def on_start(self, event):
+        print(f"Connecting to broker: {self.broker_url}")
+        self.receiver = event.container.create_receiver(self.broker_url + "/" + self.address)
+        # Request an initial set of credits
+        self.receiver.flow(10) # Request 10 messages
+
+    def on_message(self, event):
+        print(f"Received message: {event.message.body}")
+        self.received += 1
+        event.delivery.accept() # Acknowledge the message
+
+        # Request more credits if needed, or close connection if desired_messages reached
+        if self.desired_messages > 0 and self.received >= self.desired_messages:
+            print(f"Received {self.received} messages. Closing connection.")
+            event.connection.close()
+        elif event.receiver.credit == 0:
+            # If we're out of credits, request more
+            event.receiver.flow(10)
+            print("Requested 10 more credits.")
+
+
+    def on_disconnected(self, event):
+        print(f"Disconnected. Total messages received: {self.received}")
+
+if __name__ == "__main__":
+    broker_url = "amqp://localhost:5672" # Default broker URL
+    address = "myAMQPQueue"             # Default queue name
+    desired_messages = 0                # 0 for continuous receive, >0 for a specific count
+
+    if len(sys.argv) > 1:
+        broker_url = sys.argv[1]
+    if len(sys.argv) > 2:
+        address = sys.argv[2]
+    if len(sys.argv) > 3:
+        desired_messages = int(sys.argv[3])
+
+    print(f"Waiting for messages on {address}. Press Ctrl+C to exit.")
+    if desired_messages > 0:
+        print(f"Will exit after receiving {desired_messages} messages.")
+
+    try:
+        Container(AmqpConsumer(broker_url, address, desired_messages)).run()
+    except KeyboardInterrupt:
+        print("Consumer stopped by user.")
+----
+
+. **Step 2: Run the Python Consumer**
+[source,bash]
+----
+python amqp_consumer.py amqp://<AMQ_BROKER_HOST>:5672 myAMQPQueue 0
+----
+
+Replace `<AMQ_BROKER_HOST>` with the actual hostname or IP address of your AMQ Broker instance. Setting `desired_messages` to `0` makes the consumer run indefinitely until manually stopped (Ctrl+C).
+
+Run the consumer, then run the Python producer. You should see the consumer receiving the messages.
+
+== Troubleshooting and Best Practices
+
+*   **Broker URL**: Always ensure the broker URL is correct and includes the `amqp://` scheme and the correct port (default `5672`). If connecting to a secured broker, use `amqps://` and port `5671`.
+*   **Network Access**: Verify that your client machine has network access to the AMQ Broker. On OpenShift, this usually means ensuring the broker is exposed via a Service and potentially a Route (for external access).
+*   **Queue/Topic Names**: Ensure the queue or topic names used in your client applications match those configured or expected on the broker.
+*   **Authentication**: If your AMQ Broker has authentication enabled, you'll need to provide credentials in your client connection URL (e.g., `amqp://user:password@broker_host:5672`).
+*   **Flow Control**: Understand that AMQP 1.0 employs flow control. Producers won't send messages if the broker hasn't granted credits, and consumers won't receive messages if they haven't issued credits. Client libraries typically handle this automatically, but it's a key concept for advanced tuning.
+*   **Error Handling**: Implement robust error handling and retry mechanisms in production applications to deal with temporary network issues or broker unavailability.
+*   **Resource Management**: Always close connections, sessions, producers, and consumers in a `finally` block or similar construct to prevent resource leaks.

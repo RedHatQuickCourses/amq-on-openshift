@@ -1,0 +1,181 @@
+#  Scaling Broker Pods and Replicas
+
+
+Here is the Antora AsciiDoc content for "Scaling Broker Pods and Replicas":
+
+```asciidoc
+[[scaling-broker-pods-replicas]]
+= Scaling Broker Pods and Replicas
+
+This section delves into the practical aspects of scaling your AMQ Broker deployments on OpenShift. We will explore how to adjust the number of broker pods (replicas) to meet varying message throughput demands and ensure resilience.
+
+== Understanding Broker Pods and Replicas
+
+In an OpenShift environment, AMQ Broker instances deployed by the AMQ Broker Operator typically run as `StatefulSet` applications. A `StatefulSet` manages a set of pods that have stable, unique network identifiers and persistent storage. Each pod within a `StatefulSet` is considered a "replica" of the broker instance.
+
+When discussing scaling AMQ Broker on OpenShift, we primarily refer to *horizontal scaling*, which involves increasing or decreasing the number of these broker pods (replicas) running in your cluster. Each replica represents an active broker instance capable of handling messaging traffic.
+
+OpenShift's `StatefulSet` ensures that each pod replica has a sequential identity (e.g., `broker-name-0`, `broker-name-1`, etc.). This ordinal index is crucial for managing persistent volumes and ensuring proper failover and recovery mechanisms, particularly in clustered deployments.
+
+== Horizontal Scaling of AMQ Broker Replicas
+
+Horizontal scaling allows you to distribute the messaging workload across multiple broker instances, improving performance, fault tolerance, and overall capacity. The AMQ Broker Operator simplifies this process by managing the underlying OpenShift resources, such as `StatefulSets`.
+
+To scale an AMQ Broker instance, you modify the `replicas` field within the `ActiveMQArtemis` custom resource (CR) that defines your broker. The AMQ Broker Operator continuously monitors these CRs and adjusts the `StatefulSet` accordingly.
+
+=== Scaling Up (Increasing Replicas)
+
+When you increase the `replicas` count in your `ActiveMQArtemis` CR, the Operator initiates the creation of new broker pods. Each new pod will be provisioned with its own persistent volume (if configured) and will join the existing broker cluster (if clustering is enabled). This allows for immediate expansion of your messaging capacity.
+
+For example, scaling from one replica to two would result in `broker-name-0` and `broker-name-1` pods running. The `STATEFUL_SET_ORDINAL` environment variable is used to provide sequential identities for pod replicas, with Pods created from ordinal index 0 up to N-1. This is particularly relevant when configuring broker connections, such as in disaster recovery scenarios where client connections might target specific broker instances based on their ordinal.
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  deployment:
+    replicas: 2 # Scaled up to 2 replicas
+    # ... other deployment configurations
+----
+
+=== Scaling Down (Decreasing Replicas)
+
+Scaling down involves reducing the number of active broker pods. This process is managed intelligently by the AMQ Broker Operator to prevent message loss.
+
+When a broker pod shuts down due to an intentional scale-down of the deployment, the Operator automatically deploys a specialized scaledown custom resource. This resource orchestrates the preparation for message migration from the shutting down pod to the remaining active broker pods in the cluster.
+
+The scaledown controller performs the following steps:
+
+1.  **Checks for Orphaned Persistent Volumes (PVs):** The controller examines the ordinal on the volume claims associated with the `StatefulSet`. It compares the ordinal on a volume claim to the ordinals of the broker pods that are still running.
+2.  **Identifies Pods for Shutdown:** If the ordinal on a volume claim is higher than the ordinal on any of the currently running broker pods, the scaledown controller determines that the broker pod at that higher ordinal is intended for shutdown.
+3.  **Initiates Message Migration:** The scaledown controller starts a dedicated "drainer pod." This drainer pod connects to one of the other live broker pods in the cluster and facilitates the migration of any remaining messages from the shutting-down broker pod to an active broker pod. This ensures that no messages are lost during the scale-down operation.
+
+This automated message migration is a critical feature, guaranteeing data integrity even when dynamically adjusting your broker's replica count.
+
+[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  deployment:
+    replicas: 1 # Scaled down to 1 replica
+    # ... other deployment configurations
+----
+
+[[lab-scaling-broker-replicas]]
+== Hands-on Lab: Scaling AMQ Broker Replicas
+
+This lab will guide you through scaling an existing AMQ Broker deployment on OpenShift using both the `kubectl scale` command and by modifying the `ActiveMQArtemis` Custom Resource.
+
+=== Prerequisites
+
+*   An OpenShift cluster with the AMQ Broker Operator installed.
+*   An `ActiveMQArtemis` broker instance already deployed. For this lab, we'll assume a broker named `my-broker` in the current project (namespace). If you don't have one, deploy a basic broker first:
+    [source,bash]
+    ----
+    oc apply -f - <<EOF
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-broker
+    spec:
+      deployment:
+        replicas: 1
+        persistence:
+          enabled: true
+        # Add a simple acceptor if needed for client connections
+        acceptors:
+        - name: default
+          port: 61616
+          protocols: AMQP,CORE,JMS,STOMP,MQTT,OPENWIRE
+          sslenabled: false
+    EOF
+    ----
+
+=== Activity: Scale Up and Down Broker Replicas
+
+Follow these steps to scale your AMQ Broker instance.
+
+.Verify Initial Deployment
+Check the current number of broker pods and the `ActiveMQArtemis` CR configuration.
+
+[source,bash]
+----
+oc get pods -l app.kubernetes.io/name=my-broker
+oc get activemqartemis my-broker -o yaml | grep "replicas"
+----
+
+You should see one pod, e.g., `my-broker-broker-ss-0`, and `replicas: 1`.
+
+.Scale Up Using `kubectl scale`
+Increase the number of broker replicas to `2`.
+
+[source,bash]
+----
+kubectl -n $(oc project -q) scale ActiveMQArtemis my-broker --replicas 2
+----
+
+.Verify Scale Up
+Monitor the pods until the new replica is ready.
+
+[source,bash]
+----
+oc get pods -l app.kubernetes.io/name=my-broker --watch
+----
+
+You should eventually see two pods: `my-broker-broker-ss-0` and `my-broker-broker-ss-1`, both in `Running` and `Ready` states. Press `Ctrl+C` to exit the `watch` command.
+
+You can also verify the `ActiveMQArtemis` CR:
+
+[source,bash]
+----
+oc get activemqartemis my-broker -o yaml | grep "replicas"
+----
+
+The output should now show `replicas: 2`.
+
+.Scale Down Using `oc edit`
+Now, let's scale down the broker back to a single replica by directly editing the `ActiveMQArtemis` CR. This demonstrates an alternative method.
+
+[source,bash]
+----
+oc edit activemqartemis my-broker
+----
+
+This command opens the CR in your default text editor. Navigate to `spec.deployment.replicas` and change its value from `2` back to `1`. Save and exit the editor.
+
+[source,yaml]
+----
+# ... (excerpt from oc edit output)
+spec:
+  deployment:
+    replicas: 1 # Change this from 2 to 1
+    # ...
+----
+
+.Verify Scale Down and Message Migration (Conceptual)
+Monitor the pods to observe the scale-down process. One of the pods will terminate.
+
+[source,bash]
+----
+oc get pods -l app.kubernetes.io/name=my-broker --watch
+----
+
+You should see `my-broker-broker-ss-1` terminating, and eventually disappear, leaving only `my-broker-broker-ss-0`. During this process, if there were any messages on `my-broker-broker-ss-1`, the scaledown controller would have initiated a drainer pod to migrate them to `my-broker-broker-ss-0`. While we can't easily observe the internal drainer pod for a simple scale-down without active messaging, it's important to understand that this mechanism is in place.
+
+Confirm the `ActiveMQArtemis` CR reflects the change:
+
+[source,bash]
+----
+oc get activemqartemis my-broker -o yaml | grep "replicas"
+----
+
+The output should show `replicas: 1`.
+
+This activity demonstrates how straightforward it is to scale AMQ Broker instances on OpenShift, with the Operator handling the complexities of pod management and message migration.
+```
