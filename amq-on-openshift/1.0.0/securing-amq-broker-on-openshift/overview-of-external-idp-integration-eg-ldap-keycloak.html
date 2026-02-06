@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Overview of External IDP Integration (e.g., LDAP, Keycloak) :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="integrating-external-identity-providers-idp.html">
+    <link rel="next" href="configuring-amq-broker-for-external-idp-authentication.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a></li>
+    <li><a href="overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Overview of External IDP Integration (e.g., LDAP, Keycloak)</h1>
+<h1 id="_overview_of_external_idp_integration_e_g_ldap_keycloak" class="sect0"><a class="anchor" href="#_overview_of_external_idp_integration_e_g_ldap_keycloak"></a>Overview of External IDP Integration (e.g., LDAP, Keycloak)</h1>
+<div class="paragraph">
+<p>This section provides an overview of integrating external Identity Providers (IDPs) like LDAP and Red Hat Single Sign-On (Keycloak) with Red Hat AMQ Broker on OpenShift. External IDP integration is crucial for centralized user management, enhanced security, and streamlined authentication experiences within enterprise environments.</p>
+</div>
+<div class="sect2">
+<h3 id="_introduction_to_external_idp_integration"><a class="anchor" href="#_introduction_to_external_idp_integration"></a>Introduction to External IDP Integration</h3>
+<div class="paragraph">
+<p>In modern microservices architectures and cloud-native deployments like OpenShift, managing user identities and access control across multiple applications can be complex. External Identity Providers (IDPs) offer a centralized solution for user authentication and authorization, allowing AMQ Broker to delegate these responsibilities to a dedicated system. This approach brings significant benefits, including:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Centralized User Management</strong>: All user accounts and roles are managed in a single location, simplifying administration and reducing the risk of inconsistencies.</p>
+</li>
+<li>
+<p><strong>Single Sign-On (SSO)</strong>: Users can authenticate once with the IDP and gain access to multiple services, including AMQ Broker&#8217;s management console and client applications, without re-entering credentials.</p>
+</li>
+<li>
+<p><strong>Enhanced Security</strong>: IDPs often provide advanced security features like multi-factor authentication (MFA), robust password policies, and audit logging.</p>
+</li>
+<li>
+<p><strong>Compliance</strong>: Helps meet regulatory compliance requirements by enforcing consistent security policies.</p>
+</li>
+<li>
+<p><strong>Scalability and Flexibility</strong>: Easily scale user management and integrate with existing enterprise identity systems.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>AMQ Broker supports integration with various external IDPs, with common examples being LDAP (Lightweight Directory Access Protocol) for directory services and Keycloak (Red Hat Single Sign-On) as a modern OpenID Connect (OIDC) and OAuth 2.0 provider.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_core_concepts_how_amq_broker_integrates_with_idps"><a class="anchor" href="#_core_concepts_how_amq_broker_integrates_with_idps"></a>Core Concepts: How AMQ Broker Integrates with IDPs</h3>
+<div class="paragraph">
+<p>AMQ Broker, leveraging its foundation in Apache ActiveMQ Artemis, uses a Pluggable Authentication and Authorization (PAA) mechanism through Java Authentication and Authorization Service (JAAS) login modules. To integrate with an external IDP, you configure a specific JAAS login module that knows how to communicate with that IDP.</p>
+</div>
+<div class="paragraph">
+<p>When a client or the management console attempts to connect to AMQ Broker:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The broker receives the authentication request (e.g., username and password, or an OAuth token).</p>
+</li>
+<li>
+<p>It passes these credentials to the configured JAAS login module for the external IDP.</p>
+</li>
+<li>
+<p>The login module connects to the external IDP (e.g., LDAP server or Keycloak instance) to verify the user&#8217;s identity.</p>
+</li>
+<li>
+<p>Upon successful authentication, the login module typically retrieves the user&#8217;s roles from the IDP.</p>
+</li>
+<li>
+<p>AMQ Broker then uses these roles to determine the user&#8217;s authorization to perform specific operations (e.g., send messages to a queue, create a topic).</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ldap_integration"><a class="anchor" href="#_ldap_integration"></a>LDAP Integration</h3>
+<div class="paragraph">
+<p>LDAP is a widely adopted protocol for accessing and maintaining distributed directory information services. Many organizations use LDAP directories (such as Microsoft Active Directory, OpenLDAP, or Red Hat Directory Server) to store user accounts, groups, and other organizational data.</p>
+</div>
+<div class="sect3">
+<h4 id="_technical_explanation_ldaploginmodule"><a class="anchor" href="#_technical_explanation_ldaploginmodule"></a>Technical Explanation: LDAPLoginModule</h4>
+<div class="paragraph">
+<p>AMQ Broker can be configured to authenticate users directly against an LDAP directory using the <code>LDAPLoginModule</code>. This module is part of the broker&#8217;s JAAS configuration and is responsible for connecting to the LDAP server, searching for user entries, and retrieving associated roles.</p>
+</div>
+<div class="paragraph">
+<p>A typical <code>LDAPLoginModule</code> configuration defines parameters such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>connectionURL</code>: The URL of the LDAP server (e.g., <code>ldap://ldap.company.com:389</code>).</p>
+</li>
+<li>
+<p><code>connectionUsername</code> and <code>connectionPassword</code>: Credentials for a read-only administrative user to bind to the LDAP server and perform searches.</p>
+</li>
+<li>
+<p><code>userBase</code> and <code>userSearchMatching</code>: Define the base DN (Distinguished Name) and filter for searching user entries (e.g., <code>(uid={0})</code> where <code>{0}</code> is the username).</p>
+</li>
+<li>
+<p><code>roleBase</code>, <code>roleName</code>, and <code>roleSearchMatching</code>: Define the base DN, attribute name for roles, and filter for searching role memberships (e.g., <code>(uniqueMember={0})</code>). The context specifically mentions <code>uniqueMember={0}</code> for role search matching, indicating how group memberships are typically identified.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Example LDAP Login Module Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">activemq {
+   org.apache.activemq.artemis.spi.core.security.jaas.LDAPLoginModule sufficient
+       debug=true
+       reload=true
+       initialContextFactory="com.sun.jndi.ldap.LdapCtxFactory"
+       connectionURL="ldap://ldap.company.com:389"
+       connectionUsername="cn=read-only-admin,dc=example,dc=com"
+       connectionPassword="password"
+       connectionProtocol="s"
+       connectionTimeout="5000"
+       authentication="simple"
+       userBase="dc=example,dc=com"
+       userSearchMatching="(uid={0})"
+       userSearchSubtree=true
+       readTimeout="5000"
+       roleBase="dc=example,dc=com"
+       roleName="cn"
+       roleSearchMatching="(uniqueMember={0})"
+       roleSearchSubtree=false
+       ;
+   // The default properties login module is required by the Operator to authenticate with the broker.
+   // This would typically be placed after the LDAP module, allowing LDAP to be tried first.
+   org.apache.activemq.artemis.spi.core.security.jaas.PropertiesLoginModule required
+       org.apache.activemq.artemis.jms.server.config.impl.FileLoginModule/broker-users.properties
+       org.apache.activemq.artemis.jms.server.config.impl.FileLoginModule/broker-roles.properties
+       ;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the example above, <code>sufficient</code> means that if authentication succeeds with <code>LDAPLoginModule</code>, it&#8217;s enough, and subsequent modules are not processed for authentication, but if it fails, subsequent modules <strong>are</strong> tried. <code>required</code> means it must succeed for authentication to pass. This setup typically allows LDAP users to authenticate and then falls back to internal users if LDAP authentication fails or is not applicable.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_keycloak_red_hat_single_sign_on_integration"><a class="anchor" href="#_keycloak_red_hat_single_sign_on_integration"></a>Keycloak (Red Hat Single Sign-On) Integration</h3>
+<div class="paragraph">
+<p>Keycloak, branded as Red Hat Single Sign-On, is an open-source Identity and Access Management (IAM) solution that provides authentication and authorization services for applications and services. It supports standard protocols like OpenID Connect, OAuth 2.0, and SAML. Integrating AMQ Broker with Keycloak offers more advanced features like brokering external identity providers (e.g., federating users from an existing LDAP server), social logins, and robust token management.</p>
+</div>
+<div class="sect3">
+<h4 id="_technical_explanation_keycloakloginmodule"><a class="anchor" href="#_technical_explanation_keycloakloginmodule"></a>Technical Explanation: KeycloakLoginModule</h4>
+<div class="paragraph">
+<p>AMQ Broker can integrate with Keycloak using the <code>keycloakLoginModule</code>. This module allows the broker to validate tokens issued by Keycloak, enabling secure access for both client applications and the Hawtio management console. The integration can support different authentication flows depending on the client application&#8217;s capabilities.</p>
+</div>
+<div class="paragraph">
+<p>Keycloak requires specific client configurations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>For applications that can use the OAuth protocol (e.g., AMQ Management Console)</strong>:</p>
+</li>
+<li>
+<p>Authentication flow: <code>Standard flow</code></p>
+</li>
+<li>
+<p>Valid Redirect URIs: An OpenShift route for the AMQ Management Console (e.g., <code><a href="http://artemis-wconsj-0-svc-rte-kc-ldap-tests-0eae49.apps.redhat-412t.broker.app-services-dev.net/console/*" class="bare">http://artemis-wconsj-0-svc-rte-kc-ldap-tests-0eae49.apps.redhat-412t.broker.app-services-dev.net/console/*</a></code>). This ensures that after a user authenticates with Keycloak, they are redirected back to the console securely.</p>
+</li>
+<li>
+<p><strong>For messaging client applications that cannot use the OAuth protocol to obtain a token (e.g., older clients, certain client libraries)</strong>:</p>
+</li>
+<li>
+<p>Authentication flow: <code>Direct Access Grants</code></p>
+</li>
+<li>
+<p>Valid Redirect URIs: <code>*</code> (This allows clients to obtain tokens directly from Keycloak using a username/password without browser interaction, suitable for programmatic access.)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>keycloakLoginModule</code> in AMQ Broker is configured with the following key parameters:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>name</code>: A name for the login module (e.g., <code>sso</code>).</p>
+</li>
+<li>
+<p><code>moduleType</code>: Specifies the type of Keycloak integration.</p>
+</li>
+<li>
+<p><code>bearerToken</code>: Used when clients (like the Hawtio console) provide an OAuth bearer token obtained from Keycloak. The broker validates this token.</p>
+</li>
+<li>
+<p><code>directAccess</code>: Used when clients provide username/password directly to the broker, which then uses Keycloak&#8217;s direct access grants to obtain and validate a token.</p>
+</li>
+<li>
+<p><code>configuration</code>: A set of parameters related to the Keycloak realm and server.</p>
+</li>
+<li>
+<p><code>configuration.realm*</code>: The name of the Keycloak realm (e.g., <code>myrealm</code>). This specifies the security domain within Keycloak.</p>
+</li>
+<li>
+<p><code>configuration.realmPublicKey</code>: The public key for the Keycloak realm, used by AMQ Broker to verify the signature of tokens issued by Keycloak.</p>
+</li>
+<li>
+<p><code>configuration.authServerUrl*</code>: The base URL of the Keycloak authentication server (e.g., <code><a href="https://keycloak.example.com/auth" class="bare">https://keycloak.example.com/auth</a></code>).</p>
+</li>
+<li>
+<p><code>configuration.sslRequired</code>: Defines SSL requirements for communication with Keycloak (e.g., <code>all</code>, <code>external</code>, <code>none</code>).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<div class="title">Keycloak and LDAP Federation</div>
+<p>Keycloak can also act as a federation proxy for existing LDAP directories. In this scenario, Keycloak federates users from the LDAP server. The context mentions that Red Hat Single Sign-On can be configured to use <code>role-ldap-mapper</code> to map role information from LDAP to Red Hat Single Sign-On. This means that user authentication happens against LDAP via Keycloak, and LDAP group memberships are translated into Keycloak roles, which AMQ Broker then consumes from Keycloak. This provides the best of both worlds: centralized management and advanced features from Keycloak, while leveraging existing LDAP infrastructure.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_choosing_the_right_idp_integration_strategy"><a class="anchor" href="#_choosing_the_right_idp_integration_strategy"></a>Choosing the Right IDP Integration Strategy</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Direct LDAP Integration</strong>: Suitable for environments that primarily rely on LDAP for user management and do not require advanced features like SSO across many disparate applications, social logins, or complex access policies beyond basic roles. It offers a simpler setup if only broker authentication is needed.</p>
+</li>
+<li>
+<p><strong>Keycloak (Red Hat Single Sign-On) Integration</strong>: Ideal for environments requiring a robust IAM solution with features like SSO across multiple applications, API security, multi-factor authentication, and user federation from various sources (including LDAP). Keycloak provides a richer platform for managing identities and access control, especially in a cloud-native OpenShift environment. When Keycloak federates users from LDAP, it combines the benefits of both, centralizing LDAP users under Keycloak&#8217;s advanced management capabilities.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_hands_on_activity_deploying_keycloak_for_external_idp_integration_prerequisite"><a class="anchor" href="#_hands_on_activity_deploying_keycloak_for_external_idp_integration_prerequisite"></a>Hands-on Activity: Deploying Keycloak for External IDP Integration (Prerequisite)</h3>
+<div class="paragraph">
+<p>Before configuring AMQ Broker to use Keycloak as an external IDP, you need to deploy and configure a Keycloak instance on OpenShift. This hands-on activity demonstrates the initial steps to get Keycloak up and running.</p>
+</div>
+<div class="sect3">
+<h4 id="_objective"><a class="anchor" href="#_objective"></a>Objective</h4>
+<div class="paragraph">
+<p>Deploy the Keycloak Operator and a Keycloak instance on OpenShift, setting the stage for AMQ Broker integration.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_procedure"><a class="anchor" href="#_procedure"></a>Procedure</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Log in to OpenShift Container Platform</strong>:
+Ensure you are logged in to your OpenShift cluster with <code>oc login</code>.</p>
+</li>
+<li>
+<p><strong>Create a New Project for Keycloak</strong>:
+It&#8217;s a best practice to deploy Keycloak in its own dedicated project.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-project keycloak</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc project keycloak</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command switches your current context to the newly created <code>keycloak</code> project.</p>
+</div>
+</li>
+<li>
+<p><strong>Deploy the Keycloak Operator Subscription</strong>:
+The Red Hat build of Keycloak (RHSso) is deployed via an Operator. Subscribe to the <code>rhbk-operator</code> to install the Keycloak Operator.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f - &lt;&lt;EOF
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    operators.coreos.com/rhbk-operator.keycloak: ''
+  name: rhbk-operator
+  namespace: keycloak
+spec:
+  channel: stable-v26.2
+  installPlanApproval: Automatic
+  name: rhbk-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: rhbk-operator.v26.2.9-opr.1
+EOF</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command creates a <code>Subscription</code> resource, which tells OpenShift to install the <code>rhbk-operator</code> from the <code>redhat-operators</code> catalog in the <code>openshift-marketplace</code> namespace. The <code>stable-v26.2</code> channel and <code>rhbk-operator.v26.2.9-opr.1</code> starting CSV specify the version of the Operator to be deployed.</p>
+</div>
+</li>
+<li>
+<p><strong>Verify Operator Deployment</strong>:
+Wait for the Keycloak Operator to be deployed and ready. You can check its status:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get csv -n keycloak
+oc get pods -n keycloak -l app.kubernetes.io/part-of=keycloak</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Look for the <code>rhbk-operator.v26.2.9-opr.1</code> ClusterServiceVersion (CSV) to show <code>Succeeded</code> and the operator pod to be in a <code>Running</code> state.</p>
+</div>
+</li>
+<li>
+<p><strong>Deploy a Keycloak Instance</strong>:
+Once the Operator is running, you can deploy a Keycloak instance by creating a <code>Keycloak</code> Custom Resource (CR). This CR defines the desired state of your Keycloak deployment.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Example: Deploying a basic Keycloak instance (adjust for your specific needs)
+oc apply -f - &lt;&lt;EOF
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: keycloak
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  pollingInterval: 30
+  triggers:
+  - type: cpu
+    metadata:
+      value: "50"
+---
+apiVersion: keycloak.org/v1alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+spec:
+  instances: 1
+  db:
+    vendor: postgres
+    database: keycloak
+    username: keycloak
+    passwordSecret:
+      name: keycloak-db-secret
+  ingress:
+    enabled: true
+  hostname: keycloak.apps.&lt;your-openshift-domain&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+  realms:
+    - name: myrealm <i class="conum" data-value="2"></i><b>(2)</b>
+      # This is where you'd define the realm configuration
+      # For example, to federate LDAP, you'd define user federation here.
+      # For this overview, we just create a basic realm.
+EOF</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Replace <code>&lt;your-openshift-domain&gt;</code> with your actual OpenShift cluster&#8217;s base domain. This will create a route for accessing Keycloak.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This creates a default realm named <code>myrealm</code>. You will configure clients and users within this realm.</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p><strong>Create the Database Secret (if using internal PostgreSQL)</strong>:
+If your Keycloak CR references a <code>passwordSecret</code> for the database, ensure it exists.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret generic keycloak-db-secret --from-literal=password=&lt;YOUR_DB_PASSWORD&gt; -n keycloak</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;YOUR_DB_PASSWORD&gt;</code> with a strong password.</p>
+</div>
+</li>
+<li>
+<p><strong>Access the Keycloak Admin Console</strong>:
+Once the Keycloak pods are running, find the route for the Keycloak admin console:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route keycloak -n keycloak</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>HOST/PORT</code> column will show the URL to access the Keycloak admin console. Use the default username (<code>admin</code>) and the password created automatically by the Operator (which you can often find in a secret named <code>credential-keycloak</code> or similar).</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This initial setup provides a running Keycloak instance. Subsequent steps (in later sections) would involve configuring realms, clients (for AMQ Broker console and clients), users, and role mappers within Keycloak, and then finally configuring AMQ Broker to use this Keycloak instance for authentication and authorization.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a></span>
+  <span class="next"><a href="configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

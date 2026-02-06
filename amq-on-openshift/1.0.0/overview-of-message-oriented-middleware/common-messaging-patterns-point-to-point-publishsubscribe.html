@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Common Messaging Patterns (Point-to-Point, Publish/Subscribe) :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="core-concepts-producers-consumers-queues-topics.html">
+    <link rel="next" href="../amq-broker-overview/amq-broker-overview.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a></li>
+    <li><a href="common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>module-messaging-patterns
+:page-title: Common Messaging Patterns</p>
+</div>
+</div>
+</div>
+<h1 id="_common_messaging_patterns" class="sect0"><a class="anchor" href="#_common_messaging_patterns"></a>Common Messaging Patterns</h1>
+<div class="paragraph">
+<p>Asynchronous messaging systems like Red Hat AMQ Broker facilitate communication between different components of an application or various applications themselves. The way messages are delivered and consumed defines distinct <strong>messaging patterns</strong>. Understanding these patterns—Point-to-Point and Publish/Subscribe—is crucial for designing robust, scalable, and decoupled systems. These patterns dictate how producers send messages and how consumers receive them, influencing system architecture and behavior.</p>
+</div>
+<div class="sect1">
+<h2 id="_point_to_point_messaging_queues"><a class="anchor" href="#_point_to_point_messaging_queues"></a>Point-to-Point Messaging (Queues)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Point-to-Point (P2P) messaging pattern is characterized by its one-to-one delivery semantics, where each message sent by a producer is consumed by exactly one consumer. This pattern is primarily implemented using <strong>queues</strong>.</p>
+</div>
+<div class="sect2">
+<h3 id="_technical_explanation"><a class="anchor" href="#_technical_explanation"></a>Technical Explanation</h3>
+<div class="paragraph">
+<p>In a P2P model:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Producer</strong>: Sends messages to a specific queue.</p>
+</li>
+<li>
+<p><strong>Queue</strong>: A persistent storage mechanism that holds messages in the order they are received.</p>
+</li>
+<li>
+<p><strong>Consumer</strong>: Retrieves messages from the queue. Once a message is consumed, it is removed from the queue.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As per the <a href="#../../overview/overview-of-message-oriented-middleware.adoc#_queue" class="xref unresolved">product documentation^</a>, a <strong>queue</strong> implements point-to-point semantics: "Each message is seen by only one consumer, and the message is removed from the queue after it is read."</p>
+</div>
+<div class="paragraph">
+<p>Key characteristics of Point-to-Point messaging:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Single Consumer</strong>: Regardless of how many consumers are listening to a queue, each message is delivered to only one of them.</p>
+</li>
+<li>
+<p><strong>Message Removal</strong>: After a consumer successfully processes a message, the message is removed from the queue, ensuring it&#8217;s not processed again by another consumer.</p>
+</li>
+<li>
+<p><strong>Load Balancing</strong>: If multiple consumers are connected to the same queue, the broker automatically distributes incoming messages among them, effectively load balancing the processing workload. This makes P2P ideal for task distribution.</p>
+</li>
+<li>
+<p><strong>Persistence</strong>: Queues typically store messages persistently until they are consumed, ensuring message delivery even if consumers are temporarily unavailable.</p>
+</li>
+<li>
+<p><strong>Ordered Delivery</strong>: Messages are generally delivered to consumers in the order they were sent to the queue.</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="title">Conceptual Flow of Point-to-Point Messaging</div>
+<div class="content">
+<pre>+----------+       +-----------+       +-----------+
+| Producer | ----&gt; |   Queue   | ----&gt; | Consumer1 |
++----------+       +-----------+       +-----------+
+                       /   \
+                      /     \
+                     V       V
+                +-----------+   +-----------+
+                | Consumer2 |   | Consumer3 |
+                +-----------+   +-----------+
+
+Each message from the Producer is consumed by *only one* of the active Consumers (Consumer1, Consumer2, or Consumer3) and is then removed from the Queue.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_use_cases_for_point_to_point"><a class="anchor" href="#_use_cases_for_point_to_point"></a>Use Cases for Point-to-Point</h3>
+<div class="paragraph">
+<p>Point-to-Point messaging is well-suited for scenarios where:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Task Queues</strong>: Distributing tasks to a pool of workers (e.g., image processing, video encoding, report generation).</p>
+</li>
+<li>
+<p><strong>Order Processing</strong>: Ensuring each customer order is processed exactly once by a single backend service.</p>
+</li>
+<li>
+<p><strong>Financial Transactions</strong>: Guaranteeing that a payment transaction is handled uniquely.</p>
+</li>
+<li>
+<p><strong>Workflow Management</strong>: Passing a task from one stage to the next in a sequential workflow.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_publish_subscribe_messaging"><a class="anchor" href="#_publish_subscribe_messaging"></a>Publish/Subscribe Messaging (Topics)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Publish/Subscribe (Pub/Sub) messaging pattern is designed for one-to-many communication, where a single message sent by a producer (publisher) can be received by multiple consumers (subscribers). This pattern is implemented using <strong>topics</strong>.</p>
+</div>
+<div class="sect2">
+<h3 id="_technical_explanation_2"><a class="anchor" href="#_technical_explanation_2"></a>Technical Explanation</h3>
+<div class="paragraph">
+<p>In a Pub/Sub model:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Publisher</strong>: Sends messages to a specific topic.</p>
+</li>
+<li>
+<p><strong>Topic</strong>: A broadcast mechanism that delivers messages to all active subscribers. Unlike queues, topics generally do not remove messages after delivery to a subscriber; instead, they make messages available to <strong>all</strong> interested subscribers.</p>
+</li>
+<li>
+<p><strong>Subscriber</strong>: Registers interest in a topic and receives a copy of every message published to that topic while it is active.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As per the <a href="#../../overview/overview-of-message-oriented-middleware.adoc#_topic" class="xref unresolved">product documentation^</a>, a <strong>topic</strong> implements publish-subscribe semantics: "Each message is seen by multiple consumers, and the message remains available to other consumers after it is read."</p>
+</div>
+<div class="paragraph">
+<p>Key characteristics of Publish/Subscribe messaging:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Multiple Consumers</strong>: All active subscribers to a topic receive their own copy of each message published to that topic.</p>
+</li>
+<li>
+<p><strong>Message Availability</strong>: Messages are essentially broadcast. Each subscriber processes its own copy independently.</p>
+</li>
+<li>
+<p><strong>Decoupling</strong>: Publishers and subscribers are highly decoupled. Publishers don&#8217;t need to know about the subscribers, and subscribers don&#8217;t need to know about the publishers. They only need to agree on the topic name.</p>
+</li>
+<li>
+<p><strong>Timeliness</strong>: Messages are typically delivered to subscribers in real-time or near real-time. If a subscriber is not active when a message is published, it might miss that message unless <strong>durable subscriptions</strong> are used (a more advanced concept ensuring messages are retained for inactive subscribers).</p>
+</li>
+<li>
+<p><strong>No Load Balancing (by default)</strong>: Since all subscribers get a copy, there&#8217;s no inherent load balancing of message processing among them in the same way as with queues.</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="title">Conceptual Flow of Publish/Subscribe Messaging</div>
+<div class="content">
+<pre>+-----------+       +----------+
+| Publisher | ----&gt; |  Topic   |
++-----------+       +----------+
+                       / | \
+                      /  |  \
+                     V   V   V
+                +-----------+   +-----------+   +-----------+
+                | Subscriber1 | | Subscriber2 | | Subscriber3 |
+                +-----------+   +-----------+   +-----------+
+
+Each message from the Publisher is received by *all active* Subscribers (Subscriber1, Subscriber2, and Subscriber3).</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_use_cases_for_publishsubscribe"><a class="anchor" href="#_use_cases_for_publishsubscribe"></a>Use Cases for Publish/Subscribe</h3>
+<div class="paragraph">
+<p>Publish/Subscribe messaging is ideal for scenarios involving:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Broadcast Notifications</strong>: Sending system alerts, news updates, or marketing messages to all interested applications or users.</p>
+</li>
+<li>
+<p><strong>Real-time Data Feeds</strong>: Stock market updates, sports scores, weather alerts, or IoT sensor data where multiple applications need the same information simultaneously.</p>
+</li>
+<li>
+<p><strong>Event Streaming</strong>: Decoupling microservices by publishing events (e.g., "OrderCreated," "UserUpdated") that various other services can react to independently.</p>
+</li>
+<li>
+<p><strong>Monitoring and Logging</strong>: Broadcasting log entries or performance metrics that multiple monitoring tools or analytics engines can consume.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_choosing_the_right_messaging_pattern"><a class="anchor" href="#_choosing_the_right_messaging_pattern"></a>Choosing the Right Messaging Pattern</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The choice between Point-to-Point and Publish/Subscribe depends entirely on your application&#8217;s requirements for message delivery and consumer interaction.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Comparison of Messaging Patterns</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Feature</th>
+<th class="tableblock halign-left valign-top">Point-to-Point (Queues)</th>
+<th class="tableblock halign-left valign-top">Publish/Subscribe (Topics)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Delivery Semantics</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">One-to-one</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">One-to-many</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Message Consumption</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Message removed after one consumer processes it</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Each active subscriber receives a copy; message remains available for others</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Decoupling</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Producer and Consumer are aware of a shared queue, but not each other directly</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">High decoupling; Publisher doesn&#8217;t know Subscribers, and vice versa</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Load Balancing</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Built-in for multiple consumers on the same queue</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Not inherently built-in for message processing; all subscribers get a copy</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Persistence</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Messages typically persist until consumed</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Messages generally not persisted for inactive subscribers unless using durable subscriptions</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Use Cases</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Task distribution, order processing, unique transaction handling</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Event broadcasting, real-time data feeds, notifications, system events</p></td>
+</tr>
+</tbody>
+</table>
+<div class="ulist">
+<ul>
+<li>
+<p>Choose <strong>Point-to-Point</strong> when you need to distribute tasks among a group of identical workers, ensuring each task is processed exactly once, or when you need a reliable, ordered stream of messages for a single processing flow.</p>
+</li>
+<li>
+<p>Choose <strong>Publish/Subscribe</strong> when you need to broadcast information to multiple, potentially different, consumers, allowing them to react independently to events, or when you need strong decoupling between message senders and receivers.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_activity_designing_with_messaging_patterns"><a class="anchor" href="#_hands_on_activity_designing_with_messaging_patterns"></a>Hands-on Activity: Designing with Messaging Patterns</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This activity focuses on applying your understanding of Point-to-Point and Publish/Subscribe patterns to design message flows for common application scenarios. While we won&#8217;t be deploying an AMQ Broker instance <strong>in this specific module</strong>, understanding <strong>when</strong> and <strong>why</strong> to use each pattern is a critical design skill that precedes implementation.</p>
+</div>
+<div class="sect2">
+<h3 id="_objective"><a class="anchor" href="#_objective"></a>Objective</h3>
+<div class="paragraph">
+<p>Apply the knowledge of Point-to-Point and Publish/Subscribe patterns to determine the optimal message flow for various application requirements.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_scenario_1_e_commerce_order_processing"><a class="anchor" href="#_scenario_1_e_commerce_order_processing"></a>Scenario 1: E-commerce Order Processing</h3>
+<div class="paragraph">
+<p>Imagine an e-commerce platform where a customer places an order. Multiple backend services need to react to this event, but some tasks are unique, while others are shared.</p>
+</div>
+<div class="ulist">
+<div class="title">System Components:</div>
+<ul>
+<li>
+<p><code>Web Store Frontend</code>: Where customers place orders.</p>
+</li>
+<li>
+<p><code>Order Service</code>: Receives the raw order.</p>
+</li>
+<li>
+<p><code>Inventory Service</code>: Needs to update stock levels.</p>
+</li>
+<li>
+<p><code>Payment Service</code>: Needs to process the payment.</p>
+</li>
+<li>
+<p><code>Shipping Service</code>: Needs to arrange delivery.</p>
+</li>
+<li>
+<p><code>Analytics Service</code>: Needs to record all orders for business intelligence.</p>
+</li>
+<li>
+<p><code>Email Notification Service</code>: Needs to send order confirmation emails.</p>
+</li>
+</ul>
+</div>
+<div class="olist arabic">
+<div class="title">Tasks:</div>
+<ol class="arabic">
+<li>
+<p><strong>Order Confirmation</strong>: The <code>Order Service</code> receives the order and needs to confirm it. This is a primary task that should be handled once.</p>
+</li>
+<li>
+<p><strong>Payment Processing</strong>: The <code>Payment Service</code> needs to process the payment for the order. This is a critical, single-responsibility task.</p>
+</li>
+<li>
+<p><strong>Inventory Update</strong>: The <code>Inventory Service</code> needs to deduct items from stock. This must happen only once per order.</p>
+</li>
+<li>
+<p><strong>Shipping Arrangement</strong>: The <code>Shipping Service</code> needs to be notified to prepare for dispatch. This is a unique request per order.</p>
+</li>
+<li>
+<p><strong>Order Logging</strong>: The <code>Analytics Service</code> needs to receive <strong>every</strong> order for reporting. Multiple analytical tools might subscribe to this.</p>
+</li>
+<li>
+<p><strong>Customer Notification</strong>: The <code>Email Notification Service</code> needs to send an email to the customer.</p>
+</li>
+</ol>
+</div>
+<div class="ulist">
+<div class="title">Questions:</div>
+<ul>
+<li>
+<p>For which of the above tasks (1-6) would you recommend using a <strong>Point-to-Point Queue</strong>? Justify your choice.</p>
+</li>
+<li>
+<p>For which of the above tasks (1-6) would you recommend using a <strong>Publish/Subscribe Topic</strong>? Justify your choice.</p>
+</li>
+<li>
+<p>Describe how the <code>Order Service</code> might interact with AMQ Broker to initiate these communications.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_scenario_2_real_time_stock_market_data_feed"><a class="anchor" href="#_scenario_2_real_time_stock_market_data_feed"></a>Scenario 2: Real-time Stock Market Data Feed</h3>
+<div class="paragraph">
+<p>A financial institution wants to distribute real-time stock quotes to several internal and external applications.</p>
+</div>
+<div class="ulist">
+<div class="title">System Components:</div>
+<ul>
+<li>
+<p><code>Market Data Publisher</code>: Ingests raw stock data and publishes quotes for specific stocks (e.g., AAPL, GOOG, MSFT).</p>
+</li>
+<li>
+<p><code>Trading Platform</code>: Needs to display real-time quotes for all stocks the user is watching.</p>
+</li>
+<li>
+<p><code>Algorithmic Trading Bot</code>: Needs to react to specific stock price changes (e.g., only AAPL and MSFT).</p>
+</li>
+<li>
+<p><code>Market Data Archive</code>: Needs to store <strong>all</strong> historical stock quotes for compliance and analysis.</p>
+</li>
+<li>
+<p><code>Public API Gateway</code>: Makes selected stock quotes available to external partners.</p>
+</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">Questions:</div>
+<ul>
+<li>
+<p>How would you structure the messaging architecture (queues/topics) for the <code>Market Data Publisher</code> to efficiently distribute information?</p>
+</li>
+<li>
+<p>Which pattern(s) would the <code>Trading Platform</code> utilize, and why?</p>
+</li>
+<li>
+<p>Which pattern(s) would the <code>Algorithmic Trading Bot</code> utilize, and how might it filter messages?</p>
+</li>
+<li>
+<p>Which pattern(s) would the <code>Market Data Archive</code> utilize, and why?</p>
+</li>
+<li>
+<p>What considerations should be made regarding message volume and reliability in this scenario?</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_scenario_3_microservice_event_bus"><a class="anchor" href="#_scenario_3_microservice_event_bus"></a>Scenario 3: Microservice Event Bus</h3>
+<div class="paragraph">
+<p>A microservices architecture relies on an event bus to communicate state changes between services.</p>
+</div>
+<div class="ulist">
+<div class="title">System Components:</div>
+<ul>
+<li>
+<p><code>User Service</code>: Manages user profiles (creates, updates, deletes users).</p>
+</li>
+<li>
+<p><code>Product Service</code>: Manages product catalog.</p>
+</li>
+<li>
+<p><code>Order Service</code>: Processes orders.</p>
+</li>
+<li>
+<p><code>Notification Service</code>: Sends email/SMS based on various events.</p>
+</li>
+<li>
+<p><code>Audit Log Service</code>: Records all significant system events.</p>
+</li>
+<li>
+<p><code>Recommendation Service</code>: Generates product recommendations based on user activity.</p>
+</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">Example Events:</div>
+<ul>
+<li>
+<p><code>UserCreatedEvent</code></p>
+</li>
+<li>
+<p><code>UserUpdatedEvent</code></p>
+</li>
+<li>
+<p><code>OrderPlacedEvent</code></p>
+</li>
+<li>
+<p><code>ProductOutOfStockEvent</code></p>
+</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">Questions:</div>
+<ul>
+<li>
+<p>For broadcasting general events like <code>UserCreatedEvent</code> or <code>OrderPlacedEvent</code> that multiple services might be interested in, which messaging pattern is most appropriate, and why?</p>
+</li>
+<li>
+<p>If the <code>Notification Service</code> needs to send a confirmation email <strong>only once</strong> after an <code>OrderPlacedEvent</code>, how might it use a queue <strong>in conjunction with</strong> a topic, or what pattern would ensure single processing?</p>
+</li>
+<li>
+<p>The <code>Audit Log Service</code> needs to capture <strong>all</strong> events from <strong>all</strong> services. Describe its interaction with the messaging system.</p>
+</li>
+<li>
+<p>How does using these patterns promote decoupling between microservices?</p>
+</li>
+</ul>
+</div>
+<hr>
+<div class="paragraph">
+<p>Next, we will delve into the architecture of AMQ Broker and how it supports these fundamental messaging patterns.</p>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a></span>
+  <span class="next"><a href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Exposing Broker Listeners via OpenShift Routes :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="openshift-networking-concepts-services-routes-ingress.html">
+    <link rel="next" href="configuring-client-connections-for-external-access.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a></li>
+    <li><a href="exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Exposing Broker Listeners via OpenShift Routes</h1>
+<h1 id="_exposing_broker_listeners_via_openshift_routes" class="sect0"><a class="anchor" href="#_exposing_broker_listeners_via_openshift_routes"></a>Exposing Broker Listeners via OpenShift Routes</h1>
+<div class="paragraph">
+<p>Asynchronous messaging often requires clients to connect to the AMQ Broker from outside the OpenShift cluster. OpenShift&#8217;s networking capabilities, specifically Services and Routes, provide the mechanism to expose these broker listeners (known as <strong>acceptors</strong>) securely and efficiently. The AMQ Broker Operator automates much of this process, creating the necessary network resources when an acceptor is configured for external access.</p>
+</div>
+<div class="sect1">
+<h2 id="_detailed_technical_explanation"><a class="anchor" href="#_detailed_technical_explanation"></a>Detailed Technical Explanation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When you configure an acceptor on your AMQ Broker instance for external access, the AMQ Broker Operator plays a crucial role. It automatically provisions the necessary OpenShift networking components to make the broker accessible.</p>
+</div>
+<div class="sect2">
+<h3 id="_automatic_route_creation"><a class="anchor" href="#_automatic_route_creation"></a>Automatic Route Creation</h3>
+<div class="paragraph">
+<p>For each broker pod within your deployment, the Operator automatically creates a dedicated OpenShift <code>Service</code> and <code>Route</code> corresponding to each exposed acceptor. This route acts as an entry point for external clients.</p>
+</div>
+<div class="paragraph">
+<p>The full host name of the route is typically constructed by the Operator and includes elements like the broker deployment name, pod index, service type, OpenShift project name, and the OpenShift cluster&#8217;s domain. External clients use this full host name to establish connections.</p>
+</div>
+<div class="paragraph">
+<p>For example, a <code>curl</code> command to test external access might look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl https://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This route host name must resolve to the node that is hosting the OpenShift router, which then uses the host name to determine where to send the traffic inside the OpenShift internal network.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_openshift_router_behavior"><a class="anchor" href="#_openshift_router_behavior"></a>OpenShift Router Behavior</h3>
+<div class="paragraph">
+<p>The OpenShift router handles both secured and non-secured traffic by default:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It listens on port <code>80</code> for non-secured (HTTP) traffic.</p>
+</li>
+<li>
+<p>It listens on port <code>443</code> for secured (HTTPS/SSL-encrypted) traffic.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When an external client attempts to connect, the router automatically directs traffic to port <code>443</code> if a secure connection URL (e.g., <code><a href="https://&#8230;&#8203" class="bare">https://&#8230;&#8203</a>;</code>) is specified, or to port <code>80</code> for non-secure connection URLs (e.g., <code><a href="http://&#8230;&#8203" class="bare">http://&#8230;&#8203</a>;</code>).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_customizing_route_host_names"><a class="anchor" href="#_customizing_route_host_names"></a>Customizing Route Host Names</h3>
+<div class="paragraph">
+<p>You can customize the host name of the routes exposed for your broker&#8217;s acceptors to align with your organization&#8217;s internal routing configuration. This is achieved by modifying the <code>ActiveMQArtemis</code> Custom Resource (CR) instance:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Using <code>ingressHost</code>:</strong> This attribute allows you to replace the default host name generated by the Operator with a specific custom host name for a particular acceptor.</p>
+</li>
+<li>
+<p><strong>Using <code>ingressDomain</code>:</strong> This attribute appends a custom domain to the host name. This custom domain is applied not only to the acceptor routes but also to all other routes exposed by the CR configuration, such as the management console route.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These attributes are typically configured within the <code>spec</code> section of your <code>ActiveMQArtemis</code> CR.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_load_balancing_for_external_clients"><a class="anchor" href="#_load_balancing_for_external_clients"></a>Load Balancing for External Clients</h3>
+<div class="paragraph">
+<p>For scenarios where external clients need to load balance connections across multiple brokers in a cluster, you can configure load balancing at the OpenShift Route level.</p>
+</div>
+<div class="paragraph">
+<p>To enable load balancing:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Add the <code>haproxy.router.openshift.io/balance: roundrobin</code> annotation to the OpenShift Route for each broker pod. This instructs the OpenShift router to distribute incoming connections using a round-robin strategy.</p>
+</li>
+<li>
+<p>If external clients are using the AMQ Core protocol, you must also set the <code>useTopologyForLoadBalancing=false</code> key in the client’s connection URL. This prevents the Core client from attempting its own topology-aware load balancing, allowing the OpenShift router&#8217;s load balancing to take precedence.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_activity_exposing_and_testing_broker_listeners"><a class="anchor" href="#_hands_on_activity_exposing_and_testing_broker_listeners"></a>Hands-on Activity: Exposing and Testing Broker Listeners</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This lab guides you through verifying the exposure of broker listeners and testing external client connectivity.</p>
+</div>
+<div class="sect2">
+<h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>An OpenShift cluster with the AMQ Broker Operator installed.</p>
+</li>
+<li>
+<p>An <code>ActiveMQArtemis</code> broker instance already deployed. For this lab, we&#8217;ll assume a basic broker named <code>my-broker-deployment</code>.</p>
+</li>
+<li>
+<p><code>oc</code> CLI tool configured and logged into your OpenShift cluster.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_procedure"><a class="anchor" href="#_procedure"></a>Procedure</h3>
+<div class="paragraph">
+<div class="title">Verify Broker Deployment and Acceptors</div>
+<p>Before proceeding, ensure your AMQ Broker is deployed and running, and that it has at least one acceptor defined in its <code>ActiveMQArtemis</code> CR. By default, the Operator creates several standard acceptors (e.g., AMQP, Core, MQTT).</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Get the <code>ActiveMQArtemis</code> CR for your broker:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get activemqartemises.broker.amq.io my-broker-deployment -o yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Review the output, specifically the <code>spec.acceptors</code> section, to confirm that acceptors are configured. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker-deployment
+spec:
+  # ... other configurations
+  acceptors:
+    - name: amqp
+      port: 5672
+      protocols: AMQP
+    - name: amqp-ssl
+      port: 5671
+      protocols: AMQP
+      sslEnabled: true
+      # ... other SSL configuration (certificate, secretRef)
+  # ...</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<div class="title">Identify the Exposed Routes</div>
+<p>The Operator automatically creates routes for exposed acceptors. Let&#8217;s find them.</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>List the routes in your OpenShift project that belong to your broker deployment:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get routes -l activemqartemis.broker.amq.io/deployment-name=my-broker-deployment</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see routes similar to this output (names and domains will vary based on your cluster):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME                                     HOST/PORT                                                                                PATH   SERVICES                                 PORT      TERMINATION          WILDCARD
+my-broker-deployment-amqp-0-svc-rte      my-broker-deployment-amqp-0-svc-rte-myproject.apps.cluster.example.com                   amqp-0   my-broker-deployment-amqp-0-svc-rte      &lt;all&gt;     passthrough          None
+my-broker-deployment-amqp-ssl-0-svc-rte  my-broker-deployment-amqp-ssl-0-svc-rte-myproject.apps.cluster.example.com               amqp-0   my-broker-deployment-amqp-ssl-0-svc-rte  &lt;all&gt;     passthrough          None
+my-broker-deployment-console-0-svc-rte   my-broker-deployment-console-0-svc-rte-myproject.apps.cluster.example.com                console-0   my-broker-deployment-console-0-svc-rte  &lt;all&gt;     passthrough          None</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note down the <code>HOST/PORT</code> for one of your SSL-enabled AMQP routes (e.g., <code>my-broker-deployment-amqp-ssl-0-svc-rte-myproject.apps.cluster.example.com</code>). This is the external hostname clients will use.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<div class="title">Test External Connectivity using <code>curl</code></div>
+<p>While AMQ Broker primarily uses binary messaging protocols (like AMQP, Core, MQTT), <code>curl</code> can be used to perform a basic HTTP GET request to verify that the route is reachable over HTTPS for SSL-enabled routes. This helps confirm network reachability, even if the protocol doesn&#8217;t match.</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Use <code>curl</code> with the route host name you identified:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -v https://&lt;YOUR_AMQP_SSL_ROUTE_HOSTNAME&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;YOUR_AMQP_SSL_ROUTE_HOSTNAME&gt;</code> with the actual host name you noted in the previous step.</p>
+</div>
+<div class="paragraph">
+<p>You might receive an HTTP 503 error, a connection refused, or a protocol error message. This is expected since the route is designed for a messaging protocol, not HTTP. However, if the connection attempt starts and eventually fails with a protocol-level error (rather than "couldn&#8217;t resolve host" or "connection refused immediately"), it indicates that the OpenShift Route is correctly directing traffic to the broker pod.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>(Optional) Customize Route Hostname using <code>ingressDomain</code>
+You can customize the domain portion of the hostname for all exposed routes.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Edit the <code>ActiveMQArtemis</code> CR for <code>my-broker-deployment</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc edit activemqartemises.broker.amq.io my-broker-deployment</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add or modify the <code>ingressDomain</code> attribute in the <code>spec</code> section, for example:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">spec:
+  # ... other configurations
+  ingressDomain: custom-apps.example.com
+  # ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Save and exit the editor. The Operator will reconcile the changes.</p>
+</div>
+</li>
+<li>
+<p>After a few moments, check the routes again:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get routes -l activemqartemis.broker.amq.io/deployment-name=my-broker-deployment</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Observe how the <code>HOST/PORT</code> for the routes has updated to include your <code>custom-apps.example.com</code> domain.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>(Optional) Configure Load Balancing for External Access
+If you have a multi-pod broker deployment and wish for external clients to load balance across pods via the OpenShift router.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Identify the names of the routes created for your broker pods. For a 2-pod deployment, you&#8217;d typically have distinct routes for pod-0 and pod-1.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get routes -l activemqartemis.broker.amq.io/deployment-name=my-broker-deployment -o name</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will list routes like <code>route.route.openshift.io/my-broker-deployment-amqp-0-svc-rte</code> and <code>route.route.openshift.io/my-broker-deployment-amqp-1-svc-rte</code>.</p>
+</div>
+</li>
+<li>
+<p>Edit each specific route to add the load balancing annotation. For example, for the AMQP route for pod-0:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc edit route my-broker-deployment-amqp-0-svc-rte</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Add the <code>haproxy.router.openshift.io/balance</code> annotation under <code>metadata.annotations</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/balance: roundrobin
+    # ... potentially other annotations
+  name: my-broker-deployment-amqp-0-svc-rte
+  # ...
+spec:
+  # ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Save and exit. Repeat this for all other routes (e.g., <code>my-broker-deployment-amqp-1-svc-rte</code>) that you want to include in the load balancing.</p>
+</div>
+</li>
+<li>
+<p>If using AMQ Core protocol clients with this load balancing setup, remember to configure <code>useTopologyForLoadBalancing=false</code> in the client&#8217;s connection URL. This client-side setting works in conjunction with the OpenShift Route load balancing to ensure proper distribution of connections.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a></span>
+  <span class="next"><a href="configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

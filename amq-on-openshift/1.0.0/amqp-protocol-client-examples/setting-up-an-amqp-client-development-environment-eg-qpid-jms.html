@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Setting Up an AMQP Client Development Environment (e.g., Qpid JMS) :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="introduction-to-amqp-10-standard.html">
+    <link rel="next" href="developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a></li>
+    <li><a href="setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</h1>
+<h1 id="_setting_up_an_amqp_client_development_environment_e_g_qpid_jms" class="sect0"><a class="anchor" href="#_setting_up_an_amqp_client_development_environment_e_g_qpid_jms"></a>Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</h1>
+<div class="paragraph">
+<p>This section guides you through the process of establishing a development environment for AMQP clients utilizing the Red Hat build of Apache Qpid JMS. Qpid JMS is an advanced client library that fully implements the AMQP 1.0 specification, enabling Java applications to seamlessly interact with AMQ Broker and other AMQP 1.0 compliant message brokers.</p>
+</div>
+<div class="sect1">
+<h2 id="_understanding_qpid_jms_for_amqp_client_development"><a class="anchor" href="#_understanding_qpid_jms_for_amqp_client_development"></a>Understanding Qpid JMS for AMQP Client Development</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Red Hat build of Apache Qpid JMS offers a high-performance, feature-rich Jakarta Messaging (JMS) client specifically designed for the AMQP 1.0 protocol. This allows developers to construct standard JMS applications that communicate effectively with AMQ Broker over AMQP 1.0.</p>
+</div>
+<div class="paragraph">
+<p>Key aspects that make Qpid JMS a preferred choice for AMQP client development include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Jakarta Messaging API Compliance</strong>: Qpid JMS adheres to the latest Jakarta Messaging (formerly JMS) specification, providing a familiar and standardized API for developing message producers and consumers. This ensures consistency and simplifies application development for those accustomed to JMS patterns.</p>
+</li>
+<li>
+<p><strong>Full AMQP 1.0 Support</strong>: It provides comprehensive support for the AMQP 1.0 protocol, guaranteeing broad interoperability with any AMQP 1.0 compliant message broker, including Red Hat AMQ Broker.</p>
+</li>
+<li>
+<p><strong>JNDI (Java Naming and Directory Interface) Integration</strong>: Qpid JMS leverages JNDI for the lookup and management of <code>ConnectionFactory</code> and <code>Destination</code> (queues or topics) objects. This integration allows for externalizing connection details and destination names from the application code, making configurations more flexible and manageable. This is typically achieved through a <code>jndi.properties</code> file.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The fundamental principle behind setting up a Qpid JMS client is to provide it with the necessary configuration to locate and connect to the AMQ Broker and to identify the specific messaging destinations it intends to interact with. This configuration is most commonly provided via a <code>jndi.properties</code> file, which is loaded from the client application&#8217;s classpath.</p>
+</div>
+<div class="sect2">
+<h3 id="_essential_configuration_for_qpid_jms"><a class="anchor" href="#_essential_configuration_for_qpid_jms"></a>Essential Configuration for Qpid JMS</h3>
+<div class="paragraph">
+<p>To enable a Qpid JMS client to establish connections and interact with messaging destinations, specific configuration properties are required. These properties are typically defined within a <code>jndi.properties</code> file, which the JNDI <code>InitialContext</code> reads upon initialization.</p>
+</div>
+<div class="paragraph">
+<p>The critical properties to configure within <code>jndi.properties</code> are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>java.naming.factory.initial</code>: This property specifies the fully qualified class name of the JNDI <code>InitialContextFactory</code> implementation. For Qpid JMS, this must be set to <code>org.apache.qpid.jms.jndi.JmsInitialContextFactory</code>. This factory is responsible for creating the initial context from which other JNDI objects can be looked up.</p>
+</li>
+<li>
+<p><code>connectionfactory.&lt;lookup-name&gt;</code>: This property defines a named <code>ConnectionFactory</code> instance that clients will use to create connections to the broker. The value is an AMQP connection URI, specifying the broker&#8217;s host and port. For a local development environment, <code>amqp://localhost:5672</code> is a common setting. The <code>&lt;lookup-name&gt;</code> is an arbitrary string (e.g., <code>myFactoryLookup</code>) that the client application will use to retrieve this factory from the JNDI context.</p>
+</li>
+<li>
+<p><code>queue.&lt;lookup-name&gt;</code>: This property defines a named queue destination. The value is the actual name of the queue on the broker (e.g., <code>queue</code>). Similar to the connection factory, <code>&lt;lookup-name&gt;</code> is used by the client application to look up this destination. Topics can also be defined using <code>topic.&lt;lookup-name&gt;</code>.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The provided context explicitly mentions <code>Jakarta Messaging</code>. While historically referred to as JMS, the specification has transitioned to Jakarta Messaging. Qpid JMS supports both <code>javax.jms</code> and <code>jakarta.jms</code> APIs, but for new applications, using <code>jakarta.jms</code> with compatible Jakarta EE versions is recommended.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_lab_setting_up_a_basic_amqp_client_environment"><a class="anchor" href="#_hands_on_lab_setting_up_a_basic_amqp_client_environment"></a>Hands-on Lab: Setting up a Basic AMQP Client Environment</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This lab provides step-by-step instructions for setting up a local AMQ Broker instance and configuring a basic Qpid JMS client development environment. This will allow you to run and test simple AMQP client applications.</p>
+</div>
+<div class="sect2">
+<h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
+<div class="paragraph">
+<p>Before proceeding with the lab activities, ensure that you have the following software installed and configured on your development machine:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Java Development Kit (JDK)</strong>: Version 8 or newer is required.</p>
+</li>
+<li>
+<p><strong>Apache Maven</strong>: Version 3.x or newer is recommended for building Java projects.</p>
+</li>
+<li>
+<p><strong>Command Line Interface (CLI)</strong>: Access to a terminal or command prompt.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_activity_1_prepare_the_amq_broker"><a class="anchor" href="#_activity_1_prepare_the_amq_broker"></a>Activity 1: Prepare the AMQ Broker</h3>
+<div class="paragraph">
+<p>A running AMQ Broker instance with a predefined queue is a prerequisite for any Qpid JMS client application to function correctly. This activity guides you through installing and configuring a local broker instance.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Install the AMQ Broker</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Follow the instructions provided in the <a href="https://access.redhat.com/documentation/en-us/red_hat_amq/7.10/getting_started_with_amq_broker/index">Getting Started with AMQ Broker</a> to download and install Red Hat AMQ Broker.</p>
+</li>
+<li>
+<p>Create a new broker instance. For development purposes, enable anonymous access for simplicity.</p>
+</li>
+<li>
+<p>For the remainder of this lab, we will refer to the installation directory of your broker instance as <code>&lt;broker-instance-dir&gt;</code> (e.g., <code>~/amq-broker-7.x.x/broker</code>).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Start the AMQ Broker</strong></p>
+</li>
+<li>
+<p>Open a new terminal window.</p>
+</li>
+<li>
+<p>Navigate to your broker instance directory.</p>
+</li>
+<li>
+<p>Execute the <code>artemis run</code> command to start the AMQ Broker.
+<code><code>bash
+cd &lt;broker-instance-dir&gt;
+./bin/artemis run
+</code></code></p>
+</li>
+<li>
+<p>Monitor the console output. The broker is ready when you see the message <code>Server is now live</code>.
+[NOTE]
+====
+Keep this terminal window open, as the broker must remain running for the client examples to connect successfully.
+====</p>
+</li>
+<li>
+<p><strong>Create a Queue</strong></p>
+</li>
+<li>
+<p>Open <strong>another</strong> new terminal window.</p>
+</li>
+<li>
+<p>Navigate to your broker instance directory.</p>
+</li>
+<li>
+<p>Use the <code>artemis queue create</code> command to create a queue named <code>queue</code> on your broker instance. You will be prompted with a series of questions. For a simple development setup, answer <code>N</code> (No) to all prompts concerning advanced queue configurations, except for the initial confirmation.
+<code><code>bash
+cd &lt;broker-instance-dir&gt;
+./bin/artemis queue create --name queue --address queue
+</code></code>
+When prompted with "Are you sure you want to create queue 'queue' with address 'queue'?", type <code>y</code> and press Enter. If there are subsequent prompts for other configurations, answer <code>N</code>.
+[TIP]
+====
+The <code>--name queue --address queue</code> parameters simplify the process by setting both the queue name and its associated address to <code>queue</code>, reducing the number of interactive prompts.
+====</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_activity_2_configure_the_qpid_jms_client_environment"><a class="anchor" href="#_activity_2_configure_the_qpid_jms_client_environment"></a>Activity 2: Configure the Qpid JMS Client Environment</h3>
+<div class="paragraph">
+<p>With the AMQ Broker running and the <code>queue</code> created, you can now set up the client-side configuration files. This activity involves creating the <code>jndi.properties</code> file and a basic Maven project structure for a Qpid JMS client.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Create a <code>jndi.properties</code> file</strong></p>
+</li>
+<li>
+<p>Create a new directory for your client development project (e.g., <code>amqp-client-dev</code>).</p>
+</li>
+<li>
+<p>Inside this <code>amqp-client-dev</code> directory, create a new file named <code>jndi.properties</code>.</p>
+</li>
+<li>
+<p>Add the following content to the <code>jndi.properties</code> file:
+<code><code>properties
+# Configure the InitialContextFactory class to use
+java.naming.factory.initial = org.apache.qpid.jms.jndi.JmsInitialContextFactory
+# Configure the ConnectionFactory for a local broker on default AMQP port 5672
+connectionfactory.myFactoryLookup = amqp://localhost:5672
+# Configure the destination queue we created
+queue.myDestinationLookup = queue
+</code></code></p>
+</li>
+<li>
+<p>Save the <code>jndi.properties</code> file.</p>
+<div class="literalblock">
+<div class="content">
+<pre>[TIP]
+====
+For a Java application to locate this configuration, the `jndi.properties` file must be present on the application's classpath. In a Maven project, placing this file in `src/main/resources` will automatically add it to the classpath during the build process.
+====</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Conceptual Client Application Setup (Maven)</strong></p>
+<div class="literalblock">
+<div class="content">
+<pre>To demonstrate how a Qpid JMS client utilizes the `jndi.properties` configuration, let's outline a basic Maven `pom.xml` and a simple Java `Sender` class.</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Create a <code>pom.xml</code> file</strong>
+In your <code>amqp-client-dev</code> directory, create a <code>pom.xml</code> file. This <code>pom.xml</code> will define your project, specify Java version, and include the necessary Qpid JMS client dependency.
+```xml
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 <a href="http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt" class="bare">http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt</a>;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</p>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;groupId&gt;com.example.amqp&lt;/groupId&gt;
+&lt;artifactId&gt;amqp-client-dev&lt;/artifactId&gt;
+&lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;properties&gt;
+    &lt;maven.compiler.source&gt;11&lt;/maven.compiler.source&gt;
+    &lt;maven.compiler.target&gt;11&lt;/maven.compiler.target&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;qpid-jms.version&gt;2.7.0&lt;/qpid-jms.version&gt; &lt;!-- Matches Red Hat build of Apache Qpid JMS 2.7 --&gt;
+&lt;/properties&gt;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;dependencies&gt;
+    &lt;!-- Qpid JMS Client Library --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.qpid&lt;/groupId&gt;
+        &lt;artifactId&gt;qpid-jms-client&lt;/artifactId&gt;
+        &lt;version&gt;${qpid-jms.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;!-- Simple logging implementation for runtime messages --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+        &lt;artifactId&gt;slf4j-simple&lt;/artifactId&gt;
+        &lt;version&gt;1.7.32&lt;/version&gt;
+        &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;!-- Jakarta Messaging API (if using Jakarta EE environment) --&gt;
+    &lt;!-- Uncomment and adjust version if your project uses jakarta.jms.* imports explicitly --&gt;
+    &lt;!--
+    &lt;dependency&gt;
+        &lt;groupId&gt;jakarta.platform&lt;/groupId&gt;
+        &lt;artifactId&gt;jakarta.jakartaee-api&lt;/artifactId&gt;
+        &lt;version&gt;9.1.0&lt;/version&gt;
+        &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+    --&gt;
+&lt;/dependencies&gt;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.8.1&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;source&gt;${maven.compiler.source}&lt;/source&gt;
+                    &lt;target&gt;${maven.compiler.target}&lt;/target&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+                &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.0.0&lt;/version&gt;
+                &lt;executions&gt;
+                    &lt;execution&gt;
+                        &lt;goals&gt;
+                            &lt;goal&gt;java&lt;/goal&gt;
+                        &lt;/goals&gt;
+                    &lt;/execution&gt;
+                &lt;/executions&gt;
+                &lt;configuration&gt;
+                    &lt;mainClass&gt;com.example.amqp.Sender&lt;/mainClass&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;
+```</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Create a <code>Sender.java</code> file</strong>
+Create the directory structure <code>src/main/java/com/example/amqp</code> within your <code>amqp-client-dev</code> project. Then, create the <code>Sender.java</code> file inside this directory. This minimal <code>Sender</code> class illustrates how a client looks up the <code>ConnectionFactory</code> and <code>Destination</code> from JNDI using the <code>jndi.properties</code> file.</p>
+<div class="literalblock">
+<div class="content">
+<pre>```java
+package com.example.amqp;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>// Use javax.jms.* for compatibility with older JMS API versions and simplicity
+import javax.jms.*;
+// If using Jakarta Messaging (Jakarta EE environment), use:
+// import jakarta.jms.*;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>import javax.naming.Context;
+import javax.naming.InitialContext;
+import java.util.Hashtable; // Required for InitialContext properties if not using jndi.properties</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>public class Sender {</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>public static void main(String[] args) throws Exception {
+    // The JNDI InitialContext will automatically load jndi.properties from the classpath
+    Context jndiContext = null;
+    Connection connection = null;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>try {
+    jndiContext = new InitialContext();</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>// Look up ConnectionFactory and Destination using the names defined in jndi.properties
+ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext.lookup("myFactoryLookup");
+Destination queue = (Destination) jndiContext.lookup("myDestinationLookup");</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>connection = connectionFactory.createConnection();
+connection.start(); // Always start the connection</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // Non-transacted, auto-acknowledge
+MessageProducer producer = session.createProducer(queue); // Create a producer for the queue</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>TextMessage message = session.createTextMessage("Hello AMQ Broker from Qpid JMS!");
+producer.send(message); // Send the message
+System.out.println("Sent message: " + message.getText());</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>        } finally {
+            // Ensure resources are closed properly
+            if (connection != null) {
+                connection.close();
+            }
+            if (jndiContext != null) {
+                jndiContext.close();
+            }
+        }
+    }
+}
+```
+[IMPORTANT]
+====
+If your Java environment strictly uses Jakarta EE and Jakarta Messaging APIs (e.g., in a Jakarta EE application server), you should change the import statements from `javax.jms.*` to `jakarta.jms.*` and ensure the `jakarta.platform:jakarta.jakartaee-api` dependency (or specific Jakarta JMS API dependency) is correctly configured in your `pom.xml`. The Qpid JMS client library itself is compatible with both.
+====</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Run the Client Application</strong></p>
+</li>
+<li>
+<p>Open a terminal and navigate to your <code>amqp-client-dev</code> project directory (where your <code>pom.xml</code> is located).</p>
+</li>
+<li>
+<p>Execute the Maven command to compile and run the <code>Sender</code> class:
+<code><code>bash
+mvn clean compile exec:java
+</code></code></p>
+</li>
+<li>
+<p>Upon successful execution, you should observe output similar to the following:
+<code>`
+[INFO] Scanning for projects&#8230;&#8203;
+[INFO] &#8230;&#8203; (Maven build output) &#8230;&#8203;
+[INFO] --- exec-maven-plugin:3.0.0:java (default-cli) @ amqp-client-dev ---
+Sent message: Hello AMQ Broker from Qpid JMS!
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] &#8230;&#8203; (Maven build output) &#8230;&#8203;
+</code>`
+This output confirms that your Qpid JMS client development environment is correctly configured, allowing the client application to successfully connect to the AMQ Broker and send a message to the <code>queue</code> destination. You have successfully set up a functional AMQP client development environment.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a></span>
+  <span class="next"><a href="developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

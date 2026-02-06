@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Implementing Publish/Subscribe Messaging :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="implementing-point-to-point-messaging.html">
+    <link rel="next" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="core-protocol-client-examples.html">Core Protocol Client Examples</a></li>
+    <li><a href="implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Implementing Publish/Subscribe Messaging</h1>
+<h1 id="_implementing_publishsubscribe_messaging" class="sect0"><a class="anchor" href="#_implementing_publishsubscribe_messaging"></a>Implementing Publish/Subscribe Messaging</h1>
+<div class="paragraph">
+<p>The Publish/Subscribe (Pub/Sub) messaging model is a fundamental concept in message-oriented middleware, allowing for broadcasting messages to multiple interested consumers. Unlike the Point-to-Point model where a message is consumed by only one receiver, Pub/Sub enables one message to be delivered to many subscribers.</p>
+</div>
+<div class="sect1">
+<h2 id="_overview_of_publishsubscribe_messaging"><a class="anchor" href="#_overview_of_publishsubscribe_messaging"></a>Overview of Publish/Subscribe Messaging</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Pub/Sub model is ideal for scenarios where information needs to be disseminated to a dynamic set of interested parties without direct knowledge of who those parties are.</p>
+</div>
+<div class="sect2">
+<h3 id="_core_concepts"><a class="anchor" href="#_core_concepts"></a>Core Concepts</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Topics</strong>: In the Pub/Sub model, messages are published to a named destination called a <strong>topic</strong>. Topics act as logical channels for message distribution.</p>
+</li>
+<li>
+<p><strong>Publishers</strong>: Applications that create and send messages to a specific topic. Publishers do not need to know anything about the subscribers.</p>
+</li>
+<li>
+<p><strong>Subscribers</strong>: Applications that register their interest in a specific topic. When a message is published to that topic, all active subscribers receive a copy of the message.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_key_characteristics"><a class="anchor" href="#_key_characteristics"></a>Key Characteristics</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Decoupling</strong>: Publishers and subscribers are completely decoupled. They don&#8217;t need to know each other&#8217;s existence or location, improving system flexibility and maintainability.</p>
+</li>
+<li>
+<p><strong>Asynchronous Communication</strong>: Messages are sent and received asynchronously, allowing components to operate independently.</p>
+</li>
+<li>
+<p><strong>Broadcasting</strong>: A single message can be delivered to multiple subscribers.</p>
+</li>
+<li>
+<p><strong>Durability</strong>: Subscribers can be configured as <strong>durable</strong> or <strong>non-durable</strong>.</p>
+</li>
+<li>
+<p><strong>Non-durable subscriptions</strong>: Messages are only delivered to subscribers that are actively connected and listening to the topic when the message is published. If a non-durable subscriber is offline, it misses any messages published during its downtime.</p>
+</li>
+<li>
+<p><strong>Durable subscriptions</strong>: Messages are persisted by the broker for a specific subscriber, even if the subscriber is temporarily offline. When the durable subscriber reconnects, it receives all messages that were published while it was disconnected. This ensures message reliability for critical applications.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_use_cases"><a class="anchor" href="#_use_cases"></a>Use Cases</h3>
+<div class="paragraph">
+<p>Pub/Sub messaging is widely used in:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>News feeds and alerts</strong>: Broadcasting real-time updates (e.g., stock prices, weather alerts, breaking news).</p>
+</li>
+<li>
+<p><strong>Event-driven architectures</strong>: Notifying various microservices about events that have occurred (e.g., "order placed," "user registered").</p>
+</li>
+<li>
+<p><strong>Application integration</strong>: Distributing data changes or commands to multiple consuming systems.</p>
+</li>
+<li>
+<p><strong>Monitoring systems</strong>: Broadcasting metrics or log events to different monitoring tools.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_amq_broker_support_for_publishsubscribe"><a class="anchor" href="#_amq_broker_support_for_publishsubscribe"></a>AMQ Broker Support for Publish/Subscribe</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Red Hat AMQ Broker, built on Apache ActiveMQ Artemis, provides robust support for the Publish/Subscribe messaging model through various protocols, including:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>JMS (Java Message Service)</strong>: Specifically, JMS Topics are the primary mechanism for Pub/Sub in Java applications.</p>
+</li>
+<li>
+<p><strong>AMQP (Advanced Message Queuing Protocol)</strong>: AMQP uses exchanges and bindings to achieve Pub/Sub semantics, where messages are sent to an exchange and then routed to multiple queues based on binding keys.</p>
+</li>
+<li>
+<p><strong>MQTT (MQ Telemetry Transport)</strong>: Often used for IoT and mobile applications, MQTT inherently supports Pub/Sub with its topic-based messaging.</p>
+</li>
+<li>
+<p><strong>STOMP (Simple Text Oriented Messaging Protocol)</strong>: STOMP also supports Pub/Sub concepts using <code>/topic/</code> destinations.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When using JMS with AMQ Broker, a <strong>JMS Topic</strong> directly maps to the Pub/Sub model. The broker manages the distribution of messages to all active and durable subscribers.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_activity_deploying_and_testing_publishsubscribe_with_jms"><a class="anchor" href="#_hands_on_activity_deploying_and_testing_publishsubscribe_with_jms"></a>Hands-on Activity: Deploying and Testing Publish/Subscribe with JMS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This lab guides you through deploying a basic AMQ Broker instance on OpenShift, configuring a topic, and then creating simple Java-based producer (publisher) and consumer (subscriber) applications to demonstrate Publish/Subscribe messaging using JMS.</p>
+</div>
+<div class="sect2">
+<h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>An OpenShift cluster with <code>oc</code> CLI configured.</p>
+</li>
+<li>
+<p>The AMQ Broker Operator installed on your OpenShift cluster.</p>
+</li>
+<li>
+<p>Java Development Kit (JDK) 11 or newer.</p>
+</li>
+<li>
+<p>Apache Maven for building Java applications.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_1_deploy_a_basic_amq_broker_instance"><a class="anchor" href="#_step_1_deploy_a_basic_amq_broker_instance"></a>Step 1: Deploy a Basic AMQ Broker Instance</h3>
+<div class="paragraph">
+<p>If you don&#8217;t already have an AMQ Broker instance running, deploy one. We will create a simple instance with a <code>basic</code> configuration.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Project</p>
+<div class="paragraph">
+<p>Create a new OpenShift project for your broker and applications.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-project amq-pubsub-demo</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Deploy the Broker Instance</p>
+<div class="paragraph">
+<p>Create a file named <code>broker-pubsub.yaml</code> with the following content:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: amq-pubsub-broker
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
+    # Define a network via an OpenShift Route for external access
+    expose: true
+    # Configure the console for monitoring
+    console: true
+  brokerProperties:
+    - addressSettings.#.default.durable-topic-paging=true
+    - addressSettings.#.default.topic-paging=true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Apply this YAML to deploy the broker:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f broker-pubsub.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Wait for the broker pod to be running and the route to be created. You can check the status:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l app=amq-pubsub-broker
+oc get route amq-pubsub-broker-amqp # Or amq-pubsub-broker-jolokia for the console</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note down the AMQP route hostname. You&#8217;ll need it for client connections.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route amq-pubsub-broker-amqp --output=jsonpath='{.spec.host}'</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_2_access_the_management_console_hawtio"><a class="anchor" href="#_step_2_access_the_management_console_hawtio"></a>Step 2: Access the Management Console (Hawtio)</h3>
+<div class="paragraph">
+<p>You can use the Hawtio console to verify topic creation and message flow.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Get the Hawtio Console Route</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route amq-pubsub-broker-jolokia --output=jsonpath='{.spec.host}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Open this URL in your browser. You might need to log in using your OpenShift credentials or the default <code>admin</code>/<code>admin</code> if configured.</p>
+</div>
+</li>
+<li>
+<p>Navigate to <code>Runtime</code> &#8594; <code>org.apache.activemq.artemis</code> &#8594; <code>Broker</code> &#8594; <code>Addresses</code>. You&#8217;ll see dynamically created addresses when publishers and subscribers connect.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_3_develop_the_publisher_application"><a class="anchor" href="#_step_3_develop_the_publisher_application"></a>Step 3: Develop the Publisher Application</h3>
+<div class="paragraph">
+<p>Create a Java publisher application that sends messages to a topic.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Maven Project</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir pubsub-publisher
+cd pubsub-publisher
+mvn archetype:generate -DgroupId=com.example.pubsub -DartifactId=publisher -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Update <code>pom.xml</code></p>
+<div class="paragraph">
+<p>Edit <code>publisher/pom.xml</code> to include the necessary AMQ Broker JMS client dependency:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;com.example.pubsub&lt;/groupId&gt;
+    &lt;artifactId&gt;publisher&lt;/artifactId&gt;
+    &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+
+    &lt;properties&gt;
+        &lt;maven.compiler.source&gt;11&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;11&lt;/maven.compiler.target&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.activemq&lt;/groupId&gt;
+            &lt;artifactId&gt;artemis-jms-client-all&lt;/artifactId&gt;
+            &lt;version&gt;2.31.0.redhat-00003&lt;/version&gt; &lt;!-- Use the version compatible with your broker image --&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+            &lt;artifactId&gt;slf4j-simple&lt;/artifactId&gt;
+            &lt;version&gt;1.7.32&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.2.0&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;archive&gt;
+                        &lt;manifest&gt;
+                            &lt;addClasspath&gt;true&lt;/addClasspath&gt;
+                            &lt;mainClass&gt;com.example.pubsub.publisher.Publisher&lt;/mainClass&gt;
+                        &lt;/manifest&gt;
+                    &lt;/archive&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-assembly-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.3.0&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;archive&gt;
+                        &lt;manifest&gt;
+                            &lt;mainClass&gt;com.example.pubsub.publisher.Publisher&lt;/mainClass&gt;
+                        &lt;/manifest&gt;
+                    &lt;/archive&gt;
+                    &lt;descriptorRefs&gt;
+                        &lt;descriptorRef&gt;jar-with-dependencies&lt;/descriptorRef&gt;
+                    &lt;/descriptorRefs&gt;
+                &lt;/configuration&gt;
+                &lt;executions&gt;
+                    &lt;execution&gt;
+                        &lt;id&gt;make-assembly&lt;/id&gt; &lt;!-- this is used for inheritance merges --&gt;
+                        &lt;phase&gt;package&lt;/phase&gt; &lt;!-- bind to the packaging phase --&gt;
+                        &lt;goals&gt;
+                            &lt;goal&gt;single&lt;/goal&gt;
+                        &lt;/goals&gt;
+                    &lt;/execution&gt;
+                &lt;/executions&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the Publisher Class</p>
+<div class="paragraph">
+<p>Create <code>src/main/java/com/example/pubsub/publisher/Publisher.java</code> with the following content. Replace <code>YOUR_AMQP_ROUTE_HOSTNAME</code> with the actual hostname you obtained earlier.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example.pubsub.publisher;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+
+import javax.jms.*;
+import java.util.Scanner;
+
+public class Publisher {
+
+    private static final String BROKER_URL = "amqp://YOUR_AMQP_ROUTE_HOSTNAME:5672"; // Replace with your AMQP route hostname
+    private static final String TOPIC_NAME = "myTopic";
+
+    public static void main(String[] args) throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+        Scanner scanner = new Scanner(System.in);
+
+        try {
+            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
+            connection = connectionFactory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(TOPIC_NAME);
+            producer = session.createProducer(topic);
+
+            System.out.println("Publisher connected to topic: " + TOPIC_NAME);
+            System.out.println("Enter messages to send (or 'quit' to exit):");
+
+            String text;
+            while (true) {
+                System.out.print("&gt; ");
+                text = scanner.nextLine();
+                if ("quit".equalsIgnoreCase(text)) {
+                    break;
+                }
+                TextMessage message = session.createTextMessage(text);
+                producer.send(message);
+                System.out.println("Sent message: '" + text + "'");
+            }
+
+        } catch (JMSException e) {
+            System.err.println("JMS Exception occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (scanner != null) {
+                scanner.close();
+            }
+            if (producer != null) {
+                producer.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            System.out.println("Publisher gracefully shut down.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_4_develop_the_subscriber_application_non_durable_and_durable"><a class="anchor" href="#_step_4_develop_the_subscriber_application_non_durable_and_durable"></a>Step 4: Develop the Subscriber Application (Non-Durable and Durable)</h3>
+<div class="paragraph">
+<p>Create two subscriber applications: one non-durable and one durable, to observe the difference.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Maven Project for Subscriber</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd ..
+mkdir pubsub-subscriber
+cd pubsub-subscriber
+mvn archetype:generate -DgroupId=com.example.pubsub -DartifactId=subscriber -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Update <code>pom.xml</code></p>
+<div class="paragraph">
+<p>Edit <code>subscriber/pom.xml</code> to include the same dependencies as the publisher:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;com.example.pubsub&lt;/groupId&gt;
+    &lt;artifactId&gt;subscriber&lt;/artifactId&gt;
+    &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+
+    &lt;properties&gt;
+        &lt;maven.compiler.source&gt;11&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;11&lt;/maven.compiler.target&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.activemq&lt;/groupId&gt;
+            &lt;artifactId&gt;artemis-jms-client-all&lt;/artifactId&gt;
+            &lt;version&gt;2.31.0.redhat-00003&lt;/version&gt; &lt;!-- Use the version compatible with your broker image --&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+            &lt;artifactId&gt;slf4j-simple&lt;/artifactId&gt;
+            &lt;version&gt;1.7.32&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.2.0&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;archive&gt;
+                        &lt;manifest&gt;
+                            &lt;addClasspath&gt;true&lt;/addClasspath&gt;
+                            &lt;mainClass&gt;com.example.pubsub.subscriber.NonDurableSubscriber&lt;/mainClass&gt;
+                        &lt;/manifest&gt;
+                    &lt;/archive&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-assembly-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.3.0&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;archive&gt;
+                        &lt;manifest&gt;
+                            &lt;mainClass&gt;com.example.pubsub.subscriber.NonDurableSubscriber&lt;/mainClass&gt;
+                        &lt;/manifest&gt;
+                    &lt;/archive&gt;
+                    &lt;descriptorRefs&gt;
+                        &lt;descriptorRef&gt;jar-with-dependencies&lt;/descriptorRef&gt;
+                    &lt;/descriptorRefs&gt;
+                &lt;/configuration&gt;
+                &lt;executions&gt;
+                    &lt;execution&gt;
+                        &lt;id&gt;make-assembly&lt;/id&gt; &lt;!-- this is used for inheritance merges --&gt;
+                        &lt;phase&gt;package&lt;/phase&gt; &lt;!-- bind to the packaging phase --&gt;
+                        &lt;goals&gt;
+                            &lt;goal&gt;single&lt;/goal&gt;
+                        &lt;/goals&gt;
+                    &lt;/execution&gt;
+                &lt;/executions&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the Non-Durable Subscriber Class</p>
+<div class="paragraph">
+<p>Create <code>src/main/java/com/example/pubsub/subscriber/NonDurableSubscriber.java</code>. Replace <code>YOUR_AMQP_ROUTE_HOSTNAME</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example.pubsub.subscriber;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+
+import javax.jms.*;
+
+public class NonDurableSubscriber {
+
+    private static final String BROKER_URL = "amqp://YOUR_AMQP_ROUTE_HOSTNAME:5672"; // Replace with your AMQP route hostname
+    private static final String TOPIC_NAME = "myTopic";
+
+    public static void main(String[] args) throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+
+        try {
+            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
+            connection = connectionFactory.createConnection();
+            // Start the connection *before* creating the consumer for non-durable
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(TOPIC_NAME);
+
+            consumer = session.createConsumer(topic);
+            consumer.setMessageListener(new MessageListener() {
+                @Override
+                public void onMessage(Message message) {
+                    try {
+                        if (message instanceof TextMessage) {
+                            TextMessage textMessage = (TextMessage) message;
+                            System.out.println("[Non-Durable] Received: " + textMessage.getText());
+                        }
+                    } catch (JMSException e) {
+                        System.err.println("Error processing message: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            System.out.println("[Non-Durable Subscriber] Listening on topic: " + TOPIC_NAME);
+            System.out.println("Press Ctrl+C to exit.");
+
+            // Keep the main thread alive to receive messages
+            Thread.currentThread().join();
+
+        } catch (JMSException e) {
+            System.err.println("JMS Exception occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("Non-Durable Subscriber interrupted.");
+        } finally {
+            if (consumer != null) {
+                consumer.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            System.out.println("Non-Durable Subscriber gracefully shut down.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the Durable Subscriber Class</p>
+<div class="paragraph">
+<p>Create <code>src/main/java/com/example/pubsub/subscriber/DurableSubscriber.java</code>. Replace <code>YOUR_AMQP_ROUTE_HOSTNAME</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example.pubsub.subscriber;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+
+import javax.jms.*;
+
+public class DurableSubscriber {
+
+    private static final String BROKER_URL = "amqp://YOUR_AMQP_ROUTE_HOSTNAME:5672"; // Replace with your AMQP route hostname
+    private static final String TOPIC_NAME = "myTopic";
+    private static final String CLIENT_ID = "durable-sub-client-1"; // Unique ID for the client
+    private static final String SUBSCRIPTION_NAME = "myDurableSubscription"; // Unique name for the subscription
+
+    public static void main(String[] args) throws JMSException {
+        Connection connection = null;
+        Session session = null;
+        TopicSubscriber subscriber = null;
+
+        try {
+            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(BROKER_URL);
+            connection = connectionFactory.createConnection();
+            connection.setClientID(CLIENT_ID); // Set a unique client ID for durable subscription
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic topic = session.createTopic(TOPIC_NAME);
+
+            // Create a durable topic subscriber
+            subscriber = session.createDurableSubscriber(topic, SUBSCRIPTION_NAME);
+            subscriber.setMessageListener(new MessageListener() {
+                @Override
+                public void onMessage(Message message) {
+                    try {
+                        if (message instanceof TextMessage) {
+                            TextMessage textMessage = (TextMessage) message;
+                            System.out.println("[Durable     ] Received: " + textMessage.getText());
+                        }
+                    } catch (JMSException e) {
+                        System.err.println("Error processing message: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            System.out.println("[Durable Subscriber] Listening on topic: " + TOPIC_NAME + " with client ID: " + CLIENT_ID);
+            System.out.println("Press Ctrl+C to exit.");
+
+            // Keep the main thread alive to receive messages
+            Thread.currentThread().join();
+
+        } catch (JMSException e) {
+            System.err.println("JMS Exception occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("Durable Subscriber interrupted.");
+        } finally {
+            if (subscriber != null) {
+                // For durable subscribers, it's good practice to unsubscribe if it's no longer needed
+                // session.unsubscribe(SUBSCRIPTION_NAME);
+                subscriber.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            System.out.println("Durable Subscriber gracefully shut down.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_5_build_and_run_the_applications"><a class="anchor" href="#_step_5_build_and_run_the_applications"></a>Step 5: Build and Run the Applications</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Build the Publisher</p>
+<div class="paragraph">
+<p>In the <code>pubsub-publisher</code> directory, build the project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn clean install</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the Subscriber</p>
+<div class="paragraph">
+<p>In the <code>pubsub-subscriber</code> directory, build the project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn clean install</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run the Subscribers (First)</p>
+<div class="paragraph">
+<p>Open two separate terminal windows.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In Terminal 1, run the non-durable subscriber:</p>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash,subs="attributes+"]
+----
+java -jar pubsub-subscriber/target/subscriber-1.0-SNAPSHOT-jar-with-dependencies.jar com.example.pubsub.subscriber.NonDurableSubscriber
+----</pre>
+</div>
+</div>
+</li>
+<li>
+<p>In Terminal 2, run the durable subscriber:</p>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash,subs="attributes+"]
+----
+java -jar pubsub-subscriber/target/subscriber-1.0-SNAPSHOT-jar-with-dependencies.jar com.example.pubsub.subscriber.DurableSubscriber
+----</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Both subscribers should report that they are listening.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Run the Publisher</p>
+<div class="paragraph">
+<p>Open a third terminal window.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In Terminal 3, run the publisher:</p>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash,subs="attributes+"]
+----
+java -jar pubsub-publisher/target/publisher-1.0-SNAPSHOT-jar-with-dependencies.jar
+----</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, type messages into the publisher&#8217;s terminal and press Enter. You should see both subscriber terminals receiving the messages immediately.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Test Non-Durable vs. Durable Behavior</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Stop the Non-Durable Subscriber (Terminal 1)</strong> by pressing <code>Ctrl+C</code>.</p>
+</li>
+<li>
+<p>Send a few more messages from the Publisher (Terminal 3).</p>
+</li>
+<li>
+<p>Observe that only the Durable Subscriber (Terminal 2) continues to receive messages.</p>
+</li>
+<li>
+<p><strong>Restart the Non-Durable Subscriber (Terminal 1)</strong>. It will only receive new messages published <strong>after</strong> it restarts. It will not receive the messages it missed while it was offline.</p>
+</li>
+<li>
+<p><strong>Stop the Durable Subscriber (Terminal 2)</strong> by pressing <code>Ctrl+C</code>.</p>
+</li>
+<li>
+<p>Send a few more messages from the Publisher (Terminal 3). These messages are <strong>not</strong> received by any active subscriber.</p>
+</li>
+<li>
+<p><strong>Restart the Durable Subscriber (Terminal 2)</strong>. It <strong>will</strong> receive all the messages that were published while it was offline. This demonstrates the message persistence provided by durable subscriptions.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Clean Up Durable Subscription (Optional)</p>
+<div class="paragraph">
+<p>After you are done with a durable subscription, you can explicitly "unsubscribe" it using the Hawtio console or programmatically, otherwise, the broker continues to store messages for it. In the Hawtio console, navigate to <code>Runtime</code> &#8594; <code>org.apache.activemq.artemis</code> &#8594; <code>Broker</code> &#8594; <code>Addresses</code>, find your <code>myTopic</code> address, and you should see a <code>Consumer</code> entry for the durable subscriber. You can manage or remove it there.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting_tips"><a class="anchor" href="#_troubleshooting_tips"></a>Troubleshooting Tips</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Connection Issues</strong>: Ensure the <code>BROKER_URL</code> in your Java code correctly points to the AMQP route hostname and port (<code>5672</code>) of your AMQ Broker. Check <code>oc get route</code> for the correct hostname.</p>
+</li>
+<li>
+<p><strong>JMS Client Version</strong>: Make sure the <code>artemis-jms-client-all</code> version in your <code>pom.xml</code> is compatible with your AMQ Broker image version.</p>
+</li>
+<li>
+<p><strong><code>CLIENT_ID</code> for Durable Subscribers</strong>: Each connection used to create a durable subscriber <strong>must</strong> have a unique <code>setClientID()</code> value. If you try to create another durable subscriber with the same <code>CLIENT_ID</code> and <code>SUBSCRIPTION_NAME</code> while the first is active, it will fail.</p>
+</li>
+<li>
+<p><strong>Missing Messages (Non-Durable)</strong>: Remember that non-durable subscribers only receive messages published <strong>while they are active</strong>. If they are offline, they miss messages.</p>
+</li>
+<li>
+<p><strong>Durable Subscription Persistence</strong>: If messages are not being delivered to a restarted durable subscriber, ensure that <code>connection.setClientID()</code> is called <strong>before</strong> <code>connection.start()</code>, and that the <code>SUBSCRIPTION_NAME</code> is unique for that client ID. Also, verify that the broker&#8217;s persistence is correctly configured.</p>
+</li>
+<li>
+<p><strong>Firewall/Network Policy</strong>: If running clients outside OpenShift, ensure your OpenShift cluster&#8217;s network policies or firewalls allow external access to the broker&#8217;s AMQP route.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This hands-on lab provides a practical understanding of how Publish/Subscribe messaging works with Red Hat AMQ Broker on OpenShift, highlighting the critical difference between non-durable and durable subscriptions.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a></span>
+  <span class="next"><a href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

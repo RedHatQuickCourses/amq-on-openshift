@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Concepts of Horizontal and Vertical Scaling :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="scaling-amq-broker-on-openshift.html">
+    <link rel="next" href="scaling-broker-pods-and-replicas.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a></li>
+    <li><a href="concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Concepts of Horizontal and Vertical Scaling</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>:scaling-concepts.adoc
+= Concepts of Horizontal and Vertical Scaling</p>
+</div>
+<div class="paragraph">
+<p>Asynchronous messaging systems like AMQ Broker are critical components in many modern applications, handling vital communication between services. To ensure these systems can meet varying demands, from handling peak loads to maintaining high availability, understanding and implementing effective scaling strategies is paramount. This section delves into the fundamental concepts of horizontal and vertical scaling, explaining how they apply to applications deployed on platforms like OpenShift.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_understanding_application_scaling"><a class="anchor" href="#_understanding_application_scaling"></a>Understanding Application Scaling</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Scaling refers to the ability to adjust the resources allocated to an application or system to handle changes in workload. The primary goals of scaling are to maintain performance, ensure reliability, and optimize resource utilization. There are two main approaches to scaling: <strong>vertical scaling</strong> and <strong>horizontal scaling</strong>.</p>
+</div>
+<div class="sect2">
+<h3 id="_vertical_scaling_scaling_updown"><a class="anchor" href="#_vertical_scaling_scaling_updown"></a>Vertical Scaling (Scaling Up/Down)</h3>
+<div class="paragraph">
+<p>Vertical scaling, often referred to as "scaling up" or "scaling down," involves increasing or decreasing the resources (CPU, memory, storage) of a single instance or node. Imagine upgrading a server by adding more RAM or a faster processor.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Definition:</strong> Enhancing the capabilities of an existing single server or instance by providing it with more powerful hardware resources.</p>
+</li>
+<li>
+<p><strong>Mechanism:</strong></p>
+</li>
+<li>
+<p><strong>CPU:</strong> Assigning more CPU cores or increasing CPU limits/requests.</p>
+</li>
+<li>
+<p><strong>Memory:</strong> Allocating more RAM to the instance.</p>
+</li>
+<li>
+<p><strong>Storage:</strong> Increasing disk space or I/O capacity.</p>
+</li>
+<li>
+<p><strong>Pros:</strong></p>
+</li>
+<li>
+<p>Simpler to manage initially for a single instance.</p>
+</li>
+<li>
+<p>Can reduce network overhead as all operations occur within one instance.</p>
+</li>
+<li>
+<p>Less complex for applications that are not designed for distributed environments.</p>
+</li>
+<li>
+<p><strong>Cons:</strong></p>
+</li>
+<li>
+<p><strong>Single Point of Failure (SPOF):</strong> If the single scaled-up instance fails, the entire application becomes unavailable.</p>
+</li>
+<li>
+<p><strong>Resource Limits:</strong> There&#8217;s a physical limit to how much you can scale up a single machine.</p>
+</li>
+<li>
+<p><strong>Downtime:</strong> Scaling up often requires restarting the instance, leading to application downtime.</p>
+</li>
+<li>
+<p><strong>Cost Inefficiency:</strong> You might pay for resources you don&#8217;t always use, as provisioning for peak load means idle resources during off-peak times.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>In the context of OpenShift and AMQ Broker:</strong> Vertical scaling would involve modifying the resource requests and limits (CPU and memory) for the <code>ActiveMQArtemis</code> pod(s). While increasing these can provide more horsepower to an individual broker instance, it doesn&#8217;t address high availability or the ability to distribute load across multiple broker instances.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_horizontal_scaling_scaling_outin"><a class="anchor" href="#_horizontal_scaling_scaling_outin"></a>Horizontal Scaling (Scaling Out/In)</h3>
+<div class="paragraph">
+<p>Horizontal scaling, also known as "scaling out" or "scaling in," involves adding or removing instances (or nodes) of an application to distribute the workload across multiple, often identical, machines or containers. Instead of making one server more powerful, you add more servers.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Definition:</strong> Increasing the number of instances or replicas of an application to distribute the workload and improve fault tolerance.</p>
+</li>
+<li>
+<p><strong>Mechanism:</strong></p>
+</li>
+<li>
+<p><strong>Adding Instances:</strong> Deploying more identical copies of the application.</p>
+</li>
+<li>
+<p><strong>Load Balancing:</strong> Distributing incoming requests across all available instances.</p>
+</li>
+<li>
+<p><strong>Clustering:</strong> Multiple instances working together as a single logical unit (e.g., AMQ Broker clusters).</p>
+</li>
+<li>
+<p><strong>Pros:</strong></p>
+</li>
+<li>
+<p><strong>High Availability (HA):</strong> If one instance fails, others can continue to process requests, minimizing downtime.</p>
+</li>
+<li>
+<p><strong>Elasticity:</strong> Easily scales up or down based on demand, leading to better resource utilization and cost efficiency.</p>
+</li>
+<li>
+<p><strong>No Single Point of Failure:</strong> Workload is distributed, making the system more resilient.</p>
+</li>
+<li>
+<p><strong>Unlimited Scalability (theoretically):</strong> You can add as many instances as needed, limited only by infrastructure resources.</p>
+</li>
+<li>
+<p><strong>Cons:</strong></p>
+</li>
+<li>
+<p><strong>Increased Complexity:</strong> Requires careful design for state management, data consistency, and inter-instance communication.</p>
+</li>
+<li>
+<p><strong>Load Balancing:</strong> Requires a mechanism to distribute incoming requests effectively.</p>
+</li>
+<li>
+<p><strong>Distributed System Challenges:</strong> Dealing with network latency, consistency models, and potential split-brain scenarios.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>In the context of OpenShift and AMQ Broker:</strong> Horizontal scaling is the preferred method for achieving high availability and handling variable loads. This involves increasing the number of <code>ActiveMQArtemis</code> pods (replicas) managed by the AMQ Broker Operator, often configured as part of a cluster. OpenShift&#8217;s deployment and replica set mechanisms are inherently designed for horizontal scaling.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_choosing_the_right_scaling_strategy"><a class="anchor" href="#_choosing_the_right_scaling_strategy"></a>Choosing the Right Scaling Strategy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The choice between vertical and horizontal scaling, or often a combination of both, depends on several factors:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Application Architecture:</strong> Is the application stateful or stateless? Is it designed for distributed environments?</p>
+</li>
+<li>
+<p><strong>Performance Bottlenecks:</strong> Is the bottleneck CPU, memory, I/O, or network?</p>
+</li>
+<li>
+<p><strong>High Availability Requirements:</strong> How critical is it for the application to remain available during failures?</p>
+</li>
+<li>
+<p><strong>Cost:</strong> What are the infrastructure and operational costs associated with each approach?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For AMQ Broker on OpenShift, horizontal scaling is generally recommended due to OpenShift&#8217;s container-native architecture and the need for high availability in messaging systems. Vertical scaling can be used to optimize the performance of <strong>individual</strong> broker instances, but it should be combined with horizontal scaling for robust, highly available deployments.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_activity_demonstrating_horizontal_scaling_with_amq_broker_on_openshift"><a class="anchor" href="#_hands_on_activity_demonstrating_horizontal_scaling_with_amq_broker_on_openshift"></a>Hands-on Activity: Demonstrating Horizontal Scaling with AMQ Broker on OpenShift</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This activity demonstrates how to horizontally scale an AMQ Broker instance deployed on OpenShift using the <code>kubectl</code> command-line tool. This is a common operation for adjusting the capacity of your messaging infrastructure.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This activity assumes you have an AMQ Broker instance already deployed on OpenShift using the AMQ Broker Operator. The <code>ActiveMQArtemis</code> custom resource (<code>broker-dr</code> and <code>broker-prod</code> in the example context) represents your broker deployment.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_objective"><a class="anchor" href="#_objective"></a>Objective</h3>
+<div class="paragraph">
+<p>Understand and execute commands to scale an <code>ActiveMQArtemis</code> custom resource horizontally by changing its replica count.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_steps"><a class="anchor" href="#_steps"></a>Steps</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Verify Current Broker Replicas:</strong>
+Before scaling, check the current number of replicas for your AMQ Broker instance. Replace <code>your-broker-name</code> and <code>your-namespace</code> with your specific broker&#8217;s name and the OpenShift project (namespace) it&#8217;s deployed in.</p>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash]
+----
+oc get activemqartemis your-broker-name -n your-namespace -o jsonpath='{.spec.deploymentPlan.size}'
+----
+You can also check the pods directly:
+[source,bash]
+----
+oc get pods -l app.kubernetes.io/name=your-broker-name -n your-namespace
+----
+This will show you the number of running pods associated with your broker. A typical non-HA deployment would show `1`. A clustered HA deployment would likely show `2` or more.</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Scale Up the Broker Instance:</strong>
+To horizontally scale out your broker, you&#8217;ll increase the <code>replicas</code> count for the <code>ActiveMQArtemis</code> custom resource. The <code>kubectl scale</code> command is a convenient way to do this.</p>
+<div class="literalblock">
+<div class="content">
+<pre>For example, if you want to scale a broker named `broker-dr` in the `dr` namespace to 2 instances:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash]
+----
+kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 2
+----</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>And if you have another broker named `broker-prod` in the `production` namespace:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash]
+----
+kubectl -n production scale ActiveMQArtemis broker-prod --replicas 2
+----</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>After executing these commands, the AMQ Broker Operator will detect the change in the `ActiveMQArtemis` custom resource and provision new pods (or update existing ones) to match the desired replica count.</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Verify Scaled-Up Broker Instances:</strong>
+Observe the pod status in your namespace. You should see new pods spinning up for your broker:</p>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash]
+----
+oc get pods -l app.kubernetes.io/name=broker-dr -n dr
+oc get pods -l app.kubernetes.io/name=broker-prod -n production
+----
+Wait until all new pods are in a `Running` state.</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Scale Down the Broker Instance:</strong>
+Once you&#8217;ve tested, you can scale the broker back down to its original number of replicas (or any other desired number). This is "scaling in."</p>
+<div class="literalblock">
+<div class="content">
+<pre>As referenced in the provided context:
+[source,bash]
+----
+kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 1
+kubectl -n production scale ActiveMQArtemis broker-prod --replicas 1
+----</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Again, the Operator will terminate the excess pods to match the new `replicas` count.</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Verify Scaled-Down Broker Instances:</strong>
+Confirm that the replica count has returned to the desired number by checking the pods again:</p>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash]
+----
+oc get pods -l app.kubernetes.io/name=broker-dr -n dr
+oc get pods -l app.kubernetes.io/name=broker-prod -n production
+----
+You should see only the specified number of pods running.</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This hands-on activity demonstrates the power and simplicity of horizontal scaling on OpenShift using the AMQ Broker Operator and <code>kubectl</code>. By adjusting the <code>replicas</code> count, you can dynamically adapt your messaging infrastructure to changing workload demands.</p>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a></span>
+  <span class="next"><a href="scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

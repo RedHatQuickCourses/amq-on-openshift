@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Deploying and Configuring an HA Broker Pair :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">
+    <link rel="next" href="understanding-failover-and-recovery-mechanisms.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a></li>
+    <li><a href="deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Deploying and Configuring an HA Broker Pair</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unresolved include directive in modules/amq-broker-high-availability-on-openshift/pages/deploying-and-configuring-an-ha-broker-pair.adoc - include::./_attributes.adoc[]</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_introduction_to_high_availability_for_amq_broker_on_openshift"><a class="anchor" href="#_introduction_to_high_availability_for_amq_broker_on_openshift"></a>Introduction to High Availability for {amq-broker} on {openshift}</h3>
+<div class="paragraph">
+<p>High Availability (HA) is a critical requirement for production messaging systems to ensure continuous service and prevent data loss in the event of component failures. When deploying {amq-broker-on-openshift}, achieving HA means designing the deployment so that if one broker instance or its underlying infrastructure fails, a backup instance can seamlessly take over, minimizing downtime and message disruption. The {amq-broker} Operator on {openshift} simplifies the deployment and management of HA configurations by abstracting complex orchestration tasks.</p>
+</div>
+<div class="paragraph">
+<p>The core strategies for achieving HA with {amq-broker} on {openshift} involve either using a <strong>shared message store</strong> or <strong>replicating message data</strong> between live and backup brokers. Each strategy has distinct characteristics and suitability for different operational requirements.</p>
+</div>
+<div class="sect3">
+<h4 id="_shared_store_high_availability"><a class="anchor" href="#_shared_store_high_availability"></a>Shared Store High Availability</h4>
+<div class="paragraph">
+<p>In a shared store HA configuration, multiple broker instances (typically one live and one or more backups) share access to a single, highly available message store. This message store is usually provisioned as a Persistent Volume (PV) on {openshift}, backed by shared storage solutions like NFS, Ceph (using <code>ReadWriteOnce</code> access mode, where only one pod can mount it at a time but another can take over), or a block storage that supports migration.</p>
+</div>
+<div class="paragraph">
+<p>When the live broker fails, one of the backup brokers detects the failure, acquires a lock on the shared message store, and becomes the new live broker. This approach ensures data consistency as all brokers operate on the same physical message data, eliminating the need for real-time data replication between broker instances.</p>
+</div>
+<div class="ulist">
+<div class="title">Key characteristics of Shared Store HA:</div>
+<ul>
+<li>
+<p><strong>Data Consistency</strong>: All brokers access and write to the same physical message journal and paging files.</p>
+</li>
+<li>
+<p><strong>Simplicity of Data Management</strong>: No internal data replication between brokers is required, simplifying network topology for data synchronization.</p>
+</li>
+<li>
+<p><strong>Performance</strong>: May be sensitive to the performance and latency of the underlying shared storage. High latency storage can impact message throughput.</p>
+</li>
+<li>
+<p><strong>Single Point of Failure</strong>: The shared storage itself becomes a potential single point of failure if it is not highly available.</p>
+</li>
+<li>
+<p><strong>Operator Management</strong>: The {amq-broker} Operator typically deploys a StatefulSet with one active broker pod and one or more inactive backup pods, all configured to share the same Persistent Volume Claim (PVC). The Operator handles the orchestration of failover.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+While multiple broker pods are configured to use the same shared volume, only one broker (the live one) will have read/write access to the message journal at any given time. The backup brokers are typically in a "waiting to become live" state, ready to take over if the active broker fails.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_replicated_live_backup_high_availability"><a class="anchor" href="#_replicated_live_backup_high_availability"></a>Replicated Live-Backup High Availability</h4>
+<div class="paragraph">
+<p>Replicated Live-Backup HA involves two broker instances: a live broker and a backup broker. The live broker actively processes messages, and it <strong>replicates</strong> all its message data (journal, paging files, and configuration) synchronously to the backup broker. This ensures that the backup broker always holds an up-to-date, consistent copy of the message store.</p>
+</div>
+<div class="paragraph">
+<p>If the live broker fails for any reason (e.g., pod crash, node failure), the backup broker automatically detects the failure, takes over the workload, and becomes the new live broker. Clients are then redirected to the newly activated broker. After failover, the {amq-broker} Operator will provision a new backup broker to restore the HA pair.</p>
+</div>
+<div class="ulist">
+<div class="title">Key characteristics of Replicated Live-Backup HA:</div>
+<ul>
+<li>
+<p><strong>No Shared Storage</strong>: Each broker instance maintains its own independent message store, typically on its own dedicated Persistent Volume. This eliminates the shared storage as a single point of failure.</p>
+</li>
+<li>
+<p><strong>Data Replication</strong>: Messages are replicated in real-time (often synchronously) from the live broker to the backup. This synchronous replication guarantees zero message loss for acknowledged messages on failover.</p>
+</li>
+<li>
+<p><strong>High Performance</strong>: Generally less dependent on external shared storage performance once replication is established, as each broker writes to its local storage.</p>
+</li>
+<li>
+<p><strong>Resilience</strong>: Offers stronger resilience against storage-related outages, as the failure of one broker&#8217;s storage does not impact the other.</p>
+</li>
+<li>
+<p><strong>Operator Management</strong>: The {amq-broker} Operator typically deploys a StatefulSet with a <code>size</code> of 2 (or more for chained replication), configuring the brokers for replication directly through their internal mechanisms.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The provided context snippet states: "In each custom resource, specify a unique name and ensure that the <code>clustered</code> and <code>persistenceEnabled</code> attributes are set to <code>false</code>. Set the <code>size</code> attribute to <code>1</code> to create a single broker in each deployment."
+This instruction describes deploying individual, non-persistent, non-clustered brokers, which would not inherently form an HA pair. For standard Operator-managed HA deployments, especially for replicated live-backup, the {amq-broker} Operator provides direct support through properties in a <strong>single</strong> <code>Broker</code> Custom Resource (CR) where <code>size</code> is typically <code>2</code> and <code>replicationController.enabled</code> is <code>true</code>. This document focuses on the Operator&#8217;s simplified approach for deploying robust HA pairs.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_deploying_an_ha_broker_pair_with_the_amq_broker_operator"><a class="anchor" href="#_deploying_an_ha_broker_pair_with_the_amq_broker_operator"></a>Deploying an HA Broker Pair with the {amq-broker} Operator</h3>
+<div class="paragraph">
+<p>The {amq-broker} Operator streamlines the deployment of HA broker pairs by abstracting the underlying Kubernetes resources like StatefulSets, Services, and Persistent Volume Claims (PVCs). You define your desired HA configuration within a single <code>Broker</code> Custom Resource (CR) instance.</p>
+</div>
+<div class="paragraph">
+<p>For a replicated live-backup HA pair, the most common and recommended approach with the Operator is to specify <code>replicationController</code> settings directly in the <code>Broker</code> CR.</p>
+</div>
+<div class="sect3">
+<h4 id="_understanding_ha_specific_custom_resource_cr_properties"><a class="anchor" href="#_understanding_ha_specific_custom_resource_cr_properties"></a>Understanding HA-Specific Custom Resource (CR) Properties</h4>
+<div class="paragraph">
+<p>When creating a <code>Broker</code> CR for an HA pair, you&#8217;ll primarily interact with the <code>spec.deploymentPlan</code> section to define the HA characteristics and the associated infrastructure.</p>
+</div>
+<div class="ulist">
+<div class="title">Key <code>Broker</code> CR properties for HA:</div>
+<ul>
+<li>
+<p><code>spec.deploymentPlan.size</code>: For replicated HA, set this to <code>2</code> to deploy a live and a backup broker pod within the same StatefulSet. For shared store HA managed by the Operator, it&#8217;s often <code>1</code> with <code>persistenceEnabled: true</code>, and the Operator manages the failover to another pod if the first fails.</p>
+</li>
+<li>
+<p><code>spec.deploymentPlan.persistenceEnabled</code>: Set to <code>true</code> to enable message persistence. This is essential for any HA setup that needs to recover messages across broker restarts or failures, preventing data loss.</p>
+</li>
+<li>
+<p><code>spec.deploymentPlan.journalType</code>: Specifies the type of journal to use (e.g., <code>NIO</code>, <code>AIO</code>). <code>NIO</code> (Non-Blocking I/O) is generally sufficient and widely compatible, while <code>AIO</code> (Asynchronous I/O) might offer performance benefits on Linux systems that support <code>libaio</code>.</p>
+</li>
+<li>
+<p><code>spec.deploymentPlan.replicationController.enabled</code>: Set to <code>true</code> to enable internal broker replication for live-backup HA. This property triggers the Operator to configure the brokers for synchronous data replication.</p>
+</li>
+<li>
+<p><code>spec.deploymentPlan.replicationController.voteRetries</code>: (Optional) Defines the number of times a broker will attempt to vote in an election to determine the live node. The default value is typically <code>3</code>.</p>
+</li>
+<li>
+<p><code>spec.deploymentPlan.replicationController.voteRetryWait</code>: (Optional) Specifies the wait time (in milliseconds) between vote retries. The default is typically <code>1000</code> (1 second).</p>
+</li>
+<li>
+<p><code>spec.deploymentPlan.podSpec.affinity.podAntiAffinity</code>: This is a crucial setting for HA. It ensures that live and backup broker pods are scheduled on <strong>different</strong> {openshift} worker nodes. This prevents a single node failure from taking down both instances simultaneously, significantly improving fault tolerance.</p>
+</li>
+<li>
+<p><code>spec.brokerProperties</code>: (Advanced) This section allows for injecting raw {amq-broker} configuration parameters directly into the <code>broker.xml</code> of the deployed brokers. This is useful for fine-tuning advanced replication settings, network connectors, or other HA-specific parameters that are not directly exposed by the <code>Broker</code> CRD.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Always use <code>podAntiAffinity</code> for HA deployments to distribute broker pods across different nodes. This significantly improves fault tolerance and reduces the risk of a single point of failure at the infrastructure level. Refer to <a href="#amq-broker-on-openshift:configuring-broker-pods.adoc#placing-pods-relative-to-other-pods-using-anti-affinity-rules" class="xref unresolved">Section 4.17.3.2, "Placing pods relative to other pods using anti-affinity rules"</a> for more detailed information on configuring <code>podAntiAffinity</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_failover_and_recovery_mechanisms"><a class="anchor" href="#_failover_and_recovery_mechanisms"></a>Failover and Recovery Mechanisms</h4>
+<div class="paragraph">
+<p>When a live broker fails in an HA pair, the following sequence of events typically occurs, managed automatically by the {amq-broker} and {openshift} Operators:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Failure Detection</strong>: The backup broker(s) continuously monitor the live broker using internal heartbeats and network connectivity checks. {openshift}'s kubelet also monitors the pod&#8217;s health. They detect a loss of connection or a failure in the live broker&#8217;s heartbeat.</p>
+</li>
+<li>
+<p><strong>Vote/Election</strong>: In a replicated setup, if multiple backups are present or a replication chain is involved, the remaining broker(s) might engage in an election process to determine which backup will become the new live broker. For a simple live-backup pair, the active backup simply takes over upon detecting the live broker&#8217;s demise.</p>
+</li>
+<li>
+<p><strong>Activation</strong>: The designated backup broker transitions to the live state. It opens its message store (which is already up-to-date due to synchronous replication) and starts accepting client connections and processing messages.</p>
+</li>
+<li>
+<p><strong>Client Reconnection</strong>: Clients connected to the failed broker will attempt to reconnect. If configured with a connection URL that includes multiple broker addresses (e.g., a list of service endpoints provided by {openshift} routes/services) or uses client-side service discovery, they will automatically connect to the new live broker. This process is typically transparent to the application.</p>
+</li>
+<li>
+<p><strong>New Backup Creation</strong>: The {amq-broker} Operator detects that the desired <code>size</code> (e.g., 2) defined in the <code>Broker</code> CR is no longer met. It then provisions a new backup broker pod to restore the HA configuration. This new pod will synchronize its message store with the new live broker to become a fully functional backup.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The speed of failover and subsequent client reconnection depends on various factors, including network latency, client connection URLs and failover configuration, and broker heartbeat and election settings.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_persistence_and_data_replication_for_ha"><a class="anchor" href="#_persistence_and_data_replication_for_ha"></a>Persistence and Data Replication for HA</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Persistence</strong>: For any HA setup, message persistence is fundamental. This means that messages are written to a durable store (like a file-based journal on a Persistent Volume) before being acknowledged to the producer. This mechanism ensures that messages are not lost, even if both brokers crash and restart, or if the entire {openshift} cluster experiences a temporary outage.</p>
+</li>
+<li>
+<p><strong>Data Replication</strong>: In a replicated HA setup, data replication ensures that every message written to the live broker&#8217;s journal is also synchronously written to the backup broker&#8217;s journal. This synchronous replication is a key feature that guarantees zero message loss for acknowledged messages upon failover. The data is replicated using an internal {amq-broker} protocol, which is highly optimized for performance and consistency.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_hands_on_lab_deploying_a_replicated_live_backup_amq_broker_pair"><a class="anchor" href="#_hands_on_lab_deploying_a_replicated_live_backup_amq_broker_pair"></a>Hands-on Lab: Deploying a Replicated Live-Backup AMQ Broker Pair</h3>
+<div class="paragraph">
+<p>In this lab, you will deploy a replicated live-backup {amq-broker} pair on {openshift} using the {amq-broker} Operator. This setup will ensure that messages are highly available and durable, even in the event of a broker instance or node failure.</p>
+</div>
+<div class="ulist">
+<div class="title">Prerequisites:</div>
+<ul>
+<li>
+<p>An {openshift} cluster with the {amq-broker} Operator installed and running.</p>
+</li>
+<li>
+<p><code>oc</code> CLI configured and logged in to your {openshift} cluster with administrative privileges (or a project where you have permission to deploy <code>Broker</code> resources).</p>
+</li>
+<li>
+<p>Sufficient resources (CPU, memory, storage) available in your {openshift} cluster for two broker pods, plus associated Persistent Volumes.</p>
+</li>
+</ul>
+</div>
+<div class="olist arabic">
+<div class="title">Procedure:</div>
+<ol class="arabic">
+<li>
+<p><strong>Log in to {openshift} and create a new project.</strong></p>
+<div class="paragraph">
+<p>If you haven&#8217;t already, log in to your {openshift} cluster and create a new project (namespace) dedicated to your broker deployment. We&#8217;ll name it <code>amq-ha-broker-project</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc login --token=YOUR_TOKEN --server=YOUR_OPENSHIFT_API_URL
+oc new-project amq-ha-broker-project
+oc project amq-ha-broker-project</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Create the <code>Broker</code> Custom Resource for a replicated HA pair.</strong></p>
+<div class="paragraph">
+<p>Create a YAML file named <code>amq-ha-broker.yaml</code> with the following content. This configuration defines a replicated live-backup pair by setting <code>size: 2</code> and <code>replicationController.enabled: true</code>. It also enables message persistence and includes <code>podAntiAffinity</code> to ensure the broker pods are scheduled on separate {openshift} worker nodes for true HA.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
+kind: Broker
+metadata:
+  name: ha-broker-pair
+spec:
+  deploymentPlan:
+    size: 2 # Deploy two broker pods (one live, one backup)
+    persistenceEnabled: true # Enable message persistence
+    journalType: NIO # Use NIO for the message journal
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.13 # Specify the broker image
+    replicationController:
+      enabled: true # Enable internal broker replication for HA
+      voteRetries: 3 # Number of retries for election voting
+      voteRetryWait: 1000 # Wait 1 second between vote retries
+    podSpec:
+      # Ensure broker pods are scheduled on different nodes for high availability
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  broker.amq.io/cluster-name: ha-broker-pair # Match labels of pods belonging to this broker cluster
+              topologyKey: "kubernetes.io/hostname" # Enforce separation by hostname (node)
+    storage:
+      size: 8Gi # Adjust storage size as needed for your message load. This will create two 8Gi PVCs, one for each broker.
+  acceptors: # Define messaging protocol listeners
+    - name: amqp
+      protocols: amqp
+      port: 5672
+      sslEnabled: false
+      expose: true # Expose via an OpenShift Service and Route
+    - name: core
+      protocols: core
+      port: 61616
+      sslEnabled: false
+      expose: true # Expose via an OpenShift Service and Route
+  console: # Configure the Hawtio management console
+    expose: true # Expose the console via an OpenShift Route
+    sslEnabled: false</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Deploy the HA broker pair.</strong></p>
+<div class="paragraph">
+<p>Apply the Custom Resource definition to your {openshift} cluster. The {amq-broker} Operator will read this CR and provision the necessary Kubernetes resources (StatefulSet, Services, PVCs, Routes).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f amq-ha-broker.yaml</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Verify the deployment.</strong></p>
+<div class="paragraph">
+<p>Check the status of the <code>Broker</code> CR and the deployed pods. You should see two pods for <code>ha-broker-pair</code> (e.g., <code>ha-broker-pair-0</code> and <code>ha-broker-pair-1</code>), each running an {amq-broker} instance.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get broker ha-broker-pair -o yaml
+oc get pods -l broker.amq.io/cluster-name=ha-broker-pair</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should observe output similar to this, indicating two healthy pods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME               READY   STATUS    RESTARTS   AGE
+ha-broker-pair-0   1/1     Running   0          2m
+ha-broker-pair-1   1/1     Running   0          2m</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>One pod will be the <code>LIVE</code> broker, and the other will be the <code>BACKUP</code>. You can confirm this by checking the logs of each pod (e.g., <code>oc logs ha-broker-pair-0</code>) or by accessing the Hawtio management console (which is covered in a later section) and navigating to the HA topology view. Look for log messages like <code>AMQ211007: Server is now LIVE</code> or <code>AMQ211005: Server is now a backup</code>.</p>
+</div>
+</li>
+<li>
+<p><strong>Simulate a failover.</strong></p>
+<div class="paragraph">
+<p>To test the HA setup, you can simulate a failure by deleting the <code>LIVE</code> broker pod. The Operator will automatically detect this and promote the <code>BACKUP</code> broker to <code>LIVE</code>, and then create a new <code>BACKUP</code> pod to maintain the desired <code>size</code>.</p>
+</div>
+<div class="paragraph">
+<p>First, identify which pod is currently <code>LIVE</code>. You can typically find this in the pod logs (search for <code>AMQ211007: Server is now LIVE</code>). For this example, let&#8217;s assume <code>ha-broker-pair-0</code> is the <code>LIVE</code> pod.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete pod ha-broker-pair-0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, continuously monitor the pods to observe the failover and recovery process:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l broker.amq.io/cluster-name=ha-broker-pair --watch</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You will observe:
+*   <code>ha-broker-pair-0</code> transitioning to <code>Terminating</code>.
+*   <code>ha-broker-pair-1</code> remaining <code>Running</code> and, in its logs, becoming the new <code>LIVE</code> broker.
+*   A new <code>ha-broker-pair-0</code> pod being created, transitioning through <code>Pending</code>, then <code>Running</code>, and eventually becoming the new <code>BACKUP</code> broker.</p>
+</div>
+<div class="paragraph">
+<p>+
+This demonstrates the automatic failover and self-healing capabilities of an Operator-managed HA broker pair, ensuring continuous availability of your messaging infrastructure.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This lab provides a robust, operator-managed replicated live-backup HA setup, which is a common and highly recommended configuration for {amq-broker} on {openshift}, offering strong guarantees against message loss and downtime.</p>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a></span>
+  <span class="next"><a href="understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Lab: Developing and Testing Core Protocol and AMQP Clients :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="lab-monitoring-with-the-management-console.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a></li>
+    <li><a href="lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Lab: Developing and Testing Core Protocol and AMQP Clients</h1>
+<h1 id="_lab_developing_and_testing_core_protocol_and_amqp_clients" class="sect0"><a class="anchor" href="#_lab_developing_and_testing_core_protocol_and_amqp_clients"></a>Lab: Developing and Testing Core Protocol and AMQP Clients</h1>
+<div class="paragraph">
+<p>This lab activity guides you through developing and testing client applications that interact with Red Hat AMQ Broker deployed on OpenShift using both the AMQ Core Protocol JMS and the AMQP 1.0 protocol via Qpid JMS. You will learn to configure client applications, establish connections, and send/receive messages, including considerations for secure connections.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Develop Java-based producer and consumer applications using AMQ Core Protocol JMS.</p>
+</li>
+<li>
+<p>Develop Java-based producer and consumer applications using Apache Qpid JMS for AMQP 1.0.</p>
+</li>
+<li>
+<p>Configure client connections to an AMQ Broker on OpenShift, including secure (SSL/TLS) connections.</p>
+</li>
+<li>
+<p>Test message exchange between producers and consumers.</p>
+</li>
+</ul>
+</div>
+<div class="sect1">
+<h2 id="_1_prerequisites"><a class="anchor" href="#_1_prerequisites"></a>1. Prerequisites</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before you begin this lab, ensure you have the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>OpenShift Cluster:</strong> Access to an OpenShift Container Platform cluster.</p>
+</li>
+<li>
+<p><strong>AMQ Broker Instance:</strong> A running Red Hat AMQ Broker instance on OpenShift, deployed using the AMQ Broker Operator. This broker should have:</p>
+</li>
+<li>
+<p>An external route or service exposing its Core Protocol and AMQP listeners.</p>
+</li>
+<li>
+<p>SSL/TLS enabled on the external listeners (as per the <code>Securing AMQ Broker</code> objectives).</p>
+</li>
+<li>
+<p>A user account (e.g., <code>admin</code>/<code>admin</code>) configured for authentication.</p>
+</li>
+<li>
+<p><strong>Java Development Kit (JDK):</strong> Version 11 or higher installed on your local machine.</p>
+</li>
+<li>
+<p><strong>Apache Maven:</strong> Version 3.6 or higher for project management and building.</p>
+</li>
+<li>
+<p><strong>Git Client:</strong> For cloning sample repositories (optional, but good practice).</p>
+</li>
+<li>
+<p><strong>OpenShift CLI (<code>oc</code>):</strong> Configured and logged into your OpenShift cluster.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For simplicity, this lab will use a self-signed certificate or a certificate issued by a private CA for SSL/TLS. You will either import the CA certificate into a trust store or temporarily disable host verification (not recommended for production).
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2_identifying_broker_connection_details"><a class="anchor" href="#_2_identifying_broker_connection_details"></a>2. Identifying Broker Connection Details</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To connect your clients to the AMQ Broker, you need its external access URL and port.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Find the Broker&#8217;s External Route
+Look for the OpenShift Route exposed for your AMQ Broker instance&#8217;s Core Protocol or AMQP acceptor.
+If you followed previous labs for deploying an AMQ Broker with external access, you should have a route named similarly to <code>broker-amqp-route</code> or <code>broker-core-route</code>.</p>
+</li>
+</ol>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">CLI</dt>
+<dd>
+<div class="openblock">
+<div class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Execute the following command to list routes in your project:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get routes -n &lt;your-openshift-project&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Identify the <code>HOST/PORT</code> for your AMQ Broker&#8217;s core or AMQP listener. For example, it might look like <code>broker-amqp-route-your-project.apps.cluster.example.com</code>.</p>
+</li>
+<li>
+<p>Store the hostname for later use.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export BROKER_HOST=$(oc get route &lt;broker-amqp-route-name&gt; -n &lt;your-openshift-project&gt; -o jsonpath='{.spec.host}')
+echo "Broker Host: ${BROKER_HOST}"</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">OpenShift Console</dt>
+<dd>
+<div class="openblock">
+<div class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Log in to the OpenShift Container Platform web console.</p>
+</li>
+<li>
+<p>Navigate to your project.</p>
+</li>
+<li>
+<p>Go to <strong>Networking</strong> &#8594; <strong>Routes</strong>.</p>
+</li>
+<li>
+<p>Locate the route for your AMQ Broker instance (e.g., <code>broker-amqp-route</code> or <code>broker-core-route</code>).</p>
+</li>
+<li>
+<p>Copy the "Location" URL, which is the hostname for your broker.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If your broker&#8217;s external listener is exposed via a Service (e.g., a LoadBalancer Service) instead of a Route, you would use the service&#8217;s external IP and port. However, Routes are more common for HTTP/HTTPS or TCP passthrough on OpenShift.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_2_1_obtaining_the_ca_certificate_for_ssltls"><a class="anchor" href="#_2_1_obtaining_the_ca_certificate_for_ssltls"></a>2.1. Obtaining the CA Certificate for SSL/TLS</h3>
+<div class="paragraph">
+<p>If your broker is configured with SSL/TLS, clients need to trust the certificate presented by the broker. You&#8217;ll need the Certificate Authority (CA) certificate that signed your broker&#8217;s server certificate.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Download the CA Certificate (Example using <code>oc</code> for an operator-managed certificate)
+If your broker was deployed using the AMQ Broker Operator, and you&#8217;re using self-signed certificates or a certificate provisioned by OpenShift&#8217;s default CA, you might be able to extract it. Otherwise, obtain the CA certificate from your certificate management system.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Replace 'broker-dr-secret-name' with the actual secret name used by your broker for TLS, often ends with '-tls'
+# This is an example, actual secret name may vary.
+oc extract secret/&lt;broker-tls-secret-name&gt; --keys=ca.crt --to=- -n &lt;your-openshift-project&gt; &gt; ca.crt</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Java Trust Store
+Use the <code>keytool</code> utility to import the <code>ca.crt</code> into a new Java trust store.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">keytool -import -trustcacerts -alias amq-broker-ca -file ca.crt -keystore server-ca-truststore.jks -storepass securepass</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+For production environments, ensure you use strong, unique passwords for your trust stores and manage them securely. The <code>securepass</code> used here is for lab purposes only.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_3_lab_amq_core_protocol_jms_client"><a class="anchor" href="#_3_lab_amq_core_protocol_jms_client"></a>3. Lab: AMQ Core Protocol JMS Client</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The AMQ Core Protocol is based on OpenWire and is the native protocol of Apache ActiveMQ Artemis, which forms the foundation of Red Hat AMQ Broker. This section demonstrates developing a simple Java client using the AMQ Core Protocol JMS client.</p>
+</div>
+<div class="sect2">
+<h3 id="_3_1_technical_explanation_amq_core_protocol_jms"><a class="anchor" href="#_3_1_technical_explanation_amq_core_protocol_jms"></a>3.1. Technical Explanation: AMQ Core Protocol JMS</h3>
+<div class="paragraph">
+<p>Red Hat AMQ Core Protocol JMS is a client library specifically designed for Java applications to interact with AMQ Broker using its highly performant, native Core Protocol. It provides a JMS (Java Message Service) API implementation, allowing developers to leverage standard JMS concepts (connections, sessions, queues, topics, producers, consumers) while benefiting from the Core Protocol&#8217;s efficiency. The library internally handles the serialization and network communication details over TCP.</p>
+</div>
+<div class="paragraph">
+<p>When using SSL/TLS, the client needs to be configured with the appropriate trust store to verify the broker&#8217;s identity, and potentially a key store if client authentication is required (though not covered in this basic lab).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_2_hands_on_activity_developing_a_core_protocol_client"><a class="anchor" href="#_3_2_hands_on_activity_developing_a_core_protocol_client"></a>3.2. Hands-on Activity: Developing a Core Protocol Client</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Maven Project
+Create a new directory for your project and initialize a Maven project.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir amq-core-client &amp;&amp; cd amq-core-client
+mvn archetype:generate -DgroupId=com.example.amq -DartifactId=amq-core-client -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Update <code>pom.xml</code>
+Navigate into the <code>amq-core-client</code> directory and open <code>pom.xml</code>. Add the <code>artemis-jms-client</code> dependency.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;com.example.amq&lt;/groupId&gt;
+  &lt;artifactId&gt;amq-core-client&lt;/artifactId&gt;
+  &lt;packaging&gt;jar&lt;/packaging&gt;
+  &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+  &lt;name&gt;amq-core-client&lt;/name&gt;
+  &lt;url&gt;http://maven.apache.org&lt;/url&gt;
+
+  &lt;properties&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;java.version&gt;11&lt;/java.version&gt;
+    &lt;maven.compiler.source&gt;${java.version}&lt;/maven.compiler.source&gt;
+    &lt;maven.compiler.target&gt;${java.version}&lt;/maven.compiler.target&gt;
+    &lt;activemq.version&gt;2.31.0.redhat-00001&lt;/activemq.version&gt; &lt;!-- Use the version compatible with your AMQ Broker --&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.apache.activemq&lt;/groupId&gt;
+      &lt;artifactId&gt;artemis-jms-client&lt;/artifactId&gt;
+      &lt;version&gt;${activemq.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+      &lt;artifactId&gt;slf4j-simple&lt;/artifactId&gt;
+      &lt;version&gt;1.7.36&lt;/version&gt;
+      &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+        &lt;version&gt;3.2.0&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;archive&gt;
+            &lt;manifest&gt;
+              &lt;addClasspath&gt;true&lt;/addClasspath&gt;
+              &lt;mainClass&gt;com.example.amq.core.CoreProducer&lt;/mainClass&gt; &lt;!-- Will be set for producer or consumer --&gt;
+            &lt;/manifest&gt;
+          &lt;/archive&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+        &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;3.0.0&lt;/version&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Ensure the <code>activemq.version</code> specified in the <code>pom.xml</code> is compatible with your deployed AMQ Broker version. Consult Red Hat documentation for recommended client versions. The example <code>2.31.0.redhat-00001</code> is a placeholder.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Implement the Core Protocol Producer
+Create a new Java file <code>src/main/java/com/example/amq/core/CoreProducer.java</code> with the following content. Replace <code>${BROKER_HOST}</code> with the actual hostname you obtained earlier.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example.amq.core;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQJMSConnectionFactory;
+
+import javax.jms.*;
+import java.util.Objects;
+
+public class CoreProducer {
+
+    private static final String BROKER_URL = "tcp://${BROKER_HOST}:443" +
+            "?sslEnabled=true" +
+            "&amp;verifyHost=true" + // Set to false for self-signed without proper CA if you encounter issues, but not recommended
+            "&amp;trustStorePath=server-ca-truststore.jks" +
+            "&amp;trustStorePassword=securepass" +
+            "&amp;useTopologyForLoadBalancing=false" + // Important for direct connection to a single broker
+            "&amp;initialConnectAttempts=-1" +
+            "&amp;failoverAttempts=-1";
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String QUEUE_NAME = "exampleQueue";
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            // 1. Create a Connection Factory
+            ConnectionFactory connectionFactory = new ActiveMQJMSConnectionFactory(BROKER_URL, USERNAME, PASSWORD);
+            System.out.println("Connecting to broker: " + BROKER_URL);
+
+            // 2. Create a Connection
+            connection = connectionFactory.createConnection();
+            connection.start();
+            System.out.println("Connection started.");
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE); // Not transacted, auto-acknowledge
+            System.out.println("Session created.");
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(QUEUE_NAME);
+            System.out.println("Destination created: " + QUEUE_NAME);
+
+            // 5. Create a Producer
+            producer = session.createProducer(destination);
+            System.out.println("Producer created.");
+
+            // 6. Send Messages
+            for (int i = 1; i &lt;= 5; i++) {
+                String text = "Hello from Core Protocol Producer! Message " + i;
+                TextMessage message = session.createTextMessage(text);
+                producer.send(message);
+                System.out.println("Sent message: " + text);
+                Thread.sleep(1000);
+            }
+
+            System.out.println("Messages sent successfully.");
+
+        } catch (JMSException | InterruptedException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 7. Close Resources
+            if (producer != null) {
+                try {
+                    producer.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            System.out.println("Producer resources closed.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <code>BROKER_URL</code> uses parameters like <code>sslEnabled=true</code>, <code>trustStorePath</code>, and <code>trustStorePassword</code> to configure the secure connection. The context provided gives an example of such a URL: <code>queue://TEST --user admin --password admin --protocol core --sleep 1000 --url "tcp://${EXT_ACCEPTOR_HOST}:443?sslEnabled=true&amp;verifyHost=false&amp;trustStorePath=server-ca-truststore.jks&amp;trustStorePassword=securepass&#8230;&#8203;"</code>. We are adapting this to a Java <code>ConnectionFactory</code> constructor and setting <code>verifyHost=true</code> as a best practice, assuming your trust store is correctly configured. If you encounter <code>PKIX path building failed</code> errors, try <code>verifyHost=false</code> <strong>for testing only</strong>, then resolve your certificate issues.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Implement the Core Protocol Consumer
+Create a new Java file <code>src/main/java/com/example/amq/core/CoreConsumer.java</code> with the following content. Again, replace <code>${BROKER_HOST}</code>.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example.amq.core;
+
+import org.apache.activemq.artemis.jms.client.ActiveMQJMSConnectionFactory;
+
+import javax.jms.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+public class CoreConsumer {
+
+    private static final String BROKER_URL = "tcp://${BROKER_HOST}:443" +
+            "?sslEnabled=true" +
+            "&amp;verifyHost=true" + // Set to false for self-signed without proper CA if you encounter issues, but not recommended
+            "&amp;trustStorePath=server-ca-truststore.jks" +
+            "&amp;trustStorePassword=securepass" +
+            "&amp;useTopologyForLoadBalancing=false" +
+            "&amp;initialConnectAttempts=-1" +
+            "&amp;failoverAttempts=-1";
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String QUEUE_NAME = "exampleQueue";
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+        CountDownLatch latch = new CountDownLatch(5); // Expecting 5 messages
+
+        try {
+            // 1. Create a Connection Factory
+            ConnectionFactory connectionFactory = new ActiveMQJMSConnectionFactory(BROKER_URL, USERNAME, PASSWORD);
+            System.out.println("Connecting to broker: " + BROKER_URL);
+
+            // 2. Create a Connection
+            connection = connectionFactory.createConnection();
+            connection.start();
+            System.out.println("Connection started.");
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            System.out.println("Session created.");
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(QUEUE_NAME);
+            System.out.println("Destination created: " + QUEUE_NAME);
+
+            // 5. Create a Consumer
+            consumer = session.createConsumer(destination);
+            System.out.println("Consumer created. Waiting for messages...");
+
+            // 6. Set a Message Listener
+            consumer.setMessageListener(message -&gt; {
+                try {
+                    if (message instanceof TextMessage) {
+                        TextMessage textMessage = (TextMessage) message;
+                        System.out.println("Received message: " + textMessage.getText());
+                        latch.countDown(); // Decrement latch for each message
+                    } else {
+                        System.out.println("Received non-text message: " + message.getClass().getName());
+                    }
+                } catch (JMSException e) {
+                    System.err.println("Error processing message: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
+
+            // 7. Wait for messages or timeout
+            latch.await(30, TimeUnit.SECONDS); // Wait up to 30 seconds for all messages
+            System.out.println("Consumer finished waiting or received all expected messages.");
+
+        } catch (JMSException | InterruptedException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 8. Close Resources
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            System.out.println("Consumer resources closed.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Build and Run the Clients
+First, compile your project. Then, run the consumer and producer in separate terminal windows.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Ensure you are in the amq-core-client directory
+mvn clean install</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Open <strong>Terminal 1</strong> (for the Consumer):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Navigate to amq-core-client directory
+java -cp target/amq-core-client-1.0-SNAPSHOT.jar:target/dependency/* com.example.amq.core.CoreConsumer
+# Or using exec-maven-plugin for simplicity:
+mvn exec:java -Dexec.mainClass="com.example.amq.core.CoreConsumer"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see output indicating the consumer is connecting and waiting for messages.</p>
+</div>
+<div class="paragraph">
+<p>Open <strong>Terminal 2</strong> (for the Producer):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Navigate to amq-core-client directory
+java -cp target/amq-core-client-1.0-SNAPSHOT.jar:target/dependency/* com.example.amq.core.CoreProducer
+# Or using exec-maven-plugin for simplicity:
+mvn exec:java -Dexec.mainClass="com.example.amq.core.CoreProducer"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The producer will send 5 messages. You should see "Sent message:" output. Simultaneously, the consumer in Terminal 1 should start displaying "Received message:" for each message.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Verify in Hawtio Console (Optional)
+If you have the Hawtio Management Console enabled and exposed for your AMQ Broker, you can log in and navigate to the "Queues" section. You should see <code>exampleQueue</code> listed, and its message count should fluctuate (briefly increasing and then decreasing as messages are consumed) or show zero if messages are processed quickly.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_3_troubleshooting_core_protocol_client_issues"><a class="anchor" href="#_3_3_troubleshooting_core_protocol_client_issues"></a>3.3. Troubleshooting Core Protocol Client Issues</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong><code>JMSException: Failed to create session</code> or <code>Connection refused</code>:</strong></p>
+</li>
+<li>
+<p>Verify <code>BROKER_HOST</code> and <code>443</code> (or the correct port) are accurate and the broker is running.</p>
+</li>
+<li>
+<p>Ensure the OpenShift Route for the Core Protocol is correctly configured and accessible externally.</p>
+</li>
+<li>
+<p>Check firewall rules if running clients from outside your OpenShift network.</p>
+</li>
+<li>
+<p><strong><code>JMSException: AMQ219014: Cannot connect to server(s)</code>:</strong></p>
+</li>
+<li>
+<p>This typically indicates the broker hostname or port is incorrect, or the broker is not reachable.</p>
+</li>
+<li>
+<p><strong><code>javax.net.ssl.SSLHandshakeException: PKIX path building failed</code> or <code>unable to find valid certification path to requested target</code>:</strong></p>
+</li>
+<li>
+<p>This means the Java client does not trust the broker&#8217;s SSL certificate.</p>
+</li>
+<li>
+<p>Ensure <code>server-ca-truststore.jks</code> exists in the working directory or is correctly referenced.</p>
+</li>
+<li>
+<p>Verify the correct <code>ca.crt</code> was imported into the trust store.</p>
+</li>
+<li>
+<p>Double-check <code>trustStorePassword</code>.</p>
+</li>
+<li>
+<p><strong>For testing only</strong>: Temporarily set <code>verifyHost=false</code> in the <code>BROKER_URL</code> to bypass certificate verification, but resolve the underlying certificate issue for production.</p>
+</li>
+<li>
+<p><strong><code>JMSException: Invalid user name or password</code>:</strong></p>
+</li>
+<li>
+<p>Check <code>USERNAME</code> and <code>PASSWORD</code> in your client code against the credentials configured on your AMQ Broker.</p>
+</li>
+<li>
+<p><strong><code>JMSException: Queue not found</code>:</strong></p>
+</li>
+<li>
+<p>Ensure the <code>exampleQueue</code> exists or that your broker is configured to auto-create queues. AMQ Broker typically auto-creates non-durable queues by default.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_4_lab_amqp_protocol_client"><a class="anchor" href="#_4_lab_amqp_protocol_client"></a>4. Lab: AMQP Protocol Client</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AMQP (Advanced Message Queuing Protocol) 1.0 is an ISO standard, open, internet wire protocol for asynchronous messaging. Red Hat AMQ Broker provides full support for AMQP 1.0, enabling interoperability with a wide range of AMQP-compliant clients and brokers. This section demonstrates using Apache Qpid JMS (part of Red Hat build of Apache Qpid JMS) for Java to interact with the broker via AMQP.</p>
+</div>
+<div class="sect2">
+<h3 id="_4_1_technical_explanation_amqp_1_0_and_qpid_jms"><a class="anchor" href="#_4_1_technical_explanation_amqp_1_0_and_qpid_jms"></a>4.1. Technical Explanation: AMQP 1.0 and Qpid JMS</h3>
+<div class="paragraph">
+<p>AMQP 1.0 defines the messages and how they are transferred, but not the API. Qpid JMS is a Java Message Service (JMS) 1.1/2.0 client that implements the AMQP 1.0 wire protocol, allowing Java applications to use the familiar JMS API to connect to AMQP 1.0 brokers. This client translates JMS calls into AMQP 1.0 protocol messages and handles the underlying network communication.</p>
+</div>
+<div class="paragraph">
+<p>Similar to Core Protocol, secure connections via SSL/TLS require configuring the client&#8217;s trust store.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_4_2_hands_on_activity_developing_an_amqp_client"><a class="anchor" href="#_4_2_hands_on_activity_developing_an_amqp_client"></a>4.2. Hands-on Activity: Developing an AMQP Client</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Maven Project
+You can create a new project or modify the existing one. For clarity, let&#8217;s create a separate one.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd ..
+mkdir amq-amqp-client &amp;&amp; cd amq-amqp-client
+mvn archetype:generate -DgroupId=com.example.amq -DartifactId=amq-amqp-client -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Update <code>pom.xml</code>
+Navigate into the <code>amq-amqp-client</code> directory and open <code>pom.xml</code>. Add the <code>qpid-jms-client</code> dependency.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;com.example.amq&lt;/groupId&gt;
+  &lt;artifactId&gt;amq-amqp-client&lt;/artifactId&gt;
+  &lt;packaging&gt;jar&lt;/packaging&gt;
+  &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+  &lt;name&gt;amq-amqp-client&lt;/name&gt;
+  &lt;url&gt;http://maven.apache.org&lt;/url&gt;
+
+  &lt;properties&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;java.version&gt;11&lt;/java.version&gt;
+    &lt;maven.compiler.source&gt;${java.version}&lt;/maven.compiler.source&gt;
+    &lt;maven.compiler.target&gt;${java.version}&lt;/maven.compiler.target&gt;
+    &lt;qpid.jms.version&gt;0.62.0.redhat-00001&lt;/qpid.jms.version&gt; &lt;!-- Use the version compatible with your AMQ Broker --&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.apache.qpid&lt;/groupId&gt;
+      &lt;artifactId&gt;qpid-jms-client&lt;/artifactId&gt;
+      &lt;version&gt;${qpid.jms.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+      &lt;artifactId&gt;slf4j-simple&lt;/artifactId&gt;
+      &lt;version&gt;1.7.36&lt;/version&gt;
+      &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+        &lt;version&gt;3.2.0&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;archive&gt;
+            &lt;manifest&gt;
+              &lt;addClasspath&gt;true&lt;/addClasspath&gt;
+              &lt;mainClass&gt;com.example.amq.amqp.AmqpProducer&lt;/mainClass&gt; &lt;!-- Will be set for producer or consumer --&gt;
+            &lt;/manifest&gt;
+          &lt;/archive&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+        &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;3.0.0&lt;/version&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Ensure the <code>qpid.jms.version</code> is compatible with your deployed AMQ Broker. The example <code>0.62.0.redhat-00001</code> is a placeholder. Refer to Red Hat documentation for the correct version.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Implement the AMQP Producer
+Create a new Java file <code>src/main/java/com/example/amq/amqp/AmqpProducer.java</code> with the following content. Replace <code>${BROKER_HOST}</code> with the actual hostname.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example.amq.amqp;
+
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+import javax.jms.*;
+import java.util.Objects;
+
+public class AmqpProducer {
+
+    // AMQP URLs typically start with 'amqps://' for SSL/TLS, 'amqp://' for plain TCP
+    private static final String BROKER_URL = "amqps://${BROKER_HOST}:443";
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String QUEUE_NAME = "exampleAmqpQueue";
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        // Set system properties for SSL/TLS trust store
+        // Ensure server-ca-truststore.jks is in the current working directory or specify full path
+        System.setProperty("javax.net.ssl.trustStore", "server-ca-truststore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "securepass");
+        // Optional: If you encounter hostname verification issues with self-signed certs
+        // System.setProperty("qpid.jms.ssl.trustStoreHostVerify", "false");
+
+        try {
+            // 1. Create a Connection Factory
+            ConnectionFactory connectionFactory = new JmsConnectionFactory(USERNAME, PASSWORD, BROKER_URL);
+            System.out.println("Connecting to broker: " + BROKER_URL);
+
+            // 2. Create a Connection
+            connection = connectionFactory.createConnection();
+            connection.start();
+            System.out.println("Connection started.");
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            System.out.println("Session created.");
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(QUEUE_NAME);
+            System.out.println("Destination created: " + QUEUE_NAME);
+
+            // 5. Create a Producer
+            producer = session.createProducer(destination);
+            System.out.println("Producer created.");
+
+            // 6. Send Messages
+            for (int i = 1; i &lt;= 5; i++) {
+                String text = "Hello from AMQP Producer! Message " + i;
+                TextMessage message = session.createTextMessage(text);
+                producer.send(message);
+                System.out.println("Sent message: " + text);
+                Thread.sleep(1000);
+            }
+
+            System.out.println("Messages sent successfully.");
+
+        } catch (JMSException | InterruptedException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 7. Close Resources
+            if (producer != null) {
+                try {
+                    producer.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            System.out.println("Producer resources closed.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For Qpid JMS, SSL/TLS configuration is typically done via Java system properties (<code>javax.net.ssl.trustStore</code>, <code>javax.net.ssl.trustStorePassword</code>). Ensure the <code>server-ca-truststore.jks</code> file created earlier is copied into the <code>amq-amqp-client</code> directory or specify its full path. If you get <code>Hostname verification failed</code> errors, you can uncomment <code>System.setProperty("qpid.jms.ssl.trustStoreHostVerify", "false");</code> <strong>for testing only</strong>.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Implement the AMQP Consumer
+Create a new Java file <code>src/main/java/com/example/amq/amqp/AmqpConsumer.java</code> with the following content. Again, replace <code>${BROKER_HOST}</code>.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example.amq.amqp;
+
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+import javax.jms.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+public class AmqpConsumer {
+
+    private static final String BROKER_URL = "amqps://${BROKER_HOST}:443";
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String QUEUE_NAME = "exampleAmqpQueue";
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+        CountDownLatch latch = new CountDownLatch(5); // Expecting 5 messages
+
+        // Set system properties for SSL/TLS trust store
+        // Ensure server-ca-truststore.jks is in the current working directory or specify full path
+        System.setProperty("javax.net.ssl.trustStore", "server-ca-truststore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "securepass");
+        // Optional: If you encounter hostname verification issues with self-signed certs
+        // System.setProperty("qpid.jms.ssl.trustStoreHostVerify", "false");
+
+        try {
+            // 1. Create a Connection Factory
+            ConnectionFactory connectionFactory = new JmsConnectionFactory(USERNAME, PASSWORD, BROKER_URL);
+            System.out.println("Connecting to broker: " + BROKER_URL);
+
+            // 2. Create a Connection
+            connection = connectionFactory.createConnection();
+            connection.start();
+            System.out.println("Connection started.");
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            System.out.println("Session created.");
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(QUEUE_NAME);
+            System.out.println("Destination created: " + QUEUE_NAME);
+
+            // 5. Create a Consumer
+            consumer = session.createConsumer(destination);
+            System.out.println("Consumer created. Waiting for messages...");
+
+            // 6. Set a Message Listener
+            consumer.setMessageListener(message -&gt; {
+                try {
+                    if (message instanceof TextMessage) {
+                        TextMessage textMessage = (TextMessage) message;
+                        System.out.println("Received message: " + textMessage.getText());
+                        latch.countDown(); // Decrement latch for each message
+                    } else {
+                        System.out.println("Received non-text message: " + message.getClass().getName());
+                    }
+                } catch (JMSException e) {
+                    System.err.println("Error processing message: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
+
+            // 7. Wait for messages or timeout
+            latch.await(30, TimeUnit.SECONDS); // Wait up to 30 seconds for all messages
+            System.out.println("Consumer finished waiting or received all expected messages.");
+
+        } catch (JMSException | InterruptedException e) {
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // 8. Close Resources
+            if (consumer != null) {
+                try {
+                    consumer.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException e) { /* ignore */ }
+            }
+            System.out.println("Consumer resources closed.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Build and Run the Clients
+First, compile your project. Then, run the consumer and producer in separate terminal windows.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Ensure you are in the amq-amqp-client directory
+mvn clean install</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Open <strong>Terminal 3</strong> (for the AMQP Consumer):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Navigate to amq-amqp-client directory
+java -cp target/amq-amqp-client-1.0-SNAPSHOT.jar:target/dependency/* com.example.amq.amqp.AmqpConsumer
+# Or using exec-maven-plugin for simplicity:
+mvn exec:java -Dexec.mainClass="com.example.amq.amqp.AmqpConsumer"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see output indicating the consumer is connecting and waiting for messages.</p>
+</div>
+<div class="paragraph">
+<p>Open <strong>Terminal 4</strong> (for the AMQP Producer):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Navigate to amq-amqp-client directory
+java -cp target/amq-amqp-client-1.0-SNAPSHOT.jar:target/dependency/* com.example.amq.amqp.AmqpProducer
+# Or using exec-maven-plugin for simplicity:
+mvn exec:java -Dexec.mainClass="com.example.amq.amqp.AmqpProducer"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The producer will send 5 messages. You should see "Sent message:" output. Simultaneously, the consumer in Terminal 3 should start displaying "Received message:" for each message.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Verify in Hawtio Console (Optional)
+Log in to the Hawtio Management Console. Navigate to the "Queues" section. You should see <code>exampleAmqpQueue</code> listed, and its message count should fluctuate or show zero.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_4_3_troubleshooting_amqp_client_issues"><a class="anchor" href="#_4_3_troubleshooting_amqp_client_issues"></a>4.3. Troubleshooting AMQP Client Issues</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong><code>JMSException: Peer did not send any data</code> or <code>Connection refused</code>:</strong></p>
+</li>
+<li>
+<p>Verify <code>BROKER_HOST</code> and <code>443</code> (or the correct port) are accurate and the broker is running.</p>
+</li>
+<li>
+<p>Ensure the OpenShift Route for the AMQP Protocol is correctly configured and accessible externally.</p>
+</li>
+<li>
+<p>Check firewall rules if running clients from outside your OpenShift network.</p>
+</li>
+<li>
+<p><strong><code>javax.net.ssl.SSLHandshakeException</code> or <code>unable to find valid certification path to requested target</code>:</strong></p>
+</li>
+<li>
+<p>Ensure <code>server-ca-truststore.jks</code> is in the <code>amq-amqp-client</code> working directory or referenced with a full path.</p>
+</li>
+<li>
+<p>Verify <code>javax.net.ssl.trustStore</code> and <code>javax.net.ssl.trustStorePassword</code> system properties are correctly set.</p>
+</li>
+<li>
+<p>Double-check the content and password of <code>server-ca-truststore.jks</code>.</p>
+</li>
+<li>
+<p><strong>For testing only</strong>: Temporarily uncomment <code>System.setProperty("qpid.jms.ssl.trustStoreHostVerify", "false");</code> to bypass hostname verification.</p>
+</li>
+<li>
+<p><strong><code>JMSException: Not authorized</code>:</strong></p>
+</li>
+<li>
+<p>Check <code>USERNAME</code> and <code>PASSWORD</code> in your client code against the credentials configured on your AMQ Broker.</p>
+</li>
+<li>
+<p><strong><code>JMSException: The AMQP message broker did not create a durable consumer for the requested subject.</code>:</strong></p>
+</li>
+<li>
+<p>This can happen if the queue is not configured for auto-creation or if there are specific authorization issues preventing queue creation or access.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Congratulations! You have successfully developed and tested both AMQ Core Protocol JMS and AMQP 1.0 clients to interact with your Red Hat AMQ Broker instance on OpenShift, including secure connections. This foundational knowledge is crucial for integrating diverse applications with your message-oriented middleware.</p>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Introduction to Message-Oriented Middleware (MOM) :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="overview-of-message-oriented-middleware.html">
+    <link rel="next" href="benefits-and-use-cases-of-asynchronous-messaging.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a></li>
+    <li><a href="introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Introduction to Message-Oriented Middleware (MOM)</h1>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">// This is an Antora AsciiDoc file for the Introduction to Message-Oriented Middleware (MOM) topic.
+= Introduction to Message-Oriented Middleware (MOM)
+:page-aliases: mom-introduction.adoc
+
+In today's interconnected digital landscape, applications rarely operate in isolation. They need to communicate, exchange data, and coordinate tasks to deliver complex services. This communication often needs to be reliable, scalable, and resilient, especially when dealing with distributed systems where components might be running on different servers, using different technologies, or experiencing varying loads. This is where *Message-Oriented Middleware (MOM)* comes into play as a fundamental architectural pattern.
+
+== What is Message-Oriented Middleware (MOM)?
+
+Message-Oriented Middleware (MOM) is a software infrastructure that enables applications to communicate with each other by sending and receiving messages. It acts as an intermediary, facilitating asynchronous communication between distributed components. Instead of direct, tightly coupled connections, applications interact through a central component known as a *message broker*, which handles the routing, persistence, and reliable delivery of messages.
+
+The core principles that define MOM and make it so powerful are *loose coupling* and *asynchronous communication*:
+
+*   *Loose Coupling*: In a MOM-based system, applications don't need to know the direct location, availability, or implementation details of other applications they wish to communicate with. They simply send messages to a well-defined destination (e.g., a queue or topic) managed by the MOM system. This decoupling allows independent development, deployment, scaling, and maintenance of different parts of a system, reducing interdependencies and complexity.
+
+*   *Asynchronous Communication*: When an application sends a message via MOM, it doesn't wait for an immediate response from the receiver. It sends the message to the message broker and continues its own processing. The message broker then takes responsibility for delivering the message to the intended receiver(s) when they are available and ready to process it. This significantly improves responsiveness, system throughput, and allows applications to continue functioning even if other components are temporarily offline.
+
+Conceptually, you can think of a MOM system as a postal service for applications. Applications drop their "letters" (messages) into a "mailbox" (queue/topic) managed by the "post office" (message broker). The post office ensures the letter gets to the correct recipient, even if the recipient isn't home immediately. The sender doesn't wait around for the recipient to read the letter.
+
+== Why Use MOM? Benefits and Use Cases
+
+MOM addresses several common and critical challenges in distributed systems, offering significant benefits:
+
+*   **Reliability**: Messages can be stored persistently by the MOM system (on disk or in a database) until they are successfully delivered and acknowledged by the receiving application. This ensures that messages are not lost due to network outages, application crashes, or temporary unavailability of consumers.
+
+*   **Scalability**: MOM systems are designed to handle a large volume of messages and many communicating applications. By decoupling producers from consumers, you can scale each component independently based on its specific load requirements, making the overall system more adaptable to fluctuating demands.
+
+*   **Resilience and Fault Tolerance**: If a receiving application crashes or becomes unresponsive, the messages destined for it remain safely stored in the MOM system. Once the application recovers or a new instance is started, it can resume processing messages from where it left off, preventing data loss and maintaining system stability.
+
+*   **Decoupling and Modularity**: MOM promotes a highly modular architecture. Applications become independent of each other's programming languages, operating systems, or specific communication protocols. They only need to agree on a common message format. This simplifies development, facilitates integration of diverse systems, and makes the system easier to maintain and evolve.
+
+*   **Load Balancing**: MOM systems can distribute messages efficiently across multiple instances of a consuming application. For example, if you have three instances of an "Order Processor" service, a queue can distribute incoming order messages among them, effectively balancing the processing load and improving overall performance.
+
+*   **Concurrency**: By enabling asynchronous operations, MOM allows applications to process multiple tasks concurrently without blocking. A producer can send many messages without waiting for each one to be processed, leading to more efficient resource utilization and faster overall system response times.
+
+*Common Use Cases for MOM include:*
+
+*   **E-commerce Systems**: Processing customer orders, updating inventory, sending shipping notifications, handling payment transactions.
+*   **Financial Services**: Real-time processing of trades, market data distribution, fraud detection.
+*   **IoT (Internet of Things)**: Ingesting high volumes of sensor data from numerous devices, sending commands to connected devices.
+*   **Microservices Architectures**: Facilitating inter-service communication, enabling event-driven patterns where services react to events published by others.
+*   **Data Integration and Synchronization**: Moving and synchronizing data between disparate databases, legacy systems, or cloud services.
+*   **Workflow Automation**: Orchestrating complex business processes by sending messages between different stages of a workflow.
+
+== Core Concepts in MOM
+
+While specific MOM implementations (like Red Hat AMQ Broker, Apache Kafka, RabbitMQ) may use slightly different terminology or have unique features, several core concepts are universally applicable:
+
+*   **Message**: The fundamental unit of communication. A message is a self-contained package of data that is exchanged between applications. It typically consists of:
+    *   *Headers (metadata)*: Information about the message itself, such as sender, timestamp, priority, message ID, and routing instructions.
+    *   *Body (payload)*: The actual data being transmitted (e.g., an order object, sensor reading, user event).
+
+*   **Producer (Sender)**: An application or system component that creates and sends messages to the MOM system. A producer only needs to know the destination where it wants to send the message, not the specific consumer(s).
+
+*   **Consumer (Receiver)**: An application or system component that receives and processes messages from the MOM system. Consumers typically register their interest in specific message destinations.
+
+*   **Message Broker**: The central, intelligent component of a MOM system. The message broker is responsible for:
+    *   Receiving messages from producers.
+    *   Storing messages reliably.
+    *   Routing messages to the correct destinations.
+    *   Delivering messages to registered consumers.
+    *   Managing connections, security, and persistence.
+    *   Examples include Red Hat AMQ Broker (based on Apache ActiveMQ Artemis), RabbitMQ, Apache Kafka.
+
+*   **Destination**: A logical address within the message broker where messages are sent and from which they are received. The two primary types of destinations define the fundamental messaging patterns:
+    *   **Queues**: Used for *point-to-point messaging*. Each message sent to a queue is delivered to *only one* consumer, even if multiple consumers are listening to that queue. Once a message is consumed, it is removed from the queue. This is ideal for workload distribution and ensuring each task is processed exactly once.
+    *   **Topics**: Used for *publish/subscribe messaging*. Each message published to a topic can be delivered to *all interested subscribers* (consumers) that are listening to that topic. This is ideal for broadcasting information to multiple recipients simultaneously.
+
+These fundamental concepts form the basis for understanding how MOM systems operate and how they can be leveraged to build robust and scalable distributed applications.
+
+== Hands-on Activity: Conceptualizing Asynchronous Communication
+
+For this introductory topic, we'll engage in a conceptual "hands-on" exercise to solidify your understanding of asynchronous messaging and the benefits of MOM.
+
+=== Scenario: Modern Ride-Sharing Application
+
+Imagine you are building a modern ride-sharing application. When a user requests a ride, several independent processes need to occur:
+
+1.  **Match Driver**: Find the nearest available driver.
+2.  **Notify Driver**: Send a push notification to the matched driver.
+3.  **Calculate Fare**: Determine the estimated fare based on distance and traffic.
+4.  **Update User History**: Log the ride request in the user's history.
+5.  **Analytics**: Send ride request details to an analytics service for real-time dashboards.
+
+Traditionally, without MOM, these might happen sequentially or through complex direct API calls, making the system brittle if one component fails or is slow.
+
+=== Task
+
+Think about how you would design the initial ride request flow using a Message-Oriented Middleware approach.
+
+.  **Identify Producers**: Which application component(s) would initiate communication by generating messages?
+.  **Identify Messages**: What types of messages would be exchanged at the start of the process? Consider the data each message would carry.
+.  **Identify Destinations (Queues/Topics)**: For each message type, would you use a `Queue` or a `Topic`? Justify your choice based on whether messages should be processed by one consumer or multiple consumers.
+.  **Identify Consumers**: Which application components would listen for and process specific types of messages?
+
+=== Solution (Conceptual)
+
+Here's a possible MOM-based design for the ride request flow:
+
+.  **Producer**:
+    *   The `RideRequestService` (or `API Gateway` handling user requests). When a user taps "Request Ride," this service is the first to act.
+
+.  **Messages**:
+    *   A single `RideRequested` message would be sufficient to kick off the chain. It would contain details like `userId`, `pickupLocation`, `destination`, `timestamp`, etc.
+
+.  **Destinations**:
+    *   For the `RideRequested` message, a *Topic* like `RideEvents` would be highly effective. Why a Topic? Because multiple, independent services need to react to a *new ride request* simultaneously without knowing about each other. Each service needs its own copy of the event.
+
+.  **Consumers**:
+    *   `DriverMatchingService`: Subscribes to the `RideEvents` topic to find the best driver.
+    *   `NotificationService`: Subscribes to the `RideEvents` topic to prepare a notification for the matched driver (once the matching service publishes a `DriverMatched` event, which would be a subsequent step). For the initial `RideRequested` message, it might log that a request was made.
+    *   `FareCalculationService`: Subscribes to the `RideEvents` topic to calculate the estimated fare.
+    *   `UserHistoryService`: Subscribes to the `RideEvents` topic to log the new ride request in the user's history.
+    *   `AnalyticsService`: Subscribes to the `RideEvents` topic to ingest data for real-time dashboards.
+
+In this design, the `RideRequestService` doesn't directly call `DriverMatchingService`, `FareCalculationService`, etc. It simply publishes a `RideRequested` message to the `RideEvents` topic. All interested services independently consume and process this message, enabling high concurrency, reliability (messages are persisted), and loose coupling. If, for instance, the `AnalyticsService` is temporarily down, the ride can still be matched, the fare calculated, and the user history updated, making the core functionality robust.
+
+This exercise illustrates how MOM helps in building highly decoupled, resilient, and scalable systems, which are essential for modern distributed applications.
+
+== Conclusion
+
+Message-Oriented Middleware is a powerful and essential paradigm for building robust, scalable, and resilient distributed applications. By facilitating asynchronous, decoupled communication through a central message broker, MOM systems enhance reliability, flexibility, and performance. Understanding these foundational concepts — including producers, consumers, messages, brokers, queues, and topics — is crucial before delving into specific MOM implementations like Red Hat AMQ Broker, which leverages these principles to provide enterprise-grade messaging capabilities on platforms like OpenShift.</code></pre>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a></span>
+  <span class="next"><a href="benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

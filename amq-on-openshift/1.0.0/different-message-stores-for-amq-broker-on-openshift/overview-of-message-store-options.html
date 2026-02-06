@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Overview of Message Store Options :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="different-message-stores-for-amq-broker-on-openshift.html">
+    <link rel="next" href="file-based-message-store-configuration.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a></li>
+    <li><a href="overview-of-message-store-options.html">Overview of Message Store Options</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Overview of Message Store Options</h1>
+<h1 id="message-store-overview" class="sect0"><a class="anchor" href="#message-store-overview"></a>Overview of Message Store Options</h1>
+<div class="paragraph">
+<p>Message persistence is a fundamental aspect of reliable message-oriented middleware (MOM) systems like Red Hat AMQ Broker. It ensures that messages are not lost due to broker restarts, system failures, or network outages. The <strong>message store</strong> is the component responsible for durably saving messages and broker state to disk.</p>
+</div>
+<div class="paragraph">
+<p>AMQ Broker, based on Apache ActiveMQ Artemis, offers flexible options for its message store, primarily leveraging a high-performance file-based journal by default, with an alternative option to use a JDBC-compliant database. Understanding these options is crucial for designing a robust and performant messaging infrastructure, especially when deploying on OpenShift.</p>
+</div>
+<div class="sect1">
+<h2 id="_core_concepts_of_message_persistence"><a class="anchor" href="#_core_concepts_of_message_persistence"></a>Core Concepts of Message Persistence</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before diving into specific store types, let&#8217;s clarify the key directories and their roles in AMQ Broker&#8217;s persistence mechanism. These directories are typically located within a persistent volume mounted to the broker pod when deployed on OpenShift.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Journal Directory (<code>journalDirectory</code>)</strong>: This is the primary message store. It acts as a write-ahead log (WAL) or transaction journal, where all persistent messages, transactions, and critical broker operations (like queue creation, durable subscription bindings, acknowledgments) are recorded sequentially. Its design is optimized for high-throughput, low-latency writes.</p>
+</li>
+<li>
+<p><strong>Paging Directory (<code>pagingDirectory</code>)</strong>: This directory is used for <strong>paging</strong> messages to disk. When a queue accumulates a very large number of messages that exceed configurable memory limits, or when producers are significantly faster than consumers, AMQ Broker can <strong>page</strong> these messages out of memory and onto disk. This mechanism prevents out-of-memory errors and maintains broker stability under high load. Paged messages are reloaded into memory as consumers become available.</p>
+</li>
+<li>
+<p><strong>Bindings Directory (<code>bindingsDirectory</code>)</strong>: Stores durable bindings for queues, topics, and subscriptions. This ensures that even after a broker restart, the configuration of persistent destinations and subscriptions is preserved.</p>
+</li>
+<li>
+<p><strong>Large Messages Directory (<code>largeMessagesDirectory</code>)</strong>: Dedicated storage for messages that exceed a certain configured size threshold. Rather than storing the entire large message inline within the main journal, a reference is stored, and the message payload itself is written to this separate directory. This optimizes journal performance for smaller messages and efficient handling of very large payloads.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These directories collectively manage the persistent state of the broker and its messages.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_file_based_message_store_default"><a class="anchor" href="#_file_based_message_store_default"></a>File-Based Message Store (Default)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The default and generally recommended message store for AMQ Broker is its high-performance <strong>file-based journal</strong>. This approach offers superior performance characteristics due to its optimized append-only write strategy and minimal overhead.</p>
+</div>
+<div class="sect2">
+<h3 id="_how_it_works"><a class="anchor" href="#_how_it_works"></a>How it Works</h3>
+<div class="paragraph">
+<p>The file-based journal operates like a database transaction log. Messages and other persistent data are written sequentially to a series of fixed-size data files within the <code>journalDirectory</code>. This sequential I/O is extremely fast, especially when backed by modern SSD storage.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>When a persistent message arrives, it&#8217;s appended to the journal.</p>
+</li>
+<li>
+<p>When a message is consumed and acknowledged, a corresponding acknowledgment record is written to the journal.</p>
+</li>
+<li>
+<p>The broker periodically compacts and cleans up journal files once all relevant data within them has been processed or acknowledged.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_advantages"><a class="anchor" href="#_advantages"></a>Advantages</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>High Performance</strong>: Optimized for sequential disk writes, leading to very low latency and high throughput for persistent messaging.</p>
+</li>
+<li>
+<p><strong>Robustness</strong>: Designed for crash recovery, ensuring data integrity even in the event of unexpected broker termination.</p>
+</li>
+<li>
+<p><strong>Simplicity</strong>: Easy to configure and manage, as it requires only a local filesystem path.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_openshift_considerations_for_file_based_store"><a class="anchor" href="#_openshift_considerations_for_file_based_store"></a>OpenShift Considerations for File-Based Store</h3>
+<div class="paragraph">
+<p>When deploying AMQ Broker on OpenShift, using the file-based message store necessitates the use of <strong>Persistent Volumes (PVs)</strong> and <strong>Persistent Volume Claims (PVCs)</strong>. The <code>journalDirectory</code>, <code>pagingDirectory</code>, <code>bindingsDirectory</code>, and <code>largeMessagesDirectory</code> must be mapped to persistent storage to ensure message data persists beyond the lifespan of individual broker pods.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example: Broker CR fields for File-Based Storage</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  deploymentPlan:
+    size: 1
+    storage:
+      size: 10Gi
+      selector: {} # Optional: label selector for PV
+      # journalDirectory: /var/lib/artemis/data/journal # These are default paths within the pod
+      # pagingDirectory: /var/lib/artemis/data/paging
+      # bindingsDirectory: /var/lib/artemis/data/bindings
+      # largeMessagesDirectory: /var/lib/artemis/data/largemessages</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the <code>storage</code> section of the <code>ActiveMQArtemis</code> Custom Resource (CR), you specify the desired size for the Persistent Volume. The AMQ Broker Operator then provisions the necessary PV/PVCs and mounts them to the broker pods at the default paths (<code>/var/lib/artemis/data/journal</code>, etc.) within the container.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jdbc_message_store"><a class="anchor" href="#_jdbc_message_store"></a>JDBC Message Store</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As an alternative to the file-based journal, AMQ Broker can be configured to use a <strong>JDBC-compliant relational database</strong> as its message store. This option allows you to leverage existing database infrastructure and integrate message persistence with your organization&#8217;s data management strategies.</p>
+</div>
+<div class="sect2">
+<h3 id="_how_it_works_2"><a class="anchor" href="#_how_it_works_2"></a>How it Works</h3>
+<div class="paragraph">
+<p>When configured for JDBC persistence, AMQ Broker uses a database to store:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Persistent messages (typically in a messages table).</p>
+</li>
+<li>
+<p>Queue and subscription bindings (in a bindings table).</p>
+</li>
+<li>
+<p>Transaction metadata.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The broker interacts with the database via standard JDBC drivers.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_advantages_2"><a class="anchor" href="#_advantages_2"></a>Advantages</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Centralized Data Management</strong>: Leverages existing database backup, replication, and management tools.</p>
+</li>
+<li>
+<p><strong>Familiarity</strong>: For organizations with strong database expertise, managing the message store through standard SQL tools might be preferred.</p>
+</li>
+<li>
+<p><strong>Integration</strong>: Easier to integrate with other database-centric systems or monitoring solutions already in place.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_disadvantages"><a class="anchor" href="#_disadvantages"></a>Disadvantages</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Performance Overhead</strong>: Typically, JDBC persistence is slower than the file-based journal due to the overhead of database transactions, network latency (if the DB is remote), and the inherent complexity of relational databases compared to a simple write-ahead log.</p>
+</li>
+<li>
+<p><strong>Database Management</strong>: Requires an external database instance to be provisioned, managed, and maintained.</p>
+</li>
+<li>
+<p><strong>Configuration Complexity</strong>: More complex to configure, requiring datasource definitions, driver management, and potentially schema setup.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_openshift_considerations_for_jdbc_store"><a class="anchor" href="#_openshift_considerations_for_jdbc_store"></a>OpenShift Considerations for JDBC Store</h3>
+<div class="paragraph">
+<p>Deploying with a JDBC message store on OpenShift involves:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Database Provisioning</strong>: An external database (e.g., PostgreSQL, MySQL, Oracle, SQL Server) must be available and accessible from the OpenShift cluster. This could be an OpenShift-managed database (e.g., using a Database-as-a-Service operator) or an external database instance.</p>
+</li>
+<li>
+<p><strong>JDBC Driver</strong>: The appropriate JDBC driver must be made available to the broker pods. This is usually achieved by mounting it into the broker&#8217;s classpath.</p>
+</li>
+<li>
+<p><strong>Datasource Configuration</strong>: The <code>ActiveMQArtemis</code> CR needs to be configured with the JDBC connection URL, credentials, and driver details.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="title">Example: Broker CR fields for JDBC Storage (Conceptual)</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-jdbc-broker
+spec:
+  deploymentPlan:
+    size: 1
+    persistence:
+      config:
+        type: JDBC # Indicate JDBC persistence
+        jdbcStore:
+          jdbcConnectionUrl: jdbc:postgresql://my-db-service:5432/artemis
+          jdbcDriverClassName: org.postgresql.Driver
+          # ... other JDBC properties like user, password (via secretRef)
+          # ... and table names configuration</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Note:</strong> The actual <code>ActiveMQArtemis</code> CR structure for JDBC persistence might vary slightly based on the AMQ Broker Operator version and specific configuration options. This is a conceptual representation.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_journal_vs_paging_for_message_persistence"><a class="anchor" href="#_journal_vs_paging_for_message_persistence"></a>Journal vs. Paging for Message Persistence</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s important to differentiate the distinct roles of the journal and paging within the AMQ Broker&#8217;s persistence architecture:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Journal</strong>: The primary, authoritative store for <strong>all persistent data</strong>. It&#8217;s a critical component for durability and crash recovery. All persistent messages <strong>initially</strong> go into the journal.</p>
+</li>
+<li>
+<p><strong>Paging</strong>: A secondary mechanism for handling <strong>overflow</strong>. When queues become too large, messages are moved from memory (where they might have arrived from the journal) to the paging directory on disk. This is a <strong>flow control</strong> mechanism to protect the broker&#8217;s memory resources by offloading messages to disk until consumers are ready.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Both mechanisms work in concert to provide robust message persistence and ensure broker stability under varying load conditions.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_choosing_the_appropriate_message_store_strategy"><a class="anchor" href="#_choosing_the_appropriate_message_store_strategy"></a>Choosing the Appropriate Message Store Strategy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The choice between a file-based and JDBC message store depends on several factors:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Performance Requirements</strong>: For maximum throughput and lowest latency, the file-based journal is generally superior.</p>
+</li>
+<li>
+<p><strong>Operational Expertise</strong>: If your team has strong database administration skills and a preference for managing data in a relational database, JDBC might be considered.</p>
+</li>
+<li>
+<p><strong>Existing Infrastructure</strong>: Leveraging an existing, well-managed database might be appealing.</p>
+</li>
+<li>
+<p><strong>Complexity</strong>: File-based is simpler to set up and manage, especially with the AMQ Broker Operator handling Persistent Volume provisioning. JDBC introduces external database dependency and configuration.</p>
+</li>
+<li>
+<p><strong>High Availability (HA) Strategy</strong>: Both can support HA, but the implementation details differ (e.g., shared storage for file-based HA vs. database HA for JDBC).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For most OpenShift deployments of AMQ Broker, the <strong>file-based message store backed by Persistent Volumes is the recommended and default choice</strong> due to its performance benefits and seamless integration with OpenShift&#8217;s storage capabilities managed by the Operator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_activity_observing_default_message_store_setup"><a class="anchor" href="#_hands_on_activity_observing_default_message_store_setup"></a>Hands-on Activity: Observing Default Message Store Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This activity helps you verify that the default file-based message store is provisioned and used correctly by the AMQ Broker Operator on OpenShift.</p>
+</div>
+<div class="olist arabic">
+<div class="title">Procedure: Inspecting Default Storage</div>
+<ol class="arabic">
+<li>
+<p><strong>Deploy a Basic Broker</strong>: If you haven&#8217;t already, deploy a basic AMQ Broker instance using the Operator.</p>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="title">Wait for the Operator</div>
+Make sure the AMQ Broker Operator is installed and running in your cluster before executing this command.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-project amq-broker-test
+oc project amq-broker-test
+oc apply -f - &lt;&lt;EOF
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  deploymentPlan:
+    size: 1
+    storage:
+      size: 1Gi # Small size for quick testing
+EOF</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Verify Persistent Volume Claim (PVC)</strong>: After the broker pod starts, a PVC will be created and bound.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pvc -n amq-broker-test</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see a PVC similar to <code>my-broker-data-my-broker-ss-0</code> with a status of <code>Bound</code>.</p>
+</div>
+</li>
+<li>
+<p><strong>Access the Broker Pod</strong>: Connect to the running broker pod using <code>oc rsh</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc rsh -n amq-broker-test my-broker-ss-0</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Inspect Storage Directories</strong>: Once inside the pod, navigate to the default data directory <code>/var/lib/artemis/data</code> and observe the persistence files.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ls -l /var/lib/artemis/data/
+ls -l /var/lib/artemis/data/journal
+ls -l /var/lib/artemis/data/paging
+ls -l /var/lib/artemis/data/bindings
+ls -l /var/lib/artemis/data/largemessages</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You will see various files (e.g., <code>activemq-data-<strong>.amq</code>, <code>activemq-bindings-</strong>.amq</code>, <code>activemq-journal-<strong>.amq</code>, <code>activemq-paging-</strong>.page</code>) within these directories, indicating the broker is actively using the file-based message store.</p>
+</div>
+</li>
+<li>
+<p><strong>Exit the Pod</strong>: Type <code>exit</code> to leave the pod shell.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This simple activity demonstrates that by default, the AMQ Broker Operator provisions persistent storage and configures the broker to use its file-based message store for durability on OpenShift.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a></span>
+  <span class="next"><a href="file-based-message-store-configuration.html">File-Based Message Store Configuration</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

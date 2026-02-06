@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Developing Producers and Consumers with AMQP Clients (e.g., Java, Python) :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">
+    <link rel="next" href="connecting-to-amq-broker-using-amqp.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a></li>
+    <li><a href="developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</h1>
+<h1 id="_developing_producers_and_consumers_with_amqp_clients_e_g_java_python" class="sect0"><a class="anchor" href="#_developing_producers_and_consumers_with_amqp_clients_e_g_java_python"></a>Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</h1>
+<div class="paragraph">
+<p>This section guides you through the process of developing messaging clients using the Advanced Message Queuing Protocol (AMQP) 1.0 standard to interact with Red Hat AMQ Broker. We will cover setting up development environments and writing basic producer and consumer applications in both Java and Python.</p>
+</div>
+<div class="sect1">
+<h2 id="_understanding_amqp_1_0_clients"><a class="anchor" href="#_understanding_amqp_1_0_clients"></a>Understanding AMQP 1.0 Clients</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AMQP 1.0 is a robust, open standard for asynchronous messaging that provides reliable and interoperable communication between applications and messaging brokers. Unlike earlier versions or proprietary protocols, AMQP 1.0 defines a wire-level protocol, allowing for different implementations of clients and brokers to communicate seamlessly. Red Hat AMQ Broker fully supports AMQP 1.0, enabling a wide range of clients to connect.</p>
+</div>
+<div class="paragraph">
+<p>Key characteristics of AMQP 1.0 include:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Interoperability</strong>: Clients developed in different languages using various AMQP 1.0 libraries can communicate with each other and with any AMQP 1.0 compliant broker.</p>
+</li>
+<li>
+<p><strong>Reliability</strong>: Supports various delivery guarantees, from "at-most-once" to "exactly-once," ensuring messages are processed reliably.</p>
+</li>
+<li>
+<p><strong>Flexibility</strong>: Allows for complex routing, message annotations, and flow control mechanisms.</p>
+</li>
+<li>
+<p><strong>Flow Control</strong>: Producers request "credits" from the broker before sending messages, preventing the broker from being overwhelmed. Consumers also manage credit flow to ensure they can process messages at their own pace.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Developing clients for AMQ Broker using AMQP 1.0 involves establishing a connection, creating sessions, linking to specific addresses (queues or topics), and then sending or receiving messages.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_developing_amqp_clients_in_java"><a class="anchor" href="#_developing_amqp_clients_in_java"></a>Developing AMQP Clients in Java</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For Java development, the recommended client library for AMQP 1.0 is the Red Hat build of Apache Qpid JMS. This library provides a Java Message Service (JMS) interface over the AMQP 1.0 protocol, allowing you to leverage the familiar JMS API while benefiting from AMQP&#8217;s interoperability.</p>
+</div>
+<div class="openblock reference">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Refer to <code>Red Hat build of Apache Qpid JMS 2.7, Using Qpid JMS</code> in the provided context for more details on developing AMQ messaging clients using Jakarta (which includes Qpid JMS).</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setting_up_the_java_development_environment"><a class="anchor" href="#_setting_up_the_java_development_environment"></a>Setting Up the Java Development Environment</h3>
+<div class="paragraph">
+<p>To start developing Java AMQP clients, you&#8217;ll need:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Java Development Kit (JDK) 11 or later.</p>
+</li>
+<li>
+<p>A build automation tool like Maven or Gradle.</p>
+</li>
+<li>
+<p>The Qpid JMS client library.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For a Maven project, add the following dependency to your <code>pom.xml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.qpid&lt;/groupId&gt;
+    &lt;artifactId&gt;qpid-jms-client&lt;/artifactId&gt;
+    &lt;version&gt;2.7.0.redhat-00001&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="openblock note">
+<div class="content">
+<div class="paragraph">
+<p>The exact version of <code>qpid-jms-client</code> may vary. Always refer to the official Red Hat documentation for the latest recommended version.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_an_amqp_java_producer"><a class="anchor" href="#_creating_an_amqp_java_producer"></a>Creating an AMQP Java Producer</h3>
+<div class="paragraph">
+<p>A producer is an application that sends messages to a destination (queue or topic) on the AMQ Broker.</p>
+</div>
+<div class="sect3">
+<h4 id="_technical_explanation"><a class="anchor" href="#_technical_explanation"></a>Technical Explanation</h4>
+<div class="paragraph">
+<p>The Java producer will use the JMS API, specifically <code>javax.jms.ConnectionFactory</code>, <code>javax.jms.Connection</code>, <code>javax.jms.Session</code>, <code>javax.jms.MessageProducer</code>, and <code>javax.jms.TextMessage</code>. The <code>QpidJMSConnectionFactory</code> is the concrete implementation that understands how to establish an AMQP connection. The connection URL specifies the AMQP protocol, the broker&#8217;s hostname or IP, and the AMQP port (typically <code>5672</code>).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_hands_on_activity_simple_amqp_java_producer"><a class="anchor" href="#_hands_on_activity_simple_amqp_java_producer"></a>Hands-on Activity: Simple AMQP Java Producer</h4>
+<div class="paragraph">
+<p>Let&#8217;s create a simple Java application that sends messages to a queue named <code>myAMQPQueue</code>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 1: Create the Java file</strong>
+Create a file named <code>AmqpProducer.java</code> with the following content:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class AmqpProducer {
+
+    public static void main(String[] args) throws Exception {
+        // Broker connection details
+        String brokerUrl = System.getProperty("broker.url", "amqp://localhost:5672");
+        String queueName = System.getProperty("queue.name", "myAMQPQueue");
+        int messageCount = Integer.parseInt(System.getProperty("message.count", "10"));
+
+        Connection connection = null;
+        Session session = null;
+        MessageProducer producer = null;
+
+        try {
+            // 1. Create a JMS ConnectionFactory
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+
+            // 2. Create a Connection
+            connection = factory.createConnection();
+            connection.start(); // Start the connection
+
+            // 3. Create a Session
+            // Arguments: transacted (false), acknowledgeMode (AUTO_ACKNOWLEDGE)
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(queueName);
+
+            // 5. Create a MessageProducer
+            producer = session.createProducer(destination);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT); // Ensure message persistence
+
+            // 6. Send messages
+            for (int i = 1; i &lt;= messageCount; i++) {
+                String text = "Hello from AMQP Java Producer! Message #" + i;
+                TextMessage message = session.createTextMessage(text);
+                producer.send(message);
+                System.out.println("Sent message: " + text);
+            }
+
+            System.out.println("Successfully sent " + messageCount + " messages.");
+
+        } finally {
+            // 7. Clean up resources
+            if (producer != null) producer.close();
+            if (session != null) session.close();
+            if (connection != null) connection.close();
+            System.out.println("Producer resources closed.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 2: Compile and Run the Producer</strong>
+From your project root (assuming a Maven setup):</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Compile:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn compile</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn exec:java -Dexec.mainClass="AmqpProducer" -Dbroker.url="amqp://&lt;AMQ_BROKER_HOST&gt;:5672" -Dqueue.name="myAMQPQueue" -Dmessage.count="50"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;AMQ_BROKER_HOST&gt;</code> with the actual hostname or IP address of your AMQ Broker instance. If you have exposed your broker via an OpenShift Route for AMQP, use the Route&#8217;s hostname.</p>
+</div>
+<div class="paragraph">
+<p>You should see output indicating messages being sent.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_an_amqp_java_consumer"><a class="anchor" href="#_creating_an_amqp_java_consumer"></a>Creating an AMQP Java Consumer</h3>
+<div class="paragraph">
+<p>A consumer is an application that receives messages from a destination on the AMQ Broker.</p>
+</div>
+<div class="sect3">
+<h4 id="_technical_explanation_2"><a class="anchor" href="#_technical_explanation_2"></a>Technical Explanation</h4>
+<div class="paragraph">
+<p>The Java consumer also uses the JMS API, specifically <code>javax.jms.MessageConsumer</code> and <code>javax.jms.MessageListener</code> (for asynchronous consumption) or <code>receive()</code> methods (for synchronous consumption). The consumer needs to establish a connection to the broker and then create a subscription to the desired queue or topic. Flow control is automatically handled by the Qpid JMS client and the AMQP protocol, where the broker grants credits to the consumer to control the rate of message delivery.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_hands_on_activity_simple_amqp_java_consumer"><a class="anchor" href="#_hands_on_activity_simple_amqp_java_consumer"></a>Hands-on Activity: Simple AMQP Java Consumer</h4>
+<div class="paragraph">
+<p>Let&#8217;s create a simple Java application that consumes messages from <code>myAMQPQueue</code>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 1: Create the Java file</strong>
+Create a file named <code>AmqpConsumer.java</code> with the following content:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import javax.jms.*;
+import org.apache.qpid.jms.JmsConnectionFactory;
+
+public class AmqpConsumer {
+
+    public static void main(String[] args) throws Exception {
+        // Broker connection details
+        String brokerUrl = System.getProperty("broker.url", "amqp://localhost:5672");
+        String queueName = System.getProperty("queue.name", "myAMQPQueue");
+
+        Connection connection = null;
+        Session session = null;
+        MessageConsumer consumer = null;
+
+        try {
+            // 1. Create a JMS ConnectionFactory
+            JmsConnectionFactory factory = new JmsConnectionFactory(brokerUrl);
+
+            // 2. Create a Connection
+            connection = factory.createConnection();
+            connection.start(); // Start the connection
+
+            // 3. Create a Session
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+            // 4. Create a Destination (Queue)
+            Destination destination = session.createQueue(queueName);
+
+            // 5. Create a MessageConsumer
+            consumer = session.createConsumer(destination);
+
+            System.out.println("Waiting for messages on queue: " + queueName + ". Press Ctrl+C to exit.");
+
+            // 6. Receive messages synchronously
+            // You could also use an asynchronous MessageListener for real-world apps
+            while (true) {
+                Message message = consumer.receive(1000); // Wait for 1 second
+                if (message instanceof TextMessage) {
+                    TextMessage textMessage = (TextMessage) message;
+                    System.out.println("Received message: " + textMessage.getText());
+                    // message.acknowledge(); // Not needed with AUTO_ACKNOWLEDGE
+                } else if (message != null) {
+                    System.out.println("Received non-text message: " + message.getClass().getName());
+                }
+            }
+
+        } catch (JMSException e) {
+            System.err.println("JMS Exception: " + e.getMessage());
+        } finally {
+            // 7. Clean up resources
+            if (consumer != null) consumer.close();
+            if (session != null) session.close();
+            if (connection != null) connection.close();
+            System.out.println("Consumer resources closed.");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 2: Compile and Run the Consumer</strong>
+From your project root:</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Compile:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn compile</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn exec:java -Dexec.mainClass="AmqpConsumer" -Dbroker.url="amqp://&lt;AMQ_BROKER_HOST&gt;:5672" -Dqueue.name="myAMQPQueue"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;AMQ_BROKER_HOST&gt;</code> with the actual hostname or IP address of your AMQ Broker instance.</p>
+</div>
+<div class="paragraph">
+<p>Run the consumer, then run the producer from the previous step. You should see the consumer receiving the messages sent by the producer.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_developing_amqp_clients_in_python"><a class="anchor" href="#_developing_amqp_clients_in_python"></a>Developing AMQP Clients in Python</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For Python development, a common and robust library for AMQP 1.0 is <code>python-qpid-proton</code>. It provides a flexible API for building AMQP clients and services.</p>
+</div>
+<div class="sect2">
+<h3 id="_setting_up_the_python_development_environment"><a class="anchor" href="#_setting_up_the_python_development_environment"></a>Setting Up the Python Development Environment</h3>
+<div class="paragraph">
+<p>To start developing Python AMQP clients, you&#8217;ll need:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Python 3.x installed.</p>
+</li>
+<li>
+<p>The <code>python-qpid-proton</code> library.</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 1: Install <code>python-qpid-proton</code></strong></p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pip install python-qpid-proton</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_an_amqp_python_producer"><a class="anchor" href="#_creating_an_amqp_python_producer"></a>Creating an AMQP Python Producer</h3>
+<div class="sect3">
+<h4 id="_technical_explanation_3"><a class="anchor" href="#_technical_explanation_3"></a>Technical Explanation</h4>
+<div class="paragraph">
+<p>The <code>python-qpid-proton</code> library allows you to create a <code>Proton</code> <code>Container</code> to manage connections, sessions, and links. A <code>Sender</code> link is used to send messages to a specific target address (queue or topic). Messages are created as <code>Message</code> objects and then sent. The <code>send()</code> method typically returns a <code>Delivery</code> object, which can be used to track the status of the sent message (e.g., acknowledged, rejected).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_hands_on_activity_simple_amqp_python_producer"><a class="anchor" href="#_hands_on_activity_simple_amqp_python_producer"></a>Hands-on Activity: Simple AMQP Python Producer</h4>
+<div class="paragraph">
+<p>Let&#8217;s create a simple Python application that sends messages to a queue named <code>myAMQPQueue</code>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 1: Create the Python file</strong>
+Create a file named <code>amqp_producer.py</code> with the following content:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import sys
+from proton import Message
+from proton.handlers import MessagingHandler
+from proton.reactor import Container
+
+class AmqpProducer(MessagingHandler):
+    def __init__(self, broker_url, address, message_count):
+        super(AmqpProducer, self).__init__()
+        self.broker_url = broker_url
+        self.address = address
+        self.message_count = message_count
+        self.sent = 0
+        self.confirmed = 0
+        self.total = message_count
+
+    def on_start(self, event):
+        print(f"Connecting to broker: {self.broker_url}")
+        event.container.create_sender(self.broker_url + "/" + self.address)
+
+    def on_sendable(self, event):
+        while self.sent &lt; self.total and event.sender.credit &gt; 0:
+            message = Message(body=f"Hello from AMQP Python Producer! Message #{self.sent + 1}")
+            event.sender.send(message)
+            print(f"Sent message: {message.body}")
+            self.sent += 1
+
+    def on_accepted(self, event):
+        self.confirmed += 1
+        if self.confirmed == self.total:
+            print(f"All {self.total} messages sent and accepted.")
+            event.connection.close()
+
+    def on_disconnected(self, event):
+        if self.sent &lt; self.total:
+            print(f"Disconnected before all messages were sent. Sent: {self.sent}, Remaining: {self.total - self.sent}")
+        else:
+            print("Disconnected.")
+
+if __name__ == "__main__":
+    broker_url = "amqp://localhost:5672" # Default broker URL
+    address = "myAMQPQueue"             # Default queue name
+    message_count = 10                  # Default number of messages
+
+    if len(sys.argv) &gt; 1:
+        broker_url = sys.argv[1]
+    if len(sys.argv) &gt; 2:
+        address = sys.argv[2]
+    if len(sys.argv) &gt; 3:
+        message_count = int(sys.argv[3])
+
+    try:
+        Container(AmqpProducer(broker_url, address, message_count)).run()
+    except KeyboardInterrupt:
+        pass</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 2: Run the Python Producer</strong></p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>python amqp_producer.py amqp://&lt;AMQ_BROKER_HOST&gt;:5672 myAMQPQueue 50</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;AMQ_BROKER_HOST&gt;</code> with the actual hostname or IP address of your AMQ Broker instance.</p>
+</div>
+<div class="paragraph">
+<p>You should see output indicating messages being sent and confirmed.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_an_amqp_python_consumer"><a class="anchor" href="#_creating_an_amqp_python_consumer"></a>Creating an AMQP Python Consumer</h3>
+<div class="sect3">
+<h4 id="_technical_explanation_4"><a class="anchor" href="#_technical_explanation_4"></a>Technical Explanation</h4>
+<div class="paragraph">
+<p>A Python consumer using <code>python-qpid-proton</code> also runs within a <code>Container</code>. It establishes a <code>Receiver</code> link to a source address (queue or topic). When messages arrive, the <code>on_message</code> callback method is invoked. Within this method, the message can be processed, and an appropriate disposition (e.g., <code>ACCEPT</code>, <code>RELEASE</code>, <code>REJECT</code>) can be sent back to the broker to confirm or reject delivery. Flow control is handled automatically by the receiver link, which sends credits to the broker when it&#8217;s ready to receive more messages.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_hands_on_activity_simple_amqp_python_consumer"><a class="anchor" href="#_hands_on_activity_simple_amqp_python_consumer"></a>Hands-on Activity: Simple AMQP Python Consumer</h4>
+<div class="paragraph">
+<p>Let&#8217;s create a simple Python application that consumes messages from <code>myAMQPQueue</code>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 1: Create the Python file</strong>
+Create a file named <code>amqp_consumer.py</code> with the following content:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">import sys
+from proton import Message
+from proton.handlers import MessagingHandler
+from proton.reactor import Container
+
+class AmqpConsumer(MessagingHandler):
+    def __init__(self, broker_url, address, desired_messages=0):
+        super(AmqpConsumer, self).__init__()
+        self.broker_url = broker_url
+        self.address = address
+        self.received = 0
+        self.desired_messages = desired_messages
+        self.receiver = None
+
+    def on_start(self, event):
+        print(f"Connecting to broker: {self.broker_url}")
+        self.receiver = event.container.create_receiver(self.broker_url + "/" + self.address)
+        # Request an initial set of credits
+        self.receiver.flow(10) # Request 10 messages
+
+    def on_message(self, event):
+        print(f"Received message: {event.message.body}")
+        self.received += 1
+        event.delivery.accept() # Acknowledge the message
+
+        # Request more credits if needed, or close connection if desired_messages reached
+        if self.desired_messages &gt; 0 and self.received &gt;= self.desired_messages:
+            print(f"Received {self.received} messages. Closing connection.")
+            event.connection.close()
+        elif event.receiver.credit == 0:
+            # If we're out of credits, request more
+            event.receiver.flow(10)
+            print("Requested 10 more credits.")
+
+
+    def on_disconnected(self, event):
+        print(f"Disconnected. Total messages received: {self.received}")
+
+if __name__ == "__main__":
+    broker_url = "amqp://localhost:5672" # Default broker URL
+    address = "myAMQPQueue"             # Default queue name
+    desired_messages = 0                # 0 for continuous receive, &gt;0 for a specific count
+
+    if len(sys.argv) &gt; 1:
+        broker_url = sys.argv[1]
+    if len(sys.argv) &gt; 2:
+        address = sys.argv[2]
+    if len(sys.argv) &gt; 3:
+        desired_messages = int(sys.argv[3])
+
+    print(f"Waiting for messages on {address}. Press Ctrl+C to exit.")
+    if desired_messages &gt; 0:
+        print(f"Will exit after receiving {desired_messages} messages.")
+
+    try:
+        Container(AmqpConsumer(broker_url, address, desired_messages)).run()
+    except KeyboardInterrupt:
+        print("Consumer stopped by user.")</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Step 2: Run the Python Consumer</strong></p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>python amqp_consumer.py amqp://&lt;AMQ_BROKER_HOST&gt;:5672 myAMQPQueue 0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;AMQ_BROKER_HOST&gt;</code> with the actual hostname or IP address of your AMQ Broker instance. Setting <code>desired_messages</code> to <code>0</code> makes the consumer run indefinitely until manually stopped (Ctrl+C).</p>
+</div>
+<div class="paragraph">
+<p>Run the consumer, then run the Python producer. You should see the consumer receiving the messages.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting_and_best_practices"><a class="anchor" href="#_troubleshooting_and_best_practices"></a>Troubleshooting and Best Practices</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Broker URL</strong>: Always ensure the broker URL is correct and includes the <code>amqp://</code> scheme and the correct port (default <code>5672</code>). If connecting to a secured broker, use <code>amqps://</code> and port <code>5671</code>.</p>
+</li>
+<li>
+<p><strong>Network Access</strong>: Verify that your client machine has network access to the AMQ Broker. On OpenShift, this usually means ensuring the broker is exposed via a Service and potentially a Route (for external access).</p>
+</li>
+<li>
+<p><strong>Queue/Topic Names</strong>: Ensure the queue or topic names used in your client applications match those configured or expected on the broker.</p>
+</li>
+<li>
+<p><strong>Authentication</strong>: If your AMQ Broker has authentication enabled, you&#8217;ll need to provide credentials in your client connection URL (e.g., <code>amqp://user:password@broker_host:5672</code>).</p>
+</li>
+<li>
+<p><strong>Flow Control</strong>: Understand that AMQP 1.0 employs flow control. Producers won&#8217;t send messages if the broker hasn&#8217;t granted credits, and consumers won&#8217;t receive messages if they haven&#8217;t issued credits. Client libraries typically handle this automatically, but it&#8217;s a key concept for advanced tuning.</p>
+</li>
+<li>
+<p><strong>Error Handling</strong>: Implement robust error handling and retry mechanisms in production applications to deal with temporary network issues or broker unavailability.</p>
+</li>
+<li>
+<p><strong>Resource Management</strong>: Always close connections, sessions, producers, and consumers in a <code>finally</code> block or similar construct to prevent resource leaks.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a></span>
+  <span class="next"><a href="connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

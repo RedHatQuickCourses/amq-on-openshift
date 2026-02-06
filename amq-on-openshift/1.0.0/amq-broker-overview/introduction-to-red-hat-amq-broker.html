@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Introduction to Red Hat AMQ Broker :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <link rel="prev" href="amq-broker-overview.html">
+    <link rel="next" href="foundations-in-apache-activemq-artemis.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-with-openshift-authentication-mechanisms.html">Integrating with OpenShift Authentication Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="amq-broker-overview.html">AMQ Broker Overview</a></li>
+    <li><a href="introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Introduction to Red Hat AMQ Broker</h1>
+<h1 id="_introduction_to_red_hat_amq_broker" class="sect0"><a class="anchor" href="#_introduction_to_red_hat_amq_broker"></a>Introduction to Red Hat AMQ Broker</h1>
+<div class="paragraph">
+<p>This section provides a foundational understanding of Red Hat AMQ Broker, covering its identity, underlying technology, core features, supported messaging protocols, and architectural overview. Mastering these introductory concepts is essential before proceeding to its deployment and management on OpenShift.</p>
+</div>
+<div class="sect1">
+<h2 id="_what_is_red_hat_amq_broker"><a class="anchor" href="#_what_is_red_hat_amq_broker"></a>What is Red Hat AMQ Broker?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Red Hat AMQ Broker is a high-performance, lightweight, and flexible open-source message broker, purpose-built for enterprise-grade asynchronous messaging. As a key component of the Red Hat Integration portfolio, it plays a vital role in enabling decoupled, reliable communication between diverse applications and microservices in modern distributed systems and event-driven architectures.</p>
+</div>
+<div class="paragraph">
+<p>In the landscape of complex, interconnected applications, direct communication often leads to tight coupling, making systems less resilient and harder to scale. AMQ Broker addresses this challenge by serving as an intelligent intermediary. It reliably stores, routes, and delivers messages, ensuring that communication occurs even if the sender or receiver is temporarily unavailable or experiencing fluctuating load.</p>
+</div>
+<div class="ulist">
+<div class="title">Key advantages of leveraging Red Hat AMQ Broker:</div>
+<ul>
+<li>
+<p><strong>Decoupling:</strong> Fosters loose coupling between message producers and consumers, allowing them to operate independently without direct knowledge of each other&#8217;s status or location.</p>
+</li>
+<li>
+<p><strong>Reliability:</strong> Guarantees message delivery through robust persistence mechanisms, safeguarding against data loss during system failures or broker restarts.</p>
+</li>
+<li>
+<p><strong>Scalability:</strong> Designed for horizontal and vertical scaling, enabling it to efficiently handle increasing message volumes and a growing number of client connections.</p>
+</li>
+<li>
+<p><strong>Flexibility:</strong> Accommodates a variety of messaging patterns (e.g., point-to-point, publish/subscribe) and supports multiple industry-standard protocols, catering to diverse application requirements.</p>
+</li>
+<li>
+<p><strong>Integration:</strong> Offers seamless integration capabilities, particularly within the Red Hat ecosystem, including OpenShift, enhancing its operational efficiency in cloud-native environments.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_foundations_in_apache_activemq_artemis"><a class="anchor" href="#_foundations_in_apache_activemq_artemis"></a>Foundations in Apache ActiveMQ Artemis</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Red Hat AMQ Broker is meticulously engineered as an enterprise distribution of the robust and high-performing Apache ActiveMQ Artemis project. ActiveMQ Artemis is a next-generation open-source messaging system renowned for its exceptional low latency, high throughput, and comprehensive feature set, making it a leading choice for demanding messaging workloads.</p>
+</div>
+<div class="paragraph">
+<p>By building AMQ Broker upon the solid foundation of ActiveMQ Artemis, Red Hat delivers a product that combines the innovation and performance of a vibrant community project with the assurance of enterprise-grade support and integration.</p>
+</div>
+<div class="ulist">
+<div class="title">Benefits derived from the ActiveMQ Artemis foundation:</div>
+<ul>
+<li>
+<p><strong>Proven Stability and Performance:</strong> Inherits the core stability and performance optimizations from a mature, extensively tested open-source project.</p>
+</li>
+<li>
+<p><strong>Enterprise Support:</strong> Backed by Red Hat&#8217;s world-class support, ensuring prompt assistance, reliable bug fixes, and long-term maintenance.</p>
+</li>
+<li>
+<p><strong>Quality and Security Assurance:</strong> Benefits from Red Hat&#8217;s rigorous quality assurance processes and commitment to security updates.</p>
+</li>
+<li>
+<p><strong>Integrated Ecosystem:</strong> Optimized and certified to work seamlessly with other Red Hat technologies, particularly Red Hat OpenShift, streamlining deployment and management.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This powerful foundation empowers AMQ Broker to provide sophisticated messaging capabilities while integrating smoothly into enterprise IT environments.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_key_features_and_capabilities"><a class="anchor" href="#_key_features_and_capabilities"></a>Key Features and Capabilities</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Red Hat AMQ Broker is equipped with an extensive set of features designed to meet a broad spectrum of messaging requirements, from simple point-to-point communication to complex high-volume, event-driven architectures.</p>
+</div>
+<div class="ulist">
+<div class="title">Core Features and Capabilities</div>
+<ul>
+<li>
+<p><strong>High Performance and Throughput:</strong> Engineered for optimal performance, delivering high message rates with minimal latency, crucial for real-time and high-volume applications.</p>
+</li>
+<li>
+<p><strong>Message Persistence:</strong> Ensures message durability by reliably storing messages to a configurable message store (either a high-performance journal or an external database) until they are successfully processed by consumers. This prevents data loss across broker restarts or failures.</p>
+</li>
+<li>
+<p><strong>High Availability (HA) and Clustering:</strong> Supports advanced HA strategies, including shared-store and replicated live-backup configurations, to ensure continuous operation, automatic failover, and zero message loss in the event of a broker failure. More details on HA will be covered in a dedicated section.</p>
+</li>
+<li>
+<p><strong>Scalability:</strong> Provides both horizontal and vertical scaling options. It can scale horizontally by deploying multiple broker instances in a cluster and vertically by adjusting resource allocations (CPU, memory) for individual broker pods to handle increased loads.</p>
+</li>
+<li>
+<p><strong>Robust Security:</strong> Implements comprehensive security mechanisms, including SSL/TLS encryption for all client-broker communication, flexible authentication methods (local user/password, integration with external Identity Providers like LDAP or Keycloak), and Role-Based Access Control (RBAC) for fine-grained authorization to queues and topics.</p>
+</li>
+<li>
+<p><strong>Flexible Messaging Patterns:</strong> Supports both the <em>point-to-point</em> messaging model, where messages are sent to queues and consumed by a single receiver, and the <em>publish/subscribe</em> model, where messages are sent to topics and can be received by multiple subscribers.</p>
+</li>
+<li>
+<p><strong>Management and Monitoring:</strong> Includes the Hawtio management console, a web-based interface that provides real-time visibility into broker metrics, queue and topic status, active client connections, and enables administrative tasks such as adding users or managing destinations.</p>
+</li>
+<li>
+<p><strong>Message Bridging and Federation:</strong> Offers capabilities to connect multiple brokers, forming networks of brokers, and to bridge messages between different messaging systems, facilitating complex integration scenarios.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_supported_messaging_protocols"><a class="anchor" href="#_supported_messaging_protocols"></a>Supported Messaging Protocols</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AMQ Broker distinguishes itself through its multi-protocol support, enabling diverse applications developed using various programming languages and technologies to communicate seamlessly and interoperably. This flexibility makes it a versatile choice for heterogeneous environments.</p>
+</div>
+<div class="ulist">
+<div class="title">Supported Messaging Protocols</div>
+<ul>
+<li>
+<p><strong>JMS (Java Message Service):</strong> The industry-standard API for sending and receiving messages in Java applications. AMQ Broker offers a highly performant, fully compliant JMS 1.1 and 2.0 implementation.</p>
+</li>
+<li>
+<p><strong>AMQP 1.0 (Advanced Message Queuing Protocol):</strong> An open, wire-level messaging protocol designed for interoperability. It allows client applications written in languages such as Java, Python, C#, and Node.js to communicate with AMQ Broker using a standardized, efficient protocol.</p>
+</li>
+<li>
+<p><strong>MQTT (Message Queuing Telemetry Transport):</strong> A lightweight publish/subscribe protocol optimized for constrained devices and low-bandwidth, high-latency networks. It is widely adopted in Internet of Things (IoT) and mobile application scenarios.</p>
+</li>
+<li>
+<p><strong>STOMP (Simple Text-Oriented Messaging Protocol):</strong> A simple, text-based wire protocol, often preferred by web clients (e.g., JavaScript applications) and scripting languages due to its ease of implementation and human-readable format.</p>
+</li>
+<li>
+<p><strong>OpenWire:</strong> The native binary protocol of Apache ActiveMQ. AMQ Broker maintains compatibility with OpenWire, allowing existing ActiveMQ clients to connect and interact without requiring significant modifications.</p>
+</li>
+<li>
+<p><strong>Core Protocol:</strong> The high-performance, low-level native protocol of ActiveMQ Artemis, offering maximum throughput and minimal latency when used with native Artemis clients.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This comprehensive protocol support positions AMQ Broker as a central messaging hub capable of integrating a wide array of client applications and systems.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_amq_broker_architecture"><a class="anchor" href="#_amq_broker_architecture"></a>AMQ Broker Architecture</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At its foundational level, AMQ Broker functions as a central message hub. While it can operate as a standalone instance, its true power, particularly in enterprise and cloud-native environments, is realized through its ability to form clusters for enhanced high availability and scalability.</p>
+</div>
+<div class="ulist">
+<div class="title">Core Architectural Components</div>
+<ul>
+<li>
+<p><strong>Broker Instance:</strong> The fundamental operating unit of the messaging system. Each instance is responsible for managing message queues, topics, client connections, and message persistence.</p>
+</li>
+<li>
+<p><strong>Message Store (Journal/Database):</strong> This critical component ensures message durability by persistently storing messages. AMQ Broker primarily uses a high-performance journal file system, but it can also integrate with external JDBC-compliant databases for persistence.</p>
+</li>
+<li>
+<p><strong>Listeners:</strong> Network endpoints configured to accept client connections over various supported protocols (e.g., AMQP, MQTT, STOMP, OpenWire, Core). Each listener binds to a specific port and protocol.</p>
+</li>
+<li>
+<p><strong>Security Manager:</strong> Responsible for authenticating connecting clients (verifying identity) and enforcing authorization rules (determining what resources - like queues or topics - a client can access).</p>
+</li>
+<li>
+<p><strong>Management Console (Hawtio):</strong> A web-based graphical user interface that provides tools for monitoring the broker&#8217;s operational status, inspecting message queues and topics, managing client connections, and performing various administrative tasks.</p>
+</li>
+<li>
+<p><strong>Clients (Producers &amp; Consumers):</strong> External applications that interact with the broker. <strong>Producers</strong> send messages to the broker, while <strong>Consumers</strong> retrieve messages from the broker for processing. Clients typically use specific protocol implementations (e.g., a JMS client, an AMQP client library).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When deployed on OpenShift Container Platform, an AMQ Broker instance is typically encapsulated within a containerized Pod. These Pods are then managed and orchestrated by the AMQ Broker Operator, which automates tasks such as provisioning, scaling, and ensuring high availability. The architecture can scale from a single broker pod to sophisticated clusters comprising replicated live-backup brokers or shared-store configurations, leveraging OpenShift&#8217;s robust persistent storage and advanced networking capabilities.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The subsequent sections will delve deeper into each of these architectural components, particularly focusing on their configuration and management within an OpenShift environment.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="amq-broker-overview.html">AMQ Broker Overview</a></span>
+  <span class="next"><a href="foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
