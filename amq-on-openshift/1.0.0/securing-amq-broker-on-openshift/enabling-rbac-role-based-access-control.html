@@ -60,7 +60,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -405,38 +405,52 @@
 </aside>
 <article class="doc">
 <h1 class="page">Enabling RBAC (Role-Based Access Control)</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>Here&#8217;s the detailed educational content for "Enabling RBAC (Role-Based Access Control)" in Antora AsciiDoc format.</p>
+<p>Role-Based Access Control (RBAC) is a fundamental security mechanism for message brokers, allowing administrators to define precise permissions for users and applications interacting with the broker. On OpenShift, Red Hat AMQ Broker integrates its native security features, which are primarily managed through the <code>ActiveMQArtemis</code> Custom Resource (CR), with OpenShift&#8217;s operational environment.</p>
+</div>
+<div class="paragraph">
+<p>This section provides a comprehensive guide on configuring RBAC for both messaging operations (controlling access to queues and topics) and management operations (controlling access to the broker&#8217;s administrative functions). Additionally, it addresses how to approach integration with OpenShift authentication mechanisms.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction_to_amq_broker_rbac"><a class="anchor" href="#_introduction_to_amq_broker_rbac"></a>Introduction to AMQ Broker RBAC</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AMQ Broker implements RBAC to manage two distinct but interconnected aspects of security:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Messaging Operations</strong>: This governs who can perform actions such as sending messages to an address (queue or topic), consuming messages from it, creating new addresses, or browsing message content.</p>
+</li>
+<li>
+<p><strong>Management Operations</strong>: This controls access to the broker&#8217;s management API (MBeans), which allows users to view metrics, modify configuration, or perform administrative tasks programmatically or through management consoles.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A significant improvement in recent AMQ Broker versions (e.g., 7.12 and later) is the ability to apply many RBAC configurations dynamically through the <code>ActiveMQArtemis</code> CR. This eliminates the need for a full broker restart for certain changes, enhancing operational efficiency.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_rbac_for_messaging_operations"><a class="anchor" href="#_configuring_rbac_for_messaging_operations"></a>Configuring RBAC for Messaging Operations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To enforce security for message producers and consumers, you define permissions for specific roles within the <code>ActiveMQArtemis</code> Custom Resource. These permissions determine which roles can interact with particular queues and topics (referred to as addresses in AMQ Broker). The configuration is done via the <code>brokerProperties</code> field in the CR, which directly influences the broker&#8217;s internal security settings.</p>
+</div>
+<div class="sect2">
+<h3 id="_defining_permissions_for_messaging_operations"><a class="anchor" href="#_defining_permissions_for_messaging_operations"></a>Defining Permissions for Messaging Operations</h3>
+<div class="paragraph">
+<p>Permissions for messaging operations are granular. You can grant roles rights such as <code>send</code>, <code>consume</code>, <code>createAddress</code>, <code>createNonDurableQueue</code>, and <code>browse</code> for a specific address. A wildcard character (<code>#</code>) can be used to assign permissions across all addresses.</p>
 </div>
 <div class="listingblock">
+<div class="title">Example: Granting Messaging Permissions via <code>brokerProperties</code></div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">= Enabling RBAC (Role-Based Access Control)
-
-Role-Based Access Control (RBAC) is a fundamental security mechanism for message brokers, allowing administrators to define precise permissions for users and applications interacting with the broker. On OpenShift, Red Hat AMQ Broker integrates its native security features, which are primarily managed through the `ActiveMQArtemis` Custom Resource (CR), with OpenShift's operational environment.
-
-This section provides a comprehensive guide on configuring RBAC for both messaging operations (controlling access to queues and topics) and management operations (controlling access to the broker's administrative functions). Additionally, it addresses how to approach integration with OpenShift authentication mechanisms.
-
-== Introduction to AMQ Broker RBAC
-
-AMQ Broker implements RBAC to manage two distinct but interconnected aspects of security:
-
-*   *Messaging Operations*: This governs who can perform actions such as sending messages to an address (queue or topic), consuming messages from it, creating new addresses, or browsing message content.
-*   *Management Operations*: This controls access to the broker's management API (MBeans), which allows users to view metrics, modify configuration, or perform administrative tasks programmatically or through management consoles.
-
-A significant improvement in recent AMQ Broker versions (e.g., 7.12 and later) is the ability to apply many RBAC configurations dynamically through the `ActiveMQArtemis` CR. This eliminates the need for a full broker restart for certain changes, enhancing operational efficiency.
-
-== Configuring RBAC for Messaging Operations
-
-To enforce security for message producers and consumers, you define permissions for specific roles within the `ActiveMQArtemis` Custom Resource. These permissions determine which roles can interact with particular queues and topics (referred to as addresses in AMQ Broker). The configuration is done via the `brokerProperties` field in the CR, which directly influences the broker's internal security settings.
-
-=== Defining Permissions for Messaging Operations
-
-Permissions for messaging operations are granular. You can grant roles rights such as `send`, `consume`, `createAddress`, `createNonDurableQueue`, and `browse` for a specific address. A wildcard character (`#`) can be used to assign permissions across all addresses.
-
-.Example: Granting Messaging Permissions via `brokerProperties`
-[source,yaml]
-----
-apiVersion: broker.amq.redhat.com/v1beta1
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.redhat.com/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
@@ -448,52 +462,87 @@ spec:
     - 'security.roles.group1.createAddress=#'
     - 'security.roles.group1.createNonDurableQueue=#'
     - 'security.roles.group1.browse=#'
-  # ...
-----
-&lt;1&gt; The `group2` role is granted `send` permissions to all addresses (`#`).
-&lt;2&gt; The `group1` role is granted `consume`, `createAddress`, `createNonDurableQueue`, and `browse` permissions to all addresses (`#`).
-
-[NOTE]
-In a Java properties file (which `brokerProperties` effectively translates into), a colon (`:`) is a reserved character used to separate a key and a value. If you need to grant permissions to a Fully Qualified Queue Name (FQQN) that contains a colon, ensure it is properly escaped or handled according to the broker's configuration parsing rules.
-
-[[lab-config-messaging-rbac]]
-=== Hands-on Lab: Configuring Messaging RBAC
-
-In this lab, you will modify an existing `ActiveMQArtemis` Custom Resource to implement basic messaging RBAC rules, demonstrating how to control producer and consumer access.
-
-.Prerequisites
-*   An OpenShift cluster with the AMQ Broker Operator installed and running.
-*   An `ActiveMQArtemis` broker instance already deployed (e.g., named `my-broker-instance`).
-*   The `oc` command-line tool configured and authenticated to your OpenShift cluster.
-
-.Procedure
-
-. *Log in to OpenShift and select your project*:
-+
-Ensure you are operating within the OpenShift project where your AMQ Broker instance is deployed. Replace `&lt;project_name&gt;` with your specific project name.
-+
-[,bash]
-----
-oc login -u &lt;your_username&gt; -p &lt;your_password&gt; &lt;openshift_api_url&gt;
-oc project &lt;project_name&gt;
-----
-
-. *Edit the `ActiveMQArtemis` Custom Resource*:
-+
-Open your broker's CR for editing using the `oc edit` command. Replace `my-broker-instance` with the actual name of your broker instance.
-+
-[,bash]
-----
-oc edit activemqartemis my-broker-instance
-----
-
-. *Add or modify `brokerProperties` for RBAC*:
-+
-Navigate to the `spec:` section within the CR. Add or update the `brokerProperties` array to define the desired permissions for your roles. For this example, we will define roles for `order-producers` and `order-consumers`.
-+
-[source,yaml]
-----
-apiVersion: broker.amq.redhat.com/v1beta1
+  # ...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>group2</code> role is granted <code>send</code> permissions to all addresses (<code>#</code>).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>group1</code> role is granted <code>consume</code>, <code>createAddress</code>, <code>createNonDurableQueue</code>, and <code>browse</code> permissions to all addresses (<code>#</code>).</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+In a Java properties file (which <code>brokerProperties</code> effectively translates into), a colon (<code>:</code>) is a reserved character used to separate a key and a value. If you need to grant permissions to a Fully Qualified Queue Name (FQQN) that contains a colon, ensure it is properly escaped or handled according to the broker&#8217;s configuration parsing rules.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="lab-config-messaging-rbac"><a class="anchor" href="#lab-config-messaging-rbac"></a>Hands-on Lab: Configuring Messaging RBAC</h3>
+<div class="paragraph">
+<p>In this lab, you will modify an existing <code>ActiveMQArtemis</code> Custom Resource to implement basic messaging RBAC rules, demonstrating how to control producer and consumer access.</p>
+</div>
+<div class="ulist">
+<div class="title">Prerequisites</div>
+<ul>
+<li>
+<p>An OpenShift cluster with the AMQ Broker Operator installed and running.</p>
+</li>
+<li>
+<p>An <code>ActiveMQArtemis</code> broker instance already deployed (e.g., named <code>my-broker-instance</code>).</p>
+</li>
+<li>
+<p>The <code>oc</code> command-line tool configured and authenticated to your OpenShift cluster.</p>
+</li>
+</ul>
+</div>
+<div class="olist arabic">
+<div class="title">Procedure</div>
+<ol class="arabic">
+<li>
+<p><strong>Log in to OpenShift and select your project</strong>:</p>
+<div class="paragraph">
+<p>Ensure you are operating within the OpenShift project where your AMQ Broker instance is deployed. Replace <code>&lt;project_name&gt;</code> with your specific project name.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc login -u &lt;your_username&gt; -p &lt;your_password&gt; &lt;openshift_api_url&gt;
+oc project &lt;project_name&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Edit the <code>ActiveMQArtemis</code> Custom Resource</strong>:</p>
+<div class="paragraph">
+<p>Open your broker&#8217;s CR for editing using the <code>oc edit</code> command. Replace <code>my-broker-instance</code> with the actual name of your broker instance.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc edit activemqartemis my-broker-instance</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Add or modify <code>brokerProperties</code> for RBAC</strong>:</p>
+<div class="paragraph">
+<p>Navigate to the <code>spec:</code> section within the CR. Add or update the <code>brokerProperties</code> array to define the desired permissions for your roles. For this example, we will define roles for <code>order-producers</code> and <code>order-consumers</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.redhat.com/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
@@ -507,34 +556,61 @@ spec:
     - 'security.roles.system-admin.send=#'
     - 'security.roles.system-admin.consume=#'
     - 'security.roles.system-admin.browse=#'
-  # ...
-----
-&lt;1&gt; The `order-producers` role is allowed to send messages only to `orders.queue`.
-&lt;2&gt; The `order-consumers` role is allowed to consume messages only from `orders.queue`.
-&lt;3&gt; The `system-admin` role has full permissions (send, consume, create, browse) across all addresses.
-
-. *Save the CR*:
-+
-Save the changes and exit the editor. The AMQ Broker Operator will automatically detect the update to the CR and reconfigure the broker pods with the new security rules. This process typically does not require a broker restart for `brokerProperties` changes.
-
-. *Verify the changes*:
-+
-After the Operator applies the changes (which usually takes a few moments), the new RBAC rules are active. To fully verify, you would need client applications configured to authenticate as users assigned to these roles (e.g., a user associated with `order-producers` attempting to send a message). Ensure that unauthorized operations are blocked and authorized operations succeed.
-
-== Configuring RBAC for Management Operations (MBeans)
-
-In addition to controlling messaging access, AMQ Broker allows you to restrict who can access and manipulate its management interface, exposed through MBeans. This is crucial for securing administrative functions and preventing unauthorized configuration changes or data exposure.
-
-As noted in the context, starting with AMQ Broker version 7.12, MBean RBAC can be configured directly within the `ActiveMQArtemis` CR, and these changes are applied dynamically without requiring a broker restart. This is a significant improvement over previous versions where a restart was often necessary.
-
-=== Defining MBean Permissions
-
-MBean permissions are configured within the `brokerProperties` of the `ActiveMQArtemis` CR, targeting specific MBean domains and operations.
-
-.Example: Granting MBean Permissions
-[source,yaml]
-----
-apiVersion: broker.amq.redhat.com/v1beta1
+  # ...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>order-producers</code> role is allowed to send messages only to <code>orders.queue</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>order-consumers</code> role is allowed to consume messages only from <code>orders.queue</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>system-admin</code> role has full permissions (send, consume, create, browse) across all addresses.</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p><strong>Save the CR</strong>:</p>
+<div class="paragraph">
+<p>Save the changes and exit the editor. The AMQ Broker Operator will automatically detect the update to the CR and reconfigure the broker pods with the new security rules. This process typically does not require a broker restart for <code>brokerProperties</code> changes.</p>
+</div>
+</li>
+<li>
+<p><strong>Verify the changes</strong>:</p>
+<div class="paragraph">
+<p>After the Operator applies the changes (which usually takes a few moments), the new RBAC rules are active. To fully verify, you would need client applications configured to authenticate as users assigned to these roles (e.g., a user associated with <code>order-producers</code> attempting to send a message). Ensure that unauthorized operations are blocked and authorized operations succeed.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_rbac_for_management_operations_mbeans"><a class="anchor" href="#_configuring_rbac_for_management_operations_mbeans"></a>Configuring RBAC for Management Operations (MBeans)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In addition to controlling messaging access, AMQ Broker allows you to restrict who can access and manipulate its management interface, exposed through MBeans. This is crucial for securing administrative functions and preventing unauthorized configuration changes or data exposure.</p>
+</div>
+<div class="paragraph">
+<p>As noted in the context, starting with AMQ Broker version 7.12, MBean RBAC can be configured directly within the <code>ActiveMQArtemis</code> CR, and these changes are applied dynamically without requiring a broker restart. This is a significant improvement over previous versions where a restart was often necessary.</p>
+</div>
+<div class="sect2">
+<h3 id="_defining_mbean_permissions"><a class="anchor" href="#_defining_mbean_permissions"></a>Defining MBean Permissions</h3>
+<div class="paragraph">
+<p>MBean permissions are configured within the <code>brokerProperties</code> of the <code>ActiveMQArtemis</code> CR, targeting specific MBean domains and operations.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example: Granting MBean Permissions</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.redhat.com/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
@@ -546,26 +622,54 @@ spec:
     - 'security.management.roles.manager.edit=activemq.management' <i class="conum" data-value="2"></i><b>(2)</b>
     - 'security.management.roles.auditor.view=mops.#' <i class="conum" data-value="3"></i><b>(3)</b>
     - 'security.management.roles.auditor.edit=mops.#' <i class="conum" data-value="4"></i><b>(4)</b>
-  # ...
-----
-&lt;1&gt; The `manager` role has `view` permission for the `activemq.management` address.
-&lt;2&gt; The `manager` role also has `edit` permission for the `activemq.management` address, allowing modification.
-&lt;3&gt; The `auditor` role has `view` permission for all management operations (`mops.#`), allowing inspection.
-&lt;4&gt; The `auditor` role also has `edit` permission for all management operations (`mops.#`), granting full management control.
-
-[NOTE]
-The asterisk (`*`) in the operation position, as seen in the context example, generally grants access to all operations within a specified MBean domain. The number sign (`#`) after the `mops` prefix indicates access to all MBeans under the management operations domain.
-
-=== Removing Default RBAC Configuration
-
-When configuring MBean RBAC through the `ActiveMQArtemis` CR, it is *essential* to prevent the broker from loading its default RBAC configuration. The default configuration, located at `/amq/init/config/amq-broker/etc/management.xml` within the broker container, must be removed or superseded so that your custom, CR-defined RBAC rules are enforced.
-
-This is accomplished by injecting an `initContainer` into the broker's deployment. This `initContainer` executes a script to delete the default `management.xml` file *before* the main broker container starts, ensuring your new configuration takes precedence.
-
-.Example: Init Container to Remove Default RBAC Configuration
-[source,yaml]
-----
-apiVersion: broker.amq.redhat.com/v1beta1
+  # ...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>manager</code> role has <code>view</code> permission for the <code>activemq.management</code> address.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>manager</code> role also has <code>edit</code> permission for the <code>activemq.management</code> address, allowing modification.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The <code>auditor</code> role has <code>view</code> permission for all management operations (<code>mops.#</code>), allowing inspection.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The <code>auditor</code> role also has <code>edit</code> permission for all management operations (<code>mops.#</code>), granting full management control.</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The asterisk (<code>*</code>) in the operation position, as seen in the context example, generally grants access to all operations within a specified MBean domain. The number sign (<code>#</code>) after the <code>mops</code> prefix indicates access to all MBeans under the management operations domain.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_removing_default_rbac_configuration"><a class="anchor" href="#_removing_default_rbac_configuration"></a>Removing Default RBAC Configuration</h3>
+<div class="paragraph">
+<p>When configuring MBean RBAC through the <code>ActiveMQArtemis</code> CR, it is <strong>essential</strong> to prevent the broker from loading its default RBAC configuration. The default configuration, located at <code>/amq/init/config/amq-broker/etc/management.xml</code> within the broker container, must be removed or superseded so that your custom, CR-defined RBAC rules are enforced.</p>
+</div>
+<div class="paragraph">
+<p>This is accomplished by injecting an <code>initContainer</code> into the broker&#8217;s deployment. This <code>initContainer</code> executes a script to delete the default <code>management.xml</code> file <strong>before</strong> the main broker container starts, ensuring your new configuration takes precedence.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example: Init Container to Remove Default RBAC Configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.redhat.com/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
@@ -582,43 +686,64 @@ spec:
           volumeMounts:
             - name: my-broker-instance-instance-volume <i class="conum" data-value="1"></i><b>(1)</b>
               mountPath: /amq/init/config/amq-broker/etc/
-  # ...
-----
-&lt;1&gt; Replace `my-broker-instance-instance-volume` with the actual volume name used by your broker deployment. This name typically follows the pattern `&lt;BROKER_NAME&gt;-instance-volume`. You can verify the exact volume name by inspecting an existing broker pod's YAML (`oc get pod &lt;broker_pod_name&gt; -o yaml`) and looking under `spec.volumes`.
-
-[[lab-config-mbean-rbac]]
-=== Hands-on Lab: Configuring MBean RBAC
-
-In this lab, you will configure MBean RBAC rules and add the necessary `initContainer` to ensure these custom rules are correctly applied by the broker.
-
-.Prerequisites
-*   An OpenShift cluster with the AMQ Broker Operator installed and running.
-*   An `ActiveMQArtemis` broker instance already deployed (e.g., `my-broker-instance`).
-*   The `oc` command-line tool configured and authenticated to your OpenShift cluster.
-
-.Procedure
-
-. *Log in to OpenShift and select your project*:
-+
-[,bash]
-----
-oc project &lt;project_name&gt;
-----
-
-. *Edit the `ActiveMQArtemis` Custom Resource*:
-+
-[,bash]
-----
-oc edit activemqartemis my-broker-instance
-----
-
-. *Add MBean RBAC rules and the `initContainer`*:
-+
-Locate the `spec:` section. Add or modify the `brokerProperties` to define your MBean permissions. Then, add the `deploymentPlan.resourceTemplates.initContainers` section to configure the removal of the default `management.xml`.
-+
-[source,yaml]
-----
-apiVersion: broker.amq.redhat.com/v1beta1
+  # ...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Replace <code>my-broker-instance-instance-volume</code> with the actual volume name used by your broker deployment. This name typically follows the pattern <code>&lt;BROKER_NAME&gt;-instance-volume</code>. You can verify the exact volume name by inspecting an existing broker pod&#8217;s YAML (<code>oc get pod &lt;broker_pod_name&gt; -o yaml</code>) and looking under <code>spec.volumes</code>.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="lab-config-mbean-rbac"><a class="anchor" href="#lab-config-mbean-rbac"></a>Hands-on Lab: Configuring MBean RBAC</h3>
+<div class="paragraph">
+<p>In this lab, you will configure MBean RBAC rules and add the necessary <code>initContainer</code> to ensure these custom rules are correctly applied by the broker.</p>
+</div>
+<div class="ulist">
+<div class="title">Prerequisites</div>
+<ul>
+<li>
+<p>An OpenShift cluster with the AMQ Broker Operator installed and running.</p>
+</li>
+<li>
+<p>An <code>ActiveMQArtemis</code> broker instance already deployed (e.g., <code>my-broker-instance</code>).</p>
+</li>
+<li>
+<p>The <code>oc</code> command-line tool configured and authenticated to your OpenShift cluster.</p>
+</li>
+</ul>
+</div>
+<div class="olist arabic">
+<div class="title">Procedure</div>
+<ol class="arabic">
+<li>
+<p><strong>Log in to OpenShift and select your project</strong>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc project &lt;project_name&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Edit the <code>ActiveMQArtemis</code> Custom Resource</strong>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc edit activemqartemis my-broker-instance</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Add MBean RBAC rules and the <code>initContainer</code></strong>:</p>
+<div class="paragraph">
+<p>Locate the <code>spec:</code> section. Add or modify the <code>brokerProperties</code> to define your MBean permissions. Then, add the <code>deploymentPlan.resourceTemplates.initContainers</code> section to configure the removal of the default <code>management.xml</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.redhat.com/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
@@ -640,36 +765,78 @@ spec:
           volumeMounts:
             - name: my-broker-instance-instance-volume <i class="conum" data-value="3"></i><b>(3)</b>
               mountPath: /amq/init/config/amq-broker/etc/
-  # ...
-----
-&lt;1&gt; The `operations` role has full `view` and `edit` permissions for all MBeans.
-&lt;2&gt; The `monitoring` role has `view` permission for the `activemq.management` address, suitable for monitoring tools.
-&lt;3&gt; Replace `my-broker-instance-instance-volume` with the correct volume name for your broker instance.
-
-. *Save the CR*:
-+
-Save the changes and exit the editor. The Operator will detect this significant change (introduction of an `initContainer`) and will redeploy your broker pods. This will cause a brief service disruption as pods are terminated and recreated.
-
-. *Verify the changes*:
-+
-After the new pods are running, attempt management operations (e.g., through a JMX client or the Hawtio console, if configured for external authentication) with users assigned to the `operations` or `monitoring` roles. Confirm that permissions are correctly applied and unauthorized actions are blocked.
-
-[IMPORTANT]
-The `managementRBACEnabled` property dictates whether role-based access control is enabled for the broker's management MBeans. If you set `managementRBACEnabled` to `false` (often a requirement when using tools like Fuse Console that implement their *own* RBAC), then the broker's management MBeans will *not* require authorization. In this state, it is *critical* to *avoid* using the default AMQ management console, as it would expose all management operations to any user without authentication or authorization. Always prioritize either the AMQ management console with its native RBAC (`managementRBACEnabled` left at its default or `true`) or Fuse Console with its independent RBAC, but understand the security implications of `managementRBACEnabled: false`.
-
-== Integrating with OpenShift Authentication Mechanisms
-
-While the `ActiveMQArtemis` CR allows you to define *what roles* can do, you still need a mechanism to map actual *users* (or groups) to these roles. On OpenShift, this usually involves integrating the AMQ Broker with an external Identity Provider (IDP) that OpenShift itself might be using, such as LDAP, Microsoft Active Directory, or Keycloak.
-
-AMQ Broker uses the Java Authentication and Authorization Service (JAAS) for external authentication and authorization. To integrate the broker with OpenShift's authentication ecosystem, you would typically follow these steps:
-
-.  *Configure a custom JAAS login module*: You need to develop or configure a JAAS login module that can authenticate users against your chosen IDP (e.g., an LDAP-based module for an LDAP server, or a custom module for OpenShift's OAuth provider integration). This module is also responsible for retrieving user roles from the IDP and mapping them to the roles you defined in the `ActiveMQArtemis` CR (e.g., `order-producers`, `system-admin`).
-.  *Provide the JAAS configuration to the broker*: The `ActiveMQArtemis` CR provides mechanisms to mount custom configuration files and secrets into the broker pods. You would create an OpenShift Secret containing your `login.config` file (and any other necessary files like custom JAAS module JARs or truststore files for SSL/TLS connections to your IDP). This secret is then mounted into the broker pods using `extraMounts`.
-
-.Example: Mounting a Custom JAAS Configuration Secret
-[source,yaml]
-----
-apiVersion: broker.amq.redhat.com/v1beta1
+  # ...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>operations</code> role has full <code>view</code> and <code>edit</code> permissions for all MBeans.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>monitoring</code> role has <code>view</code> permission for the <code>activemq.management</code> address, suitable for monitoring tools.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Replace <code>my-broker-instance-instance-volume</code> with the correct volume name for your broker instance.</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p><strong>Save the CR</strong>:</p>
+<div class="paragraph">
+<p>Save the changes and exit the editor. The Operator will detect this significant change (introduction of an <code>initContainer</code>) and will redeploy your broker pods. This will cause a brief service disruption as pods are terminated and recreated.</p>
+</div>
+</li>
+<li>
+<p><strong>Verify the changes</strong>:</p>
+<div class="paragraph">
+<p>After the new pods are running, attempt management operations (e.g., through a JMX client or the Hawtio console, if configured for external authentication) with users assigned to the <code>operations</code> or <code>monitoring</code> roles. Confirm that permissions are correctly applied and unauthorized actions are blocked.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+The <code>managementRBACEnabled</code> property dictates whether role-based access control is enabled for the broker&#8217;s management MBeans. If you set <code>managementRBACEnabled</code> to <code>false</code> (often a requirement when using tools like Fuse Console that implement their <strong>own</strong> RBAC), then the broker&#8217;s management MBeans will <strong>not</strong> require authorization. In this state, it is <strong>critical</strong> to <strong>avoid</strong> using the default AMQ management console, as it would expose all management operations to any user without authentication or authorization. Always prioritize either the AMQ management console with its native RBAC (<code>managementRBACEnabled</code> left at its default or <code>true</code>) or Fuse Console with its independent RBAC, but understand the security implications of <code>managementRBACEnabled: false</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_integrating_with_openshift_authentication_mechanisms"><a class="anchor" href="#_integrating_with_openshift_authentication_mechanisms"></a>Integrating with OpenShift Authentication Mechanisms</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>While the <code>ActiveMQArtemis</code> CR allows you to define <strong>what roles</strong> can do, you still need a mechanism to map actual <strong>users</strong> (or groups) to these roles. On OpenShift, this usually involves integrating the AMQ Broker with an external Identity Provider (IDP) that OpenShift itself might be using, such as LDAP, Microsoft Active Directory, or Keycloak.</p>
+</div>
+<div class="paragraph">
+<p>AMQ Broker uses the Java Authentication and Authorization Service (JAAS) for external authentication and authorization. To integrate the broker with OpenShift&#8217;s authentication ecosystem, you would typically follow these steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Configure a custom JAAS login module</strong>: You need to develop or configure a JAAS login module that can authenticate users against your chosen IDP (e.g., an LDAP-based module for an LDAP server, or a custom module for OpenShift&#8217;s OAuth provider integration). This module is also responsible for retrieving user roles from the IDP and mapping them to the roles you defined in the <code>ActiveMQArtemis</code> CR (e.g., <code>order-producers</code>, <code>system-admin</code>).</p>
+</li>
+<li>
+<p><strong>Provide the JAAS configuration to the broker</strong>: The <code>ActiveMQArtemis</code> CR provides mechanisms to mount custom configuration files and secrets into the broker pods. You would create an OpenShift Secret containing your <code>login.config</code> file (and any other necessary files like custom JAAS module JARs or truststore files for SSL/TLS connections to your IDP). This secret is then mounted into the broker pods using <code>extraMounts</code>.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="title">Example: Mounting a Custom JAAS Configuration Secret</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.redhat.com/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
@@ -680,22 +847,56 @@ spec:
       mountPath: /home/amq/broker/etc/custom-jaas-config/ <i class="conum" data-value="2"></i><b>(2)</b>
   secrets:
     - custom-jaas-config <i class="conum" data-value="3"></i><b>(3)</b>
-  # ...
-----
-&lt;1&gt; `name`: A unique name for the mount, referencing the secret.
-&lt;2&gt; `mountPath`: The path inside the broker container where the secret's contents will be available.
-&lt;3&gt; `secrets`: A list of OpenShift Secrets to be mounted, by name. This Secret (`custom-jaas-config`) would contain your `login.config` file.
-
-In this configuration:
-
-*   You create an OpenShift Secret (e.g., named `custom-jaas-config`) that holds your `login.config` file and other security-related resources.
-*   The `extraMounts` section specifies the internal container path where this secret's files will be accessible.
-*   The broker's `broker.xml` (which can be customized via `brokerProperties` or a separate mounted configuration) would then be configured to use this custom JAAS realm for authentication and authorization. This typically involves setting the `security-domain` attribute for listeners or management components to reference the custom JAAS configuration.
-
-[IMPORTANT]
-The provided context demonstrates *how* to mount a secret containing a custom JAAS configuration, but it does not detail the creation of the JAAS `login.config` file itself or the specifics of integrating with various IDPs (e.g., LDAP, Kerberos, Keycloak/OAuth). Implementing this aspect requires a deeper understanding of JAAS modules, your specific IDP's configuration, and how to configure AMQ Broker's `broker.xml` to leverage the custom JAAS realm. You would typically use standard JAAS modules like `LdapLoginModule` or develop a custom security provider for more complex integrations.
-
-By strategically combining AMQ Broker's internal RBAC rules (defined in the `ActiveMQArtemis` CR) with external user authentication through custom JAAS configurations and OpenShift Secrets, you can achieve a robust, enterprise-grade security posture for your AMQ Broker deployments on OpenShift.</code></pre>
+  # ...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>name</code>: A unique name for the mount, referencing the secret.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>mountPath</code>: The path inside the broker container where the secret&#8217;s contents will be available.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>secrets</code>: A list of OpenShift Secrets to be mounted, by name. This Secret (<code>custom-jaas-config</code>) would contain your <code>login.config</code> file.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In this configuration:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>You create an OpenShift Secret (e.g., named <code>custom-jaas-config</code>) that holds your <code>login.config</code> file and other security-related resources.</p>
+</li>
+<li>
+<p>The <code>extraMounts</code> section specifies the internal container path where this secret&#8217;s files will be accessible.</p>
+</li>
+<li>
+<p>The broker&#8217;s <code>broker.xml</code> (which can be customized via <code>brokerProperties</code> or a separate mounted configuration) would then be configured to use this custom JAAS realm for authentication and authorization. This typically involves setting the <code>security-domain</code> attribute for listeners or management components to reference the custom JAAS configuration.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+The provided context demonstrates <strong>how</strong> to mount a secret containing a custom JAAS configuration, but it does not detail the creation of the JAAS <code>login.config</code> file itself or the specifics of integrating with various IDPs (e.g., LDAP, Kerberos, Keycloak/OAuth). Implementing this aspect requires a deeper understanding of JAAS modules, your specific IDP&#8217;s configuration, and how to configure AMQ Broker&#8217;s <code>broker.xml</code> to leverage the custom JAAS realm. You would typically use standard JAAS modules like <code>LdapLoginModule</code> or develop a custom security provider for more complex integrations.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By strategically combining AMQ Broker&#8217;s internal RBAC rules (defined in the <code>ActiveMQArtemis</code> CR) with external user authentication through custom JAAS configurations and OpenShift Secrets, you can achieve a robust, enterprise-grade security posture for your AMQ Broker deployments on OpenShift.</p>
+</div>
 </div>
 </div>
 <nav class="pagination">

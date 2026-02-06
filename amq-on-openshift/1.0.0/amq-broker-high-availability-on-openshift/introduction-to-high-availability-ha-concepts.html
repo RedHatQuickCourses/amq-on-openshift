@@ -60,7 +60,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -405,52 +405,102 @@
 </aside>
 <article class="doc">
 <h1 class="page">Introduction to High Availability (HA) Concepts</h1>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">[#_introduction_to_high_availability_ha_concepts]
-= Introduction to High Availability (HA) Concepts
-
-High Availability (HA) is a critical design principle for any production-grade messaging system like Red Hat AMQ Broker. It ensures that your messaging infrastructure remains operational and data remains accessible, even in the event of unforeseen failures. This section will introduce the core concepts of HA as they apply to AMQ Broker on OpenShift, laying the groundwork for understanding various deployment strategies.
-
-== What is High Availability?
-
-In the context of AMQ Broker deployed on OpenShift, *High Availability* refers to the capability of the system to maintain the integrity and continuous availability of messaging data. This means that if an individual broker pod, an underlying OpenShift node, or even an entire cluster component experiences a failure, the messaging service will continue to operate with minimal or no disruption, and no messaging data will be lost. The primary goal of HA is to minimize downtime and prevent data loss, ensuring that message producers and consumers can reliably exchange messages without interruption.
-
-=== Why is HA Important for Messaging Systems?
-
-Asynchronous messaging systems often form the backbone of complex microservices architectures, integrating various components and ensuring reliable data flow between them. Without proper HA considerations, a messaging system can become a single point of failure, leading to severe consequences:
-
-*   **Service Disruptions::** A single broker failure could halt critical business operations that rely on message exchange, impacting dependent applications and services.
-*   **Data Loss::** Messages in transit or those queued for delivery could be lost if a broker fails before they are successfully processed or persisted, leading to inconsistent application states and data integrity issues.
-*   **Reduced Reliability::** Applications become fragile and susceptible to outages, impacting user experience, compliance, and overall business continuity.
-*   **Compliance and SLAs::** Many business-critical applications have strict Service Level Agreements (SLAs) for uptime and data durability, which HA helps to meet.
-
-== Core Concepts of HA in AMQ Broker on OpenShift
-
-AMQ Broker on OpenShift leverages both OpenShift's inherent resilience capabilities and its own internal mechanisms to achieve high availability. Understanding these foundational concepts is crucial for designing and deploying robust messaging solutions.
-
-=== Leveraging OpenShift's Built-in HA Capabilities
-
-OpenShift Container Platform provides a robust and resilient foundation for deploying applications, including stateful applications like AMQ Broker. It offers several built-in HA capabilities that AMQ Broker benefits from:
-
-*   **Pod Restarts and Rescheduling::** OpenShift's orchestrator (Kubernetes) continuously monitors the health of pods. If an AMQ Broker pod fails (e.g., due to an application crash, an underlying node failure, or resource exhaustion), OpenShift automatically detects the failure and attempts to restart the pod. If the node itself is unhealthy, OpenShift can reschedule the pod onto a different, healthy node within the cluster, ensuring that the broker service is quickly brought back online.
-*   **Persistent Storage (PV/PVC)::** For stateful applications like AMQ Broker, the ability to store and retrieve data reliably is paramount for HA.
-    **Explanation:** When persistent storage is enabled for AMQ Broker, each broker pod writes its critical messaging data (such as the message journal, message store, and configuration) to a xref:ROOT:different-message-stores-for-amq-broker-on-openshift.adoc[Persistent Volume (PV)] that it claims using a xref:ROOT:different-message-stores-for-amq-broker-on-openshift.adoc[Persistent Volume Claim (PVC)]. A crucial benefit of PVs is that they are independent of the lifespan of a pod. If a broker pod is deleted or fails, the PV, which holds all the critical messaging data, remains available. When OpenShift restarts a new broker pod (potentially on a different node), this new pod can reclaim and attach to the *existing* PV. This mechanism allows the broker to recover its exact messaging state as it was before the failure, preventing data loss and ensuring rapid recovery of the broker's operational state. This is a fundamental aspect of maintaining message integrity and availability in the event of pod or node failures.
-
-=== Broker-Specific HA Strategies: Leader-Follower (Shared Store)
-
-Beyond OpenShift's foundational capabilities, AMQ Broker itself offers specific clustering strategies for enhanced HA, notably the **Leader-Follower** configuration, often referred to as a "shared store" HA setup. This strategy is designed to provide rapid failover and minimize downtime for broker instances.
-
-*   **Architecture::** A leader-follower deployment typically consists of separate deployments, each containing a single broker instance. These broker instances are configured to persist their messages to the *same* shared journal or JDBC database. This shared persistence layer is key to their HA mechanism.
-*   **Leadership Election::** High availability in this setup is achieved through a competition among the broker instances to acquire an exclusive lock on the shared database or the shared volume where their persistence data resides.
-*   **Leader Role::** The broker instance that successfully acquires the lock becomes the *leader broker*. The leader is the active instance that processes all client requests, including accepting new messages from producers, delivering messages to consumers, and managing queues and topics. All operational activities flow through the leader.
-*   **Follower Role::** Any other broker instance that is unable to acquire the lock becomes a *follower*. A follower is a passive broker that continuously monitors the shared resource (the lock) and attempts to obtain it. It does not actively process client requests; its primary role is to stand by, ready to take over.
-*   **Failover Mechanism::** If the leader broker fails (e.g., its pod crashes, its OpenShift node becomes unavailable, or the application itself becomes unresponsive), the exclusive lock on the shared persistence store is released. One of the waiting follower brokers will then immediately detect the lock release, acquire the lock, transition into the leader role, and begin serving client requests.
-*   **Benefits::** Leader-follower deployments offer a faster Mean Time To Repair (MTTR) for a node or broker failure compared to simply relying on OpenShift to restart a single broker deployment from scratch. This rapid failover ensures minimal disruption to client applications, as another broker instance is already spun up and ready to take over the active role with access to all persistent data.
-
-== Next Steps
-
-Understanding these foundational HA concepts is crucial for designing and implementing resilient messaging solutions. In subsequent sections, we will delve into the practical aspects of deploying and configuring HA AMQ Broker clusters, exploring different strategies like shared store and replicated live-backup, and how to manage failover and recovery mechanisms effectively.</code></pre>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>High Availability (HA) is a critical design principle for any production-grade messaging system like Red Hat AMQ Broker. It ensures that your messaging infrastructure remains operational and data remains accessible, even in the event of unforeseen failures. This section will introduce the core concepts of HA as they apply to AMQ Broker on OpenShift, laying the groundwork for understanding various deployment strategies.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_is_high_availability"><a class="anchor" href="#_what_is_high_availability"></a>What is High Availability?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the context of AMQ Broker deployed on OpenShift, <strong>High Availability</strong> refers to the capability of the system to maintain the integrity and continuous availability of messaging data. This means that if an individual broker pod, an underlying OpenShift node, or even an entire cluster component experiences a failure, the messaging service will continue to operate with minimal or no disruption, and no messaging data will be lost. The primary goal of HA is to minimize downtime and prevent data loss, ensuring that message producers and consumers can reliably exchange messages without interruption.</p>
+</div>
+<div class="sect2">
+<h3 id="_why_is_ha_important_for_messaging_systems"><a class="anchor" href="#_why_is_ha_important_for_messaging_systems"></a>Why is HA Important for Messaging Systems?</h3>
+<div class="paragraph">
+<p>Asynchronous messaging systems often form the backbone of complex microservices architectures, integrating various components and ensuring reliable data flow between them. Without proper HA considerations, a messaging system can become a single point of failure, leading to severe consequences:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Service Disruptions::</strong> A single broker failure could halt critical business operations that rely on message exchange, impacting dependent applications and services.</p>
+</li>
+<li>
+<p><strong>Data Loss::</strong> Messages in transit or those queued for delivery could be lost if a broker fails before they are successfully processed or persisted, leading to inconsistent application states and data integrity issues.</p>
+</li>
+<li>
+<p><strong>Reduced Reliability::</strong> Applications become fragile and susceptible to outages, impacting user experience, compliance, and overall business continuity.</p>
+</li>
+<li>
+<p><strong>Compliance and SLAs::</strong> Many business-critical applications have strict Service Level Agreements (SLAs) for uptime and data durability, which HA helps to meet.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_core_concepts_of_ha_in_amq_broker_on_openshift"><a class="anchor" href="#_core_concepts_of_ha_in_amq_broker_on_openshift"></a>Core Concepts of HA in AMQ Broker on OpenShift</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AMQ Broker on OpenShift leverages both OpenShift&#8217;s inherent resilience capabilities and its own internal mechanisms to achieve high availability. Understanding these foundational concepts is crucial for designing and deploying robust messaging solutions.</p>
+</div>
+<div class="sect2">
+<h3 id="_leveraging_openshifts_built_in_ha_capabilities"><a class="anchor" href="#_leveraging_openshifts_built_in_ha_capabilities"></a>Leveraging OpenShift&#8217;s Built-in HA Capabilities</h3>
+<div class="paragraph">
+<p>OpenShift Container Platform provides a robust and resilient foundation for deploying applications, including stateful applications like AMQ Broker. It offers several built-in HA capabilities that AMQ Broker benefits from:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Pod Restarts and Rescheduling::</strong> OpenShift&#8217;s orchestrator (Kubernetes) continuously monitors the health of pods. If an AMQ Broker pod fails (e.g., due to an application crash, an underlying node failure, or resource exhaustion), OpenShift automatically detects the failure and attempts to restart the pod. If the node itself is unhealthy, OpenShift can reschedule the pod onto a different, healthy node within the cluster, ensuring that the broker service is quickly brought back online.</p>
+</li>
+<li>
+<p><strong>Persistent Storage (PV/PVC)::</strong> For stateful applications like AMQ Broker, the ability to store and retrieve data reliably is paramount for HA.
+<strong>Explanation:</strong> When persistent storage is enabled for AMQ Broker, each broker pod writes its critical messaging data (such as the message journal, message store, and configuration) to a <a href="#ROOT:different-message-stores-for-amq-broker-on-openshift.adoc" class="xref unresolved">Persistent Volume (PV)</a> that it claims using a <a href="#ROOT:different-message-stores-for-amq-broker-on-openshift.adoc" class="xref unresolved">Persistent Volume Claim (PVC)</a>. A crucial benefit of PVs is that they are independent of the lifespan of a pod. If a broker pod is deleted or fails, the PV, which holds all the critical messaging data, remains available. When OpenShift restarts a new broker pod (potentially on a different node), this new pod can reclaim and attach to the <strong>existing</strong> PV. This mechanism allows the broker to recover its exact messaging state as it was before the failure, preventing data loss and ensuring rapid recovery of the broker&#8217;s operational state. This is a fundamental aspect of maintaining message integrity and availability in the event of pod or node failures.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_broker_specific_ha_strategies_leader_follower_shared_store"><a class="anchor" href="#_broker_specific_ha_strategies_leader_follower_shared_store"></a>Broker-Specific HA Strategies: Leader-Follower (Shared Store)</h3>
+<div class="paragraph">
+<p>Beyond OpenShift&#8217;s foundational capabilities, AMQ Broker itself offers specific clustering strategies for enhanced HA, notably the <strong>Leader-Follower</strong> configuration, often referred to as a "shared store" HA setup. This strategy is designed to provide rapid failover and minimize downtime for broker instances.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Architecture::</strong> A leader-follower deployment typically consists of separate deployments, each containing a single broker instance. These broker instances are configured to persist their messages to the <strong>same</strong> shared journal or JDBC database. This shared persistence layer is key to their HA mechanism.</p>
+</li>
+<li>
+<p><strong>Leadership Election::</strong> High availability in this setup is achieved through a competition among the broker instances to acquire an exclusive lock on the shared database or the shared volume where their persistence data resides.</p>
+</li>
+<li>
+<p><strong>Leader Role::</strong> The broker instance that successfully acquires the lock becomes the <strong>leader broker</strong>. The leader is the active instance that processes all client requests, including accepting new messages from producers, delivering messages to consumers, and managing queues and topics. All operational activities flow through the leader.</p>
+</li>
+<li>
+<p><strong>Follower Role::</strong> Any other broker instance that is unable to acquire the lock becomes a <strong>follower</strong>. A follower is a passive broker that continuously monitors the shared resource (the lock) and attempts to obtain it. It does not actively process client requests; its primary role is to stand by, ready to take over.</p>
+</li>
+<li>
+<p><strong>Failover Mechanism::</strong> If the leader broker fails (e.g., its pod crashes, its OpenShift node becomes unavailable, or the application itself becomes unresponsive), the exclusive lock on the shared persistence store is released. One of the waiting follower brokers will then immediately detect the lock release, acquire the lock, transition into the leader role, and begin serving client requests.</p>
+</li>
+<li>
+<p><strong>Benefits::</strong> Leader-follower deployments offer a faster Mean Time To Repair (MTTR) for a node or broker failure compared to simply relying on OpenShift to restart a single broker deployment from scratch. This rapid failover ensures minimal disruption to client applications, as another broker instance is already spun up and ready to take over the active role with access to all persistent data.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_next_steps"><a class="anchor" href="#_next_steps"></a>Next Steps</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Understanding these foundational HA concepts is crucial for designing and implementing resilient messaging solutions. In subsequent sections, we will delve into the practical aspects of deploying and configuring HA AMQ Broker clusters, exploring different strategies like shared store and replicated live-backup, and how to manage failover and recovery mechanisms effectively.</p>
+</div>
 </div>
 </div>
 <nav class="pagination">

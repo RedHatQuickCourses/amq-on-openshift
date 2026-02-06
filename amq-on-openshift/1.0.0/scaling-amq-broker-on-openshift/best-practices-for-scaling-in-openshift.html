@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Best Practices for Scaling in OpenShift :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <title>Best Practices for Scaling AMQ Broker on OpenShift :: AMQ Broker on OpenShift: Deployment and Management</title>
     <link rel="prev" href="performance-considerations-for-scaling.html">
     <link rel="next" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">
     <meta name="generator" content="Antora 3.1.3">
@@ -60,7 +60,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -395,7 +395,7 @@
   <ul>
     <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
     <li><a href="scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a></li>
-    <li><a href="best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a></li>
+    <li><a href="best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a></li>
   </ul>
 </nav>
 </div>
@@ -404,45 +404,65 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Best Practices for Scaling in OpenShift</h1>
+<h1 class="page">Best Practices for Scaling AMQ Broker on OpenShift</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>Here&#8217;s the detailed educational content for "Best Practices for Scaling in OpenShift" for AMQ Broker, presented in Antora AsciiDoc format.</p>
+<p>This section outlines essential best practices for effectively scaling Red Hat AMQ Broker deployments on OpenShift Container Platform. Proper scaling ensures your messaging infrastructure can handle varying loads, maintain performance, and provide high availability without unnecessary resource consumption.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_understanding_scaling_amq_broker_on_openshift"><a class="anchor" href="#_understanding_scaling_amq_broker_on_openshift"></a>Understanding Scaling AMQ Broker on OpenShift</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Scaling an AMQ Broker deployment on OpenShift involves adjusting the number of broker instances (pods) and/or the resources allocated to those instances to meet demand. This can be achieved through:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Horizontal Scaling:</strong> Adding or removing broker pods (replicas) to distribute the load across multiple instances. This is managed by increasing or decreasing the <code>replicas</code> count in your <code>Broker</code> Custom Resource.</p>
+</li>
+<li>
+<p><strong>Vertical Scaling:</strong> Increasing or decreasing the CPU and memory resources allocated to individual broker pods. This is done by modifying the <code>resources</code> section within your <code>Broker</code> Custom Resource.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Effective scaling is not just about adding resources; it&#8217;s about making informed decisions based on your workload, ensuring data integrity, and optimizing resource utilization.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_key_best_practices_for_scaling_amq_broker"><a class="anchor" href="#_key_best_practices_for_scaling_amq_broker"></a>Key Best Practices for Scaling AMQ Broker</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section details critical considerations and configurations for scaling AMQ Broker instances on OpenShift.</p>
+</div>
+<div class="sect2">
+<h3 id="_1_right_sizing_resource_requests_and_limits"><a class="anchor" href="#_1_right_sizing_resource_requests_and_limits"></a>1. Right-sizing Resource Requests and Limits</h3>
+<div class="paragraph">
+<p>Setting appropriate CPU and memory requests and limits for your broker pods is fundamental for stable scaling.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Requests:</strong> Define the minimum guaranteed resources for a pod. OpenShift schedules pods only on nodes that can satisfy their requests.</p>
+</li>
+<li>
+<p><strong>Limits:</strong> Define the maximum resources a pod can consume. This prevents a runaway broker from monopolizing node resources and impacting other applications.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Recommendation:</strong>
+*   Start with reasonable requests and limits based on observed typical load.
+*   Monitor broker resource usage closely (CPU, memory, network I/O) using OpenShift&#8217;s monitoring tools (Prometheus, Grafana) and the Hawtio console.
+*   Adjust requests and limits iteratively. Over-provisioning wastes resources, while under-provisioning can lead to performance degradation, throttling, or Out-Of-Memory (OOM) kills.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">[[_best_practices_scaling_openshift]]
-= Best Practices for Scaling AMQ Broker on OpenShift
-
-This section outlines essential best practices for effectively scaling Red Hat AMQ Broker deployments on OpenShift Container Platform. Proper scaling ensures your messaging infrastructure can handle varying loads, maintain performance, and provide high availability without unnecessary resource consumption.
-
-== Understanding Scaling AMQ Broker on OpenShift
-
-Scaling an AMQ Broker deployment on OpenShift involves adjusting the number of broker instances (pods) and/or the resources allocated to those instances to meet demand. This can be achieved through:
-
-*   *Horizontal Scaling:* Adding or removing broker pods (replicas) to distribute the load across multiple instances. This is managed by increasing or decreasing the `replicas` count in your `Broker` Custom Resource.
-*   *Vertical Scaling:* Increasing or decreasing the CPU and memory resources allocated to individual broker pods. This is done by modifying the `resources` section within your `Broker` Custom Resource.
-
-Effective scaling is not just about adding resources; it's about making informed decisions based on your workload, ensuring data integrity, and optimizing resource utilization.
-
-== Key Best Practices for Scaling AMQ Broker
-
-This section details critical considerations and configurations for scaling AMQ Broker instances on OpenShift.
-
-=== 1. Right-sizing Resource Requests and Limits
-
-Setting appropriate CPU and memory requests and limits for your broker pods is fundamental for stable scaling.
-
-*   *Requests:* Define the minimum guaranteed resources for a pod. OpenShift schedules pods only on nodes that can satisfy their requests.
-*   *Limits:* Define the maximum resources a pod can consume. This prevents a runaway broker from monopolizing node resources and impacting other applications.
-
-*Recommendation:*
-*   Start with reasonable requests and limits based on observed typical load.
-*   Monitor broker resource usage closely (CPU, memory, network I/O) using OpenShift's monitoring tools (Prometheus, Grafana) and the Hawtio console.
-*   Adjust requests and limits iteratively. Over-provisioning wastes resources, while under-provisioning can lead to performance degradation, throttling, or Out-Of-Memory (OOM) kills.
-
-[source,yaml]
-----
-apiVersion: broker.amq.io/v1beta1
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
 kind: Broker
 metadata:
   name: my-broker-scaled
@@ -457,24 +477,35 @@ spec:
       requests:
         cpu: "1"    # Request 1 CPU core
         memory: "2Gi" # Request 2 GiB of memory
-  # ...
-----
-
-[[_graceful_scaledown]]
-=== 2. Enabling Graceful Scaledown with Message Migration
-
-When horizontally scaling down (reducing the number of broker replicas), it's crucial to prevent message loss. Red Hat AMQ Broker provides a mechanism for *message migration* to gracefully move messages from a shutting-down broker instance to an active one within the cluster.
-
-*Recommendation:*
+  # ...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_graceful_scaledown"><a class="anchor" href="#_graceful_scaledown"></a>2. Enabling Graceful Scaledown with Message Migration</h3>
+<div class="paragraph">
+<p>When horizontally scaling down (reducing the number of broker replicas), it&#8217;s crucial to prevent message loss. Red Hat AMQ Broker provides a mechanism for <strong>message migration</strong> to gracefully move messages from a shutting-down broker instance to an active one within the cluster.</p>
+</div>
+<div class="paragraph">
+<p><strong>Recommendation:</strong>
 *   Always enable message migration for horizontally scaled AMQ Broker deployments that handle persistent messages.
-*   This ensures that no in-flight or persisted messages are lost when a broker pod is terminated due to scaling down, node maintenance, or other disruptions.
-
-[NOTE]
+*   This ensures that no in-flight or persisted messages are lost when a broker pod is terminated due to scaling down, node maintenance, or other disruptions.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
 The provided context explicitly mentions "4.16. ENABLING MESSAGE MIGRATION TO SUPPORT CLUSTER SCALEDOWN". This feature is critical for maintaining data integrity during scaling events.
-
-[source,yaml]
-----
-apiVersion: broker.amq.io/v1beta1
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
 kind: Broker
 metadata:
   name: my-broker-scaled
@@ -484,26 +515,45 @@ spec:
     size: 2
     messageMigration:
       enabled: true # Enable message migration for graceful scaledown
-  # ...
-----
-
-=== 3. Strategic Pod Placement with Affinity and Anti-affinity
-
-Leverage OpenShift's pod scheduling capabilities to ensure high availability and optimal performance across your cluster, especially when scaling horizontally.
-
-*   *Anti-affinity:* This is a *critical* practice for HA. Use `podAntiAffinity` to ensure that broker pods do not run on the same node or availability zone. This prevents a single node failure from bringing down multiple broker instances.
-*   *Node Selectors/Affinity:* Use `nodeSelector` or `nodeAffinity` to target specific nodes with appropriate resources (e.g., high-performance storage, specific hardware) for your broker pods.
-
-[NOTE]
+  # ...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_strategic_pod_placement_with_affinity_and_anti_affinity"><a class="anchor" href="#_3_strategic_pod_placement_with_affinity_and_anti_affinity"></a>3. Strategic Pod Placement with Affinity and Anti-affinity</h3>
+<div class="paragraph">
+<p>Leverage OpenShift&#8217;s pod scheduling capabilities to ensure high availability and optimal performance across your cluster, especially when scaling horizontally.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Anti-affinity:</strong> This is a <strong>critical</strong> practice for HA. Use <code>podAntiAffinity</code> to ensure that broker pods do not run on the same node or availability zone. This prevents a single node failure from bringing down multiple broker instances.</p>
+</li>
+<li>
+<p><strong>Node Selectors/Affinity:</strong> Use <code>nodeSelector</code> or <code>nodeAffinity</code> to target specific nodes with appropriate resources (e.g., high-performance storage, specific hardware) for your broker pods.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
 The context mentions "4.17. CONTROLLING PLACEMENT OF BROKER PODS ON OPENSHIFT CONTAINER PLATFORM NODES" and specifically "4.17.3.2. Placing pods relative to other pods using anti-affinity rules". This is a direct best practice for scaling and HA.
-
-*Recommendation:*
-*   Implement `podAntiAffinity` to spread broker pods across different nodes for resilience.
-*   Consider `nodeSelector` if you have dedicated nodes for messaging infrastructure.
-
-[source,yaml]
-----
-apiVersion: broker.amq.io/v1beta1
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><strong>Recommendation:</strong>
+*   Implement <code>podAntiAffinity</code> to spread broker pods across different nodes for resilience.
+*   Consider <code>nodeSelector</code> if you have dedicated nodes for messaging infrastructure.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
 kind: Broker
 metadata:
   name: my-broker-scaled
@@ -517,21 +567,24 @@ spec:
     # You could also use nodeSelector if you have labeled nodes
     # nodeSelector:
     #   message-brokers: "true"
-  # ...
-----
-
-=== 4. Utilize Persistent Storage for Production Deployments
-
-For any production or critical AMQ Broker deployment, *always* use persistent storage.
-
-*Recommendation:*
-*   Set `persistenceEnabled=true` in your `Broker` Custom Resource.
-*   Ensure that your OpenShift cluster has sufficient Persistent Volumes (PVs) available to be claimed by the Operator. The context highlights this: "If you intend to deploy brokers with persistent storage... you need to manually provision Persistent Volumes (PVs) and ensure that these are available to be claimed by the Operator."
-*   Ephemeral storage (`persistenceEnabled=false`) means data is lost on pod restart, which is unacceptable for most production messaging use cases.
-
-[source,yaml]
-----
-apiVersion: broker.amq.io/v1beta1
+  # ...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_4_utilize_persistent_storage_for_production_deployments"><a class="anchor" href="#_4_utilize_persistent_storage_for_production_deployments"></a>4. Utilize Persistent Storage for Production Deployments</h3>
+<div class="paragraph">
+<p>For any production or critical AMQ Broker deployment, <strong>always</strong> use persistent storage.</p>
+</div>
+<div class="paragraph">
+<p><strong>Recommendation:</strong>
+*   Set <code>persistenceEnabled=true</code> in your <code>Broker</code> Custom Resource.
+*   Ensure that your OpenShift cluster has sufficient Persistent Volumes (PVs) available to be claimed by the Operator. The context highlights this: "If you intend to deploy brokers with persistent storage&#8230;&#8203; you need to manually provision Persistent Volumes (PVs) and ensure that these are available to be claimed by the Operator."
+*   Ephemeral storage (<code>persistenceEnabled=false</code>) means data is lost on pod restart, which is unacceptable for most production messaging use cases.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
 kind: Broker
 metadata:
   name: my-broker-scaled
@@ -542,22 +595,34 @@ spec:
     persistenceEnabled: true # Crucial for production environments
     storage:
       size: 2Gi # Default storage size per broker instance
-  # ...
-----
-
-=== 5. Implement Pod Disruption Budgets (PDBs)
-
-A Pod Disruption Budget (PDB) ensures that a minimum number of broker pods are available during voluntary disruptions, such as node draining for maintenance or upgrades.
-
-*Recommendation:*
-*   Create a PDB for your AMQ Broker deployment to protect against planned outages. This ensures that OpenShift will not voluntarily evict too many broker pods at once, maintaining service availability during scaledown or cluster maintenance.
-
-[NOTE]
+  # ...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_5_implement_pod_disruption_budgets_pdbs"><a class="anchor" href="#_5_implement_pod_disruption_budgets_pdbs"></a>5. Implement Pod Disruption Budgets (PDBs)</h3>
+<div class="paragraph">
+<p>A Pod Disruption Budget (PDB) ensures that a minimum number of broker pods are available during voluntary disruptions, such as node draining for maintenance or upgrades.</p>
+</div>
+<div class="paragraph">
+<p><strong>Recommendation:</strong>
+*   Create a PDB for your AMQ Broker deployment to protect against planned outages. This ensures that OpenShift will not voluntarily evict too many broker pods at once, maintaining service availability during scaledown or cluster maintenance.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
 The context mentions "4.19. CONFIGURING A POD DISRUPTION BUDGET", reinforcing its importance.
-
-[source,yaml]
-----
-apiVersion: policy/v1
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: my-broker-pdb
@@ -565,41 +630,69 @@ spec:
   minAvailable: 1 # Ensure at least one broker pod is always available
   selector:
     matchLabels:
-      app: my-broker-scaled # Match the label of your broker pods
-----
-&lt;1&gt; Replace `app: my-broker-scaled` with the actual label selector for your broker pods. The AMQ Broker Operator typically assigns labels that can be used here.
-
-=== 6. Proactive Monitoring and Alerting
-
-Effective scaling relies on understanding your system's behavior.
-
-*Recommendation:*
+      app: my-broker-scaled # Match the label of your broker pods</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Replace <code>app: my-broker-scaled</code> with the actual label selector for your broker pods. The AMQ Broker Operator typically assigns labels that can be used here.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_6_proactive_monitoring_and_alerting"><a class="anchor" href="#_6_proactive_monitoring_and_alerting"></a>6. Proactive Monitoring and Alerting</h3>
+<div class="paragraph">
+<p>Effective scaling relies on understanding your system&#8217;s behavior.</p>
+</div>
+<div class="paragraph">
+<p><strong>Recommendation:</strong>
 *   Monitor key metrics: queue depths, message rates (producer/consumer), connection counts, latency, CPU/memory utilization, and network I/O of broker pods.
 *   Use the Hawtio Management Console (as per objectives) for detailed broker-specific metrics.
-*   Leverage OpenShift's built-in Prometheus and Grafana for cluster-wide and pod-level metrics.
-*   Set up alerts for abnormal conditions (e.g., rapidly growing queue depths, high CPU/memory usage, too many pending messages, network saturation) to trigger manual or automated scaling actions.
-
-=== 7. High Availability (HA) as a Foundation for Scalability
-
-While distinct, HA and scaling are complementary. An HA setup provides fault tolerance, while scaling adds capacity.
-
-*Recommendation:*
-*   Implement an HA strategy (e.g., live-backup pairs or shared store cluster) *before* focusing purely on scaling for performance. A robust HA setup provides the resilience needed to scale confidently.
-*   Consider how your chosen HA strategy impacts horizontal scaling. Shared store typically simplifies adding more brokers to handle more clients, while live-backup pairs are more about fault tolerance for individual brokers.
-
-[NOTE]
+*   Leverage OpenShift&#8217;s built-in Prometheus and Grafana for cluster-wide and pod-level metrics.
+*   Set up alerts for abnormal conditions (e.g., rapidly growing queue depths, high CPU/memory usage, too many pending messages, network saturation) to trigger manual or automated scaling actions.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_7_high_availability_ha_as_a_foundation_for_scalability"><a class="anchor" href="#_7_high_availability_ha_as_a_foundation_for_scalability"></a>7. High Availability (HA) as a Foundation for Scalability</h3>
+<div class="paragraph">
+<p>While distinct, HA and scaling are complementary. An HA setup provides fault tolerance, while scaling adds capacity.</p>
+</div>
+<div class="paragraph">
+<p><strong>Recommendation:</strong>
+*   Implement an HA strategy (e.g., live-backup pairs or shared store cluster) <strong>before</strong> focusing purely on scaling for performance. A robust HA setup provides the resilience needed to scale confidently.
+*   Consider how your chosen HA strategy impacts horizontal scaling. Shared store typically simplifies adding more brokers to handle more clients, while live-backup pairs are more about fault tolerance for individual brokers.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
 The context lists "2.1. OVERVIEW OF HIGH AVAILABILITY (HA)", emphasizing its importance in planning.
-
-=== 8. Test Scaling Scenarios Thoroughly
-
-The best way to validate your scaling strategy is through rigorous testing.
-
-*Recommendation:*
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_8_test_scaling_scenarios_thoroughly"><a class="anchor" href="#_8_test_scaling_scenarios_thoroughly"></a>8. Test Scaling Scenarios Thoroughly</h3>
+<div class="paragraph">
+<p>The best way to validate your scaling strategy is through rigorous testing.</p>
+</div>
+<div class="paragraph">
+<p><strong>Recommendation:</strong>
 *   Conduct load testing and stress testing under various conditions (e.g., peak message throughput, high client connection counts, sudden traffic spikes).
 *   Test both scale-up and scale-down procedures to ensure message integrity, performance consistency, and smooth transitions.
-*   Verify that your monitoring and alerting systems correctly identify scaling needs.
-
-By adhering to these best practices, you can build a resilient, performant, and efficiently scalable AMQ Broker messaging infrastructure on OpenShift Container Platform.</code></pre>
+*   Verify that your monitoring and alerting systems correctly identify scaling needs.</p>
+</div>
+<div class="paragraph">
+<p>By adhering to these best practices, you can build a resilient, performant, and efficiently scalable AMQ Broker messaging infrastructure on OpenShift Container Platform.</p>
+</div>
+</div>
 </div>
 </div>
 <nav class="pagination">

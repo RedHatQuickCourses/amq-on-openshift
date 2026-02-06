@@ -6,6 +6,8 @@
     <title>Lab: Deploying a Basic AMQ Broker Instance :: AMQ Broker on OpenShift: Deployment and Management</title>
     <link rel="prev" href="hands-on-lab-deploying-and-managing-amq-broker.html">
     <link rel="next" href="lab-configuring-external-access-and-testing-client-connectivity.html">
+    <meta name="description" content="This lab guides you through deploying a basic Red Hat AMQ Broker instance on OpenShift using the AMQ Broker Operator.">
+    <meta name="keywords" content="AMQ Broker, OpenShift, Operator, Custom Resource, Deployment, Lab, Hands-on">
     <meta name="generator" content="Antora 3.1.3">
     <link rel="stylesheet" href="../../../_/css/site.css">
     <script>var uiRootPath = '../../../_'</script>
@@ -60,7 +62,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +109,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +140,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +180,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +236,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +252,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +283,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -407,72 +409,112 @@
 <h1 class="page">Lab: Deploying a Basic AMQ Broker Instance</h1>
 <div id="preamble">
 <div class="sectionbody">
+<div class="paragraph">
+<p>This lab provides hands-on experience with deploying a basic Red Hat AMQ Broker instance on OpenShift Container Platform. You will learn how to leverage the AMQ Broker Operator and Custom Resources to provision and verify a message broker.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_learning_objectives"><a class="anchor" href="#_learning_objectives"></a>Learning Objectives</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Understand the role of the AMQ Broker Operator in OpenShift deployments.</p>
+</li>
+<li>
+<p>Deploy a simple AMQ Broker instance using a Custom Resource.</p>
+</li>
+<li>
+<p>Verify the successful deployment of the broker and its components.</p>
+</li>
+<li>
+<p>Send test messages to the broker using the <code>artemis</code> command-line tool.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before starting this lab, ensure you have:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Access to an OpenShift Container Platform cluster (version 4.x or later).</p>
+</li>
+<li>
+<p>The <code>oc</code> command-line interface (CLI) installed and configured to connect to your OpenShift cluster.</p>
+</li>
+<li>
+<p>Cluster-admin or equivalent permissions to install Operators and create Custom Resources in a new namespace.</p>
+</li>
+<li>
+<p>(Optional) A basic understanding of Kubernetes/OpenShift concepts like Pods, Services, and Namespaces.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_understanding_amq_broker_deployment_on_openshift"><a class="anchor" href="#_understanding_amq_broker_deployment_on_openshift"></a>Understanding AMQ Broker Deployment on OpenShift</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On OpenShift, Red Hat AMQ Broker instances are deployed and managed using the <strong>AMQ Broker Operator</strong>. An Operator is a method of packaging, deploying, and managing a Kubernetes application. The AMQ Broker Operator extends the Kubernetes API to understand and manage AMQ Broker instances.</p>
+</div>
+<div class="paragraph">
+<p>Instead of manually deploying individual Pods, Services, and other Kubernetes resources, you interact with the Operator by creating <strong>Custom Resources (CRs)</strong>. For AMQ Broker, the primary Custom Resource Definition (CRD) is <code>ActiveMQArtemis</code>. When you create an <code>ActiveMQArtemis</code> CR, the Operator watches for this new resource and automatically provisions all the necessary underlying OpenShift components (Deployment, StatefulSet, Services, Routes, etc.) to run your broker instance according to the specifications in your CR.</p>
+</div>
+<div class="paragraph">
+<p>This declarative approach simplifies deployment, scaling, and management, allowing you to focus on <strong>what</strong> you want (an AMQ Broker instance) rather than <strong>how</strong> to achieve it. As indicated in the "Getting Started with AMQ Broker" instructions, this involves installing the broker and creating a broker instance, often with anonymous access enabled for initial testing.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_lab_deploying_a_basic_amq_broker_instance"><a class="anchor" href="#_hands_on_lab_deploying_a_basic_amq_broker_instance"></a>Hands-on Lab: Deploying a Basic AMQ Broker Instance</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Follow the steps below to deploy your first AMQ Broker instance.</p>
+</div>
+<div class="sect2">
+<h3 id="_step_1_log_in_to_openshift"><a class="anchor" href="#_step_1_log_in_to_openshift"></a>Step 1: Log in to OpenShift</h3>
+<div class="paragraph">
+<p>Ensure you are logged in to your OpenShift cluster using the <code>oc</code> CLI.</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-adoc hljs" data-lang="adoc">= Lab: Deploying a Basic AMQ Broker Instance
-:description: This lab guides you through deploying a basic Red Hat AMQ Broker instance on OpenShift using the AMQ Broker Operator.
-:keywords: AMQ Broker, OpenShift, Operator, Custom Resource, Deployment, Lab, Hands-on
-
-This lab provides hands-on experience with deploying a basic Red Hat AMQ Broker instance on OpenShift Container Platform. You will learn how to leverage the AMQ Broker Operator and Custom Resources to provision and verify a message broker.
-
-== Learning Objectives
-
-*   Understand the role of the AMQ Broker Operator in OpenShift deployments.
-*   Deploy a simple AMQ Broker instance using a Custom Resource.
-*   Verify the successful deployment of the broker and its components.
-*   Send test messages to the broker using the `artemis` command-line tool.
-
-== Prerequisites
-
-Before starting this lab, ensure you have:
-
-*   Access to an OpenShift Container Platform cluster (version 4.x or later).
-*   The `oc` command-line interface (CLI) installed and configured to connect to your OpenShift cluster.
-*   Cluster-admin or equivalent permissions to install Operators and create Custom Resources in a new namespace.
-*   (Optional) A basic understanding of Kubernetes/OpenShift concepts like Pods, Services, and Namespaces.
-
-== Understanding AMQ Broker Deployment on OpenShift
-
-On OpenShift, Red Hat AMQ Broker instances are deployed and managed using the *AMQ Broker Operator*. An Operator is a method of packaging, deploying, and managing a Kubernetes application. The AMQ Broker Operator extends the Kubernetes API to understand and manage AMQ Broker instances.
-
-Instead of manually deploying individual Pods, Services, and other Kubernetes resources, you interact with the Operator by creating *Custom Resources (CRs)*. For AMQ Broker, the primary Custom Resource Definition (CRD) is `ActiveMQArtemis`. When you create an `ActiveMQArtemis` CR, the Operator watches for this new resource and automatically provisions all the necessary underlying OpenShift components (Deployment, StatefulSet, Services, Routes, etc.) to run your broker instance according to the specifications in your CR.
-
-This declarative approach simplifies deployment, scaling, and management, allowing you to focus on *what* you want (an AMQ Broker instance) rather than *how* to achieve it. As indicated in the "Getting Started with AMQ Broker" instructions, this involves installing the broker and creating a broker instance, often with anonymous access enabled for initial testing.
-
-== Hands-on Lab: Deploying a Basic AMQ Broker Instance
-
-Follow the steps below to deploy your first AMQ Broker instance.
-
-=== Step 1: Log in to OpenShift
-
-Ensure you are logged in to your OpenShift cluster using the `oc` CLI.
-
-[source,bash]
-----
-oc login --token=&lt;your-token&gt; --server=&lt;your-api-server&gt;
-# Alternatively, use the developer login workflow if available for your cluster.
-----
-
-Verify your current project (namespace):
-
-[source,bash]
-----
-oc whoami --show-current-project
-----
-
-=== Step 2: Create a New Project
-
-For this lab, we'll create a dedicated OpenShift project (namespace) to isolate our broker deployment.
-
-[source,bash]
-----
-oc new-project amq-broker-lab
-----
-
-You should see output similar to:
-```text
-Now using project "amq-broker-lab" on server "https://api.cluster.example.com:6443".</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc login --token=&lt;your-token&gt; --server=&lt;your-api-server&gt;
+# Alternatively, use the developer login workflow if available for your cluster.</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Verify your current project (namespace):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc whoami --show-current-project</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_2_create_a_new_project"><a class="anchor" href="#_step_2_create_a_new_project"></a>Step 2: Create a New Project</h3>
+<div class="paragraph">
+<p>For this lab, we&#8217;ll create a dedicated OpenShift project (namespace) to isolate our broker deployment.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-project amq-broker-lab</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see output similar to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">Now using project "amq-broker-lab" on server "https://api.cluster.example.com:6443".</code></pre>
 </div>
 </div>
 </div>
@@ -652,6 +694,8 @@ Producer ActiveMQQueue[demoQueue], thread=0 Elapsed time in milli second : XXXX 
 <p>You have successfully deployed a basic AMQ Broker instance on OpenShift and verified its operation by sending test messages.</p>
 </div>
 </div>
+</div>
+</div>
 <div class="sect1">
 <h2 id="_summary"><a class="anchor" href="#_summary"></a>Summary</h2>
 <div class="sectionbody">
@@ -676,11 +720,6 @@ Producer ActiveMQQueue[demoQueue], thread=0 Elapsed time in milli second : XXXX 
 </div>
 <div class="paragraph">
 <p>This foundational deployment sets the stage for further configurations, such as enabling external access, securing the broker, configuring high availability, and integrating with other systems.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-none hljs"></code></pre>
-</div>
 </div>
 </div>
 </div>

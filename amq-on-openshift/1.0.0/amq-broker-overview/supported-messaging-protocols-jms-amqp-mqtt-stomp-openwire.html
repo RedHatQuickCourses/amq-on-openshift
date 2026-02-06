@@ -60,7 +60,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -405,106 +405,221 @@
 </aside>
 <article class="doc">
 <h1 class="page">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>Here&#8217;s the detailed educational content on supported messaging protocols for AMQ Broker, formatted in Antora AsciiDoc.</p>
+<p>AMQ Broker, built on Apache ActiveMQ Artemis, is designed to be highly versatile and interoperable. It achieves this by supporting a wide array of industry-standard messaging protocols. This multi-protocol support allows diverse client applications, written in different languages and running on various platforms, to communicate seamlessly with the broker.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">[[amq-broker-supported-protocols]]
-= Supported Messaging Protocols
-
-AMQ Broker, built on Apache ActiveMQ Artemis, is designed to be highly versatile and interoperable. It achieves this by supporting a wide array of industry-standard messaging protocols. This multi-protocol support allows diverse client applications, written in different languages and running on various platforms, to communicate seamlessly with the broker.
-
-The ability to speak multiple "messaging languages" means you can integrate new and legacy systems, connect lightweight IoT devices, enable real-time web applications, and build robust enterprise solutions all with a single AMQ Broker deployment.
-
-== Java Message Service (JMS)
-
-The Java Message Service (JMS) is a Java API that provides a common way for Java applications to create, send, receive, and read messages in an enterprise messaging system. It is a critical component for many enterprise Java applications, offering a standard API for interacting with Message-Oriented Middleware (MOM).
-
-AMQ Broker supports *JMS 2.0*, the latest version of the API, providing a modern and robust interface for Java developers. The link:#amq-core-protocol-jms[AMQ Core Protocol JMS] client, specifically, is a JMS 2.0 client tailored for messaging applications using the Artemis Core Protocol. It enables Java applications to leverage the full power of AMQ Broker while adhering to a well-established and widely understood API.
-
-=== Key Features of JMS with AMQ Broker
-
-*   **Standardized API**: Provides a consistent way for Java applications to interact with various message brokers, promoting portability.
-*   **Message Types**: Supports different message formats, including text, byte, map, object, and stream messages.
-*   **Messaging Domains**: Facilitates both Point-to-Point (queues) and Publish/Subscribe (topics) messaging patterns.
-*   **Transactional Messaging**: Enables reliable message processing within transactions, ensuring atomicity and consistency.
-*   **Security**: Integrates with SSL/TLS for secure communication between JMS clients and the broker.
-*   **Automatic Reconnect and Failover**: As highlighted in the `Red Hat AMQ Core Protocol JMS` documentation, the client offers automatic reconnect and failover capabilities, enhancing application resilience.
-*   **Distributed Transactions (XA)**: Supports XA transactions, allowing messaging operations to be coordinated across multiple resources (e.g., database and message broker).
-*   **Pure-Java Implementation**: The AMQ Core Protocol JMS client is a pure-Java solution, making it easy to integrate into Java-based environments.
-
-JMS is ideal for Java-centric applications that require robust, reliable, and transactional messaging capabilities within an enterprise context.
-
-== Advanced Message Queuing Protocol (AMQP)
-
-The Advanced Message Queuing Protocol (AMQP) is an open, wire-level protocol for message orientation, queuing, routing, reliability, and security. Unlike JMS, which is an API specification for Java, AMQP is a network protocol that enables interoperable messaging between different programming languages and platforms. This means an application written in Python using an AMQP client can seamlessly exchange messages with an application written in Java using an AMQP client, both communicating with the same AMQ Broker.
-
-AMQ Broker fully supports *AMQP 1.0*, which is a standardized protocol offering high performance and advanced messaging capabilities. AMQP 1.0 focuses on the reliable delivery of messages and provides sophisticated features for message routing, acknowledgments, and flow control.
-
-=== Key Features of AMQP with AMQ Broker
-
-*   **Interoperability**: Being a wire-level protocol, AMQP enables client applications written in various languages (Java, Python, C++, Node.js, etc.) to communicate effortlessly.
-*   **Reliable Messaging**: Provides robust mechanisms for message delivery guarantees, including transactional semantics and various acknowledgment modes.
-*   **Flexible Routing**: Supports complex routing scenarios, allowing messages to be directed to specific queues or topic subscriptions based on properties or content.
-*   **Security**: Integrates with TLS/SSL for encrypted communication.
-*   **Flow Control**: Mechanisms to prevent producers from overwhelming consumers or the broker.
-*   **Open Standard**: Governed by ISO/IEC 19464, ensuring wide adoption and long-term stability.
-
-AMQP is particularly well-suited for cloud-based messaging, IoT solutions where diverse devices need to communicate, and microservices architectures requiring language-agnostic message exchange.
-
-== Message Queuing Telemetry Transport (MQTT)
-
-MQTT is a lightweight, publish-subscribe messaging protocol designed for constrained devices and low-bandwidth, high-latency, or unreliable networks. It's become the de-facto standard for Internet of Things (IoT) applications due to its efficiency and simplicity.
-
-AMQ Broker provides robust support for MQTT, making it an excellent hub for connecting a vast array of IoT devices, sensors, and mobile applications.
-
-=== Key Features of MQTT with AMQ Broker
-
-*   **Lightweight**: Minimal message overhead and small code footprint, ideal for resource-constrained devices.
-*   **Publish/Subscribe Model**: Decouples senders (publishers) from receivers (subscribers), allowing for flexible and scalable architectures.
-*   **Quality of Service (QoS)**: Offers three levels of message delivery guarantees:
-    *   *QoS 0 (At most once)*: Fire and forget.
-    *   *QoS 1 (At least once)*: Ensures the message arrives but might be duplicated.
-    *   *QoS 2 (Exactly once)*: Guarantees the message arrives once and only once.
-*   **Persistent Sessions**: Allows clients to reconnect and resume their session, receiving messages that were published while they were offline.
-*   **Last Will and Testament**: A feature where a client can specify a message to be sent by the broker to subscribers if the client disconnects unexpectedly.
-*   **Security**: Supports TLS/SSL for secure communication.
-
-MQTT is the protocol of choice for smart devices, industrial IoT, telemetry, and mobile messaging where network conditions can be challenging and resource consumption needs to be minimized.
-
-== Simple Text-Oriented Message Protocol (STOMP)
-
-STOMP is a simple, text-based messaging protocol designed for working with message brokers. It provides an interoperable wire format that allows STOMP clients to communicate with any STOMP-compatible message broker. Its simplicity makes it particularly popular for scripting languages, web browsers (via WebSockets), and lightweight applications.
-
-AMQ Broker includes native STOMP support, enabling web-based and simple clients to interact with queues and topics effectively.
-
-=== Key Features of STOMP with AMQ Broker
-
-*   **Simplicity**: Easy to implement and use, often requiring less complex client libraries compared to AMQP or JMS.
-*   **Text-Oriented**: Messages are typically text-based, making it human-readable and easy to debug.
-*   **Frame-Based**: Uses a frame-based structure (command, headers, body) for sending and receiving messages.
-*   **Web-Friendly**: Commonly used over WebSockets, allowing real-time messaging directly from web browsers to the broker.
-*   **Publish/Subscribe and Point-to-Point**: Supports both messaging paradigms.
-*   **Broad Client Support**: Libraries available for almost every modern language and platform.
-
-STOMP is an excellent choice for web applications needing real-time updates, browser-based chat applications, or scripting environments where rapid development and simplicity are prioritized.
-
-== OpenWire
-
-OpenWire is a high-performance, compact, and extensible wire format specifically developed for Apache ActiveMQ. It's the native protocol primarily used by legacy Apache ActiveMQ clients and provides an optimized way for Java clients to communicate with ActiveMQ-based brokers. While AMQ Broker is based on Apache ActiveMQ Artemis (a next-generation broker), it maintains compatibility with OpenWire to support existing ActiveMQ client applications.
-
-This compatibility is crucial for organizations migrating from Apache ActiveMQ 5.x to Red Hat AMQ Broker, allowing them to leverage the new broker without immediately rewriting their client applications.
-
-=== Key Features of OpenWire with AMQ Broker
-
-*   **High Performance**: Designed for efficient message transfer, particularly within Java ecosystems.
-*   **Optimized for Java**: Provides a rich set of features tailored for Java clients, including object serialization.
-*   **Backward Compatibility**: Enables older Apache ActiveMQ clients to connect to AMQ Broker, facilitating migrations.
-*   **Extensible**: Allows for easy addition of new commands and features to the protocol.
-*   **Client-Side Features**: Supports advanced client-side features like failover, redelivery policies, and consumer prefetch.
-
-OpenWire is essential for scenarios where existing Apache ActiveMQ 5.x Java clients need to connect to an AMQ Broker instance, providing a smooth transition path and preserving existing client investments.</code></pre>
+<div class="paragraph">
+<p>The ability to speak multiple "messaging languages" means you can integrate new and legacy systems, connect lightweight IoT devices, enable real-time web applications, and build robust enterprise solutions all with a single AMQ Broker deployment.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_java_message_service_jms"><a class="anchor" href="#_java_message_service_jms"></a>Java Message Service (JMS)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Java Message Service (JMS) is a Java API that provides a common way for Java applications to create, send, receive, and read messages in an enterprise messaging system. It is a critical component for many enterprise Java applications, offering a standard API for interacting with Message-Oriented Middleware (MOM).</p>
+</div>
+<div class="paragraph">
+<p>AMQ Broker supports <strong>JMS 2.0</strong>, the latest version of the API, providing a modern and robust interface for Java developers. The <a href="#amq-core-protocol-jms">AMQ Core Protocol JMS</a> client, specifically, is a JMS 2.0 client tailored for messaging applications using the Artemis Core Protocol. It enables Java applications to leverage the full power of AMQ Broker while adhering to a well-established and widely understood API.</p>
+</div>
+<div class="sect2">
+<h3 id="_key_features_of_jms_with_amq_broker"><a class="anchor" href="#_key_features_of_jms_with_amq_broker"></a>Key Features of JMS with AMQ Broker</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Standardized API</strong>: Provides a consistent way for Java applications to interact with various message brokers, promoting portability.</p>
+</li>
+<li>
+<p><strong>Message Types</strong>: Supports different message formats, including text, byte, map, object, and stream messages.</p>
+</li>
+<li>
+<p><strong>Messaging Domains</strong>: Facilitates both Point-to-Point (queues) and Publish/Subscribe (topics) messaging patterns.</p>
+</li>
+<li>
+<p><strong>Transactional Messaging</strong>: Enables reliable message processing within transactions, ensuring atomicity and consistency.</p>
+</li>
+<li>
+<p><strong>Security</strong>: Integrates with SSL/TLS for secure communication between JMS clients and the broker.</p>
+</li>
+<li>
+<p><strong>Automatic Reconnect and Failover</strong>: As highlighted in the <code>Red Hat AMQ Core Protocol JMS</code> documentation, the client offers automatic reconnect and failover capabilities, enhancing application resilience.</p>
+</li>
+<li>
+<p><strong>Distributed Transactions (XA)</strong>: Supports XA transactions, allowing messaging operations to be coordinated across multiple resources (e.g., database and message broker).</p>
+</li>
+<li>
+<p><strong>Pure-Java Implementation</strong>: The AMQ Core Protocol JMS client is a pure-Java solution, making it easy to integrate into Java-based environments.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>JMS is ideal for Java-centric applications that require robust, reliable, and transactional messaging capabilities within an enterprise context.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_advanced_message_queuing_protocol_amqp"><a class="anchor" href="#_advanced_message_queuing_protocol_amqp"></a>Advanced Message Queuing Protocol (AMQP)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Advanced Message Queuing Protocol (AMQP) is an open, wire-level protocol for message orientation, queuing, routing, reliability, and security. Unlike JMS, which is an API specification for Java, AMQP is a network protocol that enables interoperable messaging between different programming languages and platforms. This means an application written in Python using an AMQP client can seamlessly exchange messages with an application written in Java using an AMQP client, both communicating with the same AMQ Broker.</p>
+</div>
+<div class="paragraph">
+<p>AMQ Broker fully supports <strong>AMQP 1.0</strong>, which is a standardized protocol offering high performance and advanced messaging capabilities. AMQP 1.0 focuses on the reliable delivery of messages and provides sophisticated features for message routing, acknowledgments, and flow control.</p>
+</div>
+<div class="sect2">
+<h3 id="_key_features_of_amqp_with_amq_broker"><a class="anchor" href="#_key_features_of_amqp_with_amq_broker"></a>Key Features of AMQP with AMQ Broker</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Interoperability</strong>: Being a wire-level protocol, AMQP enables client applications written in various languages (Java, Python, C++, Node.js, etc.) to communicate effortlessly.</p>
+</li>
+<li>
+<p><strong>Reliable Messaging</strong>: Provides robust mechanisms for message delivery guarantees, including transactional semantics and various acknowledgment modes.</p>
+</li>
+<li>
+<p><strong>Flexible Routing</strong>: Supports complex routing scenarios, allowing messages to be directed to specific queues or topic subscriptions based on properties or content.</p>
+</li>
+<li>
+<p><strong>Security</strong>: Integrates with TLS/SSL for encrypted communication.</p>
+</li>
+<li>
+<p><strong>Flow Control</strong>: Mechanisms to prevent producers from overwhelming consumers or the broker.</p>
+</li>
+<li>
+<p><strong>Open Standard</strong>: Governed by ISO/IEC 19464, ensuring wide adoption and long-term stability.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>AMQP is particularly well-suited for cloud-based messaging, IoT solutions where diverse devices need to communicate, and microservices architectures requiring language-agnostic message exchange.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_message_queuing_telemetry_transport_mqtt"><a class="anchor" href="#_message_queuing_telemetry_transport_mqtt"></a>Message Queuing Telemetry Transport (MQTT)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>MQTT is a lightweight, publish-subscribe messaging protocol designed for constrained devices and low-bandwidth, high-latency, or unreliable networks. It&#8217;s become the de-facto standard for Internet of Things (IoT) applications due to its efficiency and simplicity.</p>
+</div>
+<div class="paragraph">
+<p>AMQ Broker provides robust support for MQTT, making it an excellent hub for connecting a vast array of IoT devices, sensors, and mobile applications.</p>
+</div>
+<div class="sect2">
+<h3 id="_key_features_of_mqtt_with_amq_broker"><a class="anchor" href="#_key_features_of_mqtt_with_amq_broker"></a>Key Features of MQTT with AMQ Broker</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Lightweight</strong>: Minimal message overhead and small code footprint, ideal for resource-constrained devices.</p>
+</li>
+<li>
+<p><strong>Publish/Subscribe Model</strong>: Decouples senders (publishers) from receivers (subscribers), allowing for flexible and scalable architectures.</p>
+</li>
+<li>
+<p><strong>Quality of Service (QoS)</strong>: Offers three levels of message delivery guarantees:</p>
+</li>
+<li>
+<p><strong>QoS 0 (At most once)</strong>: Fire and forget.</p>
+</li>
+<li>
+<p><strong>QoS 1 (At least once)</strong>: Ensures the message arrives but might be duplicated.</p>
+</li>
+<li>
+<p><strong>QoS 2 (Exactly once)</strong>: Guarantees the message arrives once and only once.</p>
+</li>
+<li>
+<p><strong>Persistent Sessions</strong>: Allows clients to reconnect and resume their session, receiving messages that were published while they were offline.</p>
+</li>
+<li>
+<p><strong>Last Will and Testament</strong>: A feature where a client can specify a message to be sent by the broker to subscribers if the client disconnects unexpectedly.</p>
+</li>
+<li>
+<p><strong>Security</strong>: Supports TLS/SSL for secure communication.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>MQTT is the protocol of choice for smart devices, industrial IoT, telemetry, and mobile messaging where network conditions can be challenging and resource consumption needs to be minimized.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_simple_text_oriented_message_protocol_stomp"><a class="anchor" href="#_simple_text_oriented_message_protocol_stomp"></a>Simple Text-Oriented Message Protocol (STOMP)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>STOMP is a simple, text-based messaging protocol designed for working with message brokers. It provides an interoperable wire format that allows STOMP clients to communicate with any STOMP-compatible message broker. Its simplicity makes it particularly popular for scripting languages, web browsers (via WebSockets), and lightweight applications.</p>
+</div>
+<div class="paragraph">
+<p>AMQ Broker includes native STOMP support, enabling web-based and simple clients to interact with queues and topics effectively.</p>
+</div>
+<div class="sect2">
+<h3 id="_key_features_of_stomp_with_amq_broker"><a class="anchor" href="#_key_features_of_stomp_with_amq_broker"></a>Key Features of STOMP with AMQ Broker</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Simplicity</strong>: Easy to implement and use, often requiring less complex client libraries compared to AMQP or JMS.</p>
+</li>
+<li>
+<p><strong>Text-Oriented</strong>: Messages are typically text-based, making it human-readable and easy to debug.</p>
+</li>
+<li>
+<p><strong>Frame-Based</strong>: Uses a frame-based structure (command, headers, body) for sending and receiving messages.</p>
+</li>
+<li>
+<p><strong>Web-Friendly</strong>: Commonly used over WebSockets, allowing real-time messaging directly from web browsers to the broker.</p>
+</li>
+<li>
+<p><strong>Publish/Subscribe and Point-to-Point</strong>: Supports both messaging paradigms.</p>
+</li>
+<li>
+<p><strong>Broad Client Support</strong>: Libraries available for almost every modern language and platform.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>STOMP is an excellent choice for web applications needing real-time updates, browser-based chat applications, or scripting environments where rapid development and simplicity are prioritized.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_openwire"><a class="anchor" href="#_openwire"></a>OpenWire</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>OpenWire is a high-performance, compact, and extensible wire format specifically developed for Apache ActiveMQ. It&#8217;s the native protocol primarily used by legacy Apache ActiveMQ clients and provides an optimized way for Java clients to communicate with ActiveMQ-based brokers. While AMQ Broker is based on Apache ActiveMQ Artemis (a next-generation broker), it maintains compatibility with OpenWire to support existing ActiveMQ client applications.</p>
+</div>
+<div class="paragraph">
+<p>This compatibility is crucial for organizations migrating from Apache ActiveMQ 5.x to Red Hat AMQ Broker, allowing them to leverage the new broker without immediately rewriting their client applications.</p>
+</div>
+<div class="sect2">
+<h3 id="_key_features_of_openwire_with_amq_broker"><a class="anchor" href="#_key_features_of_openwire_with_amq_broker"></a>Key Features of OpenWire with AMQ Broker</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>High Performance</strong>: Designed for efficient message transfer, particularly within Java ecosystems.</p>
+</li>
+<li>
+<p><strong>Optimized for Java</strong>: Provides a rich set of features tailored for Java clients, including object serialization.</p>
+</li>
+<li>
+<p><strong>Backward Compatibility</strong>: Enables older Apache ActiveMQ clients to connect to AMQ Broker, facilitating migrations.</p>
+</li>
+<li>
+<p><strong>Extensible</strong>: Allows for easy addition of new commands and features to the protocol.</p>
+</li>
+<li>
+<p><strong>Client-Side Features</strong>: Supports advanced client-side features like failover, redelivery policies, and consumer prefetch.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>OpenWire is essential for scenarios where existing Apache ActiveMQ 5.x Java clients need to connect to an AMQ Broker instance, providing a smooth transition path and preserving existing client investments.</p>
+</div>
+</div>
 </div>
 </div>
 <nav class="pagination">

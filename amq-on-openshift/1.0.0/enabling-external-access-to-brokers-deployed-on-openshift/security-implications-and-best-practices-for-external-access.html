@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Security Implications and Best Practices for External Access :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <title>Securing External Access to AMQ Broker on OpenShift :: AMQ Broker on OpenShift: Deployment and Management</title>
     <link rel="prev" href="configuring-client-connections-for-external-access.html">
     <link rel="next" href="../core-protocol-client-examples/core-protocol-client-examples.html">
     <meta name="generator" content="Antora 3.1.3">
@@ -60,7 +60,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -395,7 +395,7 @@
   <ul>
     <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
     <li><a href="enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a></li>
-    <li><a href="security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a></li>
+    <li><a href="security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a></li>
   </ul>
 </nav>
 </div>
@@ -404,197 +404,374 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Security Implications and Best Practices for External Access</h1>
+<h1 class="page">Securing External Access to AMQ Broker on OpenShift</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>Here is the detailed educational content for "Security Implications and Best Practices for External Access" for AMQ Broker on OpenShift, presented in Antora AsciiDoc format.</p>
+<p>This module delves into the critical security considerations and best practices when enabling external clients to connect to your Red Hat AMQ Broker instances deployed on OpenShift. Properly securing external access is paramount to protect your messaging infrastructure and the sensitive data it handles.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_security_implications_of_external_access"><a class="anchor" href="#_security_implications_of_external_access"></a>Security Implications of External Access</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When you expose your AMQ Broker to external networks, you introduce potential attack vectors and vulnerabilities that must be addressed. Understanding these implications is the first step towards building a robust security posture.</p>
+</div>
+<div class="sect2">
+<h3 id="_1_increased_attack_surface"><a class="anchor" href="#_1_increased_attack_surface"></a>1. Increased Attack Surface</h3>
+<div class="paragraph">
+<p>Exposing broker listeners via OpenShift Routes or NodePorts expands the network surface accessible to external entities. This inherently increases the potential for malicious actors to discover and attempt to exploit vulnerabilities in your broker or the underlying OpenShift platform.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_2_data_interception_and_tampering"><a class="anchor" href="#_2_data_interception_and_tampering"></a>2. Data Interception and Tampering</h3>
+<div class="paragraph">
+<p>Without proper encryption, data transmitted between external clients and the broker over public or untrusted networks can be intercepted and read (eavesdropping) or even modified (tampering) by attackers. This compromises the confidentiality and integrity of your messages.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_unauthorized_access_and_abuse"><a class="anchor" href="#_3_unauthorized_access_and_abuse"></a>3. Unauthorized Access and Abuse</h3>
+<div class="paragraph">
+<p>If authentication and authorization mechanisms are weak or improperly configured, unauthorized users or applications could gain access to your broker. This could lead to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data theft:</strong> Accessing sensitive messages from queues or topics.</p>
+</li>
+<li>
+<p><strong>Service disruption:</strong> Maliciously deleting queues, messages, or reconfiguring the broker.</p>
+</li>
+<li>
+<p><strong>Resource exhaustion:</strong> Flooding the broker with messages or connection attempts, leading to Denial of Service (DoS).</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_4_exposure_of_broker_internals"><a class="anchor" href="#_4_exposure_of_broker_internals"></a>4. Exposure of Broker Internals</h3>
+<div class="paragraph">
+<p>Misconfigured external access might inadvertently expose internal network details, broker version information, or other metadata that could aid an attacker in planning further attacks.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_best_practices_for_securing_external_access"><a class="anchor" href="#_best_practices_for_securing_external_access"></a>Best Practices for Securing External Access</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Implementing a layered security approach is crucial for protecting your AMQ Broker when enabling external access.</p>
+</div>
+<div class="sect2">
+<h3 id="_1_encrypting_connections_with_ssltls"><a class="anchor" href="#_1_encrypting_connections_with_ssltls"></a>1. Encrypting Connections with SSL/TLS</h3>
+<div class="paragraph">
+<p>Encrypting client-broker communication is a fundamental security requirement. SSL/TLS (Transport Layer Security) ensures that data exchanged between the client and the broker remains confidential and tamper-proof.</p>
+</div>
+<div class="paragraph">
+<p>OpenShift Routes can handle TLS termination, but for AMQ Broker, it&#8217;s often preferred to use <strong>passthrough</strong> routes or re-encrypt routes to ensure end-to-end encryption from the client to the broker pod. The broker itself must be configured to use TLS listeners.</p>
+</div>
+<div class="sect3">
+<h4 id="_one_way_tls_vs_two_way_tls_mutual_tls"><a class="anchor" href="#_one_way_tls_vs_two_way_tls_mutual_tls"></a>One-Way TLS vs. Two-Way TLS (Mutual TLS)</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>One-Way TLS:</strong> The client verifies the broker&#8217;s identity using the broker&#8217;s certificate. This ensures the client is connecting to the legitimate broker and encrypts the communication. The broker does not verify the client&#8217;s identity at the TLS layer.</p>
+</li>
+<li>
+<p><strong>Two-Way TLS (Mutual TLS - mTLS):</strong> Both the client and the broker verify each other&#8217;s identities using certificates. This provides a stronger level of authentication, as the broker will only allow connections from clients presenting a trusted certificate.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_configuring_clients_for_tls"><a class="anchor" href="#_configuring_clients_for_tls"></a>Configuring Clients for TLS</h4>
+<div class="paragraph">
+<p>Clients connecting to a TLS-enabled broker listener must be configured with the necessary trust stores and, for two-way TLS, key stores.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Trust Store (<code>client.ts</code>):</strong> Contains the certificate of the Certificate Authority (CA) that signed the broker&#8217;s certificate, or the broker&#8217;s public certificate itself. This allows the client to verify the broker&#8217;s identity.</p>
+</li>
+<li>
+<p><strong>Key Store (<code>client.ks</code>):</strong> Contains the client&#8217;s private key and its corresponding certificate. This is required for two-way TLS, allowing the client to present its identity to the broker.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The provided context highlights how to configure different protocol clients for TLS.</p>
+</div>
+<div class="sect4">
+<h5 id="_openwire_client_with_two_way_tls"><a class="anchor" href="#_openwire_client_with_two_way_tls"></a>OpenWire Client with Two-Way TLS</h5>
+<div class="paragraph">
+<p>For an external OpenWire client using two-way TLS, the connection URL must specify the <code>ssl://</code> protocol and the port (typically 443 for external routes). Additionally, Java Virtual Machine (JVM) flags are used to provide the paths and passwords for the client&#8217;s key store and trust store.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">= Securing External Access to AMQ Broker on OpenShift
-
-:navtitle: External Access Security
-
-This module delves into the critical security considerations and best practices when enabling external clients to connect to your Red Hat AMQ Broker instances deployed on OpenShift. Properly securing external access is paramount to protect your messaging infrastructure and the sensitive data it handles.
-
-== Security Implications of External Access
-
-When you expose your AMQ Broker to external networks, you introduce potential attack vectors and vulnerabilities that must be addressed. Understanding these implications is the first step towards building a robust security posture.
-
-=== 1. Increased Attack Surface
-
-Exposing broker listeners via OpenShift Routes or NodePorts expands the network surface accessible to external entities. This inherently increases the potential for malicious actors to discover and attempt to exploit vulnerabilities in your broker or the underlying OpenShift platform.
-
-=== 2. Data Interception and Tampering
-
-Without proper encryption, data transmitted between external clients and the broker over public or untrusted networks can be intercepted and read (eavesdropping) or even modified (tampering) by attackers. This compromises the confidentiality and integrity of your messages.
-
-=== 3. Unauthorized Access and Abuse
-
-If authentication and authorization mechanisms are weak or improperly configured, unauthorized users or applications could gain access to your broker. This could lead to:
-
-*   **Data theft:** Accessing sensitive messages from queues or topics.
-*   **Service disruption:** Maliciously deleting queues, messages, or reconfiguring the broker.
-*   **Resource exhaustion:** Flooding the broker with messages or connection attempts, leading to Denial of Service (DoS).
-
-=== 4. Exposure of Broker Internals
-
-Misconfigured external access might inadvertently expose internal network details, broker version information, or other metadata that could aid an attacker in planning further attacks.
-
-== Best Practices for Securing External Access
-
-Implementing a layered security approach is crucial for protecting your AMQ Broker when enabling external access.
-
-=== 1. Encrypting Connections with SSL/TLS
-
-Encrypting client-broker communication is a fundamental security requirement. SSL/TLS (Transport Layer Security) ensures that data exchanged between the client and the broker remains confidential and tamper-proof.
-
-OpenShift Routes can handle TLS termination, but for AMQ Broker, it's often preferred to use *passthrough* routes or re-encrypt routes to ensure end-to-end encryption from the client to the broker pod. The broker itself must be configured to use TLS listeners.
-
-==== One-Way TLS vs. Two-Way TLS (Mutual TLS)
-
-*   **One-Way TLS:** The client verifies the broker's identity using the broker's certificate. This ensures the client is connecting to the legitimate broker and encrypts the communication. The broker does not verify the client's identity at the TLS layer.
-*   **Two-Way TLS (Mutual TLS - mTLS):** Both the client and the broker verify each other's identities using certificates. This provides a stronger level of authentication, as the broker will only allow connections from clients presenting a trusted certificate.
-
-==== Configuring Clients for TLS
-
-Clients connecting to a TLS-enabled broker listener must be configured with the necessary trust stores and, for two-way TLS, key stores.
-
-*   **Trust Store (`client.ts`):** Contains the certificate of the Certificate Authority (CA) that signed the broker's certificate, or the broker's public certificate itself. This allows the client to verify the broker's identity.
-*   **Key Store (`client.ks`):** Contains the client's private key and its corresponding certificate. This is required for two-way TLS, allowing the client to present its identity to the broker.
-
-The provided context highlights how to configure different protocol clients for TLS.
-
-===== OpenWire Client with Two-Way TLS
-
-For an external OpenWire client using two-way TLS, the connection URL must specify the `ssl://` protocol and the port (typically 443 for external routes). Additionally, Java Virtual Machine (JVM) flags are used to provide the paths and passwords for the client's key store and trust store.
-
-[source,bash]
-----
-# Client connection URL
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Client connection URL
 ssl://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443
 
 # JVM flags for client-side key and trust store configuration
 -Djavax.net.ssl.keyStore=~/client.ks -Djavax.net.ssl.keyStorePassword=&lt;key_store_password&gt; \
--Djavax.net.ssl.trustStore=~/client.ts -Djavax.net.ssl.trustStorePassword=&lt;trust_store_password&gt;
-----
-
-*   Replace `my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain` with the actual route hostname.
-*   Replace `&lt;key_store_password&gt;` and `&lt;trust_store_password&gt;` with your actual passwords.
-
-===== AMQP Client with One-Way TLS
-
-For an external AMQP client using one-way TLS, the connection URL uses `amqps://` and includes parameters for the trust store. The `transport.verifyHost=true` parameter is crucial for host name verification, preventing man-in-the-middle attacks.
-
-[source,url]
-----
-amqps://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443?
-transport.verifyHost=true&amp;transport.trustStoreLocation=~/client.ts&amp;transport.trustStorePassword=&lt;trust_store_password&gt;
-----
-
-*   Replace `my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain` with the actual route hostname.
-*   Replace `&lt;trust_store_password&gt;` with your actual password.
-
-===== AMQP Client with Two-Way TLS
-
-For an external AMQP client using two-way TLS, both the key store and trust store parameters are included in the connection URL.
-
-[source,url]
-----
-amqps://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443?
-transport.verifyHost=true&amp;transport.keyStoreLocation=~/client.ks&amp;transport.keyStorePassword=&lt;key_store_password&gt;&amp;transport.trustStoreLocation=~/client.ts&amp;transport.trustStorePassword=&lt;trust_store_password&gt;
-----
-
-*   Replace `my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain` with the actual route hostname.
-*   Replace `&lt;key_store_password&gt;` and `&lt;trust_store_password&gt;` with your actual passwords.
-
-=== 2. Strong Authentication and Authorization (RBAC)
-
-Beyond TLS encryption, strong authentication and granular authorization are critical to control who can connect to your broker and what actions they can perform.
-
-*   **AMQ Broker's Internal Security:** AMQ Broker provides its own robust security mechanisms, allowing you to define users, roles, and fine-grained permissions for queues, topics, and broker operations.
-*   **Integrating with OpenShift Authentication:** For applications deployed on OpenShift, you can leverage OpenShift's built-in authentication mechanisms (e.g., service accounts, OAuth with Keycloak) to provide identities to your messaging clients.
-*   **External Identity Providers (IDPs):** For external clients, integrating with enterprise-grade IDPs like LDAP, Active Directory, or Keycloak allows you to centralize user management and enforce consistent access policies. AMQ Broker can be configured to delegate authentication to these external systems and map external roles to internal broker roles.
-
-=== 3. Network Segmentation and Firewalls
-
-Utilize OpenShift NetworkPolicies to restrict network traffic to and from your AMQ Broker pods. This allows you to:
-
-*   **Isolate brokers:** Ensure only authorized applications or external ingress controllers can reach the broker's listeners.
-*   **Control egress:** Limit what external resources your broker can connect to, if any.
-
-For external access, ensure that any external firewalls or cloud security groups are configured to only allow traffic on the specific ports and protocols required for your broker (e.g., 443 for HTTPS/TLS).
-
-=== 4. Secure OpenShift Routes and Ingress
-
-When exposing AMQ Broker via OpenShift Routes or an Ingress controller, configure them securely:
-
-*   **TLS Termination:** Always enable TLS on your routes (`https://`). For AMQ Broker, prefer `passthrough` routes to maintain end-to-end encryption to the broker pod, or use `re-encrypt` routes if the broker is configured for HTTPS. Avoid `edge` termination unless you have specific reasons and understand the implications (data is unencrypted between the router and the broker pod).
-*   **Hostnames:** Use specific hostnames rather than wildcards, where possible, to reduce exposure.
-*   **Load Balancing:** If you have multiple broker pods behind a route, clients might load balance connections. If you prefer clients *not* to use topology information for load balancing, you can configure the client connection URL as specified in the context:
-    *   For Core protocol clients, set `useTopologyForLoadBalancing=false`.
-    *   For other clients, explicitly list each broker's route hostname in the connection URL to ensure explicit failover rather than load balancing.
-
-=== 5. Principle of Least Privilege
-
-Grant only the minimum necessary permissions to users and applications accessing the broker.
-
-*   **Client Permissions:** A client application publishing messages to a specific topic should only have permission to publish to that topic, not to administer the broker or consume from unrelated queues.
-*   **Operator Permissions:** The AMQ Broker Operator should run with appropriate service account permissions, following OpenShift's security best practices.
-
-=== 6. Monitoring and Logging
-
-Implement comprehensive monitoring and logging for your AMQ Broker and OpenShift environment.
-
-*   **Broker Logs:** Monitor broker logs for failed connection attempts, authentication failures, and suspicious activities.
-*   **OpenShift Audit Logs:** Leverage OpenShift's audit logging to track API calls related to routes, services, and broker Custom Resources.
-*   **Network Activity:** Monitor network traffic to identify unusual patterns or attempted intrusions.
-
-=== 7. Regular Security Audits and Updates
-
-*   **Patching:** Keep your AMQ Broker images, OpenShift platform, and client libraries updated to the latest stable versions to benefit from security fixes.
-*   **Audits:** Periodically review your security configurations, network policies, and access controls to ensure they align with your organization's security policies and best practices.
-
-== Hands-on Activity: Configuring External Client with One-Way TLS
-
-In this activity, you will simulate connecting an external client to an AMQ Broker instance exposed via an OpenShift Route with one-way TLS enabled. This assumes you have an AMQ Broker already deployed on OpenShift with a TLS listener and an HTTPS/passthrough route, and have obtained the necessary broker certificate or CA certificate.
-
-[NOTE]
-This activity focuses on the *client-side configuration* based on the provided context. Setting up the broker's TLS listener and OpenShift Route is outside the immediate scope of this topic but is a prerequisite for a fully functional setup.
-
-=== Prerequisites
-
-*   An OpenShift cluster with the AMQ Broker Operator installed.
-*   An AMQ Broker instance deployed, configured with a TLS listener (e.g., on port 61617) and accessible via an OpenShift `passthrough` or `re-encrypt` route (e.g., exposed on port 443).
-*   The hostname of the OpenShift Route (e.g., `my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain`).
-*   The public certificate of your AMQ Broker or the CA certificate that signed it. Save this certificate to a file, for example, `broker.crt`.
-*   Java Development Kit (JDK) installed on your client machine.
-*   Apache ActiveMQ Artemis client libraries or Apache Qpid JMS client libraries for AMQP.
-
-=== Steps
-
-==== 1. Prepare the Client Trust Store
-
-You need to import the broker's certificate into a Java KeyStore (JKS) file that will serve as your client's trust store.
-
-. Create a new trust store file:
-+
-[source,bash]
-----
-keytool -import -alias broker-cert -file broker.crt -keystore client.ts -storepass &lt;trust_store_password&gt; -noprompt
-----
-+
-*   Replace `broker.crt` with the path to your broker's certificate file.
-*   Replace `&lt;trust_store_password&gt;` with a strong password for your trust store. Remember this password for the next steps.
-
-==== 2. Develop a Simple AMQP Client (Java Example)
-
-Create a simple Java AMQP client application that will connect to the broker. This example uses the Qpid JMS client.
-
-. Create a file named `AmqpTlsProducer.java` with the following content:
-+
-[source,java]
-----
-import javax.jms.*;
+-Djavax.net.ssl.trustStore=~/client.ts -Djavax.net.ssl.trustStorePassword=&lt;trust_store_password&gt;</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Replace <code>my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain</code> with the actual route hostname.</p>
+</li>
+<li>
+<p>Replace <code>&lt;key_store_password&gt;</code> and <code>&lt;trust_store_password&gt;</code> with your actual passwords.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_amqp_client_with_one_way_tls"><a class="anchor" href="#_amqp_client_with_one_way_tls"></a>AMQP Client with One-Way TLS</h5>
+<div class="paragraph">
+<p>For an external AMQP client using one-way TLS, the connection URL uses <code>amqps://</code> and includes parameters for the trust store. The <code>transport.verifyHost=true</code> parameter is crucial for host name verification, preventing man-in-the-middle attacks.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-url hljs" data-lang="url">amqps://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443?
+transport.verifyHost=true&amp;transport.trustStoreLocation=~/client.ts&amp;transport.trustStorePassword=&lt;trust_store_password&gt;</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Replace <code>my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain</code> with the actual route hostname.</p>
+</li>
+<li>
+<p>Replace <code>&lt;trust_store_password&gt;</code> with your actual password.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_amqp_client_with_two_way_tls"><a class="anchor" href="#_amqp_client_with_two_way_tls"></a>AMQP Client with Two-Way TLS</h5>
+<div class="paragraph">
+<p>For an external AMQP client using two-way TLS, both the key store and trust store parameters are included in the connection URL.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-url hljs" data-lang="url">amqps://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443?
+transport.verifyHost=true&amp;transport.keyStoreLocation=~/client.ks&amp;transport.keyStorePassword=&lt;key_store_password&gt;&amp;transport.trustStoreLocation=~/client.ts&amp;transport.trustStorePassword=&lt;trust_store_password&gt;</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Replace <code>my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain</code> with the actual route hostname.</p>
+</li>
+<li>
+<p>Replace <code>&lt;key_store_password&gt;</code> and <code>&lt;trust_store_password&gt;</code> with your actual passwords.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_2_strong_authentication_and_authorization_rbac"><a class="anchor" href="#_2_strong_authentication_and_authorization_rbac"></a>2. Strong Authentication and Authorization (RBAC)</h3>
+<div class="paragraph">
+<p>Beyond TLS encryption, strong authentication and granular authorization are critical to control who can connect to your broker and what actions they can perform.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>AMQ Broker&#8217;s Internal Security:</strong> AMQ Broker provides its own robust security mechanisms, allowing you to define users, roles, and fine-grained permissions for queues, topics, and broker operations.</p>
+</li>
+<li>
+<p><strong>Integrating with OpenShift Authentication:</strong> For applications deployed on OpenShift, you can leverage OpenShift&#8217;s built-in authentication mechanisms (e.g., service accounts, OAuth with Keycloak) to provide identities to your messaging clients.</p>
+</li>
+<li>
+<p><strong>External Identity Providers (IDPs):</strong> For external clients, integrating with enterprise-grade IDPs like LDAP, Active Directory, or Keycloak allows you to centralize user management and enforce consistent access policies. AMQ Broker can be configured to delegate authentication to these external systems and map external roles to internal broker roles.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_network_segmentation_and_firewalls"><a class="anchor" href="#_3_network_segmentation_and_firewalls"></a>3. Network Segmentation and Firewalls</h3>
+<div class="paragraph">
+<p>Utilize OpenShift NetworkPolicies to restrict network traffic to and from your AMQ Broker pods. This allows you to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Isolate brokers:</strong> Ensure only authorized applications or external ingress controllers can reach the broker&#8217;s listeners.</p>
+</li>
+<li>
+<p><strong>Control egress:</strong> Limit what external resources your broker can connect to, if any.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For external access, ensure that any external firewalls or cloud security groups are configured to only allow traffic on the specific ports and protocols required for your broker (e.g., 443 for HTTPS/TLS).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_4_secure_openshift_routes_and_ingress"><a class="anchor" href="#_4_secure_openshift_routes_and_ingress"></a>4. Secure OpenShift Routes and Ingress</h3>
+<div class="paragraph">
+<p>When exposing AMQ Broker via OpenShift Routes or an Ingress controller, configure them securely:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>TLS Termination:</strong> Always enable TLS on your routes (<code>https://</code>). For AMQ Broker, prefer <code>passthrough</code> routes to maintain end-to-end encryption to the broker pod, or use <code>re-encrypt</code> routes if the broker is configured for HTTPS. Avoid <code>edge</code> termination unless you have specific reasons and understand the implications (data is unencrypted between the router and the broker pod).</p>
+</li>
+<li>
+<p><strong>Hostnames:</strong> Use specific hostnames rather than wildcards, where possible, to reduce exposure.</p>
+</li>
+<li>
+<p><strong>Load Balancing:</strong> If you have multiple broker pods behind a route, clients might load balance connections. If you prefer clients <strong>not</strong> to use topology information for load balancing, you can configure the client connection URL as specified in the context:</p>
+</li>
+<li>
+<p>For Core protocol clients, set <code>useTopologyForLoadBalancing=false</code>.</p>
+</li>
+<li>
+<p>For other clients, explicitly list each broker&#8217;s route hostname in the connection URL to ensure explicit failover rather than load balancing.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_5_principle_of_least_privilege"><a class="anchor" href="#_5_principle_of_least_privilege"></a>5. Principle of Least Privilege</h3>
+<div class="paragraph">
+<p>Grant only the minimum necessary permissions to users and applications accessing the broker.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Client Permissions:</strong> A client application publishing messages to a specific topic should only have permission to publish to that topic, not to administer the broker or consume from unrelated queues.</p>
+</li>
+<li>
+<p><strong>Operator Permissions:</strong> The AMQ Broker Operator should run with appropriate service account permissions, following OpenShift&#8217;s security best practices.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_6_monitoring_and_logging"><a class="anchor" href="#_6_monitoring_and_logging"></a>6. Monitoring and Logging</h3>
+<div class="paragraph">
+<p>Implement comprehensive monitoring and logging for your AMQ Broker and OpenShift environment.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Broker Logs:</strong> Monitor broker logs for failed connection attempts, authentication failures, and suspicious activities.</p>
+</li>
+<li>
+<p><strong>OpenShift Audit Logs:</strong> Leverage OpenShift&#8217;s audit logging to track API calls related to routes, services, and broker Custom Resources.</p>
+</li>
+<li>
+<p><strong>Network Activity:</strong> Monitor network traffic to identify unusual patterns or attempted intrusions.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_7_regular_security_audits_and_updates"><a class="anchor" href="#_7_regular_security_audits_and_updates"></a>7. Regular Security Audits and Updates</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Patching:</strong> Keep your AMQ Broker images, OpenShift platform, and client libraries updated to the latest stable versions to benefit from security fixes.</p>
+</li>
+<li>
+<p><strong>Audits:</strong> Periodically review your security configurations, network policies, and access controls to ensure they align with your organization&#8217;s security policies and best practices.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_activity_configuring_external_client_with_one_way_tls"><a class="anchor" href="#_hands_on_activity_configuring_external_client_with_one_way_tls"></a>Hands-on Activity: Configuring External Client with One-Way TLS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this activity, you will simulate connecting an external client to an AMQ Broker instance exposed via an OpenShift Route with one-way TLS enabled. This assumes you have an AMQ Broker already deployed on OpenShift with a TLS listener and an HTTPS/passthrough route, and have obtained the necessary broker certificate or CA certificate.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This activity focuses on the <strong>client-side configuration</strong> based on the provided context. Setting up the broker&#8217;s TLS listener and OpenShift Route is outside the immediate scope of this topic but is a prerequisite for a fully functional setup.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>An OpenShift cluster with the AMQ Broker Operator installed.</p>
+</li>
+<li>
+<p>An AMQ Broker instance deployed, configured with a TLS listener (e.g., on port 61617) and accessible via an OpenShift <code>passthrough</code> or <code>re-encrypt</code> route (e.g., exposed on port 443).</p>
+</li>
+<li>
+<p>The hostname of the OpenShift Route (e.g., <code>my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain</code>).</p>
+</li>
+<li>
+<p>The public certificate of your AMQ Broker or the CA certificate that signed it. Save this certificate to a file, for example, <code>broker.crt</code>.</p>
+</li>
+<li>
+<p>Java Development Kit (JDK) installed on your client machine.</p>
+</li>
+<li>
+<p>Apache ActiveMQ Artemis client libraries or Apache Qpid JMS client libraries for AMQP.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_steps"><a class="anchor" href="#_steps"></a>Steps</h3>
+<div class="sect3">
+<h4 id="_1_prepare_the_client_trust_store"><a class="anchor" href="#_1_prepare_the_client_trust_store"></a>1. Prepare the Client Trust Store</h4>
+<div class="paragraph">
+<p>You need to import the broker&#8217;s certificate into a Java KeyStore (JKS) file that will serve as your client&#8217;s trust store.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a new trust store file:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">keytool -import -alias broker-cert -file broker.crt -keystore client.ts -storepass &lt;trust_store_password&gt; -noprompt</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Replace <code>broker.crt</code> with the path to your broker&#8217;s certificate file.</p>
+</li>
+<li>
+<p>Replace <code>&lt;trust_store_password&gt;</code> with a strong password for your trust store. Remember this password for the next steps.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_2_develop_a_simple_amqp_client_java_example"><a class="anchor" href="#_2_develop_a_simple_amqp_client_java_example"></a>2. Develop a Simple AMQP Client (Java Example)</h4>
+<div class="paragraph">
+<p>Create a simple Java AMQP client application that will connect to the broker. This example uses the Qpid JMS client.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a file named <code>AmqpTlsProducer.java</code> with the following content:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import javax.jms.*;
 import org.apache.qpid.jms.JmsConnectionFactory;
 
 public class AmqpTlsProducer {
@@ -632,33 +809,63 @@ public class AmqpTlsProducer {
             if (connection != null) connection.close();
         }
     }
-}
-----
-+
-*   Replace `my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain` with your actual broker route hostname.
-*   Replace `&lt;trust_store_password&gt;` with the password you set in the previous step.
-
-==== 3. Compile and Run the Client
-
-. Download the Qpid JMS client JARs. You can usually find them in Maven Central or include them via a `pom.xml` if using Maven. For simplicity, download `qpid-jms-client-&lt;version&gt;.jar` and its dependencies (e.g., `slf4j-api`, `proton-j`).
-. Compile the Java client:
-+
-[source,bash]
-----
-javac -cp ".:/path/to/qpid-jms-client-&lt;version&gt;.jar:/path/to/slf4j-api-&lt;version&gt;.jar" AmqpTlsProducer.java
-----
-+
-*   Adjust the classpath (`-cp`) to include all necessary Qpid JMS client JARs and their dependencies.
-. Run the client:
-+
-[source,bash]
-----
-java -cp ".:/path/to/qpid-jms-client-&lt;version&gt;.jar:/path/to/slf4j-api-&lt;version&gt;.jar" AmqpTlsProducer
-----
-+
-If successful, you should see output indicating the message was sent, and the connection will be established over TLS. You can verify the message on your broker's management console.
-
-This hands-on activity demonstrates how to configure a client to leverage one-way TLS for secure communication, a critical step in enabling external access securely. For two-way TLS, you would additionally generate a client key pair, create a client key store, and configure the client connection URL with `transport.keyStoreLocation` and `transport.keyStorePassword` parameters, as shown in the examples provided in the context.</code></pre>
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Replace <code>my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain</code> with your actual broker route hostname.</p>
+</li>
+<li>
+<p>Replace <code>&lt;trust_store_password&gt;</code> with the password you set in the previous step.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_3_compile_and_run_the_client"><a class="anchor" href="#_3_compile_and_run_the_client"></a>3. Compile and Run the Client</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Download the Qpid JMS client JARs. You can usually find them in Maven Central or include them via a <code>pom.xml</code> if using Maven. For simplicity, download <code>qpid-jms-client-&lt;version&gt;.jar</code> and its dependencies (e.g., <code>slf4j-api</code>, <code>proton-j</code>).</p>
+</li>
+<li>
+<p>Compile the Java client:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">javac -cp ".:/path/to/qpid-jms-client-&lt;version&gt;.jar:/path/to/slf4j-api-&lt;version&gt;.jar" AmqpTlsProducer.java</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Adjust the classpath (<code>-cp</code>) to include all necessary Qpid JMS client JARs and their dependencies.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Run the client:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">java -cp ".:/path/to/qpid-jms-client-&lt;version&gt;.jar:/path/to/slf4j-api-&lt;version&gt;.jar" AmqpTlsProducer</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If successful, you should see output indicating the message was sent, and the connection will be established over TLS. You can verify the message on your broker&#8217;s management console.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This hands-on activity demonstrates how to configure a client to leverage one-way TLS for secure communication, a critical step in enabling external access securely. For two-way TLS, you would additionally generate a client key pair, create a client key store, and configure the client connection URL with <code>transport.keyStoreLocation</code> and <code>transport.keyStorePassword</code> parameters, as shown in the examples provided in the context.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 <nav class="pagination">

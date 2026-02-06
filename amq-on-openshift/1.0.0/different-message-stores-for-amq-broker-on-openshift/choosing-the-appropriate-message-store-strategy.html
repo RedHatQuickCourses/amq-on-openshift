@@ -60,7 +60,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -405,214 +405,386 @@
 </aside>
 <article class="doc">
 <h1 class="page">Choosing the Appropriate Message Store Strategy</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>This document covers the objectives related to choosing an appropriate message store strategy for AMQ Broker deployments on OpenShift. It explains the available options, their characteristics, and the factors to consider for making an informed decision.</p>
+<p>Understanding and selecting the correct message store strategy is a critical decision for any AMQ Broker deployment, especially in containerized environments like OpenShift. The choice impacts performance, reliability, scalability, and operational complexity. This section details the primary message store options available for AMQ Broker and provides guidance on how to choose the best strategy for your specific use case.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="amq-broker-message-store-overview"><a class="anchor" href="#amq-broker-message-store-overview"></a>Overview of Message Store Options</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AMQ Broker, based on Apache ActiveMQ Artemis, primarily offers two fundamental approaches for message persistence:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#file-based-message-store.adoc" class="xref unresolved">File-Based Journal</a></p>
+</li>
+<li>
+<p><a href="#jdbc-message-store.adoc" class="xref unresolved">JDBC Message Store</a></p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p><em>This content is provided in Antora AsciiDoc format.</em></p>
+<p>Each approach has distinct characteristics, advantages, and trade-offs that are important to consider.</p>
 </div>
-<div class="listingblock">
+<div class="sect2">
+<h3 id="amq-broker-file-based-journal"><a class="anchor" href="#amq-broker-file-based-journal"></a>File-Based Journal Store</h3>
+<div class="paragraph">
+<p>The file-based journal is the default and generally recommended message store for AMQ Broker due to its high performance and efficiency.</p>
+</div>
+<div class="sect3">
+<h4 id="_detailed_technical_explanation"><a class="anchor" href="#_detailed_technical_explanation"></a>Detailed Technical Explanation</h4>
+<div class="paragraph">
+<p>The file-based journal stores messages and binding data directly on the filesystem in a highly optimized binary log format. It uses a write-ahead log (WAL) approach, ensuring that data is written to disk before an acknowledgment is sent back to the producer. This design provides excellent durability while minimizing I/O overhead.</p>
+</div>
+<div class="paragraph">
+<p>Key characteristics:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Performance:</strong> The file-based journal is designed for maximum throughput and minimal latency. It uses sequential writes, which are significantly faster than random writes, making it ideal for high-volume messaging scenarios.</p>
+</li>
+<li>
+<p><strong>Simplicity:</strong> It&#8217;s the default configuration, requiring no external database setup.</p>
+</li>
+<li>
+<p><strong>Data Structure:</strong> Data is stored in a series of journal files (e.g., <code>activemq-data-*.amq</code>) within a configured directory.</p>
+</li>
+<li>
+<p><strong>OpenShift Considerations:</strong> When deploying on OpenShift, the file-based journal requires persistent storage, typically provisioned via Persistent Volumes (PVs). For single instances or replicated high-availability (HA) setups, a <code>ReadWriteOnce</code> (RWO) PV is sufficient. For shared-store HA, a <code>ReadWriteMany</code> (RWX) PV is required, allowing multiple broker pods to access the same underlying storage.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="amq-broker-jdbc-message-store"><a class="anchor" href="#amq-broker-jdbc-message-store"></a>JDBC Message Store</h3>
+<div class="paragraph">
+<p>The JDBC message store allows AMQ Broker to persist messages and bindings to an external relational database using Java Database Connectivity (JDBC).</p>
+</div>
+<div class="sect3">
+<h4 id="_detailed_technical_explanation_2"><a class="anchor" href="#_detailed_technical_explanation_2"></a>Detailed Technical Explanation</h4>
+<div class="paragraph">
+<p>Instead of writing to local journal files, the broker interacts with a database through a JDBC driver. Message and binding data are stored in database tables, encoded using the AMQ Broker journal encoding. This approach leverages the durability and transactional capabilities of the underlying database.</p>
+</div>
+<div class="paragraph">
+<p>Key characteristics:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Integration:</strong> It allows integration with existing database infrastructure and operational practices, which can be advantageous in environments with strict data management policies or existing database teams.</p>
+</li>
+<li>
+<p><strong>Manageability:</strong> Database tools can be used for backup, recovery, and monitoring of the message store data, fitting into established enterprise IT strategies.</p>
+</li>
+<li>
+<p><strong>Performance Overhead:</strong> As highlighted in the context, "use of a database can negatively effect the performance of a messaging system. Specifically, writing messaging data to database tables via JDBC creates a significant performance overhead for a broker." This is due to the additional latency of network communication with the database, the overhead of SQL queries, and the transactional nature of database operations compared to the highly optimized sequential writes of the file-based journal.</p>
+</li>
+<li>
+<p><strong>Supported Databases:</strong> AMQ Broker supports various relational databases. For a definitive list, refer to the <a href="#amq-broker-supported-configurations.adoc" class="xref unresolved">Red Hat AMQ 7 Supported Configurations</a> on the Red Hat Customer Portal.</p>
+</li>
+<li>
+<p><strong>OpenShift Considerations:</strong></p>
+</li>
+<li>
+<p><strong>External Database:</strong> Requires an external database instance (e.g., PostgreSQL, MySQL, Oracle, MS SQL Server) accessible from the OpenShift cluster.</p>
+</li>
+<li>
+<p><strong>JDBC Driver:</strong> The necessary JDBC driver JAR file must be made available to the broker at runtime. This typically involves using a custom image or mounting the JAR file into the broker pod. Refer to <a href="#add-third-party-jars.adoc" class="xref unresolved">Section 4.4, “Adding third-party JAR files”</a> in the AMQ Broker documentation for details.</p>
+</li>
+<li>
+<p><strong>Secrets:</strong> Database credentials (username, password) should be managed securely using OpenShift Secrets.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="amq-broker-journal-vs-paging"><a class="anchor" href="#amq-broker-journal-vs-paging"></a>Journal vs. Paging for Message Persistence</h3>
+<div class="paragraph">
+<p>While not a primary "store strategy" in the same vein as file-based vs. JDBC, the concepts of "journal" and "paging" are critical to understanding AMQ Broker&#8217;s message persistence.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Journal:</strong> As discussed, the journal is the primary persistence mechanism for active, in-flight messages and binding data. It ensures durability for messages that are intended to be stored.</p>
+</li>
+<li>
+<p><strong>Paging:</strong> Paging is a flow control mechanism that the broker uses to prevent memory exhaustion when a queue accumulates a large number of messages, or when consumers are slow. Instead of keeping all messages in memory, the broker "pages" them out to disk (using dedicated paging files on the filesystem, regardless of whether the main message store is file-based or JDBC). When consumers become available, messages are paged back into memory. Paging is always filesystem-based and is distinct from the primary message store for durability.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="amq-broker-choosing-strategy-factors"><a class="anchor" href="#amq-broker-choosing-strategy-factors"></a>Choosing the Appropriate Message Store Strategy</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The decision between a file-based journal and a JDBC message store depends on several factors:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Comparison of Message Store Strategies</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Feature</th>
+<th class="tableblock halign-left valign-top">File-Based Journal</th>
+<th class="tableblock halign-left valign-top">JDBC Message Store</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Performance</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">link: #amq-broker-file-based-journal[Excellent] (high throughput, low latency)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">link: #amq-broker-jdbc-message-store[Lower] (significant overhead compared to file-based)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Simplicity</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">High (default, no external database needed)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Moderate (requires external database, JDBC driver, configuration)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Integration</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Less integrated with existing database infrastructure</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Highly integrated with existing database infrastructure</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Data Management</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Specialized tools/scripts for journal management; relies on PV snapshots for backup</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Standard database tools for backup, recovery, monitoring</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>High Availability (HA)</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong> Shared Store: Requires <code>ReadWriteMany</code> (RWX) PV.
+</strong> Replicated Live-Backup: <code>ReadWriteOnce</code> (RWO) PV per broker.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong> Shared Store: Requires an external database accessible by all broker instances.
+</strong> Replicated Live-Backup: Each broker instance <strong>can</strong> use the same external database, but typically replicated HA uses its own internal persistence.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>OpenShift Storage</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Persistent Volumes (RWO or RWX)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">External database service</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Based on these factors, consider the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Prioritize Performance:</strong> If your primary concern is maximum message throughput and lowest latency, the <strong>file-based journal</strong> is almost always the superior choice. This is the recommended default for most high-performance messaging applications.</p>
+</li>
+<li>
+<p><strong>Leverage Existing IT Infrastructure:</strong> If your organization has strong existing database infrastructure, established operational procedures for database management (backup, monitoring, security), and a preference for centralizing data, then a <strong>JDBC message store</strong> might be a good fit, <strong>provided you can accept the performance trade-offs</strong>.</p>
+</li>
+<li>
+<p><strong>High Availability Requirements:</strong></p>
+</li>
+<li>
+<p>For <strong>shared-store HA</strong>, both strategies are viable. The file-based approach requires an RWX Persistent Volume, while the JDBC approach requires a shared database.</p>
+</li>
+<li>
+<p>For <strong>replicated live-backup HA</strong>, each live broker in a replication pair has its own persistence. File-based is generally simpler as it only requires RWO PVs. If using JDBC with replicated HA, ensure your database can handle the load from multiple brokers and that replication is configured correctly.</p>
+</li>
+<li>
+<p><strong>Operational Complexity:</strong> While JDBC can simplify data management by leveraging existing database tools, it adds complexity in terms of managing the external database, its network connectivity, and JDBC driver availability within your OpenShift deployment.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In general, for new deployments on OpenShift, especially those focused on cloud-native patterns and high performance, the <strong>file-based journal with OpenShift Persistent Volumes</strong> is often the most straightforward and performant choice.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="amq-broker-hands-on-message-store-prep"><a class="anchor" href="#amq-broker-hands-on-message-store-prep"></a>Hands-on Activity: Preparing for Message Store Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This activity focuses on understanding how message store options are specified within the <code>ActiveMQArtemis</code> Custom Resource (CR) on OpenShift, and the prerequisites for each.</p>
+</div>
+<div class="sect2">
+<h3 id="_objective"><a class="anchor" href="#_objective"></a>Objective</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Review the structure of an <code>ActiveMQArtemis</code> CR to locate message store configuration options.</p>
+</li>
+<li>
+<p>Identify the key parameters for configuring a file-based journal versus a JDBC message store.</p>
+</li>
+<li>
+<p>Understand the prerequisites for a JDBC message store deployment.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_steps"><a class="anchor" href="#_steps"></a>Steps</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Log in to OpenShift:</strong>
+Ensure you are logged into your OpenShift cluster using the <code>oc</code> CLI.</p>
+<div class="literalblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">[[amq-broker-message-store-strategy]]
-= Choosing the Appropriate Message Store Strategy
-
-Understanding and selecting the correct message store strategy is a critical decision for any AMQ Broker deployment, especially in containerized environments like OpenShift. The choice impacts performance, reliability, scalability, and operational complexity. This section details the primary message store options available for AMQ Broker and provides guidance on how to choose the best strategy for your specific use case.
-
-[[amq-broker-message-store-overview]]
-== Overview of Message Store Options
-
-AMQ Broker, based on Apache ActiveMQ Artemis, primarily offers two fundamental approaches for message persistence:
-
-*   xref:file-based-message-store.adoc[File-Based Journal]
-*   xref:jdbc-message-store.adoc[JDBC Message Store]
-
-Each approach has distinct characteristics, advantages, and trade-offs that are important to consider.
-
-[[amq-broker-file-based-journal]]
-=== File-Based Journal Store
-
-The file-based journal is the default and generally recommended message store for AMQ Broker due to its high performance and efficiency.
-
-==== Detailed Technical Explanation
-
-The file-based journal stores messages and binding data directly on the filesystem in a highly optimized binary log format. It uses a write-ahead log (WAL) approach, ensuring that data is written to disk before an acknowledgment is sent back to the producer. This design provides excellent durability while minimizing I/O overhead.
-
-Key characteristics:
-
-*   *Performance:* The file-based journal is designed for maximum throughput and minimal latency. It uses sequential writes, which are significantly faster than random writes, making it ideal for high-volume messaging scenarios.
-*   *Simplicity:* It's the default configuration, requiring no external database setup.
-*   *Data Structure:* Data is stored in a series of journal files (e.g., `activemq-data-*.amq`) within a configured directory.
-*   *OpenShift Considerations:* When deploying on OpenShift, the file-based journal requires persistent storage, typically provisioned via Persistent Volumes (PVs). For single instances or replicated high-availability (HA) setups, a `ReadWriteOnce` (RWO) PV is sufficient. For shared-store HA, a `ReadWriteMany` (RWX) PV is required, allowing multiple broker pods to access the same underlying storage.
-
-[[amq-broker-jdbc-message-store]]
-=== JDBC Message Store
-
-The JDBC message store allows AMQ Broker to persist messages and bindings to an external relational database using Java Database Connectivity (JDBC).
-
-==== Detailed Technical Explanation
-
-Instead of writing to local journal files, the broker interacts with a database through a JDBC driver. Message and binding data are stored in database tables, encoded using the AMQ Broker journal encoding. This approach leverages the durability and transactional capabilities of the underlying database.
-
-Key characteristics:
-
-*   *Integration:* It allows integration with existing database infrastructure and operational practices, which can be advantageous in environments with strict data management policies or existing database teams.
-*   *Manageability:* Database tools can be used for backup, recovery, and monitoring of the message store data, fitting into established enterprise IT strategies.
-*   *Performance Overhead:* As highlighted in the context, "use of a database can negatively effect the performance of a messaging system. Specifically, writing messaging data to database tables via JDBC creates a significant performance overhead for a broker." This is due to the additional latency of network communication with the database, the overhead of SQL queries, and the transactional nature of database operations compared to the highly optimized sequential writes of the file-based journal.
-*   *Supported Databases:* AMQ Broker supports various relational databases. For a definitive list, refer to the xref:amq-broker-supported-configurations.adoc[Red Hat AMQ 7 Supported Configurations] on the Red Hat Customer Portal.
-*   *OpenShift Considerations:*
-    *   *External Database:* Requires an external database instance (e.g., PostgreSQL, MySQL, Oracle, MS SQL Server) accessible from the OpenShift cluster.
-    *   *JDBC Driver:* The necessary JDBC driver JAR file must be made available to the broker at runtime. This typically involves using a custom image or mounting the JAR file into the broker pod. Refer to xref:add-third-party-jars.adoc[Section 4.4, “Adding third-party JAR files”] in the AMQ Broker documentation for details.
-    *   *Secrets:* Database credentials (username, password) should be managed securely using OpenShift Secrets.
-
-[[amq-broker-journal-vs-paging]]
-=== Journal vs. Paging for Message Persistence
-
-While not a primary "store strategy" in the same vein as file-based vs. JDBC, the concepts of "journal" and "paging" are critical to understanding AMQ Broker's message persistence.
-
-*   *Journal:* As discussed, the journal is the primary persistence mechanism for active, in-flight messages and binding data. It ensures durability for messages that are intended to be stored.
-*   *Paging:* Paging is a flow control mechanism that the broker uses to prevent memory exhaustion when a queue accumulates a large number of messages, or when consumers are slow. Instead of keeping all messages in memory, the broker "pages" them out to disk (using dedicated paging files on the filesystem, regardless of whether the main message store is file-based or JDBC). When consumers become available, messages are paged back into memory. Paging is always filesystem-based and is distinct from the primary message store for durability.
-
-[[amq-broker-choosing-strategy-factors]]
-== Choosing the Appropriate Message Store Strategy
-
-The decision between a file-based journal and a JDBC message store depends on several factors:
-
-.Comparison of Message Store Strategies
-|===
-| Feature | File-Based Journal | JDBC Message Store
-
-| *Performance* | link: #amq-broker-file-based-journal[Excellent] (high throughput, low latency) | link: #amq-broker-jdbc-message-store[Lower] (significant overhead compared to file-based)
-| *Simplicity* | High (default, no external database needed) | Moderate (requires external database, JDBC driver, configuration)
-| *Integration* | Less integrated with existing database infrastructure | Highly integrated with existing database infrastructure
-| *Data Management* | Specialized tools/scripts for journal management; relies on PV snapshots for backup | Standard database tools for backup, recovery, monitoring
-| *High Availability (HA)* |
-** Shared Store: Requires `ReadWriteMany` (RWX) PV.
-** Replicated Live-Backup: `ReadWriteOnce` (RWO) PV per broker.
-|
-** Shared Store: Requires an external database accessible by all broker instances.
-** Replicated Live-Backup: Each broker instance *can* use the same external database, but typically replicated HA uses its own internal persistence.
-| *OpenShift Storage* | Persistent Volumes (RWO or RWX) | External database service
-|===
-
-Based on these factors, consider the following:
-
-*   *Prioritize Performance:* If your primary concern is maximum message throughput and lowest latency, the *file-based journal* is almost always the superior choice. This is the recommended default for most high-performance messaging applications.
-*   *Leverage Existing IT Infrastructure:* If your organization has strong existing database infrastructure, established operational procedures for database management (backup, monitoring, security), and a preference for centralizing data, then a *JDBC message store* might be a good fit, *provided you can accept the performance trade-offs*.
-*   *High Availability Requirements:*
-    *   For *shared-store HA*, both strategies are viable. The file-based approach requires an RWX Persistent Volume, while the JDBC approach requires a shared database.
-    *   For *replicated live-backup HA*, each live broker in a replication pair has its own persistence. File-based is generally simpler as it only requires RWO PVs. If using JDBC with replicated HA, ensure your database can handle the load from multiple brokers and that replication is configured correctly.
-*   *Operational Complexity:* While JDBC can simplify data management by leveraging existing database tools, it adds complexity in terms of managing the external database, its network connectivity, and JDBC driver availability within your OpenShift deployment.
-
-In general, for new deployments on OpenShift, especially those focused on cloud-native patterns and high performance, the *file-based journal with OpenShift Persistent Volumes* is often the most straightforward and performant choice.
-
-[[amq-broker-hands-on-message-store-prep]]
-== Hands-on Activity: Preparing for Message Store Configuration
-
-This activity focuses on understanding how message store options are specified within the `ActiveMQArtemis` Custom Resource (CR) on OpenShift, and the prerequisites for each.
-
-=== Objective
-
-*   Review the structure of an `ActiveMQArtemis` CR to locate message store configuration options.
-*   Identify the key parameters for configuring a file-based journal versus a JDBC message store.
-*   Understand the prerequisites for a JDBC message store deployment.
-
-=== Steps
-
-.  **Log in to OpenShift:**
-   Ensure you are logged into your OpenShift cluster using the `oc` CLI.
-
-   ```bash
-   oc login -u &lt;your_username&gt; -p &lt;your_password&gt; &lt;your_openshift_cluster_url&gt;
-   ```
-
-.  **Identify Message Store Configuration in a Sample CR:**
-   Examine a sample `ActiveMQArtemis` Custom Resource (CR). If you have an AMQ Broker Operator installed, you can get a sample or create a basic one.
-
-   Let's look at a conceptual `ActiveMQArtemis` CR snippet for a file-based store:
-
-   ```yaml
-   apiVersion: broker.amq.io/v1beta1
-   kind: ActiveMQArtemis
-   metadata:
-     name: my-broker
-   spec:
-     deploymentPlan:
-       size: 1
-       image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
-       persistenceEnabled: true
-       journalType: large_messages_optimized
-       # For file-based persistence, a Persistent Volume Claim (PVC) is automatically created
-       # or you can specify an existing one via `storage.pvc` field if not using default.
-       # The 'journalType' field indicates the type of journal.
-       # Common options:
-       #   'large_messages_optimized': Optimized for large messages (default for new CRs)
-       #   'nondurable_dlr': Non-durable store for delivery acknowledgements
-       #   'nio': Basic Non-Blocking I/O
-       #   'aio': Asynchronous I/O (Linux only, requires libaio)
-     # ... other configurations
-   ```
-
-   Now, consider a conceptual `ActiveMQArtemis` CR snippet for a JDBC message store:
-
-   ```yaml
-   apiVersion: broker.amq.io/v1beta1
-   kind: ActiveMQArtemis
-   metadata:
-     name: jdbc-broker
-   spec:
-     deploymentPlan:
-       size: 1
-       image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
-       persistenceEnabled: true
-       # For JDBC, the journalType is implicitly handled by the 'database' configuration
-       # or explicitly set to 'jdbc'.
-       database:
-         type: postgres
-         jdbcUrl: "jdbc:postgresql://postgresql-service:5432/brokerdb"
-         # Reference to a Secret containing database credentials
-         databaseSecret:
-           name: broker-db-secret
-           userKey: database-user
-           passwordKey: database-password
-         # Optionally, specify a custom JDBC driver image if not included in the base image
-         # jdbcDriverImage: my-custom-jdbc-driver-image:latest
-         # Or, configure additional mounts for JDBC driver JARs
-         externalVolumes:
-           - name: jdbc-driver-volume
-             mountPath: /opt/amq/drivers
-             secret:
-               secretName: custom-jdbc-driver-secret
-     # ... other configurations
-   ```
-
-.  **Observe Key Differences:**
-   *   For file-based persistence, the `persistenceEnabled: true` and `journalType` fields are primary. The OpenShift Operator handles PVC creation and mounting.
-   *   For JDBC persistence, the `database` section is introduced. This section specifies:
-        *   `type`: The database type (e.g., `postgres`, `mysql`).
-        *   `jdbcUrl`: The connection string for your database.
-        *   `databaseSecret`: A reference to an OpenShift `Secret` containing the database username and password. This is crucial for securely managing credentials.
-        *   `jdbcDriverImage` or `externalVolumes`: How the JDBC driver JAR file is made available to the broker pod. This is a critical prerequisite.
-
-.  **Consider Prerequisites for JDBC:**
-   Before deploying an AMQ Broker with a JDBC message store, ensure the following are in place:
-   *   **Dedicated Database:** A running database instance (e.g., PostgreSQL, MySQL) accessible from your OpenShift cluster.
-   *   **Database Schema/User:** A database and a user with appropriate permissions to create tables and perform read/write operations within that database.
-   *   **OpenShift Secret:** An OpenShift `Secret` containing the database username and password.
-     ```bash
-     oc create secret generic broker-db-secret \
-       --from-literal=database-user=mybrokeruser \
-       --from-literal=database-password=mybrokerpassword
-     ```
-   *   **JDBC Driver:** The correct JDBC driver JAR file must be present in the broker's classpath. This can be achieved by:
-        *   Using a custom AMQ Broker image that includes the driver.
-        *   Mounting the driver JAR from an `ConfigMap` or `Secret` using `externalVolumes` and ensuring it's in the correct path for the broker to pick it up.
-
-This hands-on exploration should solidify your understanding of how to configure and prepare for different message store strategies within an OpenShift AMQ Broker deployment.</code></pre>
+<pre>```bash
+oc login -u &lt;your_username&gt; -p &lt;your_password&gt; &lt;your_openshift_cluster_url&gt;
+```</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Identify Message Store Configuration in a Sample CR:</strong>
+Examine a sample <code>ActiveMQArtemis</code> Custom Resource (CR). If you have an AMQ Broker Operator installed, you can get a sample or create a basic one.</p>
+<div class="literalblock">
+<div class="content">
+<pre>Let's look at a conceptual `ActiveMQArtemis` CR snippet for a file-based store:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>```yaml
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: my-broker
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
+    persistenceEnabled: true
+    journalType: large_messages_optimized
+    # For file-based persistence, a Persistent Volume Claim (PVC) is automatically created
+    # or you can specify an existing one via `storage.pvc` field if not using default.
+    # The 'journalType' field indicates the type of journal.
+    # Common options:
+    #   'large_messages_optimized': Optimized for large messages (default for new CRs)
+    #   'nondurable_dlr': Non-durable store for delivery acknowledgements
+    #   'nio': Basic Non-Blocking I/O
+    #   'aio': Asynchronous I/O (Linux only, requires libaio)
+  # ... other configurations
+```</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Now, consider a conceptual `ActiveMQArtemis` CR snippet for a JDBC message store:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>```yaml
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: jdbc-broker
+spec:
+  deploymentPlan:
+    size: 1
+    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
+    persistenceEnabled: true
+    # For JDBC, the journalType is implicitly handled by the 'database' configuration
+    # or explicitly set to 'jdbc'.
+    database:
+      type: postgres
+      jdbcUrl: "jdbc:postgresql://postgresql-service:5432/brokerdb"
+      # Reference to a Secret containing database credentials
+      databaseSecret:
+        name: broker-db-secret
+        userKey: database-user
+        passwordKey: database-password
+      # Optionally, specify a custom JDBC driver image if not included in the base image
+      # jdbcDriverImage: my-custom-jdbc-driver-image:latest
+      # Or, configure additional mounts for JDBC driver JARs
+      externalVolumes:
+        - name: jdbc-driver-volume
+          mountPath: /opt/amq/drivers
+          secret:
+            secretName: custom-jdbc-driver-secret
+  # ... other configurations
+```</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Observe Key Differences:</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>For file-based persistence, the <code>persistenceEnabled: true</code> and <code>journalType</code> fields are primary. The OpenShift Operator handles PVC creation and mounting.</p>
+</li>
+<li>
+<p>For JDBC persistence, the <code>database</code> section is introduced. This section specifies:</p>
+</li>
+<li>
+<p><code>type</code>: The database type (e.g., <code>postgres</code>, <code>mysql</code>).</p>
+</li>
+<li>
+<p><code>jdbcUrl</code>: The connection string for your database.</p>
+</li>
+<li>
+<p><code>databaseSecret</code>: A reference to an OpenShift <code>Secret</code> containing the database username and password. This is crucial for securely managing credentials.</p>
+</li>
+<li>
+<p><code>jdbcDriverImage</code> or <code>externalVolumes</code>: How the JDBC driver JAR file is made available to the broker pod. This is a critical prerequisite.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Consider Prerequisites for JDBC:</strong>
+Before deploying an AMQ Broker with a JDBC message store, ensure the following are in place:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Dedicated Database:</strong> A running database instance (e.g., PostgreSQL, MySQL) accessible from your OpenShift cluster.</p>
+</li>
+<li>
+<p><strong>Database Schema/User:</strong> A database and a user with appropriate permissions to create tables and perform read/write operations within that database.</p>
+</li>
+<li>
+<p><strong>OpenShift Secret:</strong> An OpenShift <code>Secret</code> containing the database username and password.
+<code><code>bash
+oc create secret generic broker-db-secret \
+  --from-literal=database-user=mybrokeruser \
+  --from-literal=database-password=mybrokerpassword
+</code></code></p>
+</li>
+<li>
+<p><strong>JDBC Driver:</strong> The correct JDBC driver JAR file must be present in the broker&#8217;s classpath. This can be achieved by:</p>
+</li>
+<li>
+<p>Using a custom AMQ Broker image that includes the driver.</p>
+</li>
+<li>
+<p>Mounting the driver JAR from an <code>ConfigMap</code> or <code>Secret</code> using <code>externalVolumes</code> and ensuring it&#8217;s in the correct path for the broker to pick it up.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This hands-on exploration should solidify your understanding of how to configure and prepare for different message store strategies within an OpenShift AMQ Broker deployment.</p>
+</div>
+</div>
 </div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a></span>
-  <span class="next"><a href="openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a></span>
+  <span class="next"><a href="openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a></span>
 </nav>
 </article>
   </div>

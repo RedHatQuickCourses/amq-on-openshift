@@ -60,7 +60,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -405,116 +405,235 @@
 </aside>
 <article class="doc">
 <h1 class="page">Understanding Failover and Recovery Mechanisms</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>Here&#8217;s the detailed educational content for "Understanding Failover and Recovery Mechanisms" in Antora AsciiDoc format:</p>
+<p>When deploying message brokers like AMQ Broker in a production environment, ensuring continuous availability and reliability is paramount. <strong>Failover</strong> and <strong>recovery mechanisms</strong> are critical concepts that address how the system gracefully handles unexpected broker failures and ensures that client applications can maintain connectivity and continue their operations with minimal disruption.</p>
 </div>
-<div class="listingblock">
+</div>
+</div>
+<div class="sect2">
+<h3 id="_technical_explanation_automatic_client_failover"><a class="anchor" href="#_technical_explanation_automatic_client_failover"></a>Technical Explanation: Automatic Client Failover</h3>
+<div class="paragraph">
+<p>AMQ Broker, leveraging its foundation in Apache ActiveMQ Artemis, provides robust <strong>automatic client failover</strong> capabilities. This feature is designed to make clients resilient to broker outages without requiring complex manual reconnection logic in the application code.</p>
+</div>
+<div class="paragraph">
+<p>When a client initially connects to an AMQ Broker cluster configured for High Availability (HA), it receives information about all available <strong>master</strong> (live) and <strong>slave</strong> (backup) brokers within the cluster. This topology information is crucial for enabling failover.</p>
+</div>
+<div class="paragraph">
+<p>The core mechanism works as follows:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Detection of Failure</strong>: Clients continuously monitor their connection to the active broker. If a client does not receive any packets from the broker within a pre-configured period of time (often referred to as a "liveness check" or "idle timeout"), it detects a connection failure.</p>
+</li>
+<li>
+<p><strong>Failover Trigger</strong>: Upon detecting a connection failure, the client attempts to reconnect. If <strong>automatic failover</strong> is enabled (i.e., <code>ha=true</code> and <code>reconnectAttempts</code> is greater than <code>0</code> in the client&#8217;s connection URI), the client will use the topology information it previously received to try connecting to a designated <strong>slave</strong> broker.</p>
+</li>
+<li>
+<p><strong>Slave Broker Activation and Session Recreation</strong>: When the client successfully reconnects to a slave broker that has taken over the role of the failed master, the slave broker automatically re-creates any sessions, producers, and consumers that existed on the connection before the failover event. This process aims to restore the client&#8217;s operational state as closely as possible.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Failover occurs only if <code>ha=true</code> and <code>reconnectAttempts</code> is greater than <code>0</code>. Crucially, the client <strong>must</strong> successfully establish an initial connection to a master broker to receive information about all other brokers in the cluster. Without this initial handshake, the client lacks the necessary topology information to perform an intelligent failover to another <strong>different</strong> broker.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_limitations_and_considerations_during_failover"><a class="anchor" href="#_limitations_and_considerations_during_failover"></a>Limitations and Considerations During Failover</h4>
+<div class="paragraph">
+<p>While automatic failover greatly simplifies application design, it&#8217;s important to understand its inherent limitations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>In-flight Messages</strong>: When a failover occurs, any messages that were "in-flight" (i.e., sent by a producer but not yet acknowledged by the broker, or dispatched by the broker but not yet acknowledged by a consumer) at the exact moment of failure might be lost. This is because the new slave broker takes over at a specific point in time and does not have knowledge of these partial operations on the previous master.</p>
+</li>
+<li>
+<p><strong>Session Knowledge</strong>: Similarly, the recreated sessions on the slave broker might not have complete knowledge of all prior operations, such as messages already sent or acknowledged.</p>
+</li>
+<li>
+<p><strong>Initial Connection Failures</strong>: During the <strong>initial connection attempt</strong> to an AMQ Broker cluster, if the specified broker in the connection URI fails before the client can establish a connection and receive the full cluster topology, the client cannot "failover" to another broker in the traditional sense. In this specific scenario, the client can only retry to re-establish the initial connection to the <strong>same</strong> specified broker a configurable number of times. If all attempts fail, an exception is thrown.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_recovery_mechanisms_and_guaranteeing_message_delivery"><a class="anchor" href="#_recovery_mechanisms_and_guaranteeing_message_delivery"></a>Recovery Mechanisms and Guaranteeing Message Delivery</h4>
+<div class="paragraph">
+<p>Despite the limitations during failover, AMQ Broker and client applications can employ several strategies to ensure robust message delivery guarantees:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Automatic Session Recreation</strong>: As mentioned, the slave broker automatically re-creates client sessions and consumers. This is the primary recovery mechanism at the broker level for continuity.</p>
+</li>
+<li>
+<p><strong>Duplicate Detection</strong>: To achieve "once and only once" delivery guarantees, even with potential message loss during failover, applications should implement <strong>duplicate detection</strong>. This involves assigning unique identifiers to messages and storing them in a persistent data store. If a message is re-sent after a failover, the consumer can check if it has already processed that message ID and discard duplicates.</p>
+</li>
+<li>
+<p><strong>Transactional Messaging</strong>: Using <strong>JMS transactions</strong> (or equivalent protocol transactions) is a powerful way to ensure atomic operations. If a failover occurs mid-transaction, the transaction is typically rolled back. The client application can then retry the entire transaction on the new broker, guaranteeing that messages are either fully processed or not processed at all, preventing partial updates.</p>
+</li>
+<li>
+<p><strong>Configurable Reconnection Attempts</strong>: Clients can be configured with a specific number of reconnection attempts and a retry interval. This allows applications to be resilient to transient network issues or short broker restart cycles.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_hands_on_activity_simulating_failover_and_observing_recovery"><a class="anchor" href="#_hands_on_activity_simulating_failover_and_observing_recovery"></a>Hands-on Activity: Simulating Failover and Observing Recovery</h3>
+<div class="paragraph">
+<p>This conceptual lab activity demonstrates how a client application handles broker failure and recovers using automatic failover.</p>
+</div>
+<div class="sect3">
+<h4 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>An OpenShift cluster with the AMQ Broker Operator installed.</p>
+</li>
+<li>
+<p>An AMQ Broker instance deployed in High Availability (HA) mode (e.g., a live-backup pair or a replicated cluster). This requires a <code>broker.yaml</code> Custom Resource (CR) configured with <code>highAvailability: true</code> and appropriate persistence.</p>
+</li>
+<li>
+<p>A simple client application (e.g., a Java application using the AMQ Core Protocol or JMS) configured to connect to the HA broker. The client connection URI must include <code>ha=true</code> and <code>reconnectAttempts</code> set to a value greater than <code>0</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_lab_steps"><a class="anchor" href="#_lab_steps"></a>Lab Steps</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Deploy an HA AMQ Broker Instance</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Ensure you have an AMQ Broker deployed in a highly available configuration on OpenShift. This typically involves a <code>Broker</code> Custom Resource (CR) definition that sets <code>highAvailability</code> to <code>true</code> and defines persistent storage.</p>
+</li>
+<li>
+<p>Verify that both the live and backup broker pods are running and healthy.</p>
+<div class="literalblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">[[understanding-failover-recovery]]
-=== Understanding Failover and Recovery Mechanisms
-
-When deploying message brokers like AMQ Broker in a production environment, ensuring continuous availability and reliability is paramount. *Failover* and *recovery mechanisms* are critical concepts that address how the system gracefully handles unexpected broker failures and ensures that client applications can maintain connectivity and continue their operations with minimal disruption.
-
-==== Technical Explanation: Automatic Client Failover
-
-AMQ Broker, leveraging its foundation in Apache ActiveMQ Artemis, provides robust *automatic client failover* capabilities. This feature is designed to make clients resilient to broker outages without requiring complex manual reconnection logic in the application code.
-
-When a client initially connects to an AMQ Broker cluster configured for High Availability (HA), it receives information about all available *master* (live) and *slave* (backup) brokers within the cluster. This topology information is crucial for enabling failover.
-
-The core mechanism works as follows:
-
-*   *Detection of Failure*: Clients continuously monitor their connection to the active broker. If a client does not receive any packets from the broker within a pre-configured period of time (often referred to as a "liveness check" or "idle timeout"), it detects a connection failure.
-*   *Failover Trigger*: Upon detecting a connection failure, the client attempts to reconnect. If *automatic failover* is enabled (i.e., `ha=true` and `reconnectAttempts` is greater than `0` in the client's connection URI), the client will use the topology information it previously received to try connecting to a designated *slave* broker.
-*   *Slave Broker Activation and Session Recreation*: When the client successfully reconnects to a slave broker that has taken over the role of the failed master, the slave broker automatically re-creates any sessions, producers, and consumers that existed on the connection before the failover event. This process aims to restore the client's operational state as closely as possible.
-
-[NOTE]
-Failover occurs only if `ha=true` and `reconnectAttempts` is greater than `0`. Crucially, the client *must* successfully establish an initial connection to a master broker to receive information about all other brokers in the cluster. Without this initial handshake, the client lacks the necessary topology information to perform an intelligent failover to another *different* broker.
-
-===== Limitations and Considerations During Failover
-
-While automatic failover greatly simplifies application design, it's important to understand its inherent limitations:
-
-*   *In-flight Messages*: When a failover occurs, any messages that were "in-flight" (i.e., sent by a producer but not yet acknowledged by the broker, or dispatched by the broker but not yet acknowledged by a consumer) at the exact moment of failure might be lost. This is because the new slave broker takes over at a specific point in time and does not have knowledge of these partial operations on the previous master.
-*   *Session Knowledge*: Similarly, the recreated sessions on the slave broker might not have complete knowledge of all prior operations, such as messages already sent or acknowledged.
-*   *Initial Connection Failures*: During the *initial connection attempt* to an AMQ Broker cluster, if the specified broker in the connection URI fails before the client can establish a connection and receive the full cluster topology, the client cannot "failover" to another broker in the traditional sense. In this specific scenario, the client can only retry to re-establish the initial connection to the *same* specified broker a configurable number of times. If all attempts fail, an exception is thrown.
-
-===== Recovery Mechanisms and Guaranteeing Message Delivery
-
-Despite the limitations during failover, AMQ Broker and client applications can employ several strategies to ensure robust message delivery guarantees:
-
-*   *Automatic Session Recreation*: As mentioned, the slave broker automatically re-creates client sessions and consumers. This is the primary recovery mechanism at the broker level for continuity.
-*   *Duplicate Detection*: To achieve "once and only once" delivery guarantees, even with potential message loss during failover, applications should implement *duplicate detection*. This involves assigning unique identifiers to messages and storing them in a persistent data store. If a message is re-sent after a failover, the consumer can check if it has already processed that message ID and discard duplicates.
-*   *Transactional Messaging*: Using *JMS transactions* (or equivalent protocol transactions) is a powerful way to ensure atomic operations. If a failover occurs mid-transaction, the transaction is typically rolled back. The client application can then retry the entire transaction on the new broker, guaranteeing that messages are either fully processed or not processed at all, preventing partial updates.
-*   *Configurable Reconnection Attempts*: Clients can be configured with a specific number of reconnection attempts and a retry interval. This allows applications to be resilient to transient network issues or short broker restart cycles.
-
-==== Hands-on Activity: Simulating Failover and Observing Recovery
-
-This conceptual lab activity demonstrates how a client application handles broker failure and recovers using automatic failover.
-
-===== Prerequisites
-
-*   An OpenShift cluster with the AMQ Broker Operator installed.
-*   An AMQ Broker instance deployed in High Availability (HA) mode (e.g., a live-backup pair or a replicated cluster). This requires a `broker.yaml` Custom Resource (CR) configured with `highAvailability: true` and appropriate persistence.
-*   A simple client application (e.g., a Java application using the AMQ Core Protocol or JMS) configured to connect to the HA broker. The client connection URI must include `ha=true` and `reconnectAttempts` set to a value greater than `0`.
-
-===== Lab Steps
-
-.  **Deploy an HA AMQ Broker Instance**:
-    *   Ensure you have an AMQ Broker deployed in a highly available configuration on OpenShift. This typically involves a `Broker` Custom Resource (CR) definition that sets `highAvailability` to `true` and defines persistent storage.
-    *   Verify that both the live and backup broker pods are running and healthy.
-
-    [source,yaml]
-    ----
-    apiVersion: broker.amq.io/v1beta1
-    kind: Broker
-    metadata:
-      name: my-ha-broker
-    spec:
-      deploymentPlan:
-        size: 2 # Or 1 with ha: true for shared-store live-backup
-        image: 'registry.redhat.io/amq7/amq-broker-rhel8:7.11'
-        highAvailability: true
-        persistenceEnabled: true
-        storage:
-          size: 1Gi
-          storageClassName: ocs-storagecluster-cephfs # Example for OpenShift Data Foundation
-    ---
-    # Define a client application Deployment and Service that connects to this broker
-    # (Details omitted for brevity, assuming existing knowledge of client deployment)
-    ----
-
-.  **Deploy and Run a Client Application**:
-    *   Deploy your producer and consumer client applications to OpenShift. These applications should be configured to connect to your HA broker's service.
-    *   Ensure the client's connection string includes the necessary failover parameters.
-
-    [source,java]
-    ----
-    // Example Java JMS client connection URI
-    String connectionUri = "tcp://my-ha-broker-svc:61616?ha=true&amp;reconnectAttempts=60&amp;reconnectDelay=500";
-
-    // ... create connection, session, producer, consumer
-    ----
-    *   Start the client applications. Observe them sending and receiving messages.
-
-.  **Simulate a Broker Failure**:
-    *   Identify the currently active (live) broker pod using the Hawtio console or by inspecting broker logs/routes.
-    *   Manually delete the active broker pod on OpenShift.
-
-    [source,bash]
-    ----
-    oc delete pod &lt;live-broker-pod-name&gt; -n &lt;your-project&gt;
-    ----
-
-.  **Observe Client Failover and Recovery**:
-    *   Monitor the logs of your client applications.
-    *   You should observe the client momentarily losing connection, then logging messages indicating a successful reconnection to the newly activated backup broker.
-    *   Verify that message production and consumption resume without manual intervention.
-    *   Observe OpenShift automatically spinning up a new backup broker pod to replace the one you deleted, ensuring the HA configuration is restored.
-
-.  **Verify Message Persistence (Optional, for advanced HA)**:
-    *   If you had messages in queues before the failover, verify they are still available and processed by the consumer after the failover. This demonstrates the persistence and data replication aspects of HA.
-
-This activity visually demonstrates the resilience provided by AMQ Broker's automatic client failover, highlighting how applications can seamlessly recover from broker failures within an HA setup.</code></pre>
+<pre>[source,yaml]
+----
+apiVersion: broker.amq.io/v1beta1
+kind: Broker
+metadata:
+  name: my-ha-broker
+spec:
+  deploymentPlan:
+    size: 2 # Or 1 with ha: true for shared-store live-backup
+    image: 'registry.redhat.io/amq7/amq-broker-rhel8:7.11'
+    highAvailability: true
+    persistenceEnabled: true
+    storage:
+      size: 1Gi
+      storageClassName: ocs-storagecluster-cephfs # Example for OpenShift Data Foundation
+---
+# Define a client application Deployment and Service that connects to this broker
+# (Details omitted for brevity, assuming existing knowledge of client deployment)
+----</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Deploy and Run a Client Application</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Deploy your producer and consumer client applications to OpenShift. These applications should be configured to connect to your HA broker&#8217;s service.</p>
+</li>
+<li>
+<p>Ensure the client&#8217;s connection string includes the necessary failover parameters.</p>
+<div class="literalblock">
+<div class="content">
+<pre>[source,java]
+----
+// Example Java JMS client connection URI
+String connectionUri = "tcp://my-ha-broker-svc:61616?ha=true&amp;reconnectAttempts=60&amp;reconnectDelay=500";</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>// ... create connection, session, producer, consumer
+----
+*   Start the client applications. Observe them sending and receiving messages.</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Simulate a Broker Failure</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Identify the currently active (live) broker pod using the Hawtio console or by inspecting broker logs/routes.</p>
+</li>
+<li>
+<p>Manually delete the active broker pod on OpenShift.</p>
+<div class="literalblock">
+<div class="content">
+<pre>[source,bash]
+----
+oc delete pod &lt;live-broker-pod-name&gt; -n &lt;your-project&gt;
+----</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Observe Client Failover and Recovery</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Monitor the logs of your client applications.</p>
+</li>
+<li>
+<p>You should observe the client momentarily losing connection, then logging messages indicating a successful reconnection to the newly activated backup broker.</p>
+</li>
+<li>
+<p>Verify that message production and consumption resume without manual intervention.</p>
+</li>
+<li>
+<p>Observe OpenShift automatically spinning up a new backup broker pod to replace the one you deleted, ensuring the HA configuration is restored.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Verify Message Persistence (Optional, for advanced HA)</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>If you had messages in queues before the failover, verify they are still available and processed by the consumer after the failover. This demonstrates the persistence and data replication aspects of HA.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This activity visually demonstrates the resilience provided by AMQ Broker&#8217;s automatic client failover, highlighting how applications can seamlessly recover from broker failures within an HA setup.</p>
+</div>
 </div>
 </div>
 <nav class="pagination">

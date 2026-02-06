@@ -60,7 +60,7 @@
     <a class="nav-link" href="core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -405,97 +405,196 @@
 </aside>
 <article class="doc">
 <h1 class="page">Core Concepts: Producers, Consumers, Queues, Topics</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>Here&#8217;s the content covering the core concepts of Producers, Consumers, Queues, and Topics, formatted in Antora AsciiDoc:</p>
+<p>This section delves into the foundational concepts essential for understanding Message-Oriented Middleware (MOM) and specifically how Red Hat AMQ Broker facilitates asynchronous communication. We will explore the roles of producers, consumers, and the types of destinations—queues and topics—that manage message flow.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">// Module title for the Antora documentation
-= Core Concepts: Producers, Consumers, Queues, Topics
-
-This section delves into the foundational concepts essential for understanding Message-Oriented Middleware (MOM) and specifically how Red Hat AMQ Broker facilitates asynchronous communication. We will explore the roles of producers, consumers, and the types of destinations—queues and topics—that manage message flow.
-
-== Understanding the Messaging Architecture
-
-At the heart of message-oriented middleware is the concept of decoupling message senders and receivers. This asynchronous communication model relies on several core components working in harmony.
-
-.Messaging Components
-[cols="1,3",options="header"]
-|===
-|Entity |Description
-|xref:amq-broker-on-openshift::overview.adoc#_connection[Connection] |A network connection between a client and the AMQ Broker. Connections are instantiated by connection factories.
-|xref:amq-broker-on-openshift::overview.adoc#_session[Session] |A single-threaded context for producing and consuming messages within a connection. A session can create multiple message producers and consumers.
-|xref:amq-broker-on-openshift::overview.adoc#_message[Message] |The fundamental unit of data exchanged in a messaging system. It contains application-specific information.
-|xref:amq-broker-on-openshift::overview.adoc#_messageproducer[MessageProducer] |A client-side object responsible for sending messages to a specific destination on the broker.
-|xref:amq-broker-on-openshift::overview.adoc#_messageconsumer[MessageConsumer] |A client-side object responsible for receiving messages from a specific destination on the broker.
-|xref:amq-broker-on-openshift::overview.adoc#_destination[Destination] |A named location on the broker where messages are sent or from where they are received. Destinations can be either queues or topics.
-|xref:amq-broker-on-openshift::overview.adoc#_queue[Queue] |A type of destination that implements point-to-point messaging semantics. Messages are stored sequentially.
-|xref:amq-broker-on-openshift::overview.adoc#_topic[Topic] |A type of destination that implements publish-subscribe messaging semantics. Messages are distributed to multiple subscribers.
-|===
-
-These components form a hierarchical structure: `Connection Factories` create `Connections`, `Connections` establish `Sessions`, and `Sessions` are used to create `MessageProducers` and `MessageConsumers` that interact with `Destinations` (either `Queues` or `Topics`) to send and receive `Messages`.
-
-[NOTE]
+</div>
+</div>
+<div class="sect1">
+<h2 id="_understanding_the_messaging_architecture"><a class="anchor" href="#_understanding_the_messaging_architecture"></a>Understanding the Messaging Architecture</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At the heart of message-oriented middleware is the concept of decoupling message senders and receivers. This asynchronous communication model relies on several core components working in harmony.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Messaging Components</caption>
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Entity</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#amq-broker-on-openshift::overview.adoc#_connection" class="xref unresolved">Connection</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A network connection between a client and the AMQ Broker. Connections are instantiated by connection factories.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#amq-broker-on-openshift::overview.adoc#_session" class="xref unresolved">Session</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A single-threaded context for producing and consuming messages within a connection. A session can create multiple message producers and consumers.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#amq-broker-on-openshift::overview.adoc#_message" class="xref unresolved">Message</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The fundamental unit of data exchanged in a messaging system. It contains application-specific information.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#amq-broker-on-openshift::overview.adoc#_messageproducer" class="xref unresolved">MessageProducer</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A client-side object responsible for sending messages to a specific destination on the broker.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#amq-broker-on-openshift::overview.adoc#_messageconsumer" class="xref unresolved">MessageConsumer</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A client-side object responsible for receiving messages from a specific destination on the broker.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#amq-broker-on-openshift::overview.adoc#_destination" class="xref unresolved">Destination</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A named location on the broker where messages are sent or from where they are received. Destinations can be either queues or topics.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#amq-broker-on-openshift::overview.adoc#_queue" class="xref unresolved">Queue</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A type of destination that implements point-to-point messaging semantics. Messages are stored sequentially.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#amq-broker-on-openshift::overview.adoc#_topic" class="xref unresolved">Topic</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A type of destination that implements publish-subscribe messaging semantics. Messages are distributed to multiple subscribers.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>These components form a hierarchical structure: <code>Connection Factories</code> create <code>Connections</code>, <code>Connections</code> establish <code>Sessions</code>, and <code>Sessions</code> are used to create <code>MessageProducers</code> and <code>MessageConsumers</code> that interact with <code>Destinations</code> (either <code>Queues</code> or <code>Topics</code>) to send and receive <code>Messages</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
 The Red Hat build of Apache Qpid JMS and AMQ Core Protocol JMS clients operate on these fundamental concepts, ensuring consistent messaging behavior across different protocols.
-
-== Producers and Consumers
-
-Message producers and consumers are the active agents in the messaging system responsible for sending and receiving messages.
-
-=== Message Producers
-
-A `MessageProducer` is a client-side component that acts as a channel for sending messages to a designated xref:amq-broker-on-openshift::overview.adoc#_destination[destination]. When a client application wants to send data, it creates a producer, associates it with a specific queue or topic, and then uses that producer to dispatch messages. Each producer has a "target destination" that identifies where the message will be sent on the remote broker.
-
-=== Message Consumers
-
-Conversely, a `MessageConsumer` is a client-side component designed to receive messages. It creates a channel for retrieving messages from a specified xref:amq-broker-on-openshift::overview.adoc#_destination[destination]. Client applications that need to process incoming data establish a consumer, linking it to a particular queue or topic. This consumer then listens for and retrieves messages from its "source destination."
-
-== Queues and Topics: Messaging Patterns
-
-Destinations are named locations on the broker that hold messages. The two primary types of destinations, xref:amq-broker-on-openshift::overview.adoc#_queue[queues] and xref:amq-broker-on-openshift::overview.adoc#_topic[topics], define different messaging patterns: Point-to-Point and Publish-Subscribe.
-
-=== Queues (Point-to-Point Messaging)
-
-A xref:amq-broker-on-openshift::overview.adoc#_queue[queue] implements *point-to-point semantics*. In this model:
-
-*   **One-to-one delivery:** Each message sent to a queue is delivered to *only one* consumer.
-*   **Message removal:** Once a message is successfully read by a consumer, it is removed from the queue. This ensures that no other consumer will receive the same message.
-*   **Load balancing and reliability:** Queues are ideal for tasks that need to be processed by a single worker, allowing for load balancing across multiple consumers listening to the same queue. If a consumer is unavailable, messages persist in the queue until a consumer becomes available.
-*   **Ordering:** Messages are typically processed in the order they were received (FIFO - First-In, First-Out).
-
-[EXAMPLE]
-.Point-to-Point Messaging with Queues
-Imagine an online order processing system. Each new order is placed into an `OrderQueue`. Multiple worker processes (consumers) can listen to this queue. When an order arrives, one worker picks it up for processing. The message is then removed from the queue, preventing duplicate processing by other workers.
-
-=== Topics (Publish-Subscribe Messaging)
-
-A xref:amq-broker-on-openshift::overview.adoc#_topic[topic] implements *publish-subscribe semantics*. In this model:
-
-*   **One-to-many delivery:** Each message published to a topic is delivered to *all active, subscribing consumers*.
-*   **Message availability:** The message remains available to other consumers after it is read by one.
-*   **Decoupled communication:** Publishers (producers) send messages without knowing who the subscribers are, and subscribers receive messages without knowing who published them.
-*   **Fan-out distribution:** Topics are suitable for broadcasting information to multiple interested parties simultaneously.
-
-[EXAMPLE]
-.Publish-Subscribe Messaging with Topics
-Consider a stock trading application. Price updates for a specific stock (e.g., `IBM.STOCK.PRICES`) are published to a topic. Any application (e.g., a trading bot, a UI displaying live prices, an analytics engine) that subscribes to this topic will receive the update simultaneously.
-
-== Interplay of Components
-
-The interaction between these core concepts defines the flow of messages:
-
-1.  A client establishes a `Connection` to the AMQ Broker via a `Connection Factory`.
-2.  Within that connection, the client creates one or more `Sessions`.
-3.  Each session can then instantiate `MessageProducers` to send messages to designated `Destinations` (queues or topics).
-4.  Similarly, `MessageConsumers` are created within sessions to receive messages from specific `Destinations`.
-5.  `Messages` are the actual data payloads exchanged through this intricate network of connections, sessions, producers, consumers, and destinations.
-
-This modular design allows for flexible and robust asynchronous communication patterns, making AMQ Broker a powerful tool for building scalable and decoupled applications.</code></pre>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_producers_and_consumers"><a class="anchor" href="#_producers_and_consumers"></a>Producers and Consumers</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Message producers and consumers are the active agents in the messaging system responsible for sending and receiving messages.</p>
+</div>
+<div class="sect2">
+<h3 id="_message_producers"><a class="anchor" href="#_message_producers"></a>Message Producers</h3>
+<div class="paragraph">
+<p>A <code>MessageProducer</code> is a client-side component that acts as a channel for sending messages to a designated <a href="#amq-broker-on-openshift::overview.adoc#_destination" class="xref unresolved">destination</a>. When a client application wants to send data, it creates a producer, associates it with a specific queue or topic, and then uses that producer to dispatch messages. Each producer has a "target destination" that identifies where the message will be sent on the remote broker.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_message_consumers"><a class="anchor" href="#_message_consumers"></a>Message Consumers</h3>
+<div class="paragraph">
+<p>Conversely, a <code>MessageConsumer</code> is a client-side component designed to receive messages. It creates a channel for retrieving messages from a specified <a href="#amq-broker-on-openshift::overview.adoc#_destination" class="xref unresolved">destination</a>. Client applications that need to process incoming data establish a consumer, linking it to a particular queue or topic. This consumer then listens for and retrieves messages from its "source destination."</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_queues_and_topics_messaging_patterns"><a class="anchor" href="#_queues_and_topics_messaging_patterns"></a>Queues and Topics: Messaging Patterns</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Destinations are named locations on the broker that hold messages. The two primary types of destinations, <a href="#amq-broker-on-openshift::overview.adoc#_queue" class="xref unresolved">queues</a> and <a href="#amq-broker-on-openshift::overview.adoc#_topic" class="xref unresolved">topics</a>, define different messaging patterns: Point-to-Point and Publish-Subscribe.</p>
+</div>
+<div class="sect2">
+<h3 id="_queues_point_to_point_messaging"><a class="anchor" href="#_queues_point_to_point_messaging"></a>Queues (Point-to-Point Messaging)</h3>
+<div class="paragraph">
+<p>A <a href="#amq-broker-on-openshift::overview.adoc#_queue" class="xref unresolved">queue</a> implements <strong>point-to-point semantics</strong>. In this model:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>One-to-one delivery:</strong> Each message sent to a queue is delivered to <strong>only one</strong> consumer.</p>
+</li>
+<li>
+<p><strong>Message removal:</strong> Once a message is successfully read by a consumer, it is removed from the queue. This ensures that no other consumer will receive the same message.</p>
+</li>
+<li>
+<p><strong>Load balancing and reliability:</strong> Queues are ideal for tasks that need to be processed by a single worker, allowing for load balancing across multiple consumers listening to the same queue. If a consumer is unavailable, messages persist in the queue until a consumer becomes available.</p>
+</li>
+<li>
+<p><strong>Ordering:</strong> Messages are typically processed in the order they were received (FIFO - First-In, First-Out).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<div class="title">Point-to-Point Messaging with Queues</div>
+<p>Imagine an online order processing system. Each new order is placed into an <code>OrderQueue</code>. Multiple worker processes (consumers) can listen to this queue. When an order arrives, one worker picks it up for processing. The message is then removed from the queue, preventing duplicate processing by other workers.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_topics_publish_subscribe_messaging"><a class="anchor" href="#_topics_publish_subscribe_messaging"></a>Topics (Publish-Subscribe Messaging)</h3>
+<div class="paragraph">
+<p>A <a href="#amq-broker-on-openshift::overview.adoc#_topic" class="xref unresolved">topic</a> implements <strong>publish-subscribe semantics</strong>. In this model:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>One-to-many delivery:</strong> Each message published to a topic is delivered to <strong>all active, subscribing consumers</strong>.</p>
+</li>
+<li>
+<p><strong>Message availability:</strong> The message remains available to other consumers after it is read by one.</p>
+</li>
+<li>
+<p><strong>Decoupled communication:</strong> Publishers (producers) send messages without knowing who the subscribers are, and subscribers receive messages without knowing who published them.</p>
+</li>
+<li>
+<p><strong>Fan-out distribution:</strong> Topics are suitable for broadcasting information to multiple interested parties simultaneously.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<div class="title">Publish-Subscribe Messaging with Topics</div>
+<p>Consider a stock trading application. Price updates for a specific stock (e.g., <code>IBM.STOCK.PRICES</code>) are published to a topic. Any application (e.g., a trading bot, a UI displaying live prices, an analytics engine) that subscribes to this topic will receive the update simultaneously.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_interplay_of_components"><a class="anchor" href="#_interplay_of_components"></a>Interplay of Components</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The interaction between these core concepts defines the flow of messages:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>A client establishes a <code>Connection</code> to the AMQ Broker via a <code>Connection Factory</code>.</p>
+</li>
+<li>
+<p>Within that connection, the client creates one or more <code>Sessions</code>.</p>
+</li>
+<li>
+<p>Each session can then instantiate <code>MessageProducers</code> to send messages to designated <code>Destinations</code> (queues or topics).</p>
+</li>
+<li>
+<p>Similarly, <code>MessageConsumers</code> are created within sessions to receive messages from specific <code>Destinations</code>.</p>
+</li>
+<li>
+<p><code>Messages</code> are the actual data payloads exchanged through this intricate network of connections, sessions, producers, consumers, and destinations.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This modular design allows for flexible and robust asynchronous communication patterns, making AMQ Broker a powerful tool for building scalable and decoupled applications.</p>
+</div>
 </div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a></span>
-  <span class="next"><a href="common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a></span>
+  <span class="next"><a href="common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a></span>
 </nav>
 </article>
   </div>

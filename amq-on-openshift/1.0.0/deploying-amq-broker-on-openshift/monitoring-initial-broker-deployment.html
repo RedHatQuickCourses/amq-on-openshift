@@ -60,7 +60,7 @@
     <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns (Point-to-Point, Publish/Subscribe)</a>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
   </li>
 </ul>
   </li>
@@ -107,7 +107,7 @@
     <a class="nav-link" href="installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="understanding-amq-broker-custom-resource-definitions-crds.html">Understanding AMQ Broker Custom Resource Definitions (CRDs)</a>
+    <a class="nav-link" href="understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
@@ -138,7 +138,7 @@
     <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling in OpenShift</a>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -178,7 +178,7 @@
     <a class="nav-link" href="../securing-amq-broker-on-openshift/overview-of-external-idp-integration-eg-ldap-keycloak.html">Overview of External IDP Integration (e.g., LDAP, Keycloak)</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External IDP Authentication</a>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/mapping-external-roles-to-broker-roles.html">Mapping External Roles to Broker Roles</a>
@@ -234,7 +234,7 @@
     <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">OpenShift Storage Considerations (Persistent Volumes)</a>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
   </li>
 </ul>
   </li>
@@ -250,10 +250,10 @@
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Console via OpenShift Routes</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for Console Access</a>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
@@ -281,7 +281,7 @@
     <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Security Implications and Best Practices for External Access</a>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
   </li>
 </ul>
   </li>
@@ -405,53 +405,89 @@
 </aside>
 <article class="doc">
 <h1 class="page">Monitoring Initial Broker Deployment</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>Here&#8217;s the detailed educational content for "Monitoring Initial Broker Deployment" in Antora AsciiDoc format:</p>
+<p>When deploying Red Hat AMQ Broker on OpenShift, it is crucial to monitor the initial deployment to ensure the broker instance starts correctly, is healthy, and is ready to accept client connections. This section will cover the technical concepts behind Kubernetes health checks and provide hands-on steps to verify the status of your newly deployed AMQ Broker.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_understanding_kubernetes_probes_for_amq_broker"><a class="anchor" href="#_understanding_kubernetes_probes_for_amq_broker"></a>Understanding Kubernetes Probes for AMQ Broker</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Kubernetes uses various "probes" to determine the health and readiness of containers within a Pod. These probes are fundamental for ensuring reliable service operation, especially during initial deployment and ongoing lifecycle management. AMQ Broker on OpenShift leverages these probes to indicate its operational status.</p>
+</div>
+<div class="sect2">
+<h3 id="_technical_explanation_of_probes"><a class="anchor" href="#_technical_explanation_of_probes"></a>Technical Explanation of Probes</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Startup Probe</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>A startup probe indicates whether the application <strong>within</strong> a container has successfully started. It&#8217;s particularly useful for applications that might take a long time to initialize, preventing other probes (liveness, readiness) from failing prematurely.</p>
+</li>
+<li>
+<p>If a startup probe is configured, all other probes are disabled until it succeeds. If the startup probe fails, the Pod is restarted.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Liveness Probe</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>A liveness probe determines if a container is <strong>still running</strong> and healthy. If the liveness probe fails, Kubernetes assumes the container is unhealthy and restarts the Pod, aiming to bring it back to a working state.</p>
+</li>
+<li>
+<p>For AMQ Broker, the default liveness probe typically checks if the broker&#8217;s HTTP port is responsive, indicating the basic process is running.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Readiness Probe</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>A readiness probe determines if a container is <strong>ready to accept service requests</strong>. Unlike a liveness probe, a failed readiness probe does not restart the Pod. Instead, it removes the Pod from the service&#8217;s endpoints, preventing new traffic from being directed to an unhealthy instance. Once the probe succeeds again, the Pod is re-added to the service endpoints.</p>
+</li>
+<li>
+<p>The default readiness probe for AMQ Broker checks if the broker can accept network traffic by attempting to open a connection to each of the acceptor ports configured for the broker.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_default_probes_and_their_limitations"><a class="anchor" href="#_default_probes_and_their_limitations"></a>Default Probes and Their Limitations</h3>
+<div class="paragraph">
+<p>AMQ Broker instances deployed via the Operator include default readiness and liveness probes.
+*   The default liveness probe pings the broker’s HTTP management port.
+*   The default readiness probe attempts to open a connection to the broker&#8217;s configured acceptor ports.</p>
+</div>
+<div class="paragraph">
+<p>While these default probes provide a basic level of health checking, they have limitations:
+*   They might not identify underlying issues that don&#8217;t affect port accessibility, such as problems with the broker’s file system (e.g., persistence issues, full disk) or internal broker components.
+*   For example, if the broker process is running and its ports are open, but it&#8217;s unable to write to its message store, the default probes might still report it as healthy.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_custom_probes_for_enhanced_monitoring"><a class="anchor" href="#_custom_probes_for_enhanced_monitoring"></a>Custom Probes for Enhanced Monitoring</h3>
+<div class="paragraph">
+<p>For more comprehensive health checks, you can configure custom probes using the <code>artemis</code> command-line utility, which is included within the AMQ Broker container. This allows you to perform deeper diagnostics specific to the broker&#8217;s internal state.</p>
+</div>
+<div class="paragraph">
+<p>For instance, a custom startup probe can use <code>artemis check node --up</code> to verify if the broker node is fully operational and connected, rather than just if a port is open.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-asciidoc hljs" data-lang="asciidoc">[[monitoring-initial-broker-deployment]]
-= Monitoring Initial Broker Deployment
-
-When deploying Red Hat AMQ Broker on OpenShift, it is crucial to monitor the initial deployment to ensure the broker instance starts correctly, is healthy, and is ready to accept client connections. This section will cover the technical concepts behind Kubernetes health checks and provide hands-on steps to verify the status of your newly deployed AMQ Broker.
-
-== Understanding Kubernetes Probes for AMQ Broker
-
-Kubernetes uses various "probes" to determine the health and readiness of containers within a Pod. These probes are fundamental for ensuring reliable service operation, especially during initial deployment and ongoing lifecycle management. AMQ Broker on OpenShift leverages these probes to indicate its operational status.
-
-=== Technical Explanation of Probes
-
-. *Startup Probe*:
-*   A startup probe indicates whether the application *within* a container has successfully started. It's particularly useful for applications that might take a long time to initialize, preventing other probes (liveness, readiness) from failing prematurely.
-*   If a startup probe is configured, all other probes are disabled until it succeeds. If the startup probe fails, the Pod is restarted.
-
-. *Liveness Probe*:
-*   A liveness probe determines if a container is *still running* and healthy. If the liveness probe fails, Kubernetes assumes the container is unhealthy and restarts the Pod, aiming to bring it back to a working state.
-*   For AMQ Broker, the default liveness probe typically checks if the broker's HTTP port is responsive, indicating the basic process is running.
-
-. *Readiness Probe*:
-*   A readiness probe determines if a container is *ready to accept service requests*. Unlike a liveness probe, a failed readiness probe does not restart the Pod. Instead, it removes the Pod from the service's endpoints, preventing new traffic from being directed to an unhealthy instance. Once the probe succeeds again, the Pod is re-added to the service endpoints.
-*   The default readiness probe for AMQ Broker checks if the broker can accept network traffic by attempting to open a connection to each of the acceptor ports configured for the broker.
-
-=== Default Probes and Their Limitations
-
-AMQ Broker instances deployed via the Operator include default readiness and liveness probes.
-*   The default liveness probe pings the broker’s HTTP management port.
-*   The default readiness probe attempts to open a connection to the broker's configured acceptor ports.
-
-While these default probes provide a basic level of health checking, they have limitations:
-*   They might not identify underlying issues that don't affect port accessibility, such as problems with the broker’s file system (e.g., persistence issues, full disk) or internal broker components.
-*   For example, if the broker process is running and its ports are open, but it's unable to write to its message store, the default probes might still report it as healthy.
-
-=== Custom Probes for Enhanced Monitoring
-
-For more comprehensive health checks, you can configure custom probes using the `artemis` command-line utility, which is included within the AMQ Broker container. This allows you to perform deeper diagnostics specific to the broker's internal state.
-
-For instance, a custom startup probe can use `artemis check node --up` to verify if the broker node is fully operational and connected, rather than just if a port is open.
-
-[source,yaml]
-----
-spec:
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">spec:
   deploymentPlan:
     startupProbe:
       exec:
@@ -467,121 +503,223 @@ spec:
       initialDelaySeconds: 5
       periodSeconds: 10
       timeoutSeconds: 3
-      failureThreshold: 30
-----
-_Example of a custom `startupProbe` using the `artemis` CLI._
-
-If any configured startup or liveness probe check of a Pod fails, Kubernetes will restart that Pod. Understanding this behavior is key to troubleshooting initial deployment issues.
-
-== Hands-on Activity: Verifying Broker Deployment Status
-
-This activity guides you through using the OpenShift console and `oc` CLI to monitor the status of a newly deployed AMQ Broker instance.
-
-=== Objective
-
-Learn how to observe and interpret the status of AMQ Broker Pods, events, and logs on OpenShift to ensure a successful initial deployment.
-
-=== Steps
-
-==== 1. Access the OpenShift Console
-
-. Log in to your OpenShift Container Platform console.
-. Navigate to the project where you deployed your AMQ Broker instance. You can select the project from the dropdown menu in the top left corner.
-
-==== 2. Monitor Pod Status via OpenShift Console
-
-The primary way to monitor your broker's initial deployment is by observing its Pods.
-
-. In the left-hand navigation pane, click menu:Workloads[Pods].
-. You should see one or more Pods associated with your AMQ Broker deployment. The name will typically follow a pattern like `_broker-name_-_number_-_random-string_`.
-+
-image::images/pods-overview.png[Pods Overview, width=800]
-+
-. *Check Pod Status*:
-*   Look at the *Status* column. It should show `Running`.
-*   Check the *Ready* column. It should indicate `1/1`, meaning one out of one container in the Pod is ready to serve requests. If it shows `0/1`, the readiness probe is failing.
-. *Inspect a Specific Pod*:
-*   Click on the name of one of your broker Pods.
-*   Review the *Overview* tab. This provides a summary of the Pod's status, restarts, and resource usage.
-*   Navigate to the *Events* tab. This tab is crucial for troubleshooting. It shows a timeline of events related to the Pod, including creation, container startup, probe successes/failures, and any issues that caused restarts. Look for warnings or errors.
-*   Navigate to the *Logs* tab. This displays the standard output and error streams from the broker container. Look for messages indicating successful broker startup, connections, or any error messages that might explain why the broker isn't ready.
-
-==== 3. Inspect the Broker Custom Resource (CR)
-
-The Custom Resource (CR) defines your broker instance and its configuration, including how probes are set up.
-
-. In the left-hand navigation pane, click menu:Administration[Custom Resource Definitions].
-. Click the `ActiveMQArtemis` CRD.
-. Click the menu:Instances[Instances] tab.
-. Click the instance name for your broker deployment.
-. Click the menu:YAML[YAML] tab.
-+
-This view shows the entire Custom Resource definition. Scroll down to the `spec.deploymentPlan` section. Here you can see if custom `livenessProbe`, `readinessProbe`, or `startupProbe` sections have been explicitly configured. Even if not explicitly defined in the CR, default probes are active, as described in the technical explanation above.
-
-==== 4. Using `oc` CLI for Quick Checks
-
-The OpenShift command-line interface (`oc`) provides a fast way to check deployment status and logs.
-
-. *Log in to OpenShift via CLI*:
-+
-[source,bash]
-----
-oc login --token=&lt;your_token&gt; --server=&lt;your_api_server&gt;
-----
-+
-Make sure you are in the correct project:
-+
-[source,bash]
-----
-oc project &lt;your-project-name&gt;
-----
-
-. *Get Pod Status*:
-+
-To quickly see the status of all Pods in your project:
-+
-[source,bash]
-----
-oc get pods -o wide
-----
-+
-Look for your broker Pods and verify their `STATUS` (should be `Running`) and `READY` column (should be `1/1`).
-
-. *Describe a Pod for Detailed Information*:
-+
-To get detailed information about a specific broker Pod, including its events, container status, and probe results:
-+
-[source,bash]
-----
-oc describe pod &lt;broker-pod-name&gt;
-----
-+
-Replace `&lt;broker-pod-name&gt;` with the actual name of your broker Pod (e.g., `amq-broker-prod-0-deployer-7df9f8749-jbx5m`).
-+
-In the output, pay attention to:
-*   `Status`: Should be `Running`.
-*   `Conditions`: Look for `Ready` condition to be `True`.
-*   `Events`: This section will list all events, including probe failures and restarts.
-
-. *View Pod Logs*:
-+
-To view the logs from the broker container within a Pod:
-+
-[source,bash]
-----
-oc logs &lt;broker-pod-name&gt; -f
-----
-+
-The `-f` flag "follows" the logs, showing new output as it appears. Look for messages indicating successful broker startup, such as "ActiveMQArtemis Message Broker is now started". Any errors or warnings in the logs are critical for troubleshooting.
-
-=== Troubleshooting Tips for Initial Deployment
-
-*   **Pod in `Pending` state**: This usually indicates resource constraints (e.g., not enough CPU or memory in the cluster) or issues with Persistent Volume Claims (PVCs) if persistence is enabled. Check Pod events (`oc describe pod`) for specific reasons.
-*   **Pod in `CrashLoopBackOff`**: This means the container is repeatedly starting and then crashing. This often points to application-level issues (e.g., incorrect configuration, missing dependencies) or liveness probe failures. Check the Pod's logs (`oc logs`) immediately.
-*   **Pod `Running` but `Ready` is `0/1`**: The application is running, but it's not passing its readiness checks. Check the Pod's logs and events for clues related to why the broker isn't fully ready to accept connections. This could be due to issues with its message store, network connectivity, or internal component failures.
-*   **Persistent Volume Issues**: If your broker is configured for persistence, ensure the PersistentVolumeClaim (PVC) is bound and the underlying PersistentVolume (PV) is healthy. Issues here can prevent the broker from starting or restarting correctly.
-
-By diligently monitoring the Pod status, events, and logs, you can quickly identify and address issues during the initial deployment of your AMQ Broker on OpenShift, ensuring a stable and functional messaging environment.</code></pre>
+      failureThreshold: 30</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><em>Example of a custom <code>startupProbe</code> using the <code>artemis</code> CLI.</em></p>
+</div>
+<div class="paragraph">
+<p>If any configured startup or liveness probe check of a Pod fails, Kubernetes will restart that Pod. Understanding this behavior is key to troubleshooting initial deployment issues.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_activity_verifying_broker_deployment_status"><a class="anchor" href="#_hands_on_activity_verifying_broker_deployment_status"></a>Hands-on Activity: Verifying Broker Deployment Status</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This activity guides you through using the OpenShift console and <code>oc</code> CLI to monitor the status of a newly deployed AMQ Broker instance.</p>
+</div>
+<div class="sect2">
+<h3 id="_objective"><a class="anchor" href="#_objective"></a>Objective</h3>
+<div class="paragraph">
+<p>Learn how to observe and interpret the status of AMQ Broker Pods, events, and logs on OpenShift to ensure a successful initial deployment.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_steps"><a class="anchor" href="#_steps"></a>Steps</h3>
+<div class="sect3">
+<h4 id="_1_access_the_openshift_console"><a class="anchor" href="#_1_access_the_openshift_console"></a>1. Access the OpenShift Console</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Log in to your OpenShift Container Platform console.</p>
+</li>
+<li>
+<p>Navigate to the project where you deployed your AMQ Broker instance. You can select the project from the dropdown menu in the top left corner.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_2_monitor_pod_status_via_openshift_console"><a class="anchor" href="#_2_monitor_pod_status_via_openshift_console"></a>2. Monitor Pod Status via OpenShift Console</h4>
+<div class="paragraph">
+<p>The primary way to monitor your broker&#8217;s initial deployment is by observing its Pods.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In the left-hand navigation pane, click menu:Workloads[Pods].</p>
+</li>
+<li>
+<p>You should see one or more Pods associated with your AMQ Broker deployment. The name will typically follow a pattern like <code><em>broker-name</em>-<em>number</em>-<em>random-string</em></code>.</p>
+<div class="imageblock unresolved">
+<div class="content">
+<img src="images/pods-overview.png" alt="Pods Overview" width="800">
+</div>
+</div>
+</li>
+<li>
+<p><strong>Check Pod Status</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Look at the <strong>Status</strong> column. It should show <code>Running</code>.</p>
+</li>
+<li>
+<p>Check the <strong>Ready</strong> column. It should indicate <code>1/1</code>, meaning one out of one container in the Pod is ready to serve requests. If it shows <code>0/1</code>, the readiness probe is failing.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Inspect a Specific Pod</strong>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Click on the name of one of your broker Pods.</p>
+</li>
+<li>
+<p>Review the <strong>Overview</strong> tab. This provides a summary of the Pod&#8217;s status, restarts, and resource usage.</p>
+</li>
+<li>
+<p>Navigate to the <strong>Events</strong> tab. This tab is crucial for troubleshooting. It shows a timeline of events related to the Pod, including creation, container startup, probe successes/failures, and any issues that caused restarts. Look for warnings or errors.</p>
+</li>
+<li>
+<p>Navigate to the <strong>Logs</strong> tab. This displays the standard output and error streams from the broker container. Look for messages indicating successful broker startup, connections, or any error messages that might explain why the broker isn&#8217;t ready.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_3_inspect_the_broker_custom_resource_cr"><a class="anchor" href="#_3_inspect_the_broker_custom_resource_cr"></a>3. Inspect the Broker Custom Resource (CR)</h4>
+<div class="paragraph">
+<p>The Custom Resource (CR) defines your broker instance and its configuration, including how probes are set up.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>In the left-hand navigation pane, click menu:Administration[Custom Resource Definitions].</p>
+</li>
+<li>
+<p>Click the <code>ActiveMQArtemis</code> CRD.</p>
+</li>
+<li>
+<p>Click the menu:Instances[Instances] tab.</p>
+</li>
+<li>
+<p>Click the instance name for your broker deployment.</p>
+</li>
+<li>
+<p>Click the menu:YAML[YAML] tab.</p>
+<div class="paragraph">
+<p>This view shows the entire Custom Resource definition. Scroll down to the <code>spec.deploymentPlan</code> section. Here you can see if custom <code>livenessProbe</code>, <code>readinessProbe</code>, or <code>startupProbe</code> sections have been explicitly configured. Even if not explicitly defined in the CR, default probes are active, as described in the technical explanation above.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_4_using_oc_cli_for_quick_checks"><a class="anchor" href="#_4_using_oc_cli_for_quick_checks"></a>4. Using <code>oc</code> CLI for Quick Checks</h4>
+<div class="paragraph">
+<p>The OpenShift command-line interface (<code>oc</code>) provides a fast way to check deployment status and logs.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Log in to OpenShift via CLI</strong>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc login --token=&lt;your_token&gt; --server=&lt;your_api_server&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Make sure you are in the correct project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc project &lt;your-project-name&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Get Pod Status</strong>:</p>
+<div class="paragraph">
+<p>To quickly see the status of all Pods in your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -o wide</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Look for your broker Pods and verify their <code>STATUS</code> (should be <code>Running</code>) and <code>READY</code> column (should be <code>1/1</code>).</p>
+</div>
+</li>
+<li>
+<p><strong>Describe a Pod for Detailed Information</strong>:</p>
+<div class="paragraph">
+<p>To get detailed information about a specific broker Pod, including its events, container status, and probe results:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc describe pod &lt;broker-pod-name&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace <code>&lt;broker-pod-name&gt;</code> with the actual name of your broker Pod (e.g., <code>amq-broker-prod-0-deployer-7df9f8749-jbx5m</code>).</p>
+</div>
+<div class="paragraph">
+<p>In the output, pay attention to:
+*   <code>Status</code>: Should be <code>Running</code>.
+*   <code>Conditions</code>: Look for <code>Ready</code> condition to be <code>True</code>.
+*   <code>Events</code>: This section will list all events, including probe failures and restarts.</p>
+</div>
+</li>
+<li>
+<p><strong>View Pod Logs</strong>:</p>
+<div class="paragraph">
+<p>To view the logs from the broker container within a Pod:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc logs &lt;broker-pod-name&gt; -f</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>-f</code> flag "follows" the logs, showing new output as it appears. Look for messages indicating successful broker startup, such as "ActiveMQArtemis Message Broker is now started". Any errors or warnings in the logs are critical for troubleshooting.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_tips_for_initial_deployment"><a class="anchor" href="#_troubleshooting_tips_for_initial_deployment"></a>Troubleshooting Tips for Initial Deployment</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Pod in <code>Pending</code> state</strong>: This usually indicates resource constraints (e.g., not enough CPU or memory in the cluster) or issues with Persistent Volume Claims (PVCs) if persistence is enabled. Check Pod events (<code>oc describe pod</code>) for specific reasons.</p>
+</li>
+<li>
+<p><strong>Pod in <code>CrashLoopBackOff</code></strong>: This means the container is repeatedly starting and then crashing. This often points to application-level issues (e.g., incorrect configuration, missing dependencies) or liveness probe failures. Check the Pod&#8217;s logs (<code>oc logs</code>) immediately.</p>
+</li>
+<li>
+<p><strong>Pod <code>Running</code> but <code>Ready</code> is <code>0/1</code></strong>: The application is running, but it&#8217;s not passing its readiness checks. Check the Pod&#8217;s logs and events for clues related to why the broker isn&#8217;t fully ready to accept connections. This could be due to issues with its message store, network connectivity, or internal component failures.</p>
+</li>
+<li>
+<p><strong>Persistent Volume Issues</strong>: If your broker is configured for persistence, ensure the PersistentVolumeClaim (PVC) is bound and the underlying PersistentVolume (PV) is healthy. Issues here can prevent the broker from starting or restarting correctly.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>By diligently monitoring the Pod status, events, and logs, you can quickly identify and address issues during the initial deployment of your AMQ Broker on OpenShift, ensuring a stable and functional messaging environment.</p>
+</div>
+</div>
 </div>
 </div>
 <nav class="pagination">
