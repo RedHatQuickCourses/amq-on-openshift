@@ -1,8 +1,4 @@
-#  Developing Producers and Consumers with Java Core Protocol
-
 = Developing Producers and Consumers with Java Core Protocol
-:navtitle: Developing Core Protocol Clients
-:page-aliases: core-protocol-client-examples:developing-producers-consumers.adoc
 
 This section provides a comprehensive guide to developing message producers and consumers using the Red Hat AMQ Core Protocol JMS client library (built upon Apache ActiveMQ Artemis JMS client). You will gain a deep understanding of the fundamental components involved and learn how to implement them in practical, hands-on Java applications to interact with an AMQ Broker deployed on OpenShift.
 

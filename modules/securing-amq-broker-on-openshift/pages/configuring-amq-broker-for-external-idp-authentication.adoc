@@ -1,5 +1,3 @@
-#  Configuring AMQ Broker for External IDP Authentication
-
 = Configuring AMQ Broker for External Identity Provider (IDP) Authentication
 
 [[amq-broker-external-idp-authentication-overview]]

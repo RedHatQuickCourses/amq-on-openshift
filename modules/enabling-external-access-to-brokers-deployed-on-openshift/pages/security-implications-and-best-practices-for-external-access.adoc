@@ -1,8 +1,3 @@
-#  Security Implications and Best Practices for External Access
-
-Here is the detailed educational content for "Security Implications and Best Practices for External Access" for AMQ Broker on OpenShift, presented in Antora AsciiDoc format.
-
-```asciidoc
 = Securing External Access to AMQ Broker on OpenShift
 
 :navtitle: External Access Security
@@ -252,4 +247,3 @@ java -cp ".:/path/to/qpid-jms-client-<version>.jar:/path/to/slf4j-api-<version>.
 If successful, you should see output indicating the message was sent, and the connection will be established over TLS. You can verify the message on your broker's management console.
 
 This hands-on activity demonstrates how to configure a client to leverage one-way TLS for secure communication, a critical step in enabling external access securely. For two-way TLS, you would additionally generate a client key pair, create a client key store, and configure the client connection URL with `transport.keyStoreLocation` and `transport.keyStorePassword` parameters, as shown in the examples provided in the context.
-```

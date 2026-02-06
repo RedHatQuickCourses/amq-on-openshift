@@ -1,8 +1,4 @@
-#  Enabling RBAC (Role-Based Access Control)
 
-Here's the detailed educational content for "Enabling RBAC (Role-Based Access Control)" in Antora AsciiDoc format.
-
-```asciidoc
 = Enabling RBAC (Role-Based Access Control)
 
 Role-Based Access Control (RBAC) is a fundamental security mechanism for message brokers, allowing administrators to define precise permissions for users and applications interacting with the broker. On OpenShift, Red Hat AMQ Broker integrates its native security features, which are primarily managed through the `ActiveMQArtemis` Custom Resource (CR), with OpenShift's operational environment.
@@ -289,4 +285,3 @@ In this configuration:
 The provided context demonstrates *how* to mount a secret containing a custom JAAS configuration, but it does not detail the creation of the JAAS `login.config` file itself or the specifics of integrating with various IDPs (e.g., LDAP, Kerberos, Keycloak/OAuth). Implementing this aspect requires a deeper understanding of JAAS modules, your specific IDP's configuration, and how to configure AMQ Broker's `broker.xml` to leverage the custom JAAS realm. You would typically use standard JAAS modules like `LdapLoginModule` or develop a custom security provider for more complex integrations.
 
 By strategically combining AMQ Broker's internal RBAC rules (defined in the `ActiveMQArtemis` CR) with external user authentication through custom JAAS configurations and OpenShift Secrets, you can achieve a robust, enterprise-grade security posture for your AMQ Broker deployments on OpenShift.
-```

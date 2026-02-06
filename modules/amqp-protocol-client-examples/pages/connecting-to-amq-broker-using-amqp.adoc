@@ -1,5 +1,3 @@
-#  Connecting to AMQ Broker using AMQP
-
 = Connecting to AMQ Broker using AMQP
 
 :toc: left

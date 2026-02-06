@@ -1,8 +1,3 @@
-#  Introduction to AMQ Core Protocol
-
-As a Content Architect, I've developed the following detailed educational content on "Introduction to AMQ Core Protocol" in Antora AsciiDoc format, combining technical accuracy, clarity, and hands-on guidance, based on the provided context and objectives.
-
-```asciidoc
 = Introduction to AMQ Core Protocol
 
 This module introduces the AMQ Core Protocol, its purpose, and its key features. We will also delve into the AMQ Core Protocol JMS client, which enables Java applications to interact with AMQ Broker using this protocol. Understanding the core protocol is foundational for developing robust messaging solutions with Red Hat AMQ Broker.
@@ -116,4 +111,3 @@ The `--user` and `--password` flags are included to authenticate with the broker
 === Verification
 
 Upon successful completion of these steps, you will have a running AMQ Broker instance on your local machine with a message queue named `exampleQueue`. This setup provides the necessary messaging infrastructure for you to begin developing and testing AMQ Core Protocol JMS client applications in the subsequent modules.
-```

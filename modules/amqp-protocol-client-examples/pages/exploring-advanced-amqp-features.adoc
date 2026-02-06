@@ -1,6 +1,3 @@
-#  Exploring Advanced AMQP Features
-
-[[exploring-advanced-amqp-features]]
 = Exploring Advanced AMQP Features
 
 This section delves into advanced capabilities of the AMQP 1.0 protocol, allowing you to build more robust, reliable, and sophisticated messaging applications with Red Hat AMQ Broker. While basic message production and consumption form the foundation, understanding these advanced features is crucial for tackling real-world enterprise integration patterns. We will explore how these features enhance message delivery guarantees, provide greater flexibility, and enable more complex messaging workflows.

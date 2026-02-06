@@ -1,6 +1,4 @@
-#  Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup
 
-[[amq-broker-ha-strategies]]
 = Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup
 
 High Availability (HA) is paramount for messaging systems to ensure continuous operation and message delivery, even in the event of component failures. Red Hat AMQ Broker, leveraging Apache ActiveMQ Artemis, provides robust strategies to achieve HA on OpenShift. These strategies fundamentally differ in how they manage message persistence and coordinate between broker instances. Understanding these core differences—*Shared Store HA* versus *Replicated Live-Backup HA*—is crucial for designing a resilient and performant messaging infrastructure.

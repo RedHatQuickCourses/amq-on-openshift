@@ -1,7 +1,3 @@
-#  Introduction to Message-Oriented Middleware (MOM)
-
-```asciidoc
-// This is an Antora AsciiDoc file for the Introduction to Message-Oriented Middleware (MOM) topic.
 = Introduction to Message-Oriented Middleware (MOM)
 :page-aliases: mom-introduction.adoc
 
@@ -122,4 +118,3 @@ This exercise illustrates how MOM helps in building highly decoupled, resilient,
 == Conclusion
 
 Message-Oriented Middleware is a powerful and essential paradigm for building robust, scalable, and resilient distributed applications. By facilitating asynchronous, decoupled communication through a central message broker, MOM systems enhance reliability, flexibility, and performance. Understanding these foundational concepts — including producers, consumers, messages, brokers, queues, and topics — is crucial before delving into specific MOM implementations like Red Hat AMQ Broker, which leverages these principles to provide enterprise-grade messaging capabilities on platforms like OpenShift.
-```

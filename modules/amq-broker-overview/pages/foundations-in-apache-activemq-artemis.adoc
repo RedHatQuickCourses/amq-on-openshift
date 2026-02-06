@@ -1,8 +1,3 @@
-#  Foundations in Apache ActiveMQ Artemis
-
-Here is the detailed educational content on "Foundations in Apache ActiveMQ Artemis" in Antora AsciiDoc format:
-
-```asciidoc
 = Foundations in Apache ActiveMQ Artemis
 
 This module provides a deep dive into the foundational technology behind Red Hat AMQ Broker: *Apache ActiveMQ Artemis*. Understanding Artemis is crucial for effectively deploying, configuring, and managing AMQ Broker instances, especially in advanced scenarios.
@@ -103,4 +98,3 @@ Identify the Apache ActiveMQ Artemis version and confirm its startup messages wi
     While on OpenShift, these operations are primarily abstracted and managed by the AMQ Broker Operator through Custom Resources, understanding the underlying `artemis` CLI provides invaluable insight into the broker's configuration and management capabilities. It reinforces that the Operator effectively automates actions that, in a standalone environment, you would perform manually using this CLI.
 
 This activity reinforces that Red Hat AMQ Broker is a carefully engineered product built on the solid foundations of Apache ActiveMQ Artemis, making its core concepts essential knowledge for any AMQ Broker administrator or developer.
-```

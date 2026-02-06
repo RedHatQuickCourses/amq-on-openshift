@@ -1,6 +1,3 @@
-#  Implementing Publish/Subscribe Messaging
-
-:pub-sub-messaging:
 = Implementing Publish/Subscribe Messaging
 
 The Publish/Subscribe (Pub/Sub) messaging model is a fundamental concept in message-oriented middleware, allowing for broadcasting messages to multiple interested consumers. Unlike the Point-to-Point model where a message is consumed by only one receiver, Pub/Sub enables one message to be delivered to many subscribers.

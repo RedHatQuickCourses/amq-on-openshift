@@ -1,6 +1,3 @@
-#  Mapping External Roles to Broker Roles
-
-[[mapping-external-roles-to-broker-roles]]
 = Mapping External Roles to Broker Roles
 
 Integrating Red Hat AMQ Broker on OpenShift with external identity providers (IDPs) such as LDAP or Keycloak enhances security by centralizing user authentication. However, for the broker to enforce fine-grained authorization, it requires a mechanism to translate the roles or groups assigned to users by the external IDP into its own internal role and permission model. This crucial process is known as *mapping external roles to broker roles*.

@@ -1,10 +1,4 @@
-#  Scaling Broker Pods and Replicas
 
-
-Here is the Antora AsciiDoc content for "Scaling Broker Pods and Replicas":
-
-```asciidoc
-[[scaling-broker-pods-replicas]]
 = Scaling Broker Pods and Replicas
 
 This section delves into the practical aspects of scaling your AMQ Broker deployments on OpenShift. We will explore how to adjust the number of broker pods (replicas) to meet varying message throughput demands and ensure resilience.
@@ -178,4 +172,3 @@ oc get activemqartemis my-broker -o yaml | grep "replicas"
 The output should show `replicas: 1`.
 
 This activity demonstrates how straightforward it is to scale AMQ Broker instances on OpenShift, with the Operator handling the complexities of pod management and message migration.
-```

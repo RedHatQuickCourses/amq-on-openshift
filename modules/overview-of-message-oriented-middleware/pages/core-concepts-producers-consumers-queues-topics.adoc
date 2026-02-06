@@ -1,9 +1,3 @@
-#  Core Concepts: Producers, Consumers, Queues, Topics
-
-Here's the content covering the core concepts of Producers, Consumers, Queues, and Topics, formatted in Antora AsciiDoc:
-
-```asciidoc
-// Module title for the Antora documentation
 = Core Concepts: Producers, Consumers, Queues, Topics
 
 This section delves into the foundational concepts essential for understanding Message-Oriented Middleware (MOM) and specifically how Red Hat AMQ Broker facilitates asynchronous communication. We will explore the roles of producers, consumers, and the types of destinations—queues and topics—that manage message flow.
@@ -84,4 +78,3 @@ The interaction between these core concepts defines the flow of messages:
 5.  `Messages` are the actual data payloads exchanged through this intricate network of connections, sessions, producers, consumers, and destinations.
 
 This modular design allows for flexible and robust asynchronous communication patterns, making AMQ Broker a powerful tool for building scalable and decoupled applications.
-```

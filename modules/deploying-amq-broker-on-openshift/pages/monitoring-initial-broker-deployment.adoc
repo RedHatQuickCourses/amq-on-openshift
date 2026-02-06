@@ -1,9 +1,4 @@
-#  Monitoring Initial Broker Deployment
 
-Here's the detailed educational content for "Monitoring Initial Broker Deployment" in Antora AsciiDoc format:
-
-```asciidoc
-[[monitoring-initial-broker-deployment]]
 = Monitoring Initial Broker Deployment
 
 When deploying Red Hat AMQ Broker on OpenShift, it is crucial to monitor the initial deployment to ensure the broker instance starts correctly, is healthy, and is ready to accept client connections. This section will cover the technical concepts behind Kubernetes health checks and provide hands-on steps to verify the status of your newly deployed AMQ Broker.
@@ -175,4 +170,3 @@ The `-f` flag "follows" the logs, showing new output as it appears. Look for mes
 *   **Persistent Volume Issues**: If your broker is configured for persistence, ensure the PersistentVolumeClaim (PVC) is bound and the underlying PersistentVolume (PV) is healthy. Issues here can prevent the broker from starting or restarting correctly.
 
 By diligently monitoring the Pod status, events, and logs, you can quickly identify and address issues during the initial deployment of your AMQ Broker on OpenShift, ensuring a stable and functional messaging environment.
-```

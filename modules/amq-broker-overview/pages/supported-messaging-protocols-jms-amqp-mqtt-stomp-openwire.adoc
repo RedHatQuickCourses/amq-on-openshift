@@ -1,11 +1,5 @@
 #  Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)
 
-Here's the detailed educational content on supported messaging protocols for AMQ Broker, formatted in Antora AsciiDoc.
-
-```asciidoc
-[[amq-broker-supported-protocols]]
-= Supported Messaging Protocols
-
 AMQ Broker, built on Apache ActiveMQ Artemis, is designed to be highly versatile and interoperable. It achieves this by supporting a wide array of industry-standard messaging protocols. This multi-protocol support allows diverse client applications, written in different languages and running on various platforms, to communicate seamlessly with the broker.
 
 The ability to speak multiple "messaging languages" means you can integrate new and legacy systems, connect lightweight IoT devices, enable real-time web applications, and build robust enterprise solutions all with a single AMQ Broker deployment.
@@ -98,4 +92,3 @@ This compatibility is crucial for organizations migrating from Apache ActiveMQ 5
 *   **Client-Side Features**: Supports advanced client-side features like failover, redelivery policies, and consumer prefetch.
 
 OpenWire is essential for scenarios where existing Apache ActiveMQ 5.x Java clients need to connect to an AMQ Broker instance, providing a smooth transition path and preserving existing client investments.
-```

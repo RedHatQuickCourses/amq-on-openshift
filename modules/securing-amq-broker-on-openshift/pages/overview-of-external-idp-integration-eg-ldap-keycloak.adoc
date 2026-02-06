@@ -1,5 +1,3 @@
-#  Overview of External IDP Integration (e.g., LDAP, Keycloak)
-
 = Overview of External IDP Integration (e.g., LDAP, Keycloak)
 
 This section provides an overview of integrating external Identity Providers (IDPs) like LDAP and Red Hat Single Sign-On (Keycloak) with Red Hat AMQ Broker on OpenShift. External IDP integration is crucial for centralized user management, enhanced security, and streamlined authentication experiences within enterprise environments.

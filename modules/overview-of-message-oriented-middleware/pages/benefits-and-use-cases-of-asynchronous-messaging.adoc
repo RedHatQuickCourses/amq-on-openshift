@@ -1,9 +1,3 @@
-#  Benefits and Use Cases of Asynchronous Messaging
-
-Here is the detailed educational content for "Benefits and Use Cases of Asynchronous Messaging" in Antora AsciiDoc format:
-
-```asciidoc
-[[benefits-use-cases-async-messaging]]
 = Benefits and Use Cases of Asynchronous Messaging
 
 Asynchronous messaging is a fundamental paradigm in modern distributed systems, forming the backbone of scalable, resilient, and loosely coupled architectures. It shifts from direct, synchronous communication, where a sender waits for a receiver's immediate response, to a model where messages are sent to an intermediary (a message broker) and processed by receivers at their own pace. This decoupling is central to its power, especially in complex environments like OpenShift, where services need to operate independently and reliably.
@@ -75,4 +69,3 @@ Asynchronous messaging, particularly with a robust broker like Red Hat AMQ Broke
     *   **Example:** End-of-day financial reconciliation, processing daily reports, or bulk data imports where each record or a small batch of records is a message.
 
 The architectural benefits of asynchronous messaging are profound, allowing for the construction of flexible, robust, and high-performing systems. Understanding these concepts is crucial before diving into the practical deployment and management of Red Hat AMQ Broker on OpenShift, as the broker is the enabling technology for these patterns. Subsequent sections and hands-on labs will demonstrate how AMQ Broker facilitates these use cases through concrete examples of producers and consumers utilizing various messaging protocols.
-```

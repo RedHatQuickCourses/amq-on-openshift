@@ -1,7 +1,3 @@
-#  Introduction to High Availability (HA) Concepts
-
-```asciidoc
-[#_introduction_to_high_availability_ha_concepts]
 = Introduction to High Availability (HA) Concepts
 
 High Availability (HA) is a critical design principle for any production-grade messaging system like Red Hat AMQ Broker. It ensures that your messaging infrastructure remains operational and data remains accessible, even in the event of unforeseen failures. This section will introduce the core concepts of HA as they apply to AMQ Broker on OpenShift, laying the groundwork for understanding various deployment strategies.
@@ -45,4 +41,3 @@ Beyond OpenShift's foundational capabilities, AMQ Broker itself offers specific 
 == Next Steps
 
 Understanding these foundational HA concepts is crucial for designing and implementing resilient messaging solutions. In subsequent sections, we will delve into the practical aspects of deploying and configuring HA AMQ Broker clusters, exploring different strategies like shared store and replicated live-backup, and how to manage failover and recovery mechanisms effectively.
-```

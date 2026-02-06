@@ -1,6 +1,3 @@
-#  Overview of Message Store Options
-
-[[message-store-overview]]
 = Overview of Message Store Options
 
 Message persistence is a fundamental aspect of reliable message-oriented middleware (MOM) systems like Red Hat AMQ Broker. It ensures that messages are not lost due to broker restarts, system failures, or network outages. The *message store* is the component responsible for durably saving messages and broker state to disk.

@@ -1,6 +1,3 @@
-#  Authentication and Authorization for Console Access
-
-[[authentication-authorization-console]]
 = Authentication and Authorization for AMQ Broker Management Console Access
 
 This section details how to secure access to the AMQ Broker Management Console (Hawtio) on OpenShift by configuring authentication and authorization mechanisms. Ensuring proper access control is crucial for managing your broker instances securely.

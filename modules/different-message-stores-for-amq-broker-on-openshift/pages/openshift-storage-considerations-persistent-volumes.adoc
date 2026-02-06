@@ -1,5 +1,3 @@
-#  OpenShift Storage Considerations (Persistent Volumes)
-
 = OpenShift Storage Considerations (Persistent Volumes)
 :navtitle: Storage Considerations
 

@@ -1,5 +1,3 @@
-#  Exposing the Console via OpenShift Routes
-
 = Exposing the Hawtio Management Console via OpenShift Routes
 
 The Hawtio management console provides a web-based interface for monitoring and administering your AMQ Broker instances. To access this console from outside your OpenShift cluster, or even from within the cluster via a stable URL, you need to expose it. This section details how to enable and configure console exposure using OpenShift Routes.

@@ -1,7 +1,5 @@
 #  Hands-on Lab: Deploying and Managing AMQ Broker
 
-=== Hands-on Lab: Deploying and Managing AMQ Broker
-
 This lab provides practical experience in deploying and managing AMQ Broker on OpenShift, covering essential tasks from initial setup to advanced configurations.
 
 Key activities include:

@@ -1,8 +1,3 @@
-#  Journal vs. Paging for Message Persistence
-
-This content is provided in Antora AsciiDoc format.
-
-[discrete]
 = Journal vs. Paging for Message Persistence
 
 AMQ Broker, built on Apache ActiveMQ Artemis, employs sophisticated mechanisms to ensure message durability and efficient handling, especially under high load or when dealing with large messages. Two fundamental concepts for achieving this are the *Message Journal* and *Message Paging*. While both contribute to message persistence, they serve distinct purposes and operate differently.

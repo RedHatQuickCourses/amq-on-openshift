@@ -1,5 +1,3 @@
-#  Configuring Client Connections for External Access
-
 = Configuring Client Connections for External Access
 
 When deploying Red Hat AMQ Broker on OpenShift, ensuring that external clients can reliably and securely connect to the broker instances is a critical aspect of your messaging architecture. This involves understanding OpenShift's networking constructs and configuring client-side connection parameters appropriately.

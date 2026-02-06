@@ -1,6 +1,3 @@
-#  Implementing Point-to-Point Messaging
-
-++++
 = Implementing Point-to-Point Messaging
 
 This section delves into the fundamentals of Point-to-Point (P2P) messaging, a core concept in message-oriented middleware (MOM). We will explore how to implement P2P messaging using Java clients with Red Hat AMQ Broker, focusing on the Java Message Service (JMS) API, which underpins the AMQ Broker's core protocol client capabilities.
@@ -963,4 +960,3 @@ Access this URL in your web browser.
 *   *Security*: For production environments, always enable authentication and authorization on the AMQ Broker. Use SSL/TLS for client-broker communication as covered in the "Securing AMQ Broker on OpenShift" section.
 
 By following these steps, you have successfully implemented and tested point-to-point messaging using Java JMS clients with an AMQ Broker deployed on OpenShift. You've seen how messages are sent to a queue and consumed by a single recipient, demonstrating a fundamental messaging pattern.
-++++

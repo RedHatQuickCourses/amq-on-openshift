@@ -1,11 +1,3 @@
-#  Choosing the Appropriate Message Store Strategy
-
-This document covers the objectives related to choosing an appropriate message store strategy for AMQ Broker deployments on OpenShift. It explains the available options, their characteristics, and the factors to consider for making an informed decision.
-
-_This content is provided in Antora AsciiDoc format._
-
-```asciidoc
-[[amq-broker-message-store-strategy]]
 = Choosing the Appropriate Message Store Strategy
 
 Understanding and selecting the correct message store strategy is a critical decision for any AMQ Broker deployment, especially in containerized environments like OpenShift. The choice impacts performance, reliability, scalability, and operational complexity. This section details the primary message store options available for AMQ Broker and provides guidance on how to choose the best strategy for your specific use case.
@@ -200,4 +192,3 @@ This activity focuses on understanding how message store options are specified w
         *   Mounting the driver JAR from an `ConfigMap` or `Secret` using `externalVolumes` and ensuring it's in the correct path for the broker to pick it up.
 
 This hands-on exploration should solidify your understanding of how to configure and prepare for different message store strategies within an OpenShift AMQ Broker deployment.
-```

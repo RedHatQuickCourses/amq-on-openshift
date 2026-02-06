@@ -1,5 +1,3 @@
-#  Persistence and Data Replication for HA
-
 = Persistence and Data Replication for HA
 
 Ensuring high availability (HA) for AMQ Broker on OpenShift fundamentally relies on how message data is persistently stored and made continuously available, even in the event of component failures. This involves leveraging OpenShift's storage capabilities and configuring brokers to use resilient message stores that facilitate failover.

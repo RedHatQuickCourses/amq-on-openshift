@@ -1,9 +1,3 @@
-#  Performing Administrative Tasks through the Console
-
-Here's the detailed educational content for "Performing Administrative Tasks through the Console" in Antora AsciiDoc format.
-
-```asciidoc
-[[performing-admin-tasks]]
 = Performing Administrative Tasks through the Console
 
 As a message broker administrator, having robust tools to manage and monitor your broker instances is critical for maintaining system health, troubleshooting issues, and ensuring optimal performance. The Red Hat AMQ Broker on OpenShift leverages the powerful Hawtio management console (often referred to as the Fuse Console when packaged with Red Hat Fuse) to provide a web-based interface for these administrative tasks.
@@ -189,4 +183,3 @@ In this activity, you will modify an existing `ActiveMQArtemis` broker deploymen
 *   **Security Warning on Login**: You might see warnings related to security if not using HTTPS for the console or if self-signed certificates are in use. For production environments, ensure proper TLS configuration for the route.
 
 By successfully completing this activity, you have configured your AMQ Broker on OpenShift to expose its management interface through the Hawtio console, allowing you to perform essential administrative and monitoring tasks. Remember to always be mindful of the security implications when `managementRBACEnabled` is set to `false`.
-```

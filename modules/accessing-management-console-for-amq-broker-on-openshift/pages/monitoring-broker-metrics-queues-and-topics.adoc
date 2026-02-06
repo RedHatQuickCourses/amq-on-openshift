@@ -1,6 +1,3 @@
-#  Monitoring Broker Metrics, Queues, and Topics
-
-[[monitoring-broker-metrics-queues-topics]]
 = Monitoring Broker Metrics, Queues, and Topics
 
 This section details how to monitor the health and performance of your AMQ Broker instances on OpenShift, focusing on key metrics, queues, and topics. Effective monitoring is crucial for ensuring the reliability, performance, and stability of your messaging infrastructure.

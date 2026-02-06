@@ -1,5 +1,3 @@
-#  Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)
-
 = Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)
 
 This section guides you through the process of establishing a development environment for AMQP clients utilizing the Red Hat build of Apache Qpid JMS. Qpid JMS is an advanced client library that fully implements the AMQP 1.0 specification, enabling Java applications to seamlessly interact with AMQ Broker and other AMQP 1.0 compliant message brokers.

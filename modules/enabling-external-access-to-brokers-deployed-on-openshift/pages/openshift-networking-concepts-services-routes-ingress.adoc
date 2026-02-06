@@ -1,5 +1,3 @@
-#  OpenShift Networking Concepts: Services, Routes, Ingress
-
 = OpenShift Networking Concepts: Services, Routes, Ingress
 
 As a Content Architect, our journey into deploying and managing AMQ Broker on OpenShift requires a solid understanding of how applications communicate within and outside the cluster. OpenShift, built upon Kubernetes, provides sophisticated networking primitives to ensure reliable and secure connectivity. This section will demystify the core OpenShift networking concepts: Services, Routes, and Ingress.

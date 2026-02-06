@@ -1,5 +1,3 @@
-#  Setting Up a Core Protocol Client Development Environment
-
 = Setting Up a Core Protocol Client Development Environment
 
 This section guides you through establishing a robust development environment for building applications that interact with Red Hat AMQ Broker using its native *Core Protocol*. The AMQ Core Protocol is a high-performance, low-latency messaging protocol foundational to Apache ActiveMQ Artemis, on which Red Hat AMQ Broker is built.

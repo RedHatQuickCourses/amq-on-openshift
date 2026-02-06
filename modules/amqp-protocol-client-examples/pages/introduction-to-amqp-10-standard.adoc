@@ -1,5 +1,3 @@
-#  Introduction to AMQP 1.0 Standard
-
 = Introduction to AMQP 1.0 Standard
 :page-aliases: amqp-intro.adoc
 :page-tag: amqp, messaging, protocol, amq-broker

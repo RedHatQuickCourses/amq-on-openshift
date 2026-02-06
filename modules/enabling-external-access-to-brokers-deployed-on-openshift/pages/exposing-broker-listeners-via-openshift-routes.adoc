@@ -1,5 +1,3 @@
-#  Exposing Broker Listeners via OpenShift Routes
-
 = Exposing Broker Listeners via OpenShift Routes
 
 Asynchronous messaging often requires clients to connect to the AMQ Broker from outside the OpenShift cluster. OpenShift's networking capabilities, specifically Services and Routes, provide the mechanism to expose these broker listeners (known as *acceptors*) securely and efficiently. The AMQ Broker Operator automates much of this process, creating the necessary network resources when an acceptor is configured for external access.

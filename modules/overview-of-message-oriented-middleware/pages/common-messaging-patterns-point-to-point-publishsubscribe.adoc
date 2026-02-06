@@ -1,9 +1,3 @@
-#  Common Messaging Patterns (Point-to-Point, Publish/Subscribe)
-
-module-messaging-patterns
-:page-title: Common Messaging Patterns
-
-[[_common_messaging_patterns]]
 = Common Messaging Patterns
 
 Asynchronous messaging systems like Red Hat AMQ Broker facilitate communication between different components of an application or various applications themselves. The way messages are delivered and consumed defines distinct *messaging patterns*. Understanding these patterns—Point-to-Point and Publish/Subscribe—is crucial for designing robust, scalable, and decoupled systems. These patterns dictate how producers send messages and how consumers receive them, influencing system architecture and behavior.

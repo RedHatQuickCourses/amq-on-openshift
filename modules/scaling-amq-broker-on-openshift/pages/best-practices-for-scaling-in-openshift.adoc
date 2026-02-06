@@ -1,9 +1,4 @@
-#  Best Practices for Scaling in OpenShift
 
-Here's the detailed educational content for "Best Practices for Scaling in OpenShift" for AMQ Broker, presented in Antora AsciiDoc format.
-
-```asciidoc
-[[_best_practices_scaling_openshift]]
 = Best Practices for Scaling AMQ Broker on OpenShift
 
 This section outlines essential best practices for effectively scaling Red Hat AMQ Broker deployments on OpenShift Container Platform. Proper scaling ensures your messaging infrastructure can handle varying loads, maintain performance, and provide high availability without unnecessary resource consumption.
@@ -193,4 +188,3 @@ The best way to validate your scaling strategy is through rigorous testing.
 *   Verify that your monitoring and alerting systems correctly identify scaling needs.
 
 By adhering to these best practices, you can build a resilient, performant, and efficiently scalable AMQ Broker messaging infrastructure on OpenShift Container Platform.
-```

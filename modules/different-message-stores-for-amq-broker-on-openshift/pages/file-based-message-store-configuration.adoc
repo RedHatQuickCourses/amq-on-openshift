@@ -1,6 +1,4 @@
-#  File-Based Message Store Configuration
 
-[[file-based-message-store-configuration]]
 = File-Based Message Store Configuration
 
 This section delves into configuring Red Hat AMQ Broker to utilize file-based message stores for message persistence, focusing on its implementation within an OpenShift Container Platform environment. File-based message stores are crucial for ensuring message durability and recovering messages after a broker restart or failure.

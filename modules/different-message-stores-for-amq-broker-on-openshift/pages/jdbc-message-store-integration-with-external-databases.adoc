@@ -1,9 +1,4 @@
-#  JDBC Message Store Integration with External Databases
-
-Here is the detailed educational content on "JDBC Message Store Integration with External Databases," presented in Antora AsciiDoc format, incorporating technical explanations and a hands-on activity.
-
-```asciidoc
-= Different Message Stores for AMQ Broker on OpenShift: JDBC Message Store Integration with External Databases
+= JDBC Message Store Integration with External Databases
 
 This section delves into integrating Red Hat AMQ Broker on OpenShift with external databases for message persistence using JDBC. We will explore the technical aspects of this integration, its benefits, considerations, and provide a hands-on lab to demonstrate the configuration.
 
@@ -373,4 +368,3 @@ Look for messages in the broker logs indicating successful connection to the dat
 *   **Database Security:**
     *   Never hardcode database credentials in the `ActiveMQArtemis` Custom Resource. Always use OpenShift `Secret`s to store sensitive information and inject them into the broker pod's environment variables, then reference these variables in the `jdbcConnectionUrl`.
     *   Configure SSL/TLS for JDBC connections to encrypt data in transit between the broker and the database. This typically involves adding SSL parameters to the `jdbcConnectionUrl` and managing trust stores for the broker.
-```
