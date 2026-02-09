@@ -134,7 +134,7 @@ Navigate into the `amq-core-client` directory and open `pom.xml`. Add the `artem
     <java.version>11</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <activemq.version>2.31.0.redhat-00001</activemq.version> <!-- Use the version compatible with your AMQ Broker -->
+    <activemq.version>2.40.0.redhat-00009</activemq.version> <!-- Use the version compatible with your AMQ Broker -->
   </properties>
 
   <dependencies>
@@ -176,7 +176,7 @@ Navigate into the `amq-core-client` directory and open `pom.xml`. Add the `artem
 </project>
 ----
 [IMPORTANT]
-Ensure the `activemq.version` specified in the `pom.xml` is compatible with your deployed AMQ Broker version. Consult Red Hat documentation for recommended client versions. The example `2.31.0.redhat-00001` is a placeholder.
+Ensure the `activemq.version` specified in the `pom.xml` is compatible with your deployed AMQ Broker version. Consult Red Hat documentation for recommended client versions. The example `2.40.0.redhat-00009` is a placeholder.
 
 . Implement the Core Protocol Producer
 Create a new Java file `src/main/java/com/example/amq/core/CoreProducer.java` with the following content. Replace `${BROKER_HOST}` with the actual hostname you obtained earlier.

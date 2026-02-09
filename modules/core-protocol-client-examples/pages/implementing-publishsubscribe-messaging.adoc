@@ -163,7 +163,7 @@ Edit `publisher/pom.xml` to include the necessary AMQ Broker JMS client dependen
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-jms-client-all</artifactId>
-            <version>2.31.0.redhat-00003</version> <!-- Use the version compatible with your broker image -->
+            <version>2.40.0.redhat-00009</version> <!-- Use the version compatible with your broker image -->
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -326,7 +326,7 @@ Edit `subscriber/pom.xml` to include the same dependencies as the publisher:
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-jms-client-all</artifactId>
-            <version>2.31.0.redhat-00003</version> <!-- Use the version compatible with your broker image -->
+            <version>2.40.0.redhat-00009</version> <!-- Use the version compatible with your broker image -->
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

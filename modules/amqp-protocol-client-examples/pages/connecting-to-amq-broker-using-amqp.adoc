@@ -122,7 +122,7 @@ If you are using Maven, add the following dependency to your `pom.xml`:
   <dependency>
     <groupId>org.apache.qpid</groupId>
     <artifactId>qpid-jms-client</artifactId>
-    <version>0.63.0.redhat-00001</version> <!-- Use the appropriate Red Hat version -->
+    <version>2.5.0.redhat-00002</version> <!-- Use the appropriate Red Hat version -->
   </dependency>
 </dependencies>
 ----
@@ -132,7 +132,7 @@ For Gradle, add this to your `build.gradle`:
 [source,groovy]
 ----
 dependencies {
-    implementation 'org.apache.qpid:qpid-jms-client:0.63.0.redhat-00001' // Use the appropriate Red Hat version
+    implementation 'org.apache.qpid:qpid-jms-client:2.5.0.redhat-00002' // Use the appropriate Red Hat version
 }
 ----
 *NOTE: Always check the latest recommended Red Hat build of Apache Qpid JMS version for compatibility with your AMQ Broker release.*
@@ -313,7 +313,7 @@ Now, modify the `pom.xml` to include the Qpid JMS client dependency.
     <dependency>
       <groupId>org.apache.qpid</groupId>
       <artifactId>qpid-jms-client</artifactId>
-      <version>0.63.0.redhat-00001</version> <!-- Use the appropriate Red Hat version -->
+      <version>2.5.0.redhat-00002</version> <!-- Use the appropriate Red Hat version -->
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -70,7 +70,7 @@ cd amq-p2p-client
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <activemq.version>2.31.2</activemq.version> <1>
+        <activemq.version>2.40.0.redhat-00009</activemq.version> <1>
     </properties>
 
     <dependencies>
@@ -566,7 +566,7 @@ cd amq-p2p-client
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <activemq.version>2.31.2</activemq.version> <1>
+        <activemq.version>2.40.0.redhat-00009</activemq.version> <1>
     </properties>
 
     <dependencies>

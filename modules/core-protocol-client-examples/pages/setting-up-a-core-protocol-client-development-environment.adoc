@@ -167,7 +167,7 @@ cd amq-core-client-app
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <amq.version>7.12.0.redhat-00001</amq.version> <!-- Use the relevant Red Hat AMQ Core Protocol JMS version -->
+        <amq.version>2.40.0.redhat-00009</amq.version> <!-- Use the relevant Red Hat AMQ Core Protocol JMS version -->
     </properties>
 
     <dependencies>
@@ -206,7 +206,7 @@ cd amq-core-client-app
 ----
 +
 [IMPORTANT]
-Ensure you use the correct Red Hat AMQ Core Protocol JMS version in the `<amq.version>` property. The context mentions *Red Hat AMQ Core Protocol JMS 7.12*, so using `7.12.0.redhat-00001` or a similar specific build version is appropriate. Check the official Red Hat documentation for the exact version string if you encounter issues.
+Ensure you use the correct Red Hat AMQ Core Protocol JMS version in the `<amq.version>` property. The context mentions *Red Hat AMQ Core Protocol JMS 7.12*, so using `2.40.0.redhat-00009` or a similar specific build version is appropriate. Check the official Red Hat documentation for the exact version string if you encounter issues.
 
 == Verifying the Setup
 

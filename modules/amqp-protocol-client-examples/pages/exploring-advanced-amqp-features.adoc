@@ -50,7 +50,7 @@ In this lab, you will implement a simple AMQP producer and consumer that use tra
     <dependency>
         <groupId>org.apache.qpid</groupId>
         <artifactId>qpid-jms-client</artifactId>
-        <version>2.7.0</version>  // Use the version compatible with your broker, context mentions 2.7
+        <version>2.5.0.redhat-00002</version>  // Use the version compatible with your broker, context mentions 2.7
     </dependency>
 </dependencies>
 ----
