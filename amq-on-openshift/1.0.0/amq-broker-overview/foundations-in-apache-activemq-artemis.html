@@ -551,8 +551,7 @@
 When an AMQ Broker instance starts, the logs will explicitly mention Apache ActiveMQ Artemis. Examine the provided log snippets from a typical AMQ Broker startup. Notice the messages confirming the Artemis server is live and its version.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,text]
-----
+<pre>----
 Server is now live
 2021-09-17 09:35:25,660 INFO  [org.apache.activemq.artemis.core.server] AMQ221001:</pre>
 </div>
@@ -603,8 +602,7 @@ AMQ101000: Starting ActiveMQ Artemis Server
 Even within an AMQ Broker installation (especially a local standalone installation for development or testing, or within the container image), you&#8217;ll often find and interact with the underlying <code>artemis</code> command-line utility. This CLI is powerful for administrative tasks, queue management, and more, offering a direct way to interact with the broker&#8217;s foundational capabilities.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,text]
-----
+<pre>----
 $ &lt;broker-instance-dir&gt;/bin/artemis queue create --name exampleQueue --address exampleQueue --auto-create-address --anycast
 ----</pre>
 </div>
