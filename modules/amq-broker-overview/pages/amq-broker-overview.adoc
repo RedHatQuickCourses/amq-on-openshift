@@ -13,6 +13,6 @@ Key aspects include:
     *   AMQP (Advanced Message Queuing Protocol)
     *   MQTT (Message Queuing Telemetry Transport)
     *   STOMP (Simple Text Oriented Messaging Protocol)
-    *   OpenWire
+    *   OpenWire (Deprecated)
 *   **Architecture**: Designed for high performance, scalability, and high availability, making it suitable for enterprise-grade messaging solutions.
 *   **Extensibility**: Functionality can be extended by xref:amq-broker-on-openshift-deployment-and-management.adoc#_registering_plugins_with_amq_broker[registering plugins] in the broker's Custom Resource (CR).

@@ -55,7 +55,7 @@ AMQ Broker distinguishes itself through its multi-protocol support, enabling div
 *   *AMQP 1.0 (Advanced Message Queuing Protocol):* An open, wire-level messaging protocol designed for interoperability. It allows client applications written in languages such as Java, Python, C#, and Node.js to communicate with AMQ Broker using a standardized, efficient protocol.
 *   *MQTT (Message Queuing Telemetry Transport):* A lightweight publish/subscribe protocol optimized for constrained devices and low-bandwidth, high-latency networks. It is widely adopted in Internet of Things (IoT) and mobile application scenarios.
 *   *STOMP (Simple Text-Oriented Messaging Protocol):* A simple, text-based wire protocol, often preferred by web clients (e.g., JavaScript applications) and scripting languages due to its ease of implementation and human-readable format.
-*   *OpenWire:* The native binary protocol of Apache ActiveMQ. AMQ Broker maintains compatibility with OpenWire, allowing existing ActiveMQ clients to connect and interact without requiring significant modifications.
+*   *OpenWire (Deprecated):* The native binary protocol of Apache ActiveMQ. AMQ Broker maintains compatibility with OpenWire, allowing existing ActiveMQ clients to connect and interact without requiring significant modifications. This protocol is deprecated and will be removed in the next major release.
 *   *Core Protocol:* The high-performance, low-level native protocol of ActiveMQ Artemis, offering maximum throughput and minimal latency when used with native Artemis clients.
 
 This comprehensive protocol support positions AMQ Broker as a central messaging hub capable of integrating a wide array of client applications and systems.

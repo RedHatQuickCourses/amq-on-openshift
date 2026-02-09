@@ -18,7 +18,7 @@ The central nervous system of the broker, responsible for managing messages, que
 === Messaging Protocols
 AMQ Broker is a multi-protocol broker, meaning it can communicate with clients using various standard messaging protocols. This flexibility allows diverse applications, written in different languages or adhering to various industry standards, to integrate seamlessly with the broker.
 
-*   *OpenWire:* The native, high-performance wire protocol primarily used by ActiveMQ JMS clients. It offers rich features and is highly optimized for Java-to-Java communication.
+*   *OpenWire (Deprecated):* The native, high-performance wire protocol primarily used by ActiveMQ JMS clients. It offers rich features and is highly optimized for Java-to-Java communication.
 *   *AMQP 1.0 (Advanced Message Queuing Protocol):* An open, standardized, and interoperable protocol for message queuing. It is designed for reliable and efficient message transfer between applications, systems, and organizations, making it ideal for cross-platform and multi-language communication.
 *   *JMS (Java Message Service):* A Java API that provides a common way for Java programs to create, send, receive, and read messages. AMQ Broker provides a JMS client library that implements the JMS API, typically leveraging OpenWire or AMQP 1.0 for the underlying wire protocol.
 *   *MQTT (Message Queuing Telemetry Transport):* A lightweight messaging protocol designed for small sensors and mobile devices, optimized for high-latency or unreliable networks and low bandwidth scenarios. It's widely used in IoT (Internet of Things) applications.

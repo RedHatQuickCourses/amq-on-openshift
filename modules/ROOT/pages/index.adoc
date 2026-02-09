@@ -6,9 +6,9 @@
 Course Title:  AMQ Broker on OpenShift: Deployment and Management
 
 Description:
-Course description FIXME
+Running AMQ Broker on OpenShift
 
-Duration: FIXME hours
+Duration: 4 hours
 
 == Topics covered in this course
 
@@ -43,6 +43,6 @@ Duration: FIXME hours
 
 This course assumes that you have the following prior experience:
 
-* Course or experience...
-* Course or experience...
-* Course or experience...
+* Understanding of Message Oriented Middleware and JMS
+* Understanding on Containers, Kubernetes, and OpenShift
+* Understanding of basic Java
