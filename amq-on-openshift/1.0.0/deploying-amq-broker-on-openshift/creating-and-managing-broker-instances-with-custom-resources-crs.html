@@ -517,11 +517,8 @@
 Ensure you are logged into your OpenShift cluster via the <code>oc</code> CLI or the web console, and that you are in the correct project (namespace) where you intend to deploy the broker.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash,subs="attributes+"]
-----
-oc login --token=&lt;your_token&gt; --server=&lt;your_api_url&gt;
-oc project &lt;your_project_name&gt;
-----</pre>
+<pre>oc login --token=&lt;your_token&gt; --server=&lt;your_api_url&gt;
+oc project &lt;your_project_name&gt;</pre>
 </div>
 </div>
 </li>
@@ -530,9 +527,7 @@ oc project &lt;your_project_name&gt;
 Create a file named <code>broker-basic-instance.yaml</code> with the following content. This CR defines a single, non-clustered, non-persistent broker instance.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,yaml,subs="attributes+"]
-----
-apiVersion: broker.amq.io/v1beta1
+<pre>apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: my-broker
@@ -541,8 +536,7 @@ spec:
     size: 1
     image: registry.redhat.io/amq7/amq-broker-rhel8:7.13
     persistenceEnabled: false
-    clustered: false
-----</pre>
+    clustered: false</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -556,10 +550,7 @@ spec:
 Use the <code>oc apply</code> command to deploy the broker instance based on your YAML file.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash,subs="attributes+"]
-----
-oc apply -f broker-basic-instance.yaml
-----</pre>
+<pre>oc apply -f broker-basic-instance.yaml</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -574,11 +565,8 @@ oc apply -f broker-basic-instance.yaml
 Check the status of your AMQ Broker instance and its associated pods. The Operator will create a deployment and a pod for your broker.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash,subs="attributes+"]
-----
-oc get activemqartemis
-oc get pods -l app=my-broker
-----</pre>
+<pre>oc get activemqartemis
+oc get pods -l app=my-broker</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -625,10 +613,7 @@ oc get pods -l app=my-broker
 Open the <code>broker-basic-instance.yaml</code> file you created earlier or use <code>oc edit</code> to directly modify the CR on the cluster.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash,subs="attributes+"]
-----
-oc edit activemqartemis my-broker
-----</pre>
+<pre>oc edit activemqartemis my-broker</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -638,9 +623,7 @@ oc edit activemqartemis my-broker
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>[source,yaml,subs="attributes+"]
-----
-apiVersion: broker.amq.io/v1beta1
+<pre>apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: my-broker
@@ -651,9 +634,12 @@ spec:
     persistenceEnabled: false
     clustered: false
     jolokiaAgentEnabled: true  <i class="conum" data-value="1"></i><b>(1)</b>
-    managementRBACEnabled: true <i class="conum" data-value="2"></i><b>(2)</b>
-----
-&lt;1&gt; Enables the Jolokia agent for JMX access.
+    managementRBACEnabled: true <i class="conum" data-value="2"></i><b>(2)</b></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;1&gt; Enables the Jolokia agent for JMX access.
 &lt;2&gt; Enables Role-Based Access Control for the management interface.</pre>
 </div>
 </div>
@@ -663,10 +649,7 @@ spec:
 If you used <code>oc edit</code>, saving the file will automatically apply the changes. If you edited the local YAML file, apply it again:</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash,subs="attributes+"]
-----
-oc apply -f broker-basic-instance.yaml
-----</pre>
+<pre>oc apply -f broker-basic-instance.yaml</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -680,10 +663,7 @@ oc apply -f broker-basic-instance.yaml
 After the pod restarts and is running again, you can check the <code>status</code> section of the <code>ActiveMQArtemis</code> CR for any configuration errors.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash,subs="attributes+"]
-----
-oc get activemqartemis my-broker -o yaml
-----</pre>
+<pre>oc get activemqartemis my-broker -o yaml</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -771,9 +751,7 @@ Click on the <code>Instances</code> tab, then click the <strong>Create ActiveMQA
 Paste the following YAML into the editor. Ensure the <code>namespace</code> in <code>metadata</code> matches your current OpenShift project.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,yaml,subs="attributes+"]
-----
-apiVersion: broker.amq.io/v1beta1
+<pre>apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemisAddress
 metadata:
   name: my-first-address
@@ -782,9 +760,12 @@ spec:
   brokerName: my-broker <i class="conum" data-value="2"></i><b>(2)</b>
   addressName: myAddress0
   queueName: myQueue0
-  routingType: anycast
-----
-&lt;1&gt; **Important:** Replace `&lt;your_project_name&gt;` with the actual name of your OpenShift project. This is required when creating CRs via the console.
+  routingType: anycast</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;1&gt; **Important:** Replace `&lt;your_project_name&gt;` with the actual name of your OpenShift project. This is required when creating CRs via the console.
 &lt;2&gt; Specify the `name` of the broker instance (e.g., `my-broker`) that this address and queue should be created on.</pre>
 </div>
 </div>

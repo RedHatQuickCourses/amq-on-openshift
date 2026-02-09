@@ -506,15 +506,23 @@ Always set <code>limits</code> without explicitly setting <code>requests</code> 
 First, list your existing <code>ActiveMQArtemis</code> custom resources to identify the one you want to modify.</p>
 <div class="literalblock">
 <div class="content">
-<pre>```bash
-oc get activemqartemis
-```
-You should see output similar to this:
-```
-NAME           AGE
-my-broker      5m
-```
-In this example, our broker's CR name is `my-broker`.</pre>
+<pre>oc get activemqartemis</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>You should see output similar to this:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>NAME           AGE
+my-broker      5m</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>In this example, our broker's CR name is `my-broker`.</pre>
 </div>
 </div>
 </li>
@@ -523,9 +531,7 @@ In this example, our broker's CR name is `my-broker`.</pre>
 Use the <code>oc edit</code> command to open the custom resource for editing in your default editor (e.g., <code>vi</code> or <code>nano</code>).</p>
 <div class="literalblock">
 <div class="content">
-<pre>```bash
-oc edit activemqartemis my-broker
-```</pre>
+<pre>oc edit activemqartemis my-broker</pre>
 </div>
 </div>
 </li>
@@ -546,8 +552,7 @@ YAML is sensitive to indentation. Ensure that your `resources` block is correctl
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>```yaml
-# ... existing CR content ...
+<pre># ... existing CR content ...
 spec:
   deploymentPlan:
     size: 1 # Assuming a single broker for simplicity, adjust as needed
@@ -560,8 +565,7 @@ spec:
     # requests:
     #   cpu: "250m"
     #   memory: "512M"
-# ... rest of CR content ...
-```</pre>
+# ... rest of CR content ...</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -583,23 +587,32 @@ After a short period, verify that the new resource allocations have been applied
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p><strong>Check Pod Status</strong>: Ensure the broker pod(s) are running.
-<code><code>bash
-oc get pods -l app.kubernetes.io/name=my-broker # Replace 'my-broker' with your broker name
-</code></code></p>
+<p><strong>Check Pod Status</strong>: Ensure the broker pod(s) are running.</p>
+<div class="literalblock">
+<div class="content">
+<pre>oc get pods -l app.kubernetes.io/name=my-broker # Replace 'my-broker' with your broker name</pre>
+</div>
+</div>
 </li>
 <li>
-<p><strong>Describe a Broker Pod</strong>: Get detailed information about one of the broker pods.
-<code><code>bash
-oc describe pod &lt;broker-pod-name&gt;
-</code></code>
-Look for the <code>Resources</code> section under the <code>Containers</code> details. You should see output similar to this, reflecting your changes:
-<code>`
-&#8230;&#8203;
+<p><strong>Describe a Broker Pod</strong>: Get detailed information about one of the broker pods.</p>
+<div class="literalblock">
+<div class="content">
+<pre>oc describe pod &lt;broker-pod-name&gt;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Look for the `Resources` section under the `Containers` details. You should see output similar to this, reflecting your changes:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>...
 Containers:
   amq-broker:
-    Container ID:  &#8230;&#8203;
-    Image:         &#8230;&#8203;
+    Container ID:  ...
+    Image:         ...
     Port:          61616/TCP
     Host Port:     0/TCP
     Limits:
@@ -608,9 +621,14 @@ Containers:
     Requests:
       cpu:     500m
       memory:  1024M
-&#8230;&#8203;
-</code>`
-Notice that <code>Requests</code> now matches <code>Limits</code> because we didn&#8217;t specify them explicitly.</p>
+...</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Notice that `Requests` now matches `Limits` because we didn't specify them explicitly.</pre>
+</div>
+</div>
 </li>
 </ol>
 </div>

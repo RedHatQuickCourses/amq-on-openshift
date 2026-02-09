@@ -596,16 +596,22 @@
 Before scaling, check the current number of replicas for your AMQ Broker instance. Replace <code>your-broker-name</code> and <code>your-namespace</code> with your specific broker&#8217;s name and the OpenShift project (namespace) it&#8217;s deployed in.</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash]
-----
-oc get activemqartemis your-broker-name -n your-namespace -o jsonpath='{.spec.deploymentPlan.size}'
-----
-You can also check the pods directly:
-[source,bash]
-----
-oc get pods -l app.kubernetes.io/name=your-broker-name -n your-namespace
-----
-This will show you the number of running pods associated with your broker. A typical non-HA deployment would show `1`. A clustered HA deployment would likely show `2` or more.</pre>
+<pre>oc get activemqartemis your-broker-name -n your-namespace -o jsonpath='{.spec.deploymentPlan.size}'</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>You can also check the pods directly:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>oc get pods -l app.kubernetes.io/name=your-broker-name -n your-namespace</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>This will show you the number of running pods associated with your broker. A typical non-HA deployment would show `1`. A clustered HA deployment would likely show `2` or more.</pre>
 </div>
 </div>
 </li>
@@ -619,10 +625,7 @@ To horizontally scale out your broker, you&#8217;ll increase the <code>replicas<
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash]
-----
-kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 2
-----</pre>
+<pre>kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 2</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -632,10 +635,7 @@ kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 2
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash]
-----
-kubectl -n production scale ActiveMQArtemis broker-prod --replicas 2
-----</pre>
+<pre>kubectl -n production scale ActiveMQArtemis broker-prod --replicas 2</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -649,12 +649,13 @@ kubectl -n production scale ActiveMQArtemis broker-prod --replicas 2
 Observe the pod status in your namespace. You should see new pods spinning up for your broker:</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash]
-----
-oc get pods -l app.kubernetes.io/name=broker-dr -n dr
-oc get pods -l app.kubernetes.io/name=broker-prod -n production
-----
-Wait until all new pods are in a `Running` state.</pre>
+<pre>oc get pods -l app.kubernetes.io/name=broker-dr -n dr
+oc get pods -l app.kubernetes.io/name=broker-prod -n production</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Wait until all new pods are in a `Running` state.</pre>
 </div>
 </div>
 </li>
@@ -663,12 +664,13 @@ Wait until all new pods are in a `Running` state.</pre>
 Once you&#8217;ve tested, you can scale the broker back down to its original number of replicas (or any other desired number). This is "scaling in."</p>
 <div class="literalblock">
 <div class="content">
-<pre>As referenced in the provided context:
-[source,bash]
-----
-kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 1
-kubectl -n production scale ActiveMQArtemis broker-prod --replicas 1
-----</pre>
+<pre>As referenced in the provided context:</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 1
+kubectl -n production scale ActiveMQArtemis broker-prod --replicas 1</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -682,12 +684,13 @@ kubectl -n production scale ActiveMQArtemis broker-prod --replicas 1
 Confirm that the replica count has returned to the desired number by checking the pods again:</p>
 <div class="literalblock">
 <div class="content">
-<pre>[source,bash]
-----
-oc get pods -l app.kubernetes.io/name=broker-dr -n dr
-oc get pods -l app.kubernetes.io/name=broker-prod -n production
-----
-You should see only the specified number of pods running.</pre>
+<pre>oc get pods -l app.kubernetes.io/name=broker-dr -n dr
+oc get pods -l app.kubernetes.io/name=broker-prod -n production</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>You should see only the specified number of pods running.</pre>
 </div>
 </div>
 </li>
