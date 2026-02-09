@@ -45,22 +45,22 @@ In this activity, you will modify an existing AMQ Broker custom resource (CR) to
 1.  **Identify your Broker Custom Resource**:
     First, list your existing `ActiveMQArtemis` custom resources to identify the one you want to modify.
 
-    ```bash
+    
     oc get activemqartemis
-    ```
+    
     You should see output similar to this:
-    ```
+    
     NAME           AGE
     my-broker      5m
-    ```
+    
     In this example, our broker's CR name is `my-broker`.
 
 2.  **Edit the Broker Custom Resource**:
     Use the `oc edit` command to open the custom resource for editing in your default editor (e.g., `vi` or `nano`).
 
-    ```bash
+    
     oc edit activemqartemis my-broker
-    ```
+    
 
 3.  **Modify the `deploymentPlan.resources` section**:
     Navigate to the `spec.deploymentPlan.resources` section within the YAML. You will add or modify the `limits` and `requests` for `cpu` and `memory`.
@@ -71,7 +71,7 @@ In this activity, you will modify an existing AMQ Broker custom resource (CR) to
 
     Locate or add the `resources` block as shown below. For this example, we will set CPU limits to `500m` and memory limits to `1024M`. As per the recommendation, we will *not* explicitly set `requests` so they default to the `limits` values.
 
-    ```yaml
+    
     # ... existing CR content ...
     spec:
       deploymentPlan:
@@ -86,7 +86,7 @@ In this activity, you will modify an existing AMQ Broker custom resource (CR) to
         #   cpu: "250m"
         #   memory: "512M"
     # ... rest of CR content ...
-    ```
+    
 
     In this configuration:
     *   Each broker container will be limited to `500m` (half a CPU core).
@@ -100,16 +100,16 @@ In this activity, you will modify an existing AMQ Broker custom resource (CR) to
     After a short period, verify that the new resource allocations have been applied to your broker pods.
 
     a.  **Check Pod Status**: Ensure the broker pod(s) are running.
-        ```bash
+        
         oc get pods -l app.kubernetes.io/name=my-broker # Replace 'my-broker' with your broker name
-        ```
+        
 
     b.  **Describe a Broker Pod**: Get detailed information about one of the broker pods.
-        ```bash
+        
         oc describe pod <broker-pod-name>
-        ```
+        
         Look for the `Resources` section under the `Containers` details. You should see output similar to this, reflecting your changes:
-        ```
+        
         ...
         Containers:
           amq-broker:
@@ -124,7 +124,7 @@ In this activity, you will modify an existing AMQ Broker custom resource (CR) to
               cpu:     500m
               memory:  1024M
         ...
-        ```
+        
         Notice that `Requests` now matches `Limits` because we didn't specify them explicitly.
 
 This concludes the process of adjusting CPU and memory resource allocations for your AMQ Broker pods on OpenShift. Remember to monitor your broker's performance after making such changes to ensure optimal operation.

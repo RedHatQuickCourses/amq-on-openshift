@@ -80,15 +80,15 @@ Understand and execute commands to scale an `ActiveMQArtemis` custom resource ho
 . *Verify Current Broker Replicas:*
    Before scaling, check the current number of replicas for your AMQ Broker instance. Replace `your-broker-name` and `your-namespace` with your specific broker's name and the OpenShift project (namespace) it's deployed in.
 
-   [source,bash]
-   ----
+   
+   
    oc get activemqartemis your-broker-name -n your-namespace -o jsonpath='{.spec.deploymentPlan.size}'
-   ----
+   
    You can also check the pods directly:
-   [source,bash]
-   ----
+   
+   
    oc get pods -l app.kubernetes.io/name=your-broker-name -n your-namespace
-   ----
+   
    This will show you the number of running pods associated with your broker. A typical non-HA deployment would show `1`. A clustered HA deployment would likely show `2` or more.
 
 . *Scale Up the Broker Instance:*
@@ -96,50 +96,50 @@ Understand and execute commands to scale an `ActiveMQArtemis` custom resource ho
 
    For example, if you want to scale a broker named `broker-dr` in the `dr` namespace to 2 instances:
 
-   [source,bash]
-   ----
+   
+   
    kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 2
-   ----
+   
 
    And if you have another broker named `broker-prod` in the `production` namespace:
 
-   [source,bash]
-   ----
+   
+   
    kubectl -n production scale ActiveMQArtemis broker-prod --replicas 2
-   ----
+   
 
    After executing these commands, the AMQ Broker Operator will detect the change in the `ActiveMQArtemis` custom resource and provision new pods (or update existing ones) to match the desired replica count.
 
 . *Verify Scaled-Up Broker Instances:*
    Observe the pod status in your namespace. You should see new pods spinning up for your broker:
 
-   [source,bash]
-   ----
+   
+   
    oc get pods -l app.kubernetes.io/name=broker-dr -n dr
    oc get pods -l app.kubernetes.io/name=broker-prod -n production
-   ----
+   
    Wait until all new pods are in a `Running` state.
 
 . *Scale Down the Broker Instance:*
    Once you've tested, you can scale the broker back down to its original number of replicas (or any other desired number). This is "scaling in."
 
    As referenced in the provided context:
-   [source,bash]
-   ----
+   
+   
    kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 1
    kubectl -n production scale ActiveMQArtemis broker-prod --replicas 1
-   ----
+   
 
    Again, the Operator will terminate the excess pods to match the new `replicas` count.
 
 . *Verify Scaled-Down Broker Instances:*
    Confirm that the replica count has returned to the desired number by checking the pods again:
 
-   [source,bash]
-   ----
+   
+   
    oc get pods -l app.kubernetes.io/name=broker-dr -n dr
    oc get pods -l app.kubernetes.io/name=broker-prod -n production
-   ----
+   
    You should see only the specified number of pods running.
 
 This hands-on activity demonstrates the power and simplicity of horizontal scaling on OpenShift using the AMQ Broker Operator and `kubectl`. By adjusting the `replicas` count, you can dynamically adapt your messaging infrastructure to changing workload demands.

@@ -58,18 +58,18 @@ Let's explore the AMQ Broker CRDs installed by the Operator in your OpenShift cl
 .  **Log in to your OpenShift Cluster**:
     Ensure you are logged into your OpenShift cluster with sufficient permissions to view Custom Resource Definitions.
 
-    [source,bash]
-    ----
+    
+    
     oc login --token=<your_token> --server=<your_api_server>
-    ----
+    
 
 .  **List all Custom Resource Definitions (CRDs) in the Cluster**:
     To see all CRDs available in your cluster, use the `oc get crd` command. This will show a long list.
 
-    [source,bash]
-    ----
+    
+    
     oc get crd
-    ----
+    
     You will see output similar to this (truncated for brevity):
     ```
     NAME                                     CREATED AT
@@ -81,32 +81,32 @@ Let's explore the AMQ Broker CRDs installed by the Operator in your OpenShift cl
 .  **Filter for AMQ Broker Specific CRDs**:
     To specifically find the CRDs related to AMQ Broker, you can filter the output. The AMQ Broker CRDs typically have the group `broker.amq.io`.
 
-    [source,bash]
-    ----
+    
+    
     oc get crd | grep "broker.amq.io"
-    ----
+    
     Expected output:
-    [source,text]
-    ----
+    
+    
     activemqartemisaddresses.broker.amq.io                     2023-10-26T10:00:00Z
     activemqartemises.broker.amq.io                            2023-10-26T10:00:00Z
-    ----
+    
     This confirms the presence of the `ActiveMQArtemis` and `ActiveMQArtemisAddress` CRDs.
 
 .  **Inspect a Specific CRD (Optional)**:
     You can inspect the full definition of a CRD to understand its schema, supported versions, and other details. Let's look at the `ActiveMQArtemis` CRD.
 
-    [source,bash]
-    ----
+    
+    
     oc describe crd activemqartemises.broker.amq.io
-    ----
+    
     This command will output a detailed description including the API versions, scope (namespace-scoped or cluster-scoped), validation schema, and how it's handled by the Kubernetes API. Pay attention to the `spec.versions.schema.openAPIV3Schema` section, which describes the fields available when creating an `ActiveMQArtemis` Custom Resource.
 
 .  **View a Minimal `ActiveMQArtemis` Custom Resource Example (Conceptual)**:
     While we won't create a live broker here, understanding the structure of a Custom Resource is key. A minimal `ActiveMQArtemis` CR would look something like this:
 
-    [source,yaml]
-    ----
+    
+    
     apiVersion: broker.amq.io/v1beta1
     kind: ActiveMQArtemis
     metadata:
@@ -117,7 +117,7 @@ Let's explore the AMQ Broker CRDs installed by the Operator in your OpenShift cl
         size: 1
         image: registry.redhat.io/amq7/amq-broker:7.13
         # Other optional configurations can go here, e.g., persistence, resources
-    ----
+    
     *   `apiVersion` and `kind` are crucial; they tell OpenShift which CRD this Custom Resource adheres to.
     *   `metadata.name` provides a unique identifier for this specific broker instance.
     *   `spec` contains the actual configuration defined by the `ActiveMQArtemis` CRD's schema.
