@@ -1,18 +1,17 @@
 #  Deploying and Configuring an HA Broker Pair
 
-include::./_attributes.adoc[]
 
 :leveloffset: +1
 
-== Introduction to High Availability for {amq-broker} on {openshift}
+== Introduction to High Availability for AMQ Broker on OpenShift
 
-High Availability (HA) is a critical requirement for production messaging systems to ensure continuous service and prevent data loss in the event of component failures. When deploying {amq-broker-on-openshift}, achieving HA means designing the deployment so that if one broker instance or its underlying infrastructure fails, a backup instance can seamlessly take over, minimizing downtime and message disruption. The {amq-broker} Operator on {openshift} simplifies the deployment and management of HA configurations by abstracting complex orchestration tasks.
+High Availability (HA) is a critical requirement for production messaging systems to ensure continuous service and prevent data loss in the event of component failures. When deploying {amq-broker-on-openshift}, achieving HA means designing the deployment so that if one broker instance or its underlying infrastructure fails, a backup instance can seamlessly take over, minimizing downtime and message disruption. The AMQ Broker Operator on OpenShift simplifies the deployment and management of HA configurations by abstracting complex orchestration tasks.
 
-The core strategies for achieving HA with {amq-broker} on {openshift} involve either using a *shared message store* or *replicating message data* between live and backup brokers. Each strategy has distinct characteristics and suitability for different operational requirements.
+The core strategies for achieving HA with AMQ Broker on OpenShift involve either using a *shared message store* or *replicating message data* between live and backup brokers. Each strategy has distinct characteristics and suitability for different operational requirements.
 
 === Shared Store High Availability
 
-In a shared store HA configuration, multiple broker instances (typically one live and one or more backups) share access to a single, highly available message store. This message store is usually provisioned as a Persistent Volume (PV) on {openshift}, backed by shared storage solutions like NFS, Ceph (using `ReadWriteOnce` access mode, where only one pod can mount it at a time but another can take over), or a block storage that supports migration.
+In a shared store HA configuration, multiple broker instances (typically one live and one or more backups) share access to a single, highly available message store. This message store is usually provisioned as a Persistent Volume (PV) on OpenShift, backed by shared storage solutions like NFS, Ceph (using `ReadWriteOnce` access mode, where only one pod can mount it at a time but another can take over), or a block storage that supports migration.
 
 When the live broker fails, one of the backup brokers detects the failure, acquires a lock on the shared message store, and becomes the new live broker. This approach ensures data consistency as all brokers operate on the same physical message data, eliminating the need for real-time data replication between broker instances.
 
@@ -21,7 +20,7 @@ When the live broker fails, one of the backup brokers detects the failure, acqui
 *   *Simplicity of Data Management*: No internal data replication between brokers is required, simplifying network topology for data synchronization.
 *   *Performance*: May be sensitive to the performance and latency of the underlying shared storage. High latency storage can impact message throughput.
 *   *Single Point of Failure*: The shared storage itself becomes a potential single point of failure if it is not highly available.
-*   *Operator Management*: The {amq-broker} Operator typically deploys a StatefulSet with one active broker pod and one or more inactive backup pods, all configured to share the same Persistent Volume Claim (PVC). The Operator handles the orchestration of failover.
+*   *Operator Management*: The AMQ Broker Operator typically deploys a StatefulSet with one active broker pod and one or more inactive backup pods, all configured to share the same Persistent Volume Claim (PVC). The Operator handles the orchestration of failover.
 
 [NOTE]
 While multiple broker pods are configured to use the same shared volume, only one broker (the live one) will have read/write access to the message journal at any given time. The backup brokers are typically in a "waiting to become live" state, ready to take over if the active broker fails.
@@ -30,22 +29,22 @@ While multiple broker pods are configured to use the same shared volume, only on
 
 Replicated Live-Backup HA involves two broker instances: a live broker and a backup broker. The live broker actively processes messages, and it *replicates* all its message data (journal, paging files, and configuration) synchronously to the backup broker. This ensures that the backup broker always holds an up-to-date, consistent copy of the message store.
 
-If the live broker fails for any reason (e.g., pod crash, node failure), the backup broker automatically detects the failure, takes over the workload, and becomes the new live broker. Clients are then redirected to the newly activated broker. After failover, the {amq-broker} Operator will provision a new backup broker to restore the HA pair.
+If the live broker fails for any reason (e.g., pod crash, node failure), the backup broker automatically detects the failure, takes over the workload, and becomes the new live broker. Clients are then redirected to the newly activated broker. After failover, the AMQ Broker Operator will provision a new backup broker to restore the HA pair.
 
 .Key characteristics of Replicated Live-Backup HA:
 *   *No Shared Storage*: Each broker instance maintains its own independent message store, typically on its own dedicated Persistent Volume. This eliminates the shared storage as a single point of failure.
 *   *Data Replication*: Messages are replicated in real-time (often synchronously) from the live broker to the backup. This synchronous replication guarantees zero message loss for acknowledged messages on failover.
 *   *High Performance*: Generally less dependent on external shared storage performance once replication is established, as each broker writes to its local storage.
 *   *Resilience*: Offers stronger resilience against storage-related outages, as the failure of one broker's storage does not impact the other.
-*   *Operator Management*: The {amq-broker} Operator typically deploys a StatefulSet with a `size` of 2 (or more for chained replication), configuring the brokers for replication directly through their internal mechanisms.
+*   *Operator Management*: The AMQ Broker Operator typically deploys a StatefulSet with a `size` of 2 (or more for chained replication), configuring the brokers for replication directly through their internal mechanisms.
 
 [NOTE]
 The provided context snippet states: "In each custom resource, specify a unique name and ensure that the `clustered` and `persistenceEnabled` attributes are set to `false`. Set the `size` attribute to `1` to create a single broker in each deployment."
-This instruction describes deploying individual, non-persistent, non-clustered brokers, which would not inherently form an HA pair. For standard Operator-managed HA deployments, especially for replicated live-backup, the {amq-broker} Operator provides direct support through properties in a *single* `Broker` Custom Resource (CR) where `size` is typically `2` and `replicationController.enabled` is `true`. This document focuses on the Operator's simplified approach for deploying robust HA pairs.
+This instruction describes deploying individual, non-persistent, non-clustered brokers, which would not inherently form an HA pair. For standard Operator-managed HA deployments, especially for replicated live-backup, the AMQ Broker Operator provides direct support through properties in a *single* `Broker` Custom Resource (CR) where `size` is typically `2` and `replicationController.enabled` is `true`. This document focuses on the Operator's simplified approach for deploying robust HA pairs.
 
-== Deploying an HA Broker Pair with the {amq-broker} Operator
+== Deploying an HA Broker Pair with the AMQ Broker Operator
 
-The {amq-broker} Operator streamlines the deployment of HA broker pairs by abstracting the underlying Kubernetes resources like StatefulSets, Services, and Persistent Volume Claims (PVCs). You define your desired HA configuration within a single `Broker` Custom Resource (CR) instance.
+The AMQ Broker Operator streamlines the deployment of HA broker pairs by abstracting the underlying Kubernetes resources like StatefulSets, Services, and Persistent Volume Claims (PVCs). You define your desired HA configuration within a single `Broker` Custom Resource (CR) instance.
 
 For a replicated live-backup HA pair, the most common and recommended approach with the Operator is to specify `replicationController` settings directly in the `Broker` CR.
 
@@ -60,43 +59,43 @@ When creating a `Broker` CR for an HA pair, you'll primarily interact with the `
 *   `spec.deploymentPlan.replicationController.enabled`: Set to `true` to enable internal broker replication for live-backup HA. This property triggers the Operator to configure the brokers for synchronous data replication.
 *   `spec.deploymentPlan.replicationController.voteRetries`: (Optional) Defines the number of times a broker will attempt to vote in an election to determine the live node. The default value is typically `3`.
 *   `spec.deploymentPlan.replicationController.voteRetryWait`: (Optional) Specifies the wait time (in milliseconds) between vote retries. The default is typically `1000` (1 second).
-*   `spec.deploymentPlan.podSpec.affinity.podAntiAffinity`: This is a crucial setting for HA. It ensures that live and backup broker pods are scheduled on *different* {openshift} worker nodes. This prevents a single node failure from taking down both instances simultaneously, significantly improving fault tolerance.
-*   `spec.brokerProperties`: (Advanced) This section allows for injecting raw {amq-broker} configuration parameters directly into the `broker.xml` of the deployed brokers. This is useful for fine-tuning advanced replication settings, network connectors, or other HA-specific parameters that are not directly exposed by the `Broker` CRD.
+*   `spec.deploymentPlan.podSpec.affinity.podAntiAffinity`: This is a crucial setting for HA. It ensures that live and backup broker pods are scheduled on *different* OpenShift worker nodes. This prevents a single node failure from taking down both instances simultaneously, significantly improving fault tolerance.
+*   `spec.brokerProperties`: (Advanced) This section allows for injecting raw AMQ Broker configuration parameters directly into the `broker.xml` of the deployed brokers. This is useful for fine-tuning advanced replication settings, network connectors, or other HA-specific parameters that are not directly exposed by the `Broker` CRD.
 
 [TIP]
 Always use `podAntiAffinity` for HA deployments to distribute broker pods across different nodes. This significantly improves fault tolerance and reduces the risk of a single point of failure at the infrastructure level. Refer to xref:amq-broker-on-openshift:configuring-broker-pods.adoc#placing-pods-relative-to-other-pods-using-anti-affinity-rules[Section 4.17.3.2, "Placing pods relative to other pods using anti-affinity rules"] for more detailed information on configuring `podAntiAffinity`.
 
 === Failover and Recovery Mechanisms
 
-When a live broker fails in an HA pair, the following sequence of events typically occurs, managed automatically by the {amq-broker} and {openshift} Operators:
+When a live broker fails in an HA pair, the following sequence of events typically occurs, managed automatically by the AMQ Broker and OpenShift Operators:
 
-1.  *Failure Detection*: The backup broker(s) continuously monitor the live broker using internal heartbeats and network connectivity checks. {openshift}'s kubelet also monitors the pod's health. They detect a loss of connection or a failure in the live broker's heartbeat.
+1.  *Failure Detection*: The backup broker(s) continuously monitor the live broker using internal heartbeats and network connectivity checks. OpenShift's kubelet also monitors the pod's health. They detect a loss of connection or a failure in the live broker's heartbeat.
 2.  *Vote/Election*: In a replicated setup, if multiple backups are present or a replication chain is involved, the remaining broker(s) might engage in an election process to determine which backup will become the new live broker. For a simple live-backup pair, the active backup simply takes over upon detecting the live broker's demise.
 3.  *Activation*: The designated backup broker transitions to the live state. It opens its message store (which is already up-to-date due to synchronous replication) and starts accepting client connections and processing messages.
-4.  *Client Reconnection*: Clients connected to the failed broker will attempt to reconnect. If configured with a connection URL that includes multiple broker addresses (e.g., a list of service endpoints provided by {openshift} routes/services) or uses client-side service discovery, they will automatically connect to the new live broker. This process is typically transparent to the application.
-5.  *New Backup Creation*: The {amq-broker} Operator detects that the desired `size` (e.g., 2) defined in the `Broker` CR is no longer met. It then provisions a new backup broker pod to restore the HA configuration. This new pod will synchronize its message store with the new live broker to become a fully functional backup.
+4.  *Client Reconnection*: Clients connected to the failed broker will attempt to reconnect. If configured with a connection URL that includes multiple broker addresses (e.g., a list of service endpoints provided by OpenShift routes/services) or uses client-side service discovery, they will automatically connect to the new live broker. This process is typically transparent to the application.
+5.  *New Backup Creation*: The AMQ Broker Operator detects that the desired `size` (e.g., 2) defined in the `Broker` CR is no longer met. It then provisions a new backup broker pod to restore the HA configuration. This new pod will synchronize its message store with the new live broker to become a fully functional backup.
 
 The speed of failover and subsequent client reconnection depends on various factors, including network latency, client connection URLs and failover configuration, and broker heartbeat and election settings.
 
 === Persistence and Data Replication for HA
 
-*   *Persistence*: For any HA setup, message persistence is fundamental. This means that messages are written to a durable store (like a file-based journal on a Persistent Volume) before being acknowledged to the producer. This mechanism ensures that messages are not lost, even if both brokers crash and restart, or if the entire {openshift} cluster experiences a temporary outage.
-*   *Data Replication*: In a replicated HA setup, data replication ensures that every message written to the live broker's journal is also synchronously written to the backup broker's journal. This synchronous replication is a key feature that guarantees zero message loss for acknowledged messages upon failover. The data is replicated using an internal {amq-broker} protocol, which is highly optimized for performance and consistency.
+*   *Persistence*: For any HA setup, message persistence is fundamental. This means that messages are written to a durable store (like a file-based journal on a Persistent Volume) before being acknowledged to the producer. This mechanism ensures that messages are not lost, even if both brokers crash and restart, or if the entire OpenShift cluster experiences a temporary outage.
+*   *Data Replication*: In a replicated HA setup, data replication ensures that every message written to the live broker's journal is also synchronously written to the backup broker's journal. This synchronous replication is a key feature that guarantees zero message loss for acknowledged messages upon failover. The data is replicated using an internal AMQ Broker protocol, which is highly optimized for performance and consistency.
 
 == Hands-on Lab: Deploying a Replicated Live-Backup AMQ Broker Pair
 
-In this lab, you will deploy a replicated live-backup {amq-broker} pair on {openshift} using the {amq-broker} Operator. This setup will ensure that messages are highly available and durable, even in the event of a broker instance or node failure.
+In this lab, you will deploy a replicated live-backup AMQ Broker pair on OpenShift using the AMQ Broker Operator. This setup will ensure that messages are highly available and durable, even in the event of a broker instance or node failure.
 
 .Prerequisites:
-*   An {openshift} cluster with the {amq-broker} Operator installed and running.
-*   `oc` CLI configured and logged in to your {openshift} cluster with administrative privileges (or a project where you have permission to deploy `Broker` resources).
-*   Sufficient resources (CPU, memory, storage) available in your {openshift} cluster for two broker pods, plus associated Persistent Volumes.
+*   An OpenShift cluster with the AMQ Broker Operator installed and running.
+*   `oc` CLI configured and logged in to your OpenShift cluster with administrative privileges (or a project where you have permission to deploy `Broker` resources).
+*   Sufficient resources (CPU, memory, storage) available in your OpenShift cluster for two broker pods, plus associated Persistent Volumes.
 
 .Procedure:
 
-. *Log in to {openshift} and create a new project.*
+. *Log in to OpenShift and create a new project.*
 +
-If you haven't already, log in to your {openshift} cluster and create a new project (namespace) dedicated to your broker deployment. We'll name it `amq-ha-broker-project`.
+If you haven't already, log in to your OpenShift cluster and create a new project (namespace) dedicated to your broker deployment. We'll name it `amq-ha-broker-project`.
 +
 [source,bash,subs="attributes+"]
 ----
@@ -107,7 +106,7 @@ oc project amq-ha-broker-project
 
 . *Create the `Broker` Custom Resource for a replicated HA pair.*
 +
-Create a YAML file named `amq-ha-broker.yaml` with the following content. This configuration defines a replicated live-backup pair by setting `size: 2` and `replicationController.enabled: true`. It also enables message persistence and includes `podAntiAffinity` to ensure the broker pods are scheduled on separate {openshift} worker nodes for true HA.
+Create a YAML file named `amq-ha-broker.yaml` with the following content. This configuration defines a replicated live-backup pair by setting `size: 2` and `replicationController.enabled: true`. It also enables message persistence and includes `podAntiAffinity` to ensure the broker pods are scheduled on separate OpenShift worker nodes for true HA.
 +
 [source,yaml,subs="attributes+"]
 ----
@@ -154,7 +153,7 @@ spec:
 
 . *Deploy the HA broker pair.*
 +
-Apply the Custom Resource definition to your {openshift} cluster. The {amq-broker} Operator will read this CR and provision the necessary Kubernetes resources (StatefulSet, Services, PVCs, Routes).
+Apply the Custom Resource definition to your OpenShift cluster. The AMQ Broker Operator will read this CR and provision the necessary Kubernetes resources (StatefulSet, Services, PVCs, Routes).
 +
 [source,bash]
 ----
@@ -163,7 +162,7 @@ oc apply -f amq-ha-broker.yaml
 
 . *Verify the deployment.*
 +
-Check the status of the `Broker` CR and the deployed pods. You should see two pods for `ha-broker-pair` (e.g., `ha-broker-pair-0` and `ha-broker-pair-1`), each running an {amq-broker} instance.
+Check the status of the `Broker` CR and the deployed pods. You should see two pods for `ha-broker-pair` (e.g., `ha-broker-pair-0` and `ha-broker-pair-1`), each running an AMQ Broker instance.
 +
 [source,bash]
 ----
@@ -207,4 +206,4 @@ You will observe:
 +
 This demonstrates the automatic failover and self-healing capabilities of an Operator-managed HA broker pair, ensuring continuous availability of your messaging infrastructure.
 
-This lab provides a robust, operator-managed replicated live-backup HA setup, which is a common and highly recommended configuration for {amq-broker} on {openshift}, offering strong guarantees against message loss and downtime.
+This lab provides a robust, operator-managed replicated live-backup HA setup, which is a common and highly recommended configuration for AMQ Broker on OpenShift, offering strong guarantees against message loss and downtime.
