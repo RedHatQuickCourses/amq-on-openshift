@@ -416,46 +416,31 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_java_message_service_jms"><a class="anchor" href="#_java_message_service_jms"></a>Java Message Service (JMS)</h2>
+<h2 id="_artemis_core_protocol"><a class="anchor" href="#_artemis_core_protocol"></a>Artemis Core Protocol</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Java Message Service (JMS) is a Java API that provides a common way for Java applications to create, send, receive, and read messages in an enterprise messaging system. It is a critical component for many enterprise Java applications, offering a standard API for interacting with Message-Oriented Middleware (MOM).</p>
-</div>
-<div class="paragraph">
-<p>AMQ Broker supports <strong>JMS 2.0</strong>, the latest version of the API, providing a modern and robust interface for Java developers. The <a href="#amq-core-protocol-jms">AMQ Core Protocol JMS</a> client, specifically, is a JMS 2.0 client tailored for messaging applications using the Artemis Core Protocol. It enables Java applications to leverage the full power of AMQ Broker while adhering to a well-established and widely understood API.</p>
+<p>Red Hat AMQ uses a native, high-performance, JMS-agnostic Core protocol designed for maximum speed, low latency, and advanced broker features beyond standard JMS. It supports client-side compression, large messages, and acts as the underlying engine for other protocols like AMQP and MQTT, offering a specialized API for direct, efficient communication.</p>
 </div>
 <div class="sect2">
-<h3 id="_key_features_of_jms_with_amq_broker"><a class="anchor" href="#_key_features_of_jms_with_amq_broker"></a>Key Features of JMS with AMQ Broker</h3>
+<h3 id="_key_aspects_of_the_activemq_artemis_core_protocol"><a class="anchor" href="#_key_aspects_of_the_activemq_artemis_core_protocol"></a>Key Aspects of the ActiveMQ Artemis Core Protocol</h3>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Standardized API</strong>: Provides a consistent way for Java applications to interact with various message brokers, promoting portability.</p>
+<p><strong>Native &amp; Optimized</strong>: It is the native wire format of Artemis, built for speed and efficiency.</p>
 </li>
 <li>
-<p><strong>Message Types</strong>: Supports different message formats, including text, byte, map, object, and stream messages.</p>
+<p><strong>JMS-Agnostic Core API</strong>: You can use the Core API directly for advanced features not available in standard JMS, or use it to implement JMS.</p>
 </li>
 <li>
-<p><strong>Messaging Domains</strong>: Facilitates both Point-to-Point (queues) and Publish/Subscribe (topics) messaging patterns.</p>
+<p><strong>Feature-Rich</strong>: Supports advanced messaging capabilities, including large message compression, clustering, and security.</p>
 </li>
 <li>
-<p><strong>Transactional Messaging</strong>: Enables reliable message processing within transactions, ensuring atomicity and consistency.</p>
-</li>
-<li>
-<p><strong>Security</strong>: Integrates with SSL/TLS for secure communication between JMS clients and the broker.</p>
-</li>
-<li>
-<p><strong>Automatic Reconnect and Failover</strong>: As highlighted in the <code>Red Hat AMQ Core Protocol JMS</code> documentation, the client offers automatic reconnect and failover capabilities, enhancing application resilience.</p>
-</li>
-<li>
-<p><strong>Distributed Transactions (XA)</strong>: Supports XA transactions, allowing messaging operations to be coordinated across multiple resources (e.g., database and message broker).</p>
-</li>
-<li>
-<p><strong>Pure-Java Implementation</strong>: The AMQ Core Protocol JMS client is a pure-Java solution, making it easy to integrate into Java-based environments.</p>
+<p><strong>Client Flexibility</strong>: While it has its own dedicated API, JMS applications can also use the AMQ Core Protocol JMS client, which maps JMS calls to Core protocol operations.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>JMS is ideal for Java-centric applications that require robust, reliable, and transactional messaging capabilities within an enterprise context.</p>
+<p>Refer the <a href="https://artemis.apache.org/components/artemis/documentation/latest/core.html#using-core">upstream documentation</a> for more information.</p>
 </div>
 </div>
 </div>
@@ -587,7 +572,7 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_openwire"><a class="anchor" href="#_openwire"></a>OpenWire</h2>
+<h2 id="_openwire_deprecated"><a class="anchor" href="#_openwire_deprecated"></a>OpenWire (Deprecated)</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>OpenWire is a high-performance, compact, and extensible wire format specifically developed for Apache ActiveMQ. It&#8217;s the native protocol primarily used by legacy Apache ActiveMQ clients and provides an optimized way for Java clients to communicate with ActiveMQ-based brokers. While AMQ Broker is based on Apache ActiveMQ Artemis (a next-generation broker), it maintains compatibility with OpenWire to support existing ActiveMQ client applications.</p>
@@ -617,7 +602,7 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>OpenWire is essential for scenarios where existing Apache ActiveMQ 5.x Java clients need to connect to an AMQ Broker instance, providing a smooth transition path and preserving existing client investments.</p>
+<p>OpenWire is essential for scenarios where existing Apache ActiveMQ 5.x Java clients need to connect to an AMQ Broker instance, providing a smooth transition path and preserving existing client investments. This protocol is deprecated in the AMQ Broker and will be removed in one of the next major releases.</p>
 </div>
 </div>
 </div>
