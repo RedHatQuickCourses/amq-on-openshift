@@ -20,7 +20,7 @@ AMQ Broker is a multi-protocol broker, meaning it can communicate with clients u
 
 *   *OpenWire (Deprecated):* The native, high-performance wire protocol primarily used by ActiveMQ JMS clients. It offers rich features and is highly optimized for Java-to-Java communication.
 *   *AMQP 1.0 (Advanced Message Queuing Protocol):* An open, standardized, and interoperable protocol for message queuing. It is designed for reliable and efficient message transfer between applications, systems, and organizations, making it ideal for cross-platform and multi-language communication.
-*   *JMS (Java Message Service):* A Java API that provides a common way for Java programs to create, send, receive, and read messages. AMQ Broker provides a JMS client library that implements the JMS API, typically leveraging OpenWire or AMQP 1.0 for the underlying wire protocol.
+*   *Artemis Core Protocol:* The default native wire protocol in ActiveMQ Artemis.
 *   *MQTT (Message Queuing Telemetry Transport):* A lightweight messaging protocol designed for small sensors and mobile devices, optimized for high-latency or unreliable networks and low bandwidth scenarios. It's widely used in IoT (Internet of Things) applications.
 *   *STOMP (Streaming Text Oriented Messaging Protocol):* A simple text-based protocol for working with message brokers. It provides a common wire format for clients to communicate with STOMP brokers, making it easy to use from various programming languages.
 
@@ -35,8 +35,11 @@ Handles authentication and authorization for clients connecting to the broker. I
 
 === Management Console (Hawtio)
 A web-based interface built on Hawtio, providing a graphical view and control panel for the broker. It allows administrators to:
+
 *   Monitor broker metrics, queues, topics, and subscriptions in real-time.
+
 *   Inspect messages within queues or topics for debugging.
+
 *   Perform administrative tasks such as adding/removing queues, managing connections, viewing message counts, and pausing consumers. This console is crucial for daily operational management.
 
 == AMQ Broker Architecture on OpenShift
@@ -45,23 +48,32 @@ When deploying AMQ Broker on OpenShift, the architecture extends to incorporate 
 
 === Operator-Based Deployment
 The primary and recommended method for deploying AMQ Broker on OpenShift is via the AMQ Broker Operator.
+
 *   *Custom Resource Definitions (CRDs):* The Operator introduces new API extensions to OpenShift, defining custom resources like `ActiveMQArtemis`. These CRDs allow users to declare the desired state of their broker deployments using Kubernetes-native YAML manifests.
+
 *   *Custom Resources (CRs):* Instances of the `ActiveMQArtemis` CRD. When you create an `ActiveMQArtemis` CR (for example, to define a source broker as mentioned in the context), the Operator watches it and automatically creates and manages the underlying OpenShift resources (Pods, Services, Routes, Persistent Volume Claims, etc.) to match the declared state. This automates complex deployment and lifecycle management tasks.
 
 === OpenShift Pods and Containers
 Each AMQ Broker instance (or part of a cluster) runs within one or more OpenShift Pods.
+
 *   A Pod is the smallest deployable unit in OpenShift, encapsulating one or more containers, storage resources, and a unique network IP.
+
 *   The AMQ Broker itself runs within a container inside an OpenShift Pod. The Operator ensures the correct broker image is used and that the container is configured with the necessary environment variables and entrypoint commands.
 
 === Persistent Storage
 For durable message persistence, AMQ Broker requires robust and reliable storage. On OpenShift, this is typically provided by Persistent Volumes (PVs) and Persistent Volume Claims (PVCs).
+
 *   The broker's message journal, paging files, and configuration are stored on these persistent volumes, ensuring that critical message data survives Pod restarts, node failures, or upgrades.
+
 *   The `ActiveMQArtemis` CR defines the storage requirements (e.g., size, access mode), and the Operator provisions the necessary PVCs which then bind to available PVs in the OpenShift cluster.
 
 === Networking on OpenShift
 OpenShift's networking components enable clients to connect to brokers and brokers to communicate with each other, both internally within the cluster and externally.
+
 *   *Services:* Provide stable internal IP addresses and DNS names for broker Pods. This allows other applications within the OpenShift cluster to connect to the broker reliably, abstracting away the dynamic nature of Pod IPs.
+
 *   *Routes:* Expose broker listeners (defined by acceptors) and the Hawtio management console to external clients outside the OpenShift cluster. Routes define how external HTTP/HTTPS or TCP traffic reaches services within the cluster.
+
 *   *Ingress (or OpenShift Routes):* Managed by the Operator to create the necessary external access points based on the `ActiveMQArtemis` CR configuration, providing secure and controlled external access.
 
 == High Availability (HA) Architecture on OpenShift
@@ -73,10 +85,8 @@ High availability is critical for message brokers to ensure continuous service e
 *   Only one broker (the live one) is active at a time, writing to the shared store. If the live broker fails, a backup broker takes over, acquiring a lock on the shared store and promoting itself to live status.
 *   This approach simplifies data synchronization as only one instance ever writes to the store, but it introduces a single point of failure in the shared storage itself.
 
-=== Replicated Live-Backup HA
-*   This is a more robust HA strategy where live and backup brokers maintain their *own independent* persistent storage. Message data is replicated synchronously or asynchronously between the live and backup instances.
-*   *Live-Backup Pair:* A live broker continuously replicates its message journal data to one or more backup brokers. If the live broker fails, the backup detects this, performs any necessary synchronization, and promotes itself to live status, ensuring an up-to-date copy of all persistent messages.
-*   *Dual Mirror Topology:* The context specifically notes: "You can implement a dual mirror topology where both brokers are mirrors of each other." This refers to a scenario where two brokers are configured such that each can act as a live broker for some purposes while also mirroring data to the other, or where they can switch roles based on a failover event. The caution "do not create a topology of 3 or more brokers where each broker mirrors data to all of the other brokers" warns against the complexity and potential for deadlocks or performance degradation in overly complex mesh mirroring topologies. The AMQ Broker Operator simplifies the configuration of these replication modes, automating the setup of internal connectors and replication mechanisms defined in the `ActiveMQArtemis` CR.
+=== JDBC Store HA
+*   This strategy allows the live and backup brokers to share a common database. A leader-follower configuration has separate deployments that each have a single broker instance. High availability is achieved by the brokers competing to acquire a lock for the database. The broker that acquires a lock becomes the leader broker, which serves client requests. The broker that is unable to acquire a lock becomes a follower. A follower is a passive broker that continuously tries to obtain a lock for the database. If the follower obtains a lock, it immediately becomes the leader and starts to serve clients.
 
 == Scaling Architecture on OpenShift
 
@@ -115,12 +125,3 @@ Now, mentally place this conceptual broker within an OpenShift environment.
     *   An OpenShift *Route* (or Ingress) points to this Service, exposing the broker's listeners and the Hawtio console to external applications or users outside the OpenShift cluster.
 .   *Operator:* The *AMQ Broker Operator* acts as the orchestrator. It takes your `ActiveMQArtemis` Custom Resource definition and automatically translates it into all these OpenShift components (Pod, Service, Route, PVC) to deploy and manage your broker instance.
 
-=== Step 3: Visualizing High Availability (HA)
-
-Consider two brokers configured for Replicated Live-Backup HA on OpenShift, referencing the "dual mirror topology" concept from the context.
-
-.   *Two Pods with Independent Storage:* You would have two separate broker Pods running, each with its own dedicated *Persistent Volume Claim (PVC)* and *Persistent Volume (PV)*. One is designated as 'live', the other as 'backup'.
-.   *Replication Link:* A logical connection (*Connector*) is automatically established by the Operator between them. The live broker continuously replicates its message journal data to the backup broker's independent storage.
-.   *Failover Mechanism:* If the live broker's Pod or underlying node fails, the backup broker automatically detects this, performs any necessary data synchronization from its replicated journal, and promotes itself to live status. The OpenShift *Service* (which clients connect to) would then automatically redirect traffic to the newly active broker, ensuring continuous operation.
-
-This conceptual visualization will be further reinforced in later hands-on labs where you deploy and interact with actual broker instances and observe these architectural elements in action.
