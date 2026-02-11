@@ -15,11 +15,11 @@ At its heart, ActiveMQ Artemis is built with a focus on efficiency and robustnes
 *   *Asynchronous Design*: Artemis leverages an asynchronous, non-blocking architecture throughout its core, from network communication to disk I/O. This design allows it to handle a large number of concurrent connections and messages with minimal thread contention and high throughput, making it highly efficient for modern distributed systems.
 *   *Pluggable Persistence*: Message durability is a cornerstone of enterprise messaging. Artemis offers flexible persistence options, primarily using a highly optimized, custom *journal file store* by default. This journal is designed for extremely fast, synchronous disk writes, ensuring messages are never lost even in the event of a broker crash. It also supports *JDBC persistence* for integration with relational databases, offering an alternative for environments that prefer existing database infrastructure for message storage.
 *   *Multi-Protocol Support (Native Implementation)*: Unlike some brokers that rely on protocol converters or proxies, Artemis natively implements a wide range of standard messaging protocols directly into its core. This native support reduces overhead, enhances performance, and provides seamless interoperability. These protocols include:
-    ** *AMQ Core Protocol (OpenWire-compatible)*: The high-performance, low-latency native protocol primarily used by Java clients.
+    ** *AMQ Core Protocol*: The high-performance, low-latency native protocol primarily used by Java clients.
     ** *AMQP 1.0*: The Advanced Message Queuing Protocol, an open standard for interoperable, reliable messaging across different platforms and programming languages.
     ** *MQTT*: Message Queuing Telemetry Transport, a lightweight publish/subscribe protocol ideal for IoT, mobile, and constrained environments.
     ** *STOMP*: Simple (or Streaming) Text Oriented Message Protocol, a text-based wire protocol often used by web clients and scripting languages.
-    ** *JMS*: Java Message Service, a Java API standard for creating, sending, receiving, and reading messages. Artemis provides a robust and fully compliant JMS implementation.
+    
 *   *Modular Design*: Artemis is designed with a modular architecture, allowing components to be swapped or extended. This flexibility is key to its adaptability and the ability for Red Hat to build AMQ Broker on top of it, adding enterprise-specific features and optimizations.
 
 == Key Features
@@ -55,10 +55,11 @@ Identify the Apache ActiveMQ Artemis version and confirm its startup messages wi
 
 .Steps
 
-.  **Observe Broker Startup Logs for Artemis Identification**:
+**Observe Broker Startup Logs for Artemis Identification**:
     When an AMQ Broker instance starts, the logs will explicitly mention Apache ActiveMQ Artemis. Examine the provided log snippets from a typical AMQ Broker startup. Notice the messages confirming the Artemis server is live and its version.
 
-    
+[source,bash]
+----
     Server is now live
     2021-09-17 09:35:25,660 INFO  [org.apache.activemq.artemis.core.server] AMQ221001:
      
@@ -71,29 +72,31 @@ Identify the Apache ActiveMQ Artemis version and confirm its startup messages wi
     2021-09-17 09:35:26,656 INFO  [org.apache.activemq.hawtio.plugin.PluginContextListener]
      
     Initialized artemis-plugin plugin
-    ...
+    
     AMQ101000: Starting ActiveMQ Artemis Server
-    ...
+    
     2020-06-03 12:12:12,336 INFO  [org.apache.activemq.artemis.core.server] AMQ221007:
      
     Server is now live
-    
+----
 
-    In this output, observe the key indicators:
+  ** In this output, observe the key indicators: 
+
     *   The log entry `AMQ221001: Apache ActiveMQ Artemis Message Broker version 2.16.0.redhat-00022` clearly identifies the underlying messaging engine and its specific version. The `.redhat-00022` suffix denotes Red Hat's specific build, indicating it's an enterprise-hardened version.
     *   The `org.apache.activemq.artemis.core.server` log category confirms that the Artemis core components are active and managing the server's lifecycle.
     *   Messages like `AMQ101000: Starting ActiveMQ Artemis Server` and `AMQ221007: Server is now live` are direct lifecycle messages from the Artemis server, confirming its successful startup.
 
-.  **Explore the Artemis Command Line Interface (CLI)**:
+**Explore the Artemis Command Line Interface (CLI)**:
     Even within an AMQ Broker installation (especially a local standalone installation for development or testing, or within the container image), you'll often find and interact with the underlying `artemis` command-line utility. This CLI is powerful for administrative tasks, queue management, and more, offering a direct way to interact with the broker's foundational capabilities.
 
     
-    
+[source,bash]
+----    
     $ <broker-instance-dir>/bin/artemis queue create --name exampleQueue --address exampleQueue --auto-create-address --anycast
-    
+----    
 
-    This command demonstrates using the `artemis` executable, which is part of the core Apache ActiveMQ Artemis distribution. It allows you to directly interact with and manage broker resources like queues and addresses. The `<broker-instance-dir>` typically refers to the root directory where a standalone Artemis (or AMQ Broker) instance has been created or extracted.
+This command demonstrates using the `artemis` executable, which is part of the core Apache ActiveMQ Artemis distribution. It allows you to directly interact with and manage broker resources like queues and addresses. The `<broker-instance-dir>` typically refers to the root directory where a standalone Artemis (or AMQ Broker) instance has been created or extracted.
 
-    While on OpenShift, these operations are primarily abstracted and managed by the AMQ Broker Operator through Custom Resources, understanding the underlying `artemis` CLI provides invaluable insight into the broker's configuration and management capabilities. It reinforces that the Operator effectively automates actions that, in a standalone environment, you would perform manually using this CLI.
+While on OpenShift, these operations are primarily abstracted and managed by the AMQ Broker Operator through Custom Resources, understanding the underlying `artemis` CLI provides invaluable insight into the broker's configuration and management capabilities. It reinforces that the Operator effectively automates actions that, in a standalone environment, you would perform manually using this CLI.
 
 This activity reinforces that Red Hat AMQ Broker is a carefully engineered product built on the solid foundations of Apache ActiveMQ Artemis, making its core concepts essential knowledge for any AMQ Broker administrator or developer.
