@@ -442,7 +442,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p><strong>AMQ Core Protocol (OpenWire-compatible)</strong>: The high-performance, low-latency native protocol primarily used by Java clients.</p>
+<p><strong>AMQ Core Protocol</strong>: The high-performance, low-latency native protocol primarily used by Java clients.</p>
 </li>
 <li>
 <p><strong>AMQP 1.0</strong>: The Advanced Message Queuing Protocol, an open standard for interoperable, reliable messaging across different platforms and programming languages.</p>
@@ -452,9 +452,6 @@
 </li>
 <li>
 <p><strong>STOMP</strong>: Simple (or Streaming) Text Oriented Message Protocol, a text-based wire protocol often used by web clients and scripting languages.</p>
-</li>
-<li>
-<p><strong>JMS</strong>: Java Message Service, a Java API standard for creating, sending, receiving, and reading messages. Artemis provides a robust and fully compliant JMS implementation.</p>
 </li>
 </ul>
 </div>
@@ -543,78 +540,67 @@
 <div class="title">Objective</div>
 <p>Identify the Apache ActiveMQ Artemis version and confirm its startup messages within the AMQ Broker logs. This activity will demonstrate how the core Artemis project manifests within the Red Hat AMQ Broker product.</p>
 </div>
-<div class="olist arabic">
+<div class="paragraph">
 <div class="title">Steps</div>
-<ol class="arabic">
-<li>
 <p><strong>Observe Broker Startup Logs for Artemis Identification</strong>:
-When an AMQ Broker instance starts, the logs will explicitly mention Apache ActiveMQ Artemis. Examine the provided log snippets from a typical AMQ Broker startup. Notice the messages confirming the Artemis server is live and its version.</p>
-<div class="literalblock">
+    When an AMQ Broker instance starts, the logs will explicitly mention Apache ActiveMQ Artemis. Examine the provided log snippets from a typical AMQ Broker startup. Notice the messages confirming the Artemis server is live and its version.</p>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>Server is now live
-2021-09-17 09:35:25,660 INFO  [org.apache.activemq.artemis.core.server] AMQ221001:</pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">    Server is now live
+    2021-09-17 09:35:25,660 INFO  [org.apache.activemq.artemis.core.server] AMQ221001:
+
+    Apache ActiveMQ Artemis Message Broker version 2.16.0.redhat-00022 [amq-broker,
+
+    nodeID=8d886031-179a-11ec-9e02-0a580ad9008b]
+    2021-09-17 09:35:26,470 INFO  [org.apache.amq.hawtio.branding.PluginContextListener]
+
+    Initialized amq-broker-redhat-branding plugin
+    2021-09-17 09:35:26,656 INFO  [org.apache.activemq.hawtio.plugin.PluginContextListener]
+
+    Initialized artemis-plugin plugin
+
+    AMQ101000: Starting ActiveMQ Artemis Server
+
+    2020-06-03 12:12:12,336 INFO  [org.apache.activemq.artemis.core.server] AMQ221007:
+
+    Server is now live</code></pre>
 </div>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>Apache ActiveMQ Artemis Message Broker version 2.16.0.redhat-00022 [amq-broker,</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>nodeID=8d886031-179a-11ec-9e02-0a580ad9008b]
-2021-09-17 09:35:26,470 INFO  [org.apache.amq.hawtio.branding.PluginContextListener]</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>Initialized amq-broker-redhat-branding plugin
-2021-09-17 09:35:26,656 INFO  [org.apache.activemq.hawtio.plugin.PluginContextListener]</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>Initialized artemis-plugin plugin
-...
-AMQ101000: Starting ActiveMQ Artemis Server
-...
-2020-06-03 12:12:12,336 INFO  [org.apache.activemq.artemis.core.server] AMQ221007:</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>Server is now live</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>In this output, observe the key indicators:
-*   The log entry `AMQ221001: Apache ActiveMQ Artemis Message Broker version 2.16.0.redhat-00022` clearly identifies the underlying messaging engine and its specific version. The `.redhat-00022` suffix denotes Red Hat's specific build, indicating it's an enterprise-hardened version.
-*   The `org.apache.activemq.artemis.core.server` log category confirms that the Artemis core components are active and managing the server's lifecycle.
-*   Messages like `AMQ101000: Starting ActiveMQ Artemis Server` and `AMQ221007: Server is now live` are direct lifecycle messages from the Artemis server, confirming its successful startup.</pre>
-</div>
-</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In this output, observe the key indicators:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>The log entry <code>AMQ221001: Apache ActiveMQ Artemis Message Broker version 2.16.0.redhat-00022</code> clearly identifies the underlying messaging engine and its specific version. The <code>.redhat-00022</code> suffix denotes Red Hat&#8217;s specific build, indicating it&#8217;s an enterprise-hardened version.</p>
 </li>
 <li>
-<p><strong>Explore the Artemis Command Line Interface (CLI)</strong>:
-Even within an AMQ Broker installation (especially a local standalone installation for development or testing, or within the container image), you&#8217;ll often find and interact with the underlying <code>artemis</code> command-line utility. This CLI is powerful for administrative tasks, queue management, and more, offering a direct way to interact with the broker&#8217;s foundational capabilities.</p>
-<div class="literalblock">
-<div class="content">
-<pre>$ &lt;broker-instance-dir&gt;/bin/artemis queue create --name exampleQueue --address exampleQueue --auto-create-address --anycast</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>This command demonstrates using the `artemis` executable, which is part of the core Apache ActiveMQ Artemis distribution. It allows you to directly interact with and manage broker resources like queues and addresses. The `&lt;broker-instance-dir&gt;` typically refers to the root directory where a standalone Artemis (or AMQ Broker) instance has been created or extracted.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>While on OpenShift, these operations are primarily abstracted and managed by the AMQ Broker Operator through Custom Resources, understanding the underlying `artemis` CLI provides invaluable insight into the broker's configuration and management capabilities. It reinforces that the Operator effectively automates actions that, in a standalone environment, you would perform manually using this CLI.</pre>
-</div>
+<p>The <code>org.apache.activemq.artemis.core.server</code> log category confirms that the Artemis core components are active and managing the server&#8217;s lifecycle.</p>
+</li>
+<li>
+<p>Messages like <code>AMQ101000: Starting ActiveMQ Artemis Server</code> and <code>AMQ221007: Server is now live</code> are direct lifecycle messages from the Artemis server, confirming its successful startup.</p>
+</li>
+</ul>
 </div>
 </li>
-</ol>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Explore the Artemis Command Line Interface (CLI)</strong>:
+    Even within an AMQ Broker installation (especially a local standalone installation for development or testing, or within the container image), you&#8217;ll often find and interact with the underlying <code>artemis</code> command-line utility. This CLI is powerful for administrative tasks, queue management, and more, offering a direct way to interact with the broker&#8217;s foundational capabilities.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">    $ &lt;broker-instance-dir&gt;/bin/artemis queue create --name exampleQueue --address exampleQueue --auto-create-address --anycast</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command demonstrates using the <code>artemis</code> executable, which is part of the core Apache ActiveMQ Artemis distribution. It allows you to directly interact with and manage broker resources like queues and addresses. The <code>&lt;broker-instance-dir&gt;</code> typically refers to the root directory where a standalone Artemis (or AMQ Broker) instance has been created or extracted.</p>
+</div>
+<div class="paragraph">
+<p>While on OpenShift, these operations are primarily abstracted and managed by the AMQ Broker Operator through Custom Resources, understanding the underlying <code>artemis</code> CLI provides invaluable insight into the broker&#8217;s configuration and management capabilities. It reinforces that the Operator effectively automates actions that, in a standalone environment, you would perform manually using this CLI.</p>
 </div>
 <div class="paragraph">
 <p>This activity reinforces that Red Hat AMQ Broker is a carefully engineered product built on the solid foundations of Apache ActiveMQ Artemis, making its core concepts essential knowledge for any AMQ Broker administrator or developer.</p>
