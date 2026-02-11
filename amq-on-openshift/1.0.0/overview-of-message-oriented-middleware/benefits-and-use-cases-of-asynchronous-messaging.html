@@ -429,58 +429,58 @@
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Decoupling (Loose Coupling):</strong>
-<strong>Technical Explanation:</strong> Producers and consumers do not need to be aware of each other&#8217;s direct network location, availability, or implementation details. They only need to agree on a common message format and a destination on the message broker. This architectural pattern isolates components, preventing failures in one service from directly impacting others. Services can evolve and be deployed independently, reducing inter-service dependencies.</p>
-<div class="literalblock">
-<div class="content">
-<pre>**Impact:** Reduces complex dependencies, simplifies overall system design, and allows for independent development, deployment, and scaling cycles for different microservices or applications. When using AMQ Broker on OpenShift, your application pods (producers/consumers) only need to know how to connect to the broker, not to each other directly.</pre>
-</div>
-</div>
+<p><strong>Decoupling (Loose Coupling):</strong></p>
 </li>
 <li>
-<p><strong>Resilience and Reliability:</strong>
-<strong>Technical Explanation:</strong> Messages are persisted by the broker until successfully delivered and acknowledged by a consumer. If a consumer fails, is temporarily offline, or an error occurs during processing, messages are not lost and can be redelivered once the consumer recovers or after appropriate error handling. The broker acts as a buffer against system outages and spikes. Message acknowledgment mechanisms ensure that messages are only removed from the broker after successful processing.</p>
-<div class="literalblock">
-<div class="content">
-<pre>**Impact:** Enhances fault tolerance and guarantees message delivery. A transient failure of a processing service does not lead to data loss or user-facing errors. AMQ Broker's persistence options (such as file-based or JDBC message stores, which will be discussed in detail later) are crucial for ensuring message durability even if the broker itself restarts or undergoes failover in a high-availability setup.</pre>
-</div>
-</div>
+<p><strong>Technical Explanation:</strong> Producers and consumers do not need to be aware of each other&#8217;s direct network location, availability, or implementation details. They only need to agree on a common message format and a destination on the message broker. This architectural pattern isolates components, preventing failures in one service from directly impacting others. Services can evolve and be deployed independently, reducing inter-service dependencies.</p>
 </li>
 <li>
-<p><strong>Scalability:</strong>
-<strong>Technical Explanation:</strong> Components can scale independently. If the message production rate increases, more consumer instances can be added to process messages in parallel from the same destination (e.g., a queue), distributing the load effectively. Similarly, if a single producer experiences high load, it can quickly offload tasks to the broker without waiting for downstream services. This inherently supports horizontal scaling of consumer services by simply adding more pods on OpenShift.</p>
-<div class="literalblock">
-<div class="content">
-<pre>**Impact:** Systems can handle varying loads efficiently, dynamically adjusting to demand without requiring redesign. Red Hat AMQ Broker, especially when deployed in an HA configuration on OpenShift, can scale to handle high message throughput and a large number of concurrent connections.</pre>
-</div>
-</div>
+<p><strong>Impact:</strong> Reduces complex dependencies, simplifies overall system design, and allows for independent development, deployment, and scaling cycles for different microservices or applications. When using AMQ Broker on OpenShift, your application pods (producers/consumers) only need to know how to connect to the broker, not to each other directly.</p>
 </li>
 <li>
-<p><strong>Improved Responsiveness:</strong>
-<strong>Technical Explanation:</strong> For operations that involve long-running tasks or multiple sequential steps, a client can send a request as a message to the broker and receive an immediate acknowledgment that the message was accepted. The client doesn&#8217;t have to wait for the entire, potentially lengthy, process to complete, freeing it to perform other tasks or respond to the user immediately. The actual processing happens in the background.</p>
-<div class="literalblock">
-<div class="content">
-<pre>**Impact:** Enhances user experience by reducing perceived latency for interactive applications. For example, a web application can immediately confirm an order placement to the user while the actual order fulfillment process (e.g., inventory check, payment processing, shipping notification) happens asynchronously via messaging.</pre>
-</div>
-</div>
+<p><strong>Resilience and Reliability:</strong></p>
 </li>
 <li>
-<p><strong>Load Leveling (Throttling/Buffering):</strong>
-<strong>Technical Explanation:</strong> A message broker acts as a buffer between fast producers and potentially slower or intermittently available consumers. During peak load, messages can queue up without overwhelming consumers, allowing them to process at their own sustainable rate. This prevents back pressure from propagating upstream, where a slow consumer could otherwise block a fast producer.</p>
-<div class="literalblock">
-<div class="content">
-<pre>**Impact:** Stabilizes system performance, prevents resource exhaustion in downstream services, and ensures consistent throughput even under fluctuating demand.</pre>
-</div>
-</div>
+<p><strong>Technical Explanation:</strong> Messages are persisted by the broker until successfully delivered and acknowledged by a consumer. If a consumer fails, is temporarily offline, or an error occurs during processing, messages are not lost and can be redelivered once the consumer recovers or after appropriate error handling. The broker acts as a buffer against system outages and spikes. Message acknowledgment mechanisms ensure that messages are only removed from the broker after successful processing.</p>
 </li>
 <li>
-<p><strong>Simplified Integration:</strong>
-<strong>Technical Explanation:</strong> The broker provides a standardized, centralized interface for various applications, potentially written in different languages or running on different platforms, to communicate. This avoids the need for complex, brittle, point-to-point integrations between every service pair, which can become unmanageable in large-scale systems.</p>
-<div class="literalblock">
-<div class="content">
-<pre>**Impact:** Streamlines the integration of heterogeneous systems and microservices, fostering a more modular, adaptable, and manageable architecture. Different clients using diverse messaging protocols like JMS, AMQP, MQTT, or STOMP (as supported by AMQ Broker) can all communicate seamlessly through the central broker.</pre>
-</div>
-</div>
+<p><strong>Impact:</strong> Enhances fault tolerance and guarantees message delivery. A transient failure of a processing service does not lead to data loss or user-facing errors. AMQ Broker&#8217;s persistence options (such as file-based or JDBC message stores, which will be discussed in detail later) are crucial for ensuring message durability even if the broker itself restarts or undergoes failover in a high-availability setup.</p>
+</li>
+<li>
+<p><strong>Scalability:</strong></p>
+</li>
+<li>
+<p><strong>Technical Explanation:</strong> Components can scale independently. If the message production rate increases, more consumer instances can be added to process messages in parallel from the same destination (e.g., a queue), distributing the load effectively. Similarly, if a single producer experiences high load, it can quickly offload tasks to the broker without waiting for downstream services. This inherently supports horizontal scaling of consumer services by simply adding more pods on OpenShift.</p>
+</li>
+<li>
+<p><strong>Impact:</strong> Systems can handle varying loads efficiently, dynamically adjusting to demand without requiring redesign. Red Hat AMQ Broker, especially when deployed in an HA configuration on OpenShift, can scale to handle high message throughput and a large number of concurrent connections.</p>
+</li>
+<li>
+<p><strong>Improved Responsiveness:</strong></p>
+</li>
+<li>
+<p><strong>Technical Explanation:</strong> For operations that involve long-running tasks or multiple sequential steps, a client can send a request as a message to the broker and receive an immediate acknowledgment that the message was accepted. The client doesn&#8217;t have to wait for the entire, potentially lengthy, process to complete, freeing it to perform other tasks or respond to the user immediately. The actual processing happens in the background.</p>
+</li>
+<li>
+<p><strong>Impact:</strong> Enhances user experience by reducing perceived latency for interactive applications. For example, a web application can immediately confirm an order placement to the user while the actual order fulfillment process (e.g., inventory check, payment processing, shipping notification) happens asynchronously via messaging.</p>
+</li>
+<li>
+<p><strong>Load Leveling (Throttling/Buffering):</strong></p>
+</li>
+<li>
+<p><strong>Technical Explanation:</strong> A message broker acts as a buffer between fast producers and potentially slower or intermittently available consumers. During peak load, messages can queue up without overwhelming consumers, allowing them to process at their own sustainable rate. This prevents back pressure from propagating upstream, where a slow consumer could otherwise block a fast producer.</p>
+</li>
+<li>
+<p><strong>Impact:</strong> Stabilizes system performance, prevents resource exhaustion in downstream services, and ensures consistent throughput even under fluctuating demand.</p>
+</li>
+<li>
+<p><strong>Simplified Integration:</strong></p>
+</li>
+<li>
+<p><strong>Technical Explanation:</strong> The broker provides a standardized, centralized interface for various applications, potentially written in different languages or running on different platforms, to communicate. This avoids the need for complex, brittle, point-to-point integrations between every service pair, which can become unmanageable in large-scale systems.</p>
+</li>
+<li>
+<p><strong>Impact:</strong> Streamlines the integration of heterogeneous systems and microservices, fostering a more modular, adaptable, and manageable architecture. Different clients using diverse messaging protocols like JMS, AMQP, MQTT, or STOMP (as supported by AMQ Broker) can all communicate seamlessly through the central broker.</p>
 </li>
 </ul>
 </div>
@@ -494,94 +494,66 @@
 <ul>
 <li>
 <p><strong>Event-Driven Architectures (EDA):</strong></p>
-<div class="literalblock">
-<div class="content">
-<pre>**Description:** Services communicate by publishing *events* (messages) when something significant happens, and other services *subscribe* to these events to react accordingly. This promotes extreme decoupling and allows services to react autonomously to state changes in the system.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>**Example:** An `OrderPlaced` event published by an `Order Service` could trigger parallel and asynchronous actions in a `Payment Service` (to process payment), an `Inventory Service` (to deduct stock), and a `Notification Service` (to send a confirmation email).</pre>
-</div>
-</div>
+</li>
+<li>
+<p><strong>Description:</strong> Services communicate by publishing <strong>events</strong> (messages) when something significant happens, and other services <strong>subscribe</strong> to these events to react accordingly. This promotes extreme decoupling and allows services to react autonomously to state changes in the system.</p>
+</li>
+<li>
+<p><strong>Example:</strong> An <code>OrderPlaced</code> event published by an <code>Order Service</code> could trigger parallel and asynchronous actions in a <code>Payment Service</code> (to process payment), an <code>Inventory Service</code> (to deduct stock), and a <code>Notification Service</code> (to send a confirmation email).</p>
 </li>
 <li>
 <p><strong>Background Processing / Long-Running Tasks:</strong></p>
-<div class="literalblock">
-<div class="content">
-<pre>**Description:** Tasks that are computationally intensive, time-consuming, or require significant external interaction are offloaded from the main application thread to be processed asynchronously by dedicated worker services.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>**Example:** Uploaded image processing (resizing, watermarking), video encoding, generation of large data reports, sending bulk emails, or complex financial calculations can be submitted as messages to a queue and processed by worker services at their own pace.</pre>
-</div>
-</div>
+</li>
+<li>
+<p><strong>Description:</strong> Tasks that are computationally intensive, time-consuming, or require significant external interaction are offloaded from the main application thread to be processed asynchronously by dedicated worker services.</p>
+</li>
+<li>
+<p><strong>Example:</strong> Uploaded image processing (resizing, watermarking), video encoding, generation of large data reports, sending bulk emails, or complex financial calculations can be submitted as messages to a queue and processed by worker services at their own pace.</p>
 </li>
 <li>
 <p><strong>Notifications and Alerts:</strong></p>
-<div class="literalblock">
-<div class="content">
-<pre>**Description:** Sending timely notifications to users or other systems in response to specific events, ensuring delivery even if the recipient system is temporarily unavailable.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>**Example:** Transaction confirmations, password reset emails, system alerts (e.g., "CPU utilization exceeded 80%"), or push notifications to mobile devices. The producing service doesn't wait for the notification to be sent.</pre>
-</div>
-</div>
+</li>
+<li>
+<p><strong>Description:</strong> Sending timely notifications to users or other systems in response to specific events, ensuring delivery even if the recipient system is temporarily unavailable.</p>
+</li>
+<li>
+<p><strong>Example:</strong> Transaction confirmations, password reset emails, system alerts (e.g., "CPU utilization exceeded 80%"), or push notifications to mobile devices. The producing service doesn&#8217;t wait for the notification to be sent.</p>
 </li>
 <li>
 <p><strong>Data Ingestion and Streaming:</strong></p>
-<div class="literalblock">
-<div class="content">
-<pre>**Description:** Collecting and processing continuous streams of data from various sources in real-time or near real-time, often acting as a buffer for downstream analytical systems.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>**Example:** IoT device data collection (sensor readings), log aggregation from multiple services, or processing real-time analytics events. AMQ Broker can act as an efficient ingestion point for such data streams before they are persisted or further processed.</pre>
-</div>
-</div>
+</li>
+<li>
+<p><strong>Description:</strong> Collecting and processing continuous streams of data from various sources in real-time or near real-time, often acting as a buffer for downstream analytical systems.</p>
+</li>
+<li>
+<p><strong>Example:</strong> IoT device data collection (sensor readings), log aggregation from multiple services, or processing real-time analytics events. AMQ Broker can act as an efficient ingestion point for such data streams before they are persisted or further processed.</p>
 </li>
 <li>
 <p><strong>Distributed Transactions (Saga Pattern):</strong></p>
-<div class="literalblock">
-<div class="content">
-<pre>**Description:** Coordinating a sequence of local transactions across multiple independent services to achieve a single, larger business operation, ensuring eventual consistency. Messages are used to orchestrate the steps, with mechanisms for compensating transactions on failure.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>**Example:** In an e-commerce checkout process, placing an order, deducting payment, and updating inventory are separate microservice actions coordinated via messages. If any step fails, compensating messages can be sent to reverse previous steps (e.g., refund payment, add items back to inventory).</pre>
-</div>
-</div>
+</li>
+<li>
+<p><strong>Description:</strong> Coordinating a sequence of local transactions across multiple independent services to achieve a single, larger business operation, ensuring eventual consistency. Messages are used to orchestrate the steps, with mechanisms for compensating transactions on failure.</p>
+</li>
+<li>
+<p><strong>Example:</strong> In an e-commerce checkout process, placing an order, deducting payment, and updating inventory are separate microservice actions coordinated via messages. If any step fails, compensating messages can be sent to reverse previous steps (e.g., refund payment, add items back to inventory).</p>
 </li>
 <li>
 <p><strong>Microservices Communication:</strong></p>
-<div class="literalblock">
-<div class="content">
-<pre>**Description:** Providing a reliable and scalable communication backbone for microservices to interact without direct, synchronous dependencies, often using queues for point-to-point communication and topics for publish/subscribe patterns.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>**Example:** A `User Service` publishing a `UserRegistered` event, which a `Welcome Email Service` consumes, or a `Product Service` updating product details, which a `Search Indexing Service` consumes to maintain an up-to-date search index.</pre>
-</div>
-</div>
+</li>
+<li>
+<p><strong>Description:</strong> Providing a reliable and scalable communication backbone for microservices to interact without direct, synchronous dependencies, often using queues for point-to-point communication and topics for publish/subscribe patterns.</p>
+</li>
+<li>
+<p><strong>Example:</strong> A <code>User Service</code> publishing a <code>UserRegistered</code> event, which a <code>Welcome Email Service</code> consumes, or a <code>Product Service</code> updating product details, which a <code>Search Indexing Service</code> consumes to maintain an up-to-date search index.</p>
 </li>
 <li>
 <p><strong>Batch Processing:</strong></p>
-<div class="literalblock">
-<div class="content">
-<pre>**Description:** Processing large volumes of data in batches during off-peak hours or as scheduled jobs. Messages can represent individual items or chunks of data to be processed by a fleet of consumers.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>**Example:** End-of-day financial reconciliation, processing daily reports, or bulk data imports where each record or a small batch of records is a message.</pre>
-</div>
-</div>
+</li>
+<li>
+<p><strong>Description:</strong> Processing large volumes of data in batches during off-peak hours or as scheduled jobs. Messages can represent individual items or chunks of data to be processed by a fleet of consumers.</p>
+</li>
+<li>
+<p><strong>Example:</strong> End-of-day financial reconciliation, processing daily reports, or bulk data imports where each record or a small batch of records is a message.</p>
 </li>
 </ul>
 </div>
