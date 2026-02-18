@@ -115,7 +115,7 @@ Let's explore the AMQ Broker CRDs installed by the Operator in your OpenShift cl
     spec:
       deploymentPlan:
         size: 1
-        image: registry.redhat.io/amq7/amq-broker:7.13
+        image: placeholder
         # Other optional configurations can go here, e.g., persistence, resources
     
     *   `apiVersion` and `kind` are crucial; they tell OpenShift which CRD this Custom Resource adheres to.

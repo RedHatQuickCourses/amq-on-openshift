@@ -36,10 +36,6 @@ In the context of AMQ Broker:
 *   Each AMQ Broker instance (e.g., a single broker, or a broker participating in a high-availability pair or cluster) runs within its own pod.
 *   The pod encapsulates the AMQ Broker container, configuration, and potentially other helper containers (e.g., for sidecar patterns, though not typical for a basic AMQ Broker deployment).
 
-.Pod Diagram
-image::amq-broker-pod.png[AMQ Broker Pod,width=600,align=center]
-_Figure: A single AMQ Broker instance running inside a Pod._
-
 === 2. Deployments
 
 A Deployment is a Kubernetes API object that manages a set of identical pods. It allows you to declaratively describe the desired state for your application, such as the number of replica pods, the container image to use, and how to update pods.
@@ -58,10 +54,6 @@ For AMQ Broker:
 *   Services are essential for internal client applications within the OpenShift cluster to connect to AMQ Broker pods.
 *   They provide a stable endpoint for clients, even if broker pods are restarted or scaled.
 *   AMQ Broker typically requires services for each protocol listener (e.g., AMQP, Core, MQTT, STOMP) and for the management console.
-
-.Service Diagram
-image::amq-broker-service.png[AMQ Broker Service,width=600,align=center]
-_Figure: A Service providing stable access to AMQ Broker Pods._
 
 === 4. Routes
 
@@ -85,9 +77,6 @@ For AMQ Broker:
 *   AMQ Broker pods use PVCs to request persistent storage for their message stores and journals.
 *   This ensures that even if a broker pod fails or is rescheduled, its messages and configuration data remain intact and available when a new pod starts up.
 
-.Persistence Diagram
-image::amq-broker-persistence.png[AMQ Broker Persistence,width=600,align=center]
-_Figure: AMQ Broker using Persistent Volume Claim for durable storage._
 
 === 6. Projects (Namespaces)
 
@@ -110,10 +99,6 @@ For AMQ Broker:
 
 *   The AMQ Broker Operator is the recommended way to deploy and manage AMQ Broker on OpenShift.
 *   You interact with the Operator by creating and modifying `Broker` Custom Resources, rather than directly managing pods, deployments, services, and routes yourself. This simplifies complex tasks like HA deployment and upgrades.
-
-.Operator Diagram
-image::amq-broker-operator.png[AMQ Broker Operator,width=600,align=center]
-_Figure: The AMQ Broker Operator managing Broker Custom Resources and underlying OpenShift resources._
 
 === 8. Resource Quotas and Limits
 
@@ -165,7 +150,7 @@ This command creates a new project and automatically switches your current conte
 +
 [source,bash]
 ----
-oc new-app --docker-image=nginx:latest --name=my-nginx
+oc new-app --image=nginx:latest --name=my-nginx
 ----
 +
 TIP: The `oc new-app` command simplifies the creation of deployments, services, and routes from images or source code.

@@ -45,7 +45,7 @@ When creating an `ActiveMQArtemis` CR, you'll define various properties within i
 *   `metadata`: Contains metadata about the CR, such as its unique `name`. The `name` you provide here will be used by OpenShift to identify your broker deployment.
 *   `spec`: This is where the core configuration for your broker instance resides. Within `spec`, the `deploymentPlan` sub-section is crucial:
     *   `size`: Defines the number of broker pods to deploy. For a basic, single instance, this will be `1`.
-    *   `image`: Specifies the container image to use for the broker. It's recommended to use Red Hat provided images, like `registry.redhat.io/amq7/amq-broker-rhel8:7.13`.
+    *   `image`: Specifies the container image to use for the broker. The value for this field should be set to "placeholder" so that the Operator will choose the latest supported broker image.
     *   `persistenceEnabled`: A boolean flag indicating whether the broker should use persistent storage for messages. For a basic, non-persistent setup, this is set to `false`.
     *   `clustered`: A boolean flag indicating whether the broker is part of a cluster. For a single instance, this is set to `false`.
 
@@ -79,7 +79,6 @@ In this activity, you will deploy a basic, single AMQ Broker instance named `my-
     spec:
       deploymentPlan:
         size: 1
-        image: registry.redhat.io/amq7/amq-broker-rhel8:7.13
         persistenceEnabled: false
         clustered: false
     
@@ -107,6 +106,7 @@ In this activity, you will deploy a basic, single AMQ Broker instance named `my-
     
 
     Wait until the broker pod shows a `STATUS` of `Running` and `READY` is `1/1`. This indicates the broker is successfully deployed and running.
+
 // end::hands-on-create-basic-broker[]
 // end::create-basic-broker[]
 
@@ -150,7 +150,7 @@ In this activity, you will modify the `my-broker` instance to enable its Jolokia
     spec:
       deploymentPlan:
         size: 1
-        image: registry.redhat.io/amq7/amq-broker-rhel8:7.13
+        image: placeholder
         persistenceEnabled: false
         clustered: false
         jolokiaAgentEnabled: true  // <1>
@@ -178,78 +178,68 @@ In this activity, you will modify the `my-broker` instance to enable its Jolokia
     
 
     Examine the `status` field for any warnings or error messages related to the `brokerProperties` or `deploymentPlan`. A healthy `status` indicates successful application of changes.
+
 // end::hands-on-modify-broker[]
 // end::managing-broker-instances[]
 
 // tag::configuring-addresses-queues[]
-== Configuring Addresses and Queues with `ActiveMQArtemisAddress` CR
+== Configuring Addresses and Queues with brokerProperties in `ActiveMQArtemis` CR
 
-Beyond the broker instance itself, you can also define addresses and queues *on* the broker using the `ActiveMQArtemisAddress` Custom Resource. This allows for declarative management of your messaging destinations.
+Beyond the broker instance itself, you can also define addresses and queues *on* the broker using the same `ActiveMQArtemis` Custom Resource through the brokerProperties attribute. This allows for declarative management of your messaging destinations.
 
-// tag::technical-explanation-addresses[]
-=== Technical Explanation: `ActiveMQArtemisAddress` CR Structure
+// tag::technical-explanation-brokerProperties[]
+=== Technical Explanation: `brokerProperties` Structure
 
-The `ActiveMQArtemisAddress` CR allows you to define messaging addresses and their associated queues. Each CR instance configures a single address and/or queue.
+The `spec: brokerProperties` allows you to customize and configure almost everything that is configurable in the broker including the addresses, queues, addressSettings, securitySettings and much more. This is generally used for configuring items that are not exposed in the custom resource definition.
+Configuration settings added under a brokerProperties attribute are stored in a secret. This secret is mounted as a properties file on the broker pod. At startup, the properties file is applied directly to the internal java configuration bean after the XML configuration is applied.
 
-*   `apiVersion`: `broker.amq.io/v1beta1`
-*   `kind`: `ActiveMQArtemisAddress`
-*   `metadata`: Contains the `name` (unique identifier for this address CR).
-    *   NOTE: If creating via the OpenShift web console, you *must* include a `namespace` property in the `metadata` section, specifying the name of your OpenShift project.
-*   `spec`: Defines the address and queue properties:
-    *   `address`: The name of the messaging address (e.g., `myAddress0`).
-    *   `queue`: The name of the queue to associate with the address (e.g., `myQueue0`).
-    *   `routingType`: Specifies how messages are routed to the queue. Common types include `anycast` (for point-to-point) and `multicast` (for publish/subscribe).
+The fields defined in the xref:https://github.com/rh-messaging/artemis/blob/main/artemis-server/src/main/java/org/apache/activemq/artemis/core/config/impl/ConfigurationImpl.java [ConfigurationImpl] class should be used for configuring the AMQ Broker using brokerProperties.
 
-This CR is installed automatically when you install the AMQ Broker Operator. For more details, refer to xref:https://access.redhat.com/documentation/en-us/red_hat_amq_broker/7.13/html/deploying_amq_broker_on_openshift/configuring-addresses-and-queues-in-the-activemqartemisaddress-cr[Section 4.2.1.2, “Configuring addresses and queues in the `ActiveMQArtemisAddress` CR”].
-// end::technical-explanation-addresses[]
+// end::technical-explanation-brokerProperties[]
 
 // tag::hands-on-addresses[]
 === Hands-on Activity: Create an Address and Queue
 
-In this activity, you will create an address and an associated `anycast` queue on your `my-broker` instance using an `ActiveMQArtemisAddress` CR.
+In this activity, you will create an address and an associated `anycast` queue on your `my-broker` instance using the brokerProperties attribute in an `ActiveMQArtemis` CR.
 
 .Procedure to Create an Address and Queue
 .  **Open the OpenShift Web Console:**
     For this activity, we will use the OpenShift web console to demonstrate the creation process via the UI, which aligns with the provided context.
 
-.  **Navigate to Custom Resource Definitions:**
-    In the left-hand navigation pane, click on menu:Administration[Custom Resource Definitions].
+.  **Navigate to Installed Operators:**
+    In the left-hand navigation pane, click on menu > Operators > Installed Operators > Red Hat Integration - AMQ Broker for RHEL 9 (Multiarch)
 
-.  **Select the `ActiveMQArtemisAddress` CRD:**
-    Scroll down or search for `ActiveMQArtemisAddress` and click on it.
+.  **Select the `ActiveMQArtemis` resource:**
+    Look for the `ActiveMQArtemis` tab in the horizontal menu and click on it.
 
-.  **Create a New Instance:**
-    Click on the `Instances` tab, then click the *Create ActiveMQArtemisAddress* button. A YAML editor will open.
+.  **Edit the `ActiveMQArtemis` resource:**
+    Click on the name of the ActiveMQArtemis resource and a YAML editor will open.
 
-.  **Configure the `ActiveMQArtemisAddress` CR:**
-    Paste the following YAML into the editor. Ensure the `namespace` in `metadata` matches your current OpenShift project.
-
+.  **Configure the brokerProperties attribute:**
+    Configure the addresses and queues under the spec section in the ActiveMQArtemis CR.
     
-    
-    apiVersion: broker.amq.io/v1beta1
-    kind: ActiveMQArtemisAddress
-    metadata:
-      name: my-first-address
-      namespace: <your_project_name> # <1>
     spec:
-      brokerName: my-broker # <2>
-      addressName: myAddress0
-      queueName: myQueue0
-      routingType: anycast
+     brokerProperties:
+     - addressConfigurations.myAddress0.queueConfigs.myQueue0.address=myAddress0
+     - addressConfigurations.myAddress0.queueConfigs.myQueue0.routingType=ANYCAST
+     - addressConfigurations.myAddress0.queueConfigs.myQueue0.purgeOnNoConsumers=false
     
-    <1> **Important:** Replace `<your_project_name>` with the actual name of your OpenShift project. This is required when creating CRs via the console.
-    <2> Specify the `name` of the broker instance (e.g., `my-broker`) that this address and queue should be created on.
+  
+    This configuration defines an address named `myAddress0` with an `anycast` queue named `myQueue0` on the selected broker instance.
 
-    This configuration defines an address named `myAddress0` with an `anycast` queue named `myQueue0` on the broker instance `my-broker`.
-
-.  **Create the CR:**
-    Click the *Create* button at the bottom of the YAML editor.
+.  **Save the CR:**
+    Click the *Save* button at the bottom of the YAML editor and wait for the Operator to reconcile the changes.
 
 .  **Verify the Address and Queue:**
-    The Operator will process the CR and create the address and queue on your AMQ Broker. You can verify this in several ways:
-    *   Check the `ActiveMQArtemisAddress` instance status in the OpenShift console.
+    The Operator will process the brokerProperties attribute and create the address and queue on your AMQ Broker. You can verify this in several ways:
+    *   By executing the `artemis queue stat` on the broker pod terminal
+
+[source, bash]
+----
+    oc exec my-broker-ss-0 -- /home/jboss/amq-broker/bin/artemis queue stat --user admin --password admin
+----
     *   Later, once you've configured access to the Hawtio Management Console, you can log in and see the created address and queue directly.
-    *   Alternatively, you can inspect the broker's configuration directly if you have advanced access.
+
 // end::hands-on-addresses[]
 // end::configuring-addresses-queues[]
 
@@ -258,7 +248,7 @@ In this activity, you will create an address and an associated `anycast` queue o
 
 As you deploy and manage AMQ Broker instances, keep the following best practices and considerations in mind:
 
-*   **Unique Names:** Each `ActiveMQArtemis` and `ActiveMQArtemisAddress` Custom Resource instance must have a unique `metadata.name` within its respective type and namespace.
+*   **Unique Names:** Each `ActiveMQArtemis` Custom Resource instance must have a unique `metadata.name` within its respective type and namespace.
 *   **Liveness Probes:** The AMQ Broker Operator enables a default liveness probe to check the health of a broker. This probe typically checks the reachability of the AMQ Management Console. If you're configuring advanced scenarios (e.g., leader-follower HA), you might need to adjust or add custom liveness probes, as the management console might not always be reachable on follower brokers.
 *   **Node Placement for HA (Advanced):** While not explicitly covered in basic deployment, if you plan for High Availability (HA) with multiple broker deployments on the same OpenShift cluster, ensure that broker pods are provisioned on separate nodes. This prevents a single node failure from taking down both brokers. Refer to "Controlling placement of broker pods on OpenShift Container Platform nodes" for detailed guidance on node affinity and anti-affinity.
 *   **Persistent Storage:** For production environments, always set `persistenceEnabled: true` in your `ActiveMQArtemis` CR to ensure message durability. This will require configuring appropriate Persistent Volumes (PVs) and Persistent Volume Claims (PVCs) for your OpenShift environment.

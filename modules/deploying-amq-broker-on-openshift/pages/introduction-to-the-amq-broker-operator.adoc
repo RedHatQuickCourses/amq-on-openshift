@@ -61,17 +61,17 @@ cd ~/broker/operator
 [NOTE]
 The exact version number (e.g., `7.13.3`) may vary depending on the latest release. Always refer to the official Red Hat documentation for the most current download links and instructions. The following example uses `7.13.3`.
 +
-You would typically download this from the Red Hat Customer Portal. For demonstration purposes, assume you've downloaded `amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip` to your `Downloads` directory.
+You would typically download this from the Red Hat Customer Portal. For demonstration purposes, assume you've downloaded `amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip` to your `Downloads` directory.
 +
 [source,bash]
 ----
-mv ~/Downloads/amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip .
+mv ~/Downloads/amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip .
 ----
 .   Extract the contents of the downloaded archive.
 +
 [source,bash]
 ----
-unzip amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip
+unzip amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip
 ----
 +
 You should now have a directory structure containing the Operator's deployment files (e.g., `deploy/operator.yaml`) and example Custom Resources. These files will be used in subsequent steps to install the Operator and deploy AMQ Broker instances.

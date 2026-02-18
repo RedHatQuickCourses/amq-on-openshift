@@ -27,7 +27,7 @@ Before proceeding with the CLI installation, ensure you have the following:
 
 *   Access to an OpenShift Container Platform cluster with sufficient permissions to install cluster-scoped Operators.
 *   The `oc` command-line tool installed and configured to connect to your OpenShift cluster.
-*   The AMQ Broker Operator installation archive (`amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip` or similar) downloaded from the Red Hat Customer Portal. This archive contains the necessary deployment files, including `operator.yaml`.
+*   The AMQ Broker Operator installation archive (`amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip` or similar) downloaded from the Red Hat Customer Portal. This archive contains the necessary deployment files, including `operator.yaml`.
 *   An existing OpenShift project where you intend to manage your AMQ Broker deployments.
 
 === Hands-on Activity: Deploying the Operator via CLI
@@ -38,7 +38,7 @@ Follow these steps to install the AMQ Broker Operator using the OpenShift CLI.
 You need to download the AMQ Broker Operator installation files from the Red Hat Customer Portal.
 
 . From the Red Hat Customer Portal, navigate to the AMQ Broker downloads section for version `7.13.3` (or the desired version).
-. Locate the `AMQ Broker 7.13.3 Operator Installation and Example Files` and click `Download`. The `amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip` archive will download automatically.
+. Locate the `AMQ Broker 7.13.3 Operator Installation and Example Files` and click `Download`. The `amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip` archive will download automatically.
 
 .Extract the Operator Files
 Once downloaded, prepare a directory and extract the contents of the archive.
@@ -54,7 +54,7 @@ $ mkdir ~/broker/operator
 +
 [source,bash]
 ----
-$ mv amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip ~/broker/operator
+$ mv amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip ~/broker/operator
 ----
 
 . Navigate into the directory:
@@ -68,7 +68,7 @@ $ cd ~/broker/operator
 +
 [source,bash]
 ----
-$ unzip amq-broker-operator-operator-7.13.3-ocp-install-examples-rhel8.zip
+$ unzip amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip
 ----
 +
 This will create a `amq-broker-operator-7.13.3-ocp-install-examples` directory containing the `deploy` folder and other example files.
@@ -120,7 +120,7 @@ Confirm that the Operator pod is running successfully.
 +
 [source,bash]
 ----
-$ oc get deployment amq-broker-operator -n <project-name>
+$ oc get deployment amq-broker-controller-manager -n <project-name>
 ----
 +
 You should see output similar to this, indicating the deployment is ready:
@@ -128,7 +128,7 @@ You should see output similar to this, indicating the deployment is ready:
 [source,text]
 ----
 NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
-amq-broker-operator   1/1     1            1           2m
+amq-broker-controller-manager   1/1     1            1           2m
 ----
 
 . Check the Operator's pod status:
@@ -143,7 +143,7 @@ You should see a pod with a `Running` status:
 [source,text]
 ----
 NAME                                  READY   STATUS    RESTARTS   AGE
-amq-broker-operator-xxxxxxxxxx-xxxxx  1/1     Running   0          2m
+amq-broker-controller-manager-xxxxxxxxxx-xxxxx  1/1     Running   0          2m
 ----
 
 Once the Operator pod is running, the AMQ Broker Operator is successfully installed and ready to manage broker instances in your project.
@@ -209,6 +209,6 @@ Monitor the installation process and confirm the Operator is running.
 . Wait for the Operator's status to change from `Installing` to `Succeeded`. This indicates that the Operator's deployment has completed successfully.
 . Click on the *Red Hat Integration - AMQ Broker for RHEL 9 (Multiarch)* Operator name to view its details.
 . Navigate to the *Operator Details* tab and then the *All Instances* tab. You should see `ActiveMQArtemis` listed, and its status should eventually show `Ready` or `Running`.
-. You can also verify the Operator's pod running by navigating to *Workloads* > *Pods* in the left navigation and filtering by the installed namespace. Look for a pod named `amq-broker-operator-xxxxxxxxxx-xxxxx` with a `Running` status.
+. You can also verify the Operator's pod running by navigating to *Workloads* > *Pods* in the left navigation and filtering by the installed namespace. Look for a pod named `amq-broker-controller-manager-xxxxxxxxxx-xxxxx` with a `Running` status.
 
 With the AMQ Broker Operator successfully installed, you can now proceed to create and manage AMQ Broker instances using Custom Resources.
