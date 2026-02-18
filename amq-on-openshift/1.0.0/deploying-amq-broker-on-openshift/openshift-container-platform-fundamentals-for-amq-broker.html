@@ -466,15 +466,6 @@
 </li>
 </ul>
 </div>
-<div class="imageblock text-center unresolved">
-<div class="content">
-<img src="amq-broker-pod.png" alt="AMQ Broker Pod" width="600">
-</div>
-<div class="title">Figure 1. Pod Diagram</div>
-</div>
-<div class="paragraph">
-<p><em>Figure: A single AMQ Broker instance running inside a Pod.</em></p>
-</div>
 </div>
 <div class="sect2">
 <h3 id="_2_deployments"><a class="anchor" href="#_2_deployments"></a>2. Deployments</h3>
@@ -515,15 +506,6 @@
 <p>AMQ Broker typically requires services for each protocol listener (e.g., AMQP, Core, MQTT, STOMP) and for the management console.</p>
 </li>
 </ul>
-</div>
-<div class="imageblock text-center unresolved">
-<div class="content">
-<img src="amq-broker-service.png" alt="AMQ Broker Service" width="600">
-</div>
-<div class="title">Figure 2. Service Diagram</div>
-</div>
-<div class="paragraph">
-<p><em>Figure: A Service providing stable access to AMQ Broker Pods.</em></p>
 </div>
 </div>
 <div class="sect2">
@@ -576,15 +558,6 @@
 </li>
 </ul>
 </div>
-<div class="imageblock text-center unresolved">
-<div class="content">
-<img src="amq-broker-persistence.png" alt="AMQ Broker Persistence" width="600">
-</div>
-<div class="title">Figure 3. Persistence Diagram</div>
-</div>
-<div class="paragraph">
-<p><em>Figure: AMQ Broker using Persistent Volume Claim for durable storage.</em></p>
-</div>
 </div>
 <div class="sect2">
 <h3 id="_6_projects_namespaces"><a class="anchor" href="#_6_projects_namespaces"></a>6. Projects (Namespaces)</h3>
@@ -635,15 +608,6 @@
 <p>You interact with the Operator by creating and modifying <code>Broker</code> Custom Resources, rather than directly managing pods, deployments, services, and routes yourself. This simplifies complex tasks like HA deployment and upgrades.</p>
 </li>
 </ul>
-</div>
-<div class="imageblock text-center unresolved">
-<div class="content">
-<img src="amq-broker-operator.png" alt="AMQ Broker Operator" width="600">
-</div>
-<div class="title">Figure 4. Operator Diagram</div>
-</div>
-<div class="paragraph">
-<p><em>Figure: The AMQ Broker Operator managing Broker Custom Resources and underlying OpenShift resources.</em></p>
 </div>
 </div>
 <div class="sect2">
@@ -739,7 +703,7 @@ For organizational purposes, let&#8217;s create a new project.</p>
 To see pods and deployments in action, let&#8217;s deploy a simple <code>nginx</code> web server.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-app --docker-image=nginx:latest --name=my-nginx</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-app --image=nginx:latest --name=my-nginx</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">

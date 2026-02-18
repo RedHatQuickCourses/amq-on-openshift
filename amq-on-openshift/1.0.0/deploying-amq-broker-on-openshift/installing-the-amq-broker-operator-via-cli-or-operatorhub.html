@@ -453,7 +453,7 @@
 <p>The <code>oc</code> command-line tool installed and configured to connect to your OpenShift cluster.</p>
 </li>
 <li>
-<p>The AMQ Broker Operator installation archive (<code>amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip</code> or similar) downloaded from the Red Hat Customer Portal. This archive contains the necessary deployment files, including <code>operator.yaml</code>.</p>
+<p>The AMQ Broker Operator installation archive (<code>amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip</code> or similar) downloaded from the Red Hat Customer Portal. This archive contains the necessary deployment files, including <code>operator.yaml</code>.</p>
 </li>
 <li>
 <p>An existing OpenShift project where you intend to manage your AMQ Broker deployments.</p>
@@ -476,7 +476,7 @@
 <p>From the Red Hat Customer Portal, navigate to the AMQ Broker downloads section for version <code>7.13.3</code> (or the desired version).</p>
 </li>
 <li>
-<p>Locate the <code>AMQ Broker 7.13.3 Operator Installation and Example Files</code> and click <code>Download</code>. The <code>amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip</code> archive will download automatically.</p>
+<p>Locate the <code>AMQ Broker 7.13.3 Operator Installation and Example Files</code> and click <code>Download</code>. The <code>amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip</code> archive will download automatically.</p>
 </li>
 </ol>
 </div>
@@ -498,7 +498,7 @@
 <p>Move the downloaded archive to this new directory:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mv amq-broker-operator-7.13.3-ocp-install-examples-rhel8.zip ~/broker/operator</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ mv amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip ~/broker/operator</code></pre>
 </div>
 </div>
 </li>
@@ -514,7 +514,7 @@
 <p>Extract the contents of the archive:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ unzip amq-broker-operator-operator-7.13.3-ocp-install-examples-rhel8.zip</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ unzip amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -590,7 +590,7 @@
 <p>Check the status of the Operator&#8217;s deployment:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc get deployment amq-broker-operator -n &lt;project-name&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ oc get deployment amq-broker-controller-manager -n &lt;project-name&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -599,7 +599,7 @@
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
-amq-broker-operator   1/1     1            1           2m</code></pre>
+amq-broker-controller-manager   1/1     1            1           2m</code></pre>
 </div>
 </div>
 </li>
@@ -616,7 +616,7 @@ amq-broker-operator   1/1     1            1           2m</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME                                  READY   STATUS    RESTARTS   AGE
-amq-broker-operator-xxxxxxxxxx-xxxxx  1/1     Running   0          2m</code></pre>
+amq-broker-controller-manager-xxxxxxxxxx-xxxxx  1/1     Running   0          2m</code></pre>
 </div>
 </div>
 </li>
@@ -767,7 +767,7 @@ amq-broker-operator-xxxxxxxxxx-xxxxx  1/1     Running   0          2m</code></pr
 <p>Navigate to the <strong>Operator Details</strong> tab and then the <strong>All Instances</strong> tab. You should see <code>ActiveMQArtemis</code> listed, and its status should eventually show <code>Ready</code> or <code>Running</code>.</p>
 </li>
 <li>
-<p>You can also verify the Operator&#8217;s pod running by navigating to <strong>Workloads</strong> &gt; <strong>Pods</strong> in the left navigation and filtering by the installed namespace. Look for a pod named <code>amq-broker-operator-xxxxxxxxxx-xxxxx</code> with a <code>Running</code> status.</p>
+<p>You can also verify the Operator&#8217;s pod running by navigating to <strong>Workloads</strong> &gt; <strong>Pods</strong> in the left navigation and filtering by the installed namespace. Look for a pod named <code>amq-broker-controller-manager-xxxxxxxxxx-xxxxx</code> with a <code>Running</code> status.</p>
 </li>
 </ol>
 </div>
