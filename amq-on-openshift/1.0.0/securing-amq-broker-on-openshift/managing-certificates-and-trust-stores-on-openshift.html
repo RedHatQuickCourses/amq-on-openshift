@@ -642,7 +642,7 @@
 <div class="sect2">
 <h3 id="_2_create_broker_tls_credentials_secret"><a class="anchor" href="#_2_create_broker_tls_credentials_secret"></a>2. Create Broker TLS Credentials Secret</h3>
 <div class="paragraph">
-<p>The AMQ Broker Operator expects secrets for TLS to contain two files: <code>key.store</code> and <code>trust.store</code>.</p>
+<p>The AMQ Broker Operator expects secrets for TLS to contain two files: <code>broker.ks</code> and <code>client.ts</code>.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -651,34 +651,25 @@
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-<div class="title">OpenShift TLS Secret Naming Convention Nuance</div>
-When generating a secret for TLS, OpenShift requires you to specify both a <code>key.store</code> and a <code>trust.store</code> entry. The <code>trust.store</code> entry is generically named within the secret. For two-way TLS (mTLS) with the AMQ Broker, the file you provide for the <code>trust.store</code> entry should actually be your broker&#8217;s trust store (<code>~/broker.ts</code>), containing the public certificates of trusted clients.
+<div class="title">AMQ Broker on OpenShift TLS Secret Naming Convention Nuance</div>
+When generating a secret for TLS, the AMQ Broker requires you to specify both a <code>Keystore</code> and a <code>Truststore</code> entry. The <code>Keystore</code> entry should be named broker.ks. For two-way TLS (mTLS) with the AMQ Broker, the file you provide for the <code>Truststore</code> entry should actually be your broker&#8217;s trust store (<code>~/client.ts</code>), containing the public certificates of trusted clients.
 </td>
 </tr>
 </table>
-</div>
-<div class="paragraph">
-<p>To align with the <code>oc create secret</code> command shown in the context, which specifies <code>--from-file=trust.store=~/client.ts</code>, we&#8217;ll temporarily copy our generated <code>~/broker.ts</code> to <code>~/client.ts</code> before creating the secret.</p>
-</div>
-<div class="listingblock">
-<div class="title">Copy broker trust store for secret creation</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cp ~/broker.ts ~/client.ts</code></pre>
-</div>
 </div>
 <div class="listingblock">
 <div class="title">Create a secret for the broker&#8217;s TLS credentials</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret generic broker-cert-secret \
-  --from-file=key.store=~/broker.ks \
-  --from-file=trust.store=~/client.ts <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+  --from-file=broker.ks=~/broker.ks \
+  --from-file=client.ts=~/broker.ts <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Here, <code>key.store</code> maps to your <code>~/broker.ks</code> file. The <code>trust.store</code> key is given the content of <code>~/client.ts</code> (which we just copied from <code>~/broker.ts</code>), and this file represents the <strong>broker&#8217;s trust store</strong> for mTLS.</td>
+<td>Here, <code>broker.ks</code> maps to your <code>~/broker.ks</code> file. The <code>client.ts</code> key is given the content of <code>~/broker.ts</code>, and this file represents the <strong>broker&#8217;s trust store</strong> for mTLS.</td>
 </tr>
 </table>
 </div>

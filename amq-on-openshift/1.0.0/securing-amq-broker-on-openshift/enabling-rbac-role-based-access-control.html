@@ -457,11 +457,11 @@ metadata:
 spec:
   # ... other broker configurations ...
   brokerProperties:
-    - 'security.roles.group2.send=#' <i class="conum" data-value="1"></i><b>(1)</b>
-    - 'security.roles.group1.consume=#' <i class="conum" data-value="2"></i><b>(2)</b>
-    - 'security.roles.group1.createAddress=#'
-    - 'security.roles.group1.createNonDurableQueue=#'
-    - 'security.roles.group1.browse=#'
+    - 'securityRoles.group2.send=#' <i class="conum" data-value="1"></i><b>(1)</b>
+    - 'securityRoles.group1.consume=#' <i class="conum" data-value="2"></i><b>(2)</b>
+    - 'securityRoles.group1.createAddress=#'
+    - 'securityRoles.group1.createNonDurableQueue=#'
+    - 'securityRoles.group1.browse=#'
   # ...</code></pre>
 </div>
 </div>
@@ -549,13 +549,13 @@ metadata:
 spec:
   # ... existing configurations ...
   brokerProperties:
-    - 'security.roles.order-producers.send=orders.queue' <i class="conum" data-value="1"></i><b>(1)</b>
-    - 'security.roles.order-consumers.consume=orders.queue' <i class="conum" data-value="2"></i><b>(2)</b>
-    - 'security.roles.system-admin.createAddress=#' <i class="conum" data-value="3"></i><b>(3)</b>
-    - 'security.roles.system-admin.createNonDurableQueue=#'
-    - 'security.roles.system-admin.send=#'
-    - 'security.roles.system-admin.consume=#'
-    - 'security.roles.system-admin.browse=#'
+    - 'securityRoles.order-producers.send=orders.queue' <i class="conum" data-value="1"></i><b>(1)</b>
+    - 'securityRoles.order-consumers.consume=orders.queue' <i class="conum" data-value="2"></i><b>(2)</b>
+    - 'securityRoles.system-admin.createAddress=#' <i class="conum" data-value="3"></i><b>(3)</b>
+    - 'securityRoles.system-admin.createNonDurableQueue=#'
+    - 'securityRoles.system-admin.send=#'
+    - 'securityRoles.system-admin.consume=#'
+    - 'securityRoles.system-admin.browse=#'
   # ...</code></pre>
 </div>
 </div>
@@ -618,32 +618,10 @@ spec:
   # ... other broker configurations ...
   brokerProperties:
     # ... existing messaging RBAC if any ...
-    - 'security.management.roles.manager.view=activemq.management' <i class="conum" data-value="1"></i><b>(1)</b>
-    - 'security.management.roles.manager.edit=activemq.management' <i class="conum" data-value="2"></i><b>(2)</b>
-    - 'security.management.roles.auditor.view=mops.#' <i class="conum" data-value="3"></i><b>(3)</b>
-    - 'security.management.roles.auditor.edit=mops.#' <i class="conum" data-value="4"></i><b>(4)</b>
+    - securityRoles."mops.#".amq.view=true
+    - securityRoles."mops.#".amq.edit=true
   # ...</code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>manager</code> role has <code>view</code> permission for the <code>activemq.management</code> address.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>manager</code> role also has <code>edit</code> permission for the <code>activemq.management</code> address, allowing modification.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>The <code>auditor</code> role has <code>view</code> permission for all management operations (<code>mops.#</code>), allowing inspection.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>The <code>auditor</code> role also has <code>edit</code> permission for all management operations (<code>mops.#</code>), granting full management control.</td>
-</tr>
-</table>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -677,7 +655,7 @@ spec:
   # ... other broker configurations ...
   deploymentPlan:
     size: 1 # Example size, adjust as needed
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12 # Ensure this matches your broker image version
+    image: placeholder # Ensure this matches your broker image version
     resourceTemplates:
       initContainers:
         - name: remove-default-rbac-config
@@ -748,23 +726,31 @@ kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
 spec:
+  env:
+  - name: JAVA_ARGS_APPEND
+    value: "-Dhawtio.roles=* -Djavax.management.builder.initial=org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder"
+  resourceTemplates:
+  - selector:
+      kind: "StatefulSet"
+    patch:
+      kind: "StatefulSet"
+      spec:
+      template:
+       spec:
+        initContainers:
+        - name: "&lt;BROKER_NAME&gt;-container-init"
+          args:
+          -  '-c'
+          -  '/opt/amq/bin/launch.sh &amp;&amp; /opt/amq-broker/script/default.sh; echo "Empty management.xml";echo "&lt;management-context xmlns=\"http://activemq.apache.org/schema\" /&gt;" &gt; /amq/init/config/amq-broker/etc/management.xml'
+
   # ... existing configurations ...
   brokerProperties:
     # ... existing messaging RBAC if any ...
-    - 'security.management.roles.operations.view=mops.#' <i class="conum" data-value="1"></i><b>(1)</b>
-    - 'security.management.roles.operations.edit=mops.#'
-    - 'security.management.roles.monitoring.view=activemq.management' <i class="conum" data-value="2"></i><b>(2)</b>
+    - securityRoles."mops.address.activemq.management.*".manager.view=true
+    - securityRoles."mops.address.activemq.management.*".manager.edit=true
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12 # IMPORTANT: Use your actual broker image
-    resourceTemplates:
-      initContainers:
-        - name: remove-default-rbac-config
-          image: busybox:latest
-          command: ["sh", "-c", "rm -f /amq/init/config/amq-broker/etc/management.xml"]
-          volumeMounts:
-            - name: my-broker-instance-instance-volume <i class="conum" data-value="3"></i><b>(3)</b>
-              mountPath: /amq/init/config/amq-broker/etc/
+    image: placeholder
   # ...</code></pre>
 </div>
 </div>

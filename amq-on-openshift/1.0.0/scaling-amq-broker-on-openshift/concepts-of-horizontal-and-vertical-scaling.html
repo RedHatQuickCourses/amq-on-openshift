@@ -408,10 +408,6 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>:scaling-concepts.adoc
-= Concepts of Horizontal and Vertical Scaling</p>
-</div>
-<div class="paragraph">
 <p>Asynchronous messaging systems like AMQ Broker are critical components in many modern applications, handling vital communication between services. To ensure these systems can meet varying demands, from handling peak loads to maintaining high availability, understanding and implementing effective scaling strategies is paramount. This section delves into the fundamental concepts of horizontal and vertical scaling, explaining how they apply to applications deployed on platforms like OpenShift.</p>
 </div>
 </div>
@@ -434,7 +430,8 @@
 </li>
 <li>
 <p><strong>Mechanism:</strong></p>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p><strong>CPU:</strong> Assigning more CPU cores or increasing CPU limits/requests.</p>
 </li>
@@ -444,9 +441,13 @@
 <li>
 <p><strong>Storage:</strong> Increasing disk space or I/O capacity.</p>
 </li>
+</ul>
+</div>
+</li>
 <li>
 <p><strong>Pros:</strong></p>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p>Simpler to manage initially for a single instance.</p>
 </li>
@@ -456,9 +457,13 @@
 <li>
 <p>Less complex for applications that are not designed for distributed environments.</p>
 </li>
+</ul>
+</div>
+</li>
 <li>
 <p><strong>Cons:</strong></p>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p><strong>Single Point of Failure (SPOF):</strong> If the single scaled-up instance fails, the entire application becomes unavailable.</p>
 </li>
@@ -470,6 +475,9 @@
 </li>
 <li>
 <p><strong>Cost Inefficiency:</strong> You might pay for resources you don&#8217;t always use, as provisioning for peak load means idle resources during off-peak times.</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -489,7 +497,8 @@
 </li>
 <li>
 <p><strong>Mechanism:</strong></p>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p><strong>Adding Instances:</strong> Deploying more identical copies of the application.</p>
 </li>
@@ -499,9 +508,13 @@
 <li>
 <p><strong>Clustering:</strong> Multiple instances working together as a single logical unit (e.g., AMQ Broker clusters).</p>
 </li>
+</ul>
+</div>
+</li>
 <li>
 <p><strong>Pros:</strong></p>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p><strong>High Availability (HA):</strong> If one instance fails, others can continue to process requests, minimizing downtime.</p>
 </li>
@@ -514,9 +527,13 @@
 <li>
 <p><strong>Unlimited Scalability (theoretically):</strong> You can add as many instances as needed, limited only by infrastructure resources.</p>
 </li>
+</ul>
+</div>
+</li>
 <li>
 <p><strong>Cons:</strong></p>
-</li>
+<div class="ulist">
+<ul>
 <li>
 <p><strong>Increased Complexity:</strong> Requires careful design for state management, data consistency, and inter-instance communication.</p>
 </li>
@@ -525,6 +542,9 @@
 </li>
 <li>
 <p><strong>Distributed System Challenges:</strong> Dealing with network latency, consistency models, and potential split-brain scenarios.</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>

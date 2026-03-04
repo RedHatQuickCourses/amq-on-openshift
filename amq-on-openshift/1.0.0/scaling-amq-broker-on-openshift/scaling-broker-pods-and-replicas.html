@@ -422,7 +422,7 @@
 <p>When discussing scaling AMQ Broker on OpenShift, we primarily refer to <strong>horizontal scaling</strong>, which involves increasing or decreasing the number of these broker pods (replicas) running in your cluster. Each replica represents an active broker instance capable of handling messaging traffic.</p>
 </div>
 <div class="paragraph">
-<p>OpenShift&#8217;s <code>StatefulSet</code> ensures that each pod replica has a sequential identity (e.g., <code>broker-name-0</code>, <code>broker-name-1</code>, etc.). This ordinal index is crucial for managing persistent volumes and ensuring proper failover and recovery mechanisms, particularly in clustered deployments.</p>
+<p>OpenShift&#8217;s <code>StatefulSet</code> ensures that each pod replica has a sequential identity (e.g., <code>broker-name-ss-0</code>, <code>broker-name-ss-1</code>, etc.). This ordinal index is crucial for managing persistent volumes and ensuring proper failover and recovery mechanisms, particularly in clustered deployments.</p>
 </div>
 </div>
 </div>
@@ -433,15 +433,15 @@
 <p>Horizontal scaling allows you to distribute the messaging workload across multiple broker instances, improving performance, fault tolerance, and overall capacity. The AMQ Broker Operator simplifies this process by managing the underlying OpenShift resources, such as <code>StatefulSets</code>.</p>
 </div>
 <div class="paragraph">
-<p>To scale an AMQ Broker instance, you modify the <code>replicas</code> field within the <code>ActiveMQArtemis</code> custom resource (CR) that defines your broker. The AMQ Broker Operator continuously monitors these CRs and adjusts the <code>StatefulSet</code> accordingly.</p>
+<p>To scale an AMQ Broker instance, you modify the <code>spec: deploymentPlan: size</code> field within the <code>ActiveMQArtemis</code> custom resource (CR) that defines your broker. The AMQ Broker Operator continuously monitors these CRs and adjusts the <code>StatefulSet</code> accordingly.</p>
 </div>
 <div class="sect2">
 <h3 id="_scaling_up_increasing_replicas"><a class="anchor" href="#_scaling_up_increasing_replicas"></a>Scaling Up (Increasing Replicas)</h3>
 <div class="paragraph">
-<p>When you increase the <code>replicas</code> count in your <code>ActiveMQArtemis</code> CR, the Operator initiates the creation of new broker pods. Each new pod will be provisioned with its own persistent volume (if configured) and will join the existing broker cluster (if clustering is enabled). This allows for immediate expansion of your messaging capacity.</p>
+<p>When you increase the <code>spec: deploymentPlan: size</code> count in your <code>ActiveMQArtemis</code> CR, the Operator initiates the creation of new broker pods. Each new pod will be provisioned with its own persistent volume (if configured) and will join the existing broker cluster (if clustering is enabled). This allows for immediate expansion of your messaging capacity.</p>
 </div>
 <div class="paragraph">
-<p>For example, scaling from one replica to two would result in <code>broker-name-0</code> and <code>broker-name-1</code> pods running. The <code>STATEFUL_SET_ORDINAL</code> environment variable is used to provide sequential identities for pod replicas, with Pods created from ordinal index 0 up to N-1. This is particularly relevant when configuring broker connections, such as in disaster recovery scenarios where client connections might target specific broker instances based on their ordinal.</p>
+<p>For example, scaling from one replica to two would result in <code>broker-name-ss-0</code> and <code>broker-name-ss-1</code> pods running. The <code>STATEFUL_SET_ORDINAL</code> environment variable is used to provide sequential identities for pod replicas, with Pods created from ordinal index 0 up to N-1. This is particularly relevant when configuring broker connections, such as in disaster recovery scenarios where client connections might target specific broker instances based on their ordinal.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -450,8 +450,8 @@ kind: ActiveMQArtemis
 metadata:
   name: my-broker
 spec:
-  deployment:
-    replicas: 2 # Scaled up to 2 replicas
+  deploymentPlan:
+    size: 2
     # ... other deployment configurations</code></pre>
 </div>
 </div>
@@ -490,8 +490,8 @@ kind: ActiveMQArtemis
 metadata:
   name: my-broker
 spec:
-  deployment:
-    replicas: 1 # Scaled down to 1 replica
+  deploymentPlan:
+    size: 1
     # ... other deployment configurations</code></pre>
 </div>
 </div>
@@ -512,35 +512,30 @@ spec:
 <p>An OpenShift cluster with the AMQ Broker Operator installed.</p>
 </li>
 <li>
-<p>An <code>ActiveMQArtemis</code> broker instance already deployed. For this lab, we&#8217;ll assume a broker named <code>my-broker</code> in the current project (namespace). If you don&#8217;t have one, deploy a basic broker first:
-[source,bash]
-----
-oc apply -f - &lt;&lt;EOF
-apiVersion: broker.amq.io/v1beta1
-kind: ActiveMQArtemis
-metadata:
-  name: my-broker
-spec:
-  deployment:
-    replicas: 1
-    persistence:
-      enabled: true
-    # Add a simple acceptor if needed for client connections
-    acceptors:</p>
-<div class="ulist">
-<ul>
-<li>
-<p>name: default
-      port: 61616
-      protocols: AMQP,CORE,JMS,STOMP,MQTT,OPENWIRE
-      sslenabled: false
-EOF
-----</p>
+<p>An <code>ActiveMQArtemis</code> broker instance already deployed. For this lab, we&#8217;ll assume a broker named <code>my-broker</code> in the current project (namespace). If you don&#8217;t have one, deploy a basic broker first:</p>
 </li>
 </ul>
 </div>
-</li>
-</ul>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f - &lt;&lt;EOF
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-broker
+    spec:
+      deploymentPlan:
+        size: 1
+        persistence:
+          enabled: true
+        # Add a simple acceptor if needed for client connections
+        acceptors:
+        - name: default
+          port: 61616
+          protocols: AMQP,CORE,JMS,STOMP,MQTT,OPENWIRE
+          sslenabled: false
+EOF</code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -555,11 +550,11 @@ EOF
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l app.kubernetes.io/name=my-broker
-oc get activemqartemis my-broker -o yaml | grep "replicas"</code></pre>
+oc get activemqartemis my-broker -o yaml | grep "size"</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You should see one pod, e.g., <code>my-broker-broker-ss-0</code>, and <code>replicas: 1</code>.</p>
+<p>You should see one pod, e.g., <code>my-broker-ss-0</code>, and <code>replicas: 1</code>.</p>
 </div>
 <div class="paragraph">
 <div class="title">Scale Up Using <code>kubectl scale</code></div>
@@ -580,18 +575,18 @@ oc get activemqartemis my-broker -o yaml | grep "replicas"</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You should eventually see two pods: <code>my-broker-broker-ss-0</code> and <code>my-broker-broker-ss-1</code>, both in <code>Running</code> and <code>Ready</code> states. Press <code>Ctrl+C</code> to exit the <code>watch</code> command.</p>
+<p>You should eventually see two pods: <code>my-broker-ss-0</code> and <code>my-broker-ss-1</code>, both in <code>Running</code> and <code>Ready</code> states. Press <code>Ctrl+C</code> to exit the <code>watch</code> command.</p>
 </div>
 <div class="paragraph">
 <p>You can also verify the <code>ActiveMQArtemis</code> CR:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get activemqartemis my-broker -o yaml | grep "replicas"</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get activemqartemis my-broker -o yaml | grep "size"</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The output should now show <code>replicas: 2</code>.</p>
+<p>The output should now show <code>size: 2</code>.</p>
 </div>
 <div class="paragraph">
 <div class="title">Scale Down Using <code>oc edit</code></div>
@@ -603,14 +598,14 @@ oc get activemqartemis my-broker -o yaml | grep "replicas"</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This command opens the CR in your default text editor. Navigate to <code>spec.deployment.replicas</code> and change its value from <code>2</code> back to <code>1</code>. Save and exit the editor.</p>
+<p>This command opens the CR in your default text editor. Navigate to <code>spec.deploymentPlan.size</code> and change its value from <code>2</code> back to <code>1</code>. Save and exit the editor.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># ... (excerpt from oc edit output)
 spec:
-  deployment:
-    replicas: 1 # Change this from 2 to 1
+  deploymentPlan:
+      size: 1 # Change this from 2 to 1
     # ...</code></pre>
 </div>
 </div>
@@ -624,18 +619,18 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>You should see <code>my-broker-broker-ss-1</code> terminating, and eventually disappear, leaving only <code>my-broker-broker-ss-0</code>. During this process, if there were any messages on <code>my-broker-broker-ss-1</code>, the scaledown controller would have initiated a drainer pod to migrate them to <code>my-broker-broker-ss-0</code>. While we can&#8217;t easily observe the internal drainer pod for a simple scale-down without active messaging, it&#8217;s important to understand that this mechanism is in place.</p>
+<p>You should see <code>my-broker-ss-1</code> terminating, and eventually disappear, leaving only <code>my-broker-ss-0</code>. During this process, if there were any messages on <code>my-broker-ss-1</code>, the scaledown controller would have initiated a drainer pod to migrate them to <code>my-broker-ss-0</code>. While we can&#8217;t easily observe the internal drainer pod for a simple scale-down without active messaging, it&#8217;s important to understand that this mechanism is in place.</p>
 </div>
 <div class="paragraph">
 <p>Confirm the <code>ActiveMQArtemis</code> CR reflects the change:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get activemqartemis my-broker -o yaml | grep "replicas"</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get activemqartemis my-broker -o yaml | grep "size"</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The output should show <code>replicas: 1</code>.</p>
+<p>The output should show <code>size: 1</code>.</p>
 </div>
 <div class="paragraph">
 <p>This activity demonstrates how straightforward it is to scale AMQ Broker instances on OpenShift, with the Operator handling the complexities of pod management and message migration.</p>

@@ -592,7 +592,7 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12 # Or your preferred AMQ Broker image
+    image: placeholder
     resources:
       limits:
         cpu: "1000m"   # Limit to 1 CPU core
@@ -600,12 +600,6 @@ spec:
       requests:
         cpu: "500m"    # Request a minimum of 0.5 CPU core
         memory: "1Gi"  # Request a minimum of 1 Gigabyte
-  # Add other basic configuration if needed, e.g., persistence
-  addressSettings:
-    - name: "#"
-      config:
-        maxSizeBytes: "100mb"
-        addressFullMessagePolicy: BLOCK
   # Consider adding persistence for production deployments
   # persistent: true
   # journalType: NIO</code></pre>

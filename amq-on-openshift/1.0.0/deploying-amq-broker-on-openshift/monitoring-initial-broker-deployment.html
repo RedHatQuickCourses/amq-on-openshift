@@ -554,11 +554,6 @@
 </li>
 <li>
 <p>You should see one or more Pods associated with your AMQ Broker deployment. The name will typically follow a pattern like <code><em>broker-name</em>-<em>number</em>-<em>random-string</em></code>.</p>
-<div class="imageblock unresolved">
-<div class="content">
-<img src="images/pods-overview.png" alt="Pods Overview" width="800">
-</div>
-</div>
 </li>
 <li>
 <p><strong>Check Pod Status</strong>:</p>
@@ -603,19 +598,16 @@
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>In the left-hand navigation pane, click menu:Administration[Custom Resource Definitions].</p>
+<p>In the left-hand navigation pane, click menu &gt; Operator Hub &gt; Installed Operators &gt; Red Hat Integration - AMQ Broker for RHEL 9 (Multiarch).</p>
 </li>
 <li>
-<p>Click the <code>ActiveMQArtemis</code> CRD.</p>
-</li>
-<li>
-<p>Click the menu:Instances[Instances] tab.</p>
+<p>Click the <code>ActiveMQArtemis</code> tab.</p>
 </li>
 <li>
 <p>Click the instance name for your broker deployment.</p>
 </li>
 <li>
-<p>Click the menu:YAML[YAML] tab.</p>
+<p>Click the YAML tab.</p>
 <div class="paragraph">
 <p>This view shows the entire Custom Resource definition. Scroll down to the <code>spec.deploymentPlan</code> section. Here you can see if custom <code>livenessProbe</code>, <code>readinessProbe</code>, or <code>startupProbe</code> sections have been explicitly configured. Even if not explicitly defined in the CR, default probes are active, as described in the technical explanation above.</p>
 </div>
