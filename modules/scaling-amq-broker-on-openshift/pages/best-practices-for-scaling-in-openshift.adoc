@@ -99,9 +99,10 @@ spec:
   # ... other broker configurations ...
   deploymentPlan:
     size: 2
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution: # Prefer to spread pods
-        - topologyKey: "kubernetes.io/hostname" # Do not schedule on the same host
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution: # Prefer to spread pods
+          - topologyKey: "kubernetes.io/hostname" # Do not schedule on the same host
     # You could also use nodeSelector if you have labeled nodes
     # nodeSelector:
     #   message-brokers: "true"

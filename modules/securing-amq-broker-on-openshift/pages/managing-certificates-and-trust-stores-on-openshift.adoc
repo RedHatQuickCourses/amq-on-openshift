@@ -131,28 +131,21 @@ oc project <your-project-name> <1>
 
 === 2. Create Broker TLS Credentials Secret
 
-The AMQ Broker Operator expects secrets for TLS to contain two files: `key.store` and `trust.store`.
+The AMQ Broker Operator expects secrets for TLS to contain two files: `broker.ks` and `client.ts`.
 
 [IMPORTANT]
-.OpenShift TLS Secret Naming Convention Nuance
-When generating a secret for TLS, OpenShift requires you to specify both a `key.store` and a `trust.store` entry. The `trust.store` entry is generically named within the secret. For two-way TLS (mTLS) with the AMQ Broker, the file you provide for the `trust.store` entry should actually be your broker's trust store (`~/broker.ts`), containing the public certificates of trusted clients.
+.AMQ Broker on OpenShift TLS Secret Naming Convention Nuance
+When generating a secret for TLS, the AMQ Broker requires you to specify both a `Keystore` and a `Truststore` entry. The `Keystore` entry should be named broker.ks. For two-way TLS (mTLS) with the AMQ Broker, the file you provide for the `Truststore` entry should actually be your broker's trust store (`~/client.ts`), containing the public certificates of trusted clients.
 
-To align with the `oc create secret` command shown in the context, which specifies `--from-file=trust.store=~/client.ts`, we'll temporarily copy our generated `~/broker.ts` to `~/client.ts` before creating the secret.
-
-.Copy broker trust store for secret creation
-[source,bash,subs="attributes+"]
-----
-cp ~/broker.ts ~/client.ts
-----
 
 .Create a secret for the broker's TLS credentials
 [source,bash,subs="attributes+"]
 ----
 oc create secret generic broker-cert-secret \
-  --from-file=key.store=~/broker.ks \
-  --from-file=trust.store=~/client.ts <1>
+  --from-file=broker.ks=~/broker.ks \
+  --from-file=client.ts=~/broker.ts <1>
 ----
-<1> Here, `key.store` maps to your `~/broker.ks` file. The `trust.store` key is given the content of `~/client.ts` (which we just copied from `~/broker.ts`), and this file represents the *broker's trust store* for mTLS.
+<1> Here, `broker.ks` maps to your `~/broker.ks` file. The `client.ts` key is given the content of `~/broker.ts`, and this file represents the *broker's trust store* for mTLS.
 
 === 3. (Optional) Create Trust Bundle for `trustSecret`
 

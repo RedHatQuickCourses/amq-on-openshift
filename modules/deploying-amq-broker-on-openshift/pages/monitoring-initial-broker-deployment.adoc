@@ -82,9 +82,7 @@ The primary way to monitor your broker's initial deployment is by observing its 
 
 . In the left-hand navigation pane, click menu:Workloads[Pods].
 . You should see one or more Pods associated with your AMQ Broker deployment. The name will typically follow a pattern like `_broker-name_-_number_-_random-string_`.
-+
-image::images/pods-overview.png[Pods Overview, width=800]
-+
+
 . *Check Pod Status*:
 *   Look at the *Status* column. It should show `Running`.
 *   Check the *Ready* column. It should indicate `1/1`, meaning one out of one container in the Pod is ready to serve requests. If it shows `0/1`, the readiness probe is failing.
@@ -98,11 +96,10 @@ image::images/pods-overview.png[Pods Overview, width=800]
 
 The Custom Resource (CR) defines your broker instance and its configuration, including how probes are set up.
 
-. In the left-hand navigation pane, click menu:Administration[Custom Resource Definitions].
-. Click the `ActiveMQArtemis` CRD.
-. Click the menu:Instances[Instances] tab.
+. In the left-hand navigation pane, click menu > Operator Hub > Installed Operators > Red Hat Integration - AMQ Broker for RHEL 9 (Multiarch).
+. Click the `ActiveMQArtemis` tab.
 . Click the instance name for your broker deployment.
-. Click the menu:YAML[YAML] tab.
+. Click the YAML tab.
 +
 This view shows the entire Custom Resource definition. Scroll down to the `spec.deploymentPlan` section. Here you can see if custom `livenessProbe`, `readinessProbe`, or `startupProbe` sections have been explicitly configured. Even if not explicitly defined in the CR, default probes are active, as described in the technical explanation above.
 

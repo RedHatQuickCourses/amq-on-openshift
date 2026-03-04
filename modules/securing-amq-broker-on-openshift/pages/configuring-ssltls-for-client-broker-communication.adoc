@@ -1,11 +1,5 @@
 #  Configuring SSL/TLS for Client-Broker Communication
 
-AMQ Broker on OpenShift: Deployment and Management
-:icons: font
-:source-highlighter: highlight.js
-:toc: macro
-:toc-title: On this page
-
 toc::[]
 
 [[securing-amq-broker-on-openshift]]
@@ -59,7 +53,7 @@ NOTE: Replace `amq-broker-service.my-project.svc.cluster.local` with your actual
 keytool -exportcert -alias broker -file broker.cer -keystore broker.ks -storepass password -noprompt
 ----
 
-. Create an OpenShift secret containing the broker's keystore. This secret will be referenced by the AMQ Broker Custom Resource (CR).
+. Create an OpenShift secret containing the broker's keystore. This secret will be referenced by the AMQ Broker Custom Resource (CR). The name of the resulting Keystore should be "broker.ks".
 +
 [source,bash]
 ----
@@ -101,6 +95,7 @@ spec:
       protocols: amqp,openwire
       port: 5671 # Or your desired secure port, e.g., 61617 for OpenWire/JMS
       sslEnabled: true
+      expose: true
       sslSecret: broker-tls-secret # Name of the OpenShift secret created earlier
       # Optional: To automatically reload certificates when renewed by cert-manager
       # brokerProperties:
@@ -148,19 +143,19 @@ keytool -genkeypair -alias client -keyalg RSA -keysize 2048 -validity 365 -keyst
 keytool -exportcert -alias client -file client.cer -keystore client.ks -storepass password -noprompt
 ----
 
-. Create a broker trust store (`broker.ts`) and import the client's public certificate into it. This trust store will be used by the broker to verify client identities.
+. Create a broker trust store (`client.ts`) and import the client's public certificate into it. This trust store will be used by the broker to verify client identities.
 +
 [source,bash]
 ----
 keytool -importcert -trustcacerts -alias client -file client.cer -keystore broker.ts -storepass password -noprompt
 ----
 
-. Create an OpenShift secret containing the broker's trust store for client authentication.
+. Create an OpenShift secret containing the broker's trust store for client authentication. The name of the resulting TrustStore should be "client.ts".
 +
 [source,bash]
 ----
 oc create secret generic broker-trust-secret \
-  --from-file=broker.ts=./broker.ts \
+  --from-file=client.ts=./broker.ts \
   --from-literal=trustStorePassword=password \
   -n $(oc project -q)
 ----
@@ -191,6 +186,7 @@ spec:
       protocols: amqp,openwire
       port: 5672 # Or your desired secure port for mTLS
       sslEnabled: true
+      expose: true
       sslSecret: broker-tls-secret     # Secret containing broker's keystore
       needClientAuth: true             # Require clients to present certificates
       trustSecret: broker-trust-secret # Secret containing broker's truststore with client certificates

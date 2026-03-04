@@ -58,18 +58,20 @@ spec:
       protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE # Protocols supported by this acceptor
       sslSecret: my-broker-tls-secret # <1>
       sslEnabled: true # <2>
-      sslClientAuth: 'NONE' # <3> Set to 'REQUIRED' or 'WANT' for mutual TLS
-      sslEnabledCipherSuites: TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256 # <4> Recommended for stronger security
-      sslEnabledProtocols: TLSv1.3,TLSv1.2 # <5> Restrict to modern TLS versions
+      needClientAuth: false # <3> Set to 'TRUE' or use 'wantClientAuth: true' for mutual TLS
+      enabledCipherSuites: TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256 # <4> Recommended for stronger security
+      enabledProtocols: TLSv1.3,TLSv1.2 # <5> Restrict to modern TLS versions
+      expose: true # <6> Expose this acceptor through an OpenShift route
 ----
-<1> `sslSecret`: The name of the Kubernetes `Secret` that contains the broker's TLS keystore (and optionally trust store if `sslClientAuth` is enabled).
+<1> `sslSecret`: The name of the Kubernetes `Secret` that contains the broker's TLS keystore (and optionally trust store if `needClientAuth` is true).
 <2> `sslEnabled`: Set this to `true` to activate SSL/TLS for this specific acceptor.
-<3> `sslClientAuth`: This parameter controls client certificate authentication.
-    *   `NONE`: No client certificate required (one-way TLS).
-    *   `WANT`: Client certificate is requested but not required.
-    *   `REQUIRED`: Client *must* present a valid certificate for mutual TLS. If set to `REQUIRED` or `WANT`, the broker will use the trust store provided in the `sslSecret` (if present) to validate client certificates.
-<4> `sslEnabledCipherSuites`: Specifies a comma-separated list of accepted cipher suites. Explicitly listing strong cipher suites is a security best practice.
-<5> `sslEnabledProtocols`: Specifies a comma-separated list of accepted TLS protocol versions. It's recommended to disable older, less secure versions like TLSv1.0 or TLSv1.1.
+<3> `needClientAuth`: This parameter controls client certificate authentication.
+    *   `false`: No client certificate required (one-way TLS).
+    *   `true`: Client *must* present a valid certificate for mutual TLS. If set to `true`, the broker will use the trust store provided in the `sslSecret` (if present) to validate client certificates.
+    Alternately, you can use `wantClientAuth: true` where the client certificate is requested but not required.
+<4> `enabledCipherSuites`: Specifies a comma-separated list of accepted cipher suites. Explicitly listing strong cipher suites is a security best practice.
+<5> `enabledProtocols`: Specifies a comma-separated list of accepted TLS protocol versions. It's recommended to disable older, less secure versions like TLSv1.0 or TLSv1.1.
+<6> `expose`: Setting it to true will expose this acceptor through an OpenShift route.
 
 After applying these changes to your `ActiveMQArtemis` CR, the AMQ Broker Operator will reconfigure the broker Pods to use the specified TLS certificate for the `my-secure-acceptor`.
 
@@ -110,10 +112,10 @@ Clients require access to cryptographic stores to perform authentication:
 
 The `CONTEXT` details the SSL/TLS transport options that can be configured for clients, often via system properties or connection URI parameters:
 
-*   `transport.keyStoreLocation`: Specifies the file path to the client's SSL/TLS key store (for mTLS). If unset, the `javax.net.ssl.keyStore` system property is used.
-*   `transport.keyStorePassword`: The password for the client's SSL/TLS key store (for mTLS). If unset, `javax.net.ssl.keyStorePassword` is used.
-*   `transport.trustStoreLocation`: Specifies the file path to the client's SSL/TLS trust store. If unset, the `javax.net.ssl.trustStore` system property is used.
-*   `transport.trustStorePassword`: The password for the client's SSL/TLS trust store. If unset, `javax.net.ssl.trustStorePassword` is used.
+*   `keyStorePath`: Specifies the file path to the client's SSL/TLS key store (for mTLS). If unset, the `javax.net.ssl.keyStore` system property is used.
+*   `keyStorePassword`: The password for the client's SSL/TLS key store (for mTLS). If unset, `javax.net.ssl.keyStorePassword` is used.
+*   `trustStorePath`: Specifies the file path to the client's SSL/TLS trust store. If unset, the `javax.net.ssl.trustStore` system property is used.
+*   `trustStorePassword`: The password for the client's SSL/TLS trust store. If unset, `javax.net.ssl.trustStorePassword` is used.
 
 .Example Client Connection URL for Core Protocol with TLS
 For a Core protocol client, the connection URL might be constructed as follows, incorporating TLS, trust store, and host verification:
@@ -169,7 +171,7 @@ The AMQ Broker Operator expects the TLS certificate and private key (in the keys
 .Create the Secret from the Broker Keystore
 [source,bash]
 ----
-oc create secret generic my-broker-tls-secret --from-file=broker.ks -n <your-namespace>
+oc create secret generic my-broker-tls-secret --from-file=broker.ks=broker.ks --from-file=client.ts=broker.ks --from-literal=keyStorePassword=password --from-literal=trustStorePassword=password -n <your-namespace>
 ----
 *   Replace `<your-namespace>` with the OpenShift project namespace where your AMQ Broker is deployed.
 *   This secret will be mounted into the broker Pod by the Operator, making the `broker.ks` available for the secure acceptor.
@@ -190,7 +192,7 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.11
+    image: placeholder
   acceptors:
     - name: my-unsecured-acceptor # Keep an unsecured acceptor for comparison if needed
       port: 61616
@@ -200,9 +202,10 @@ spec:
       protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE
       sslSecret: my-broker-tls-secret # References the secret created above
       sslEnabled: true
-      sslClientAuth: 'NONE' # For one-way TLS (broker authentication only)
-      sslEnabledCipherSuites: TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256
-      sslEnabledProtocols: TLSv1.3,TLSv1.2
+      needClientAuth: false # For one-way TLS (broker authentication only)
+      enabledCipherSuites: TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256
+      enabledProtocols: TLSv1.3,TLSv1.2
+      expose: true
 ----
 *   Save this content as `broker-with-tls.yaml`.
 *   Apply the configuration: `oc apply -f broker-with-tls.yaml -n <your-namespace>`
@@ -210,42 +213,14 @@ spec:
 
 ==== 4. Expose the Secure Acceptor via an OpenShift Route
 
-To allow external clients to connect to the secure acceptor, you need to expose it using an OpenShift Route. For TLS connections where the broker handles the TLS termination, a `passthrough` route is typically used.
-
-.Create a Route for the Secure Acceptor
+To allow external clients to connect to the secure acceptor, you need to expose it using an OpenShift Route. For TLS connections where the broker handles the TLS termination, a `passthrough` route is typically used. The Operator does this automatically if you configure `expose: true` on the required acceptor.
 [source,yaml]
 ----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  labels:
-    app.kubernetes.io/component: broker
-    app.kubernetes.io/instance: my-broker
-    app.kubernetes.io/name: activemq-artemis
-  name: my-broker-secure-route
 spec:
-  port:
-    targetPort: 61617 # <1> Target the port of our secure acceptor
-  to:
-    kind: Service
-    name: my-broker-amq-headless # <2> Use the headless service created by the Operator for your broker
-    weight: 100
-  tls:
-    termination: passthrough # <3> The TLS connection is passed directly to the broker
-  wildcardPolicy: None
+  acceptors:
+    - name: my-secure-acceptor # Our new secure acceptor
+      expose: true
 ----
-<1> `targetPort`: Matches the `port` configured for `my-secure-acceptor` in the `ActiveMQArtemis` CR.
-<2> `name`: Replace `my-broker` with the name of your `ActiveMQArtemis` instance. The Operator creates a headless service for each broker Pod.
-<3> `termination: passthrough`: This is crucial. It means OpenShift's router does *not* terminate TLS; instead, it forwards the raw TCP stream to the broker Pod, allowing the broker to handle the TLS handshake using its configured certificate.
-
-*   Save this as `broker-secure-route.yaml`.
-*   Apply the route: `oc apply -f broker-secure-route.yaml -n <your-namespace>`
-*   Wait for the route to become active. Get its hostname:
-    [source,bash]
-    ----
-    oc get route my-broker-secure-route -n <your-namespace> -o jsonpath='{.spec.host}'
-    ----
-    Note this hostname. It *must* match the Common Name (`CN`) you specified when generating the broker's certificate in Step 1. If they don't match, clients configured with `verifyHost=true` will reject the connection. If necessary, delete the `broker.ks` and `broker-public.crt`, and regenerate them with the correct hostname, then update the secret.
 
 ==== 5. Prepare Client Trust Store
 
@@ -293,4 +268,4 @@ String brokerUrl = "tcp://<my-broker-secure-route-hostname>:443?" + // <1>
 <1> The client explicitly connects to port 443 (standard HTTPS/TLS port for routes) and relies on the `sslEnabled=true` parameter.
 <2> `verifyHost=true` ensures the client checks the broker's hostname against its certificate's CN. `useTopologyForLoadBalancing=false` is included as per the `CONTEXT` for preventing external clients from using cluster topology for load balancing when connecting via routes.
 
-This lab provides a foundational setup for understanding encrypted connections. In a production scenario, you would integrate with `cert-manager` for automated certificate lifecycle management and potentially use more robust external identity providers for client authentication, leveraging mutual TLS (`sslClientAuth: 'REQUIRED'`) for enhanced security.
+This lab provides a foundational setup for understanding encrypted connections. In a production scenario, you would integrate with `cert-manager` for automated certificate lifecycle management and potentially use more robust external identity providers for client authentication, leveraging mutual TLS (`needClientAuth: 'true'`) for enhanced security.

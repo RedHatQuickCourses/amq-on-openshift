@@ -1,7 +1,5 @@
 #  Concepts of Horizontal and Vertical Scaling
 
-:scaling-concepts.adoc
-= Concepts of Horizontal and Vertical Scaling
 
 Asynchronous messaging systems like AMQ Broker are critical components in many modern applications, handling vital communication between services. To ensure these systems can meet varying demands, from handling peak loads to maintaining high availability, understanding and implementing effective scaling strategies is paramount. This section delves into the fundamental concepts of horizontal and vertical scaling, explaining how they apply to applications deployed on platforms like OpenShift.
 
@@ -15,18 +13,18 @@ Vertical scaling, often referred to as "scaling up" or "scaling down," involves 
 
 *   *Definition:* Enhancing the capabilities of an existing single server or instance by providing it with more powerful hardware resources.
 *   *Mechanism:*
-    *   **CPU:** Assigning more CPU cores or increasing CPU limits/requests.
-    *   **Memory:** Allocating more RAM to the instance.
-    *   **Storage:** Increasing disk space or I/O capacity.
+    -   **CPU:** Assigning more CPU cores or increasing CPU limits/requests.
+    -   **Memory:** Allocating more RAM to the instance.
+    -   **Storage:** Increasing disk space or I/O capacity.
 *   *Pros:*
-    *   Simpler to manage initially for a single instance.
-    *   Can reduce network overhead as all operations occur within one instance.
-    *   Less complex for applications that are not designed for distributed environments.
+    -   Simpler to manage initially for a single instance.
+    -   Can reduce network overhead as all operations occur within one instance.
+    -   Less complex for applications that are not designed for distributed environments.
 *   *Cons:*
-    *   *Single Point of Failure (SPOF):* If the single scaled-up instance fails, the entire application becomes unavailable.
-    *   *Resource Limits:* There's a physical limit to how much you can scale up a single machine.
-    *   *Downtime:* Scaling up often requires restarting the instance, leading to application downtime.
-    *   *Cost Inefficiency:* You might pay for resources you don't always use, as provisioning for peak load means idle resources during off-peak times.
+    -   *Single Point of Failure (SPOF):* If the single scaled-up instance fails, the entire application becomes unavailable.
+    -   *Resource Limits:* There's a physical limit to how much you can scale up a single machine.
+    -   *Downtime:* Scaling up often requires restarting the instance, leading to application downtime.
+    -   *Cost Inefficiency:* You might pay for resources you don't always use, as provisioning for peak load means idle resources during off-peak times.
 
 *In the context of OpenShift and AMQ Broker:* Vertical scaling would involve modifying the resource requests and limits (CPU and memory) for the `ActiveMQArtemis` pod(s). While increasing these can provide more horsepower to an individual broker instance, it doesn't address high availability or the ability to distribute load across multiple broker instances.
 
@@ -36,18 +34,18 @@ Horizontal scaling, also known as "scaling out" or "scaling in," involves adding
 
 *   *Definition:* Increasing the number of instances or replicas of an application to distribute the workload and improve fault tolerance.
 *   *Mechanism:*
-    *   **Adding Instances:** Deploying more identical copies of the application.
-    *   **Load Balancing:** Distributing incoming requests across all available instances.
-    *   **Clustering:** Multiple instances working together as a single logical unit (e.g., AMQ Broker clusters).
+    -   **Adding Instances:** Deploying more identical copies of the application.
+    -   **Load Balancing:** Distributing incoming requests across all available instances.
+    -   **Clustering:** Multiple instances working together as a single logical unit (e.g., AMQ Broker clusters).
 *   *Pros:*
-    *   *High Availability (HA):* If one instance fails, others can continue to process requests, minimizing downtime.
-    *   *Elasticity:* Easily scales up or down based on demand, leading to better resource utilization and cost efficiency.
-    *   *No Single Point of Failure:* Workload is distributed, making the system more resilient.
-    *   *Unlimited Scalability (theoretically):* You can add as many instances as needed, limited only by infrastructure resources.
+    -   *High Availability (HA):* If one instance fails, others can continue to process requests, minimizing downtime.
+    -   *Elasticity:* Easily scales up or down based on demand, leading to better resource utilization and cost efficiency.
+    -   *No Single Point of Failure:* Workload is distributed, making the system more resilient.
+    -   *Unlimited Scalability (theoretically):* You can add as many instances as needed, limited only by infrastructure resources.
 *   *Cons:*
-    *   *Increased Complexity:* Requires careful design for state management, data consistency, and inter-instance communication.
-    *   *Load Balancing:* Requires a mechanism to distribute incoming requests effectively.
-    *   *Distributed System Challenges:* Dealing with network latency, consistency models, and potential split-brain scenarios.
+    -   *Increased Complexity:* Requires careful design for state management, data consistency, and inter-instance communication.
+    -   *Load Balancing:* Requires a mechanism to distribute incoming requests effectively.
+    -   *Distributed System Challenges:* Dealing with network latency, consistency models, and potential split-brain scenarios.
 
 *In the context of OpenShift and AMQ Broker:* Horizontal scaling is the preferred method for achieving high availability and handling variable loads. This involves increasing the number of `ActiveMQArtemis` pods (replicas) managed by the AMQ Broker Operator, often configured as part of a cluster. OpenShift's deployment and replica set mechanisms are inherently designed for horizontal scaling.
 

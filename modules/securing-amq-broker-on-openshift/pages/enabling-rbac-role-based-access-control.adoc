@@ -32,11 +32,11 @@ metadata:
 spec:
   # ... other broker configurations ...
   brokerProperties:
-    - 'security.roles.group2.send=#' // <1>
-    - 'security.roles.group1.consume=#' // <2>
-    - 'security.roles.group1.createAddress=#'
-    - 'security.roles.group1.createNonDurableQueue=#'
-    - 'security.roles.group1.browse=#'
+    - 'securityRoles.group2.send=#' // <1>
+    - 'securityRoles.group1.consume=#' // <2>
+    - 'securityRoles.group1.createAddress=#'
+    - 'securityRoles.group1.createNonDurableQueue=#'
+    - 'securityRoles.group1.browse=#'
   # ...
 ----
 <1> The `group2` role is granted `send` permissions to all addresses (`#`).
@@ -89,13 +89,13 @@ metadata:
 spec:
   # ... existing configurations ...
   brokerProperties:
-    - 'security.roles.order-producers.send=orders.queue' // <1>
-    - 'security.roles.order-consumers.consume=orders.queue' // <2>
-    - 'security.roles.system-admin.createAddress=#' // <3>
-    - 'security.roles.system-admin.createNonDurableQueue=#'
-    - 'security.roles.system-admin.send=#'
-    - 'security.roles.system-admin.consume=#'
-    - 'security.roles.system-admin.browse=#'
+    - 'securityRoles.order-producers.send=orders.queue' // <1>
+    - 'securityRoles.order-consumers.consume=orders.queue' // <2>
+    - 'securityRoles.system-admin.createAddress=#' // <3>
+    - 'securityRoles.system-admin.createNonDurableQueue=#'
+    - 'securityRoles.system-admin.send=#'
+    - 'securityRoles.system-admin.consume=#'
+    - 'securityRoles.system-admin.browse=#'
   # ...
 ----
 <1> The `order-producers` role is allowed to send messages only to `orders.queue`.
@@ -131,16 +131,10 @@ spec:
   # ... other broker configurations ...
   brokerProperties:
     # ... existing messaging RBAC if any ...
-    - 'security.management.roles.manager.view=activemq.management' // <1>
-    - 'security.management.roles.manager.edit=activemq.management' // <2>
-    - 'security.management.roles.auditor.view=mops.#' // <3>
-    - 'security.management.roles.auditor.edit=mops.#' // <4>
+    - securityRoles."mops.#".amq.view=true
+    - securityRoles."mops.#".amq.edit=true
   # ...
 ----
-<1> The `manager` role has `view` permission for the `activemq.management` address.
-<2> The `manager` role also has `edit` permission for the `activemq.management` address, allowing modification.
-<3> The `auditor` role has `view` permission for all management operations (`mops.#`), allowing inspection.
-<4> The `auditor` role also has `edit` permission for all management operations (`mops.#`), granting full management control.
 
 [NOTE]
 The asterisk (`*`) in the operation position, as seen in the context example, generally grants access to all operations within a specified MBean domain. The number sign (`#`) after the `mops` prefix indicates access to all MBeans under the management operations domain.
@@ -162,7 +156,7 @@ spec:
   # ... other broker configurations ...
   deploymentPlan:
     size: 1 # Example size, adjust as needed
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12 # Ensure this matches your broker image version
+    image: placeholder # Ensure this matches your broker image version
     resourceTemplates:
       initContainers:
         - name: remove-default-rbac-config
@@ -212,23 +206,31 @@ kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
 spec:
+  env:
+  - name: JAVA_ARGS_APPEND
+    value: "-Dhawtio.roles=* -Djavax.management.builder.initial=org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder"
+  resourceTemplates:
+  - selector:
+      kind: "StatefulSet"
+    patch:
+      kind: "StatefulSet"
+      spec:
+      template:
+       spec:
+        initContainers:
+        - name: "<BROKER_NAME>-container-init"
+          args:
+          -  '-c'
+          -  '/opt/amq/bin/launch.sh && /opt/amq-broker/script/default.sh; echo "Empty management.xml";echo "<management-context xmlns=\"http://activemq.apache.org/schema\" />" > /amq/init/config/amq-broker/etc/management.xml'
+
   # ... existing configurations ...
   brokerProperties:
     # ... existing messaging RBAC if any ...
-    - 'security.management.roles.operations.view=mops.#' // <1>
-    - 'security.management.roles.operations.edit=mops.#'
-    - 'security.management.roles.monitoring.view=activemq.management' // <2>
+    - securityRoles."mops.address.activemq.management.*".manager.view=true
+    - securityRoles."mops.address.activemq.management.*".manager.edit=true
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12 # IMPORTANT: Use your actual broker image
-    resourceTemplates:
-      initContainers:
-        - name: remove-default-rbac-config
-          image: busybox:latest
-          command: ["sh", "-c", "rm -f /amq/init/config/amq-broker/etc/management.xml"]
-          volumeMounts:
-            - name: my-broker-instance-instance-volume # <3>
-              mountPath: /amq/init/config/amq-broker/etc/
+    image: placeholder
   # ...
 ----
 <1> The `operations` role has full `view` and `edit` permissions for all MBeans.
