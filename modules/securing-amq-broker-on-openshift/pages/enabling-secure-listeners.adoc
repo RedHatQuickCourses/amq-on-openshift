@@ -138,49 +138,29 @@ spec:
   deploymentPlan:
     size: 1
     image: placeholder
-    journalStorage:
-      size: 2Gi
-    brokerProperties:
-      - "security.enabled=true" # Ensure security is enabled if you plan to configure users later
+    requireLogin: true
   acceptors:
     - name: amqp-secure
       port: 5671
-      protocols: [AMQP]
+      protocols: AMQP
       sslEnabled: true
       sslSecret: amq-broker-tls-secret # Name of the Secret created in Step 2
-      # The keyStorePath refers to the file name *inside* the secret
-      keyStorePath: broker.ks
-      # The keyStorePassword refers to the literal key name *inside* the secret
-      keyStorePassword: keyStorePassword
-      enabledProtocols: [TLSv1.2, TLSv1.3]
-      # Uncomment and configure if you need mutual TLS
-      # trustStorePath: client.ts
-      # trustStorePassword: trustStorePassword
+      enabledProtocols: TLSv1.2,TLSv1.3
     - name: core-secure
       port: 61617
-      protocols: [CORE]
+      protocols: CORE
       sslEnabled: true
       sslSecret: amq-broker-tls-secret
-      keyStorePath: broker.ks
-      keyStorePassword: keyStorePassword
-      enabledProtocols: [TLSv1.2, TLSv1.3]
+      enabledProtocols: TLSv1.2,TLSv1.3
   # Expose the secure AMQP port via an OpenShift Route
   console:
     expose: true
-  addressSettings:
-    - name: "#"
-      redeliveryDelay: 1000
-      maxDeliveryAttempts: 3
-  # Example for external exposure - use a Route for secure external access
-  # routes:
-  #   - name: amqp-secure-external
-  #     host: amqp-broker-secure.apps.<cluster-hostname>
-  #     servicePort: 5671
-  #     termination: passthrough # Important for TLS termination at the broker
+  brokerProperties:
+  - addressSettings."#".redeliveryDelay=1000
+  - addressSettings."#".maxDeliveryAttempts=3
 ----
 *   We've defined two acceptors (`amqp-secure` and `core-secure`) with `sslEnabled: true`.
 *   `sslSecret` points to `amq-broker-tls-secret`, the secret we created.
-*   `keyStorePath` and `keyStorePassword` reference the file and literal key within that secret.
 *   `enabledProtocols` explicitly sets `TLSv1.2` and `TLSv1.3` for stronger security.
 
 .Apply the Custom Resource to deploy the broker:
@@ -207,7 +187,8 @@ Once the broker pod is running, check its logs to confirm that the secure listen
 oc logs $(oc get pod -l activemq-artemis-name=amq-broker-secure-example -o jsonpath='{.items[0].metadata.name}') -n $(oc project -q) | grep "acceptor"
 ----
 You should see log entries indicating that the secure acceptors are starting up on the specified ports (e.g., 5671 and 61617) with SSL enabled. Look for messages similar to:
-`INFO  [org.apache.activemq.artemis.core.server] AMQ221007: Server will be started. AMQP Acceptor 'amqp-secure' is listening on nio://0.0.0.0:5671 for protocols [AMQP] with SSL.`
+`INFO  [org.apache.activemq.artemis.core.server] AMQ221020: Started EPOLL Acceptor at amq-broker-secure-example-ss-0.amq-broker-secure-example-hdls-svc.broker.svc.cluster.local:5671 for protocols [AMQP]
+`
 
 === Step 5: Test Client Connectivity (Overview)
 

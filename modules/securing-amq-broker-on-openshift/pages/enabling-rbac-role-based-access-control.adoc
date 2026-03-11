@@ -32,15 +32,15 @@ metadata:
 spec:
   # ... other broker configurations ...
   brokerProperties:
-    - 'securityRoles.group2.send=#' // <1>
-    - 'securityRoles.group1.consume=#' // <2>
-    - 'securityRoles.group1.createAddress=#'
-    - 'securityRoles.group1.createNonDurableQueue=#'
-    - 'securityRoles.group1.browse=#'
+    - 'securityRoles.#.group1.send=true' // <1>
+    - 'securityRoles.#.group2.consume=true' // <2>
+    - 'securityRoles.#.group2.createAddress=true'
+    - 'securityRoles.#.group2.createNonDurableQueue=true'
+    - 'securityRoles.#.group2.browse=true'
   # ...
 ----
-<1> The `group2` role is granted `send` permissions to all addresses (`#`).
-<2> The `group1` role is granted `consume`, `createAddress`, `createNonDurableQueue`, and `browse` permissions to all addresses (`#`).
+<1> The `group1` role is granted `send` permissions to all addresses (`#`).
+<2> The `group2` role is granted `consume`, `createAddress`, `createNonDurableQueue`, and `browse` permissions to all addresses (`#`).
 
 [NOTE]
 In a Java properties file (which `brokerProperties` effectively translates into), a colon (`:`) is a reserved character used to separate a key and a value. If you need to grant permissions to a Fully Qualified Queue Name (FQQN) that contains a colon, ensure it is properly escaped or handled according to the broker's configuration parsing rules.
@@ -89,13 +89,13 @@ metadata:
 spec:
   # ... existing configurations ...
   brokerProperties:
-    - 'securityRoles.order-producers.send=orders.queue' // <1>
-    - 'securityRoles.order-consumers.consume=orders.queue' // <2>
-    - 'securityRoles.system-admin.createAddress=#' // <3>
-    - 'securityRoles.system-admin.createNonDurableQueue=#'
-    - 'securityRoles.system-admin.send=#'
-    - 'securityRoles.system-admin.consume=#'
-    - 'securityRoles.system-admin.browse=#'
+    - 'securityRoles."orders\.queue".order-producers.send=true' // <1>
+    - 'securityRoles."orders\.queue".order-consumers.consume=true' // <2>
+    - 'securityRoles.#.system-admin.createAddress=true' // <3>
+    - 'securityRoles.#.system-admin.createNonDurableQueue=true'
+    - 'securityRoles.#.system-admin.send=true'
+    - 'securityRoles.#.system-admin.consume=true'
+    - 'securityRoles.#.system-admin.browse=true'
   # ...
 ----
 <1> The `order-producers` role is allowed to send messages only to `orders.queue`.
@@ -157,14 +157,19 @@ spec:
   deploymentPlan:
     size: 1 # Example size, adjust as needed
     image: placeholder # Ensure this matches your broker image version
-    resourceTemplates:
-      initContainers:
-        - name: remove-default-rbac-config
-          image: busybox:latest # Use a lightweight image like busybox for init containers
-          command: ["sh", "-c", "rm -f /amq/init/config/amq-broker/etc/management.xml"]
-          volumeMounts:
-            - name: my-broker-instance-instance-volume # <1>
-              mountPath: /amq/init/config/amq-broker/etc/
+  resourceTemplates:
+    - patch:
+        kind: StatefulSet
+        spec:
+          template:
+            spec:
+              initContainers:
+                - args:
+                    - '-c'
+                    - '/opt/amq/bin/launch.sh && /opt/amq-broker/script/default.sh; echo "Empty management.xml";echo "<management-context xmlns=\"http://activemq.apache.org/schema\" />" > /amq/init/config/amq-broker/etc/management.xml'
+                  name: my-broker-instance-container-init
+      selector:
+        kind: StatefulSet      
   # ...
 ----
 <1> Replace `my-broker-instance-instance-volume` with the actual volume name used by your broker deployment. This name typically follows the pattern `<BROKER_NAME>-instance-volume`. You can verify the exact volume name by inspecting an existing broker pod's YAML (`oc get pod <broker_pod_name> -o yaml`) and looking under `spec.volumes`.
@@ -210,24 +215,25 @@ spec:
   - name: JAVA_ARGS_APPEND
     value: "-Dhawtio.roles=* -Djavax.management.builder.initial=org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder"
   resourceTemplates:
-  - selector:
-      kind: "StatefulSet"
-    patch:
-      kind: "StatefulSet"
-      spec:
-      template:
-       spec:
-        initContainers:
-        - name: "<BROKER_NAME>-container-init"
-          args:
-          -  '-c'
-          -  '/opt/amq/bin/launch.sh && /opt/amq-broker/script/default.sh; echo "Empty management.xml";echo "<management-context xmlns=\"http://activemq.apache.org/schema\" />" > /amq/init/config/amq-broker/etc/management.xml'
+    - patch:
+        kind: StatefulSet
+        spec:
+          template:
+            spec:
+              initContainers:
+                - args:
+                    - '-c'
+                    - '/opt/amq/bin/launch.sh && /opt/amq-broker/script/default.sh; echo "Empty management.xml";echo "<management-context xmlns=\"http://activemq.apache.org/schema\" />" > /amq/init/config/amq-broker/etc/management.xml'
+                  name: my-broker-instance-container-init
+      selector:
+        kind: StatefulSet
 
   # ... existing configurations ...
   brokerProperties:
     # ... existing messaging RBAC if any ...
-    - securityRoles."mops.address.activemq.management.*".manager.view=true
-    - securityRoles."mops.address.activemq.management.*".manager.edit=true
+   - securityRoles."mops.#".amq.view=true
+   - securityRoles."mops.#".amq.edit=true  
+   - securityRoles."mops.#".admin.manage=true  
   deploymentPlan:
     size: 1
     image: placeholder
@@ -265,17 +271,13 @@ kind: ActiveMQArtemis
 metadata:
   name: my-broker-instance
 spec:
-  # ... other broker configurations ...
-  extraMounts:
-    - name: custom-jaas-config // <1>
-      mountPath: /home/amq/broker/etc/custom-jaas-config/ // <2>
-  secrets:
-    - custom-jaas-config // <3>
+  deploymentPlan:
+   extraMounts:
+     secrets:
+        - simple-jaas-config <1>
   # ...
 ----
-<1> `name`: A unique name for the mount, referencing the secret.
-<2> `mountPath`: The path inside the broker container where the secret's contents will be available.
-<3> `secrets`: A list of OpenShift Secrets to be mounted, by name. This Secret (`custom-jaas-config`) would contain your `login.config` file.
+<1> `secrets`: A list of OpenShift Secrets to be mounted, by name. This Secret (`custom-jaas-config`) would contain your `login.config` file.
 
 In this configuration:
 
