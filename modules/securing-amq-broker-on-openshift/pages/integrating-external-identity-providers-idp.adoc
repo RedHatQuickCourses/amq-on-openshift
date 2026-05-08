@@ -36,25 +36,139 @@ For modern cloud-native and web-based environments, integrating with OpenID Conn
     ** Extracting user identity and role information embedded within the token's claims.
 *   *Role/Group Mapping*: OIDC providers like Keycloak can assign roles or group memberships to users within specific realms. These roles are typically embedded in the JWT access token as claims (e.g., `realm_access.roles`, `groups`). AMQ Broker is configured to extract these specific claims and map their values to its internal roles for authorization purposes.
 
-== Configuring AMQ Broker for External IDP Authentication on OpenShift
+== Configuring AMQ Broker for External IDP (Keycloak) Authentication on OpenShift
 
-Integrating an external IDP with AMQ Broker on OpenShift primarily involves configuring the `ActiveMQArtemis` Custom Resource (CR) to specify the connection details and authentication mechanism. The AMQ Broker Operator manages the broker instances and simplifies this configuration by allowing you to define these settings directly within the broker's CR.
+* Create a text file named login.config and add the JAAS login module configuration to connect AMQ Broker with Red Hat Single Sign-On. For example:
 
-While specific CR fields vary based on the IDP type (e.g., LDAP configuration parameters differ from OIDC), the general principles are consistent:
+[source,json]
+----
+console {
+    // ensure the operator can connect to the broker by referencing the existing properties config
+    org.apache.activemq.artemis.spi.core.security.jaas.PropertiesLoginModule sufficient
+        org.apache.activemq.jaas.properties.user="artemis-users.properties"
+        org.apache.activemq.jaas.properties.role="artemis-roles.properties"
+        baseDir="/home/jboss/amq-broker/etc";
 
-.  **Define Connection Details**: Specify the IDP's network endpoint (e.g., LDAP server URL, Keycloak issuer URL).
-.  **Provide Credentials**: If the broker needs to authenticate itself to the IDP (e.g., an LDAP bind DN and password for directory searches, or an OAuth 2.0 client ID and secret for token validation), these credentials must be securely provided.
-.  **Configure Role/Group Mapping**: Define how roles or groups obtained from the IDP translate into AMQ Broker's internal authorization roles.
+   org.keycloak.adapters.jaas.BearerTokenLoginModule sufficient
+        keycloak-config-file="/amq/extra/secrets/sso-jaas-config/_keycloak-bearer-token.json"
+        role-principal-class=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal;
+};
+activemq {
+    org.keycloak.adapters.jaas.BearerTokenLoginModule sufficient
+        keycloak-config-file="/amq/extra/secrets/sso-jaas-config/_keycloak-bearer-token.json"
+        role-principal-class=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal;
 
-=== Storing Sensitive Information with OpenShift Secrets
+    org.keycloak.adapters.jaas.DirectAccessGrantsLoginModule sufficient
+        keycloak-config-file="/amq/extra/secrets/sso-jaas-config/_keycloak-direct-access.json"
+        role-principal-class=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal;
 
-Just as with TLS certificates for secure connections, any sensitive information required for IDP integration (e.g., LDAP bind passwords, Keycloak client secrets, truststore containing the IDP's TLS certificate) *must* be stored as OpenShift Secrets. This is a best practice for managing sensitive configuration data in OpenShift.
+    org.apache.activemq.artemis.spi.core.security.jaas.PrincipalConversionLoginModule required
+       principalClassList=org.keycloak.KeycloakPrincipal;
+};
+----
+[NOTE]
+====
+The path to the .json configuration files must be in the format /amq/extra/secrets/name-jaas-config. For name, specify a string value. You must use the same string value and a -jaas-config suffix to name the secret that you create later in this procedure.
+In the example login.config file, a realm named console is used to authenticate AMQ Management Console users and a realm named activemq to authenticate messaging clients.
+The following login modules are configured in the example login.config file.
 
-These secrets are then referenced by name in your `ActiveMQArtemis` CR configuration. This method ensures that sensitive data is not hardcoded directly in the CR, exposed in plain text in configuration files, or committed to version control systems.
+In the login.config file example, each .json properties file name has an underscore prefix. The Operator ignores files prefixed with an underscore when it reports the status of the JaasPropertiesApplied condition. If the file names do not have an underscore prefix, the status of the JaasPropertiesApplied condition shows OutofSync permanently because the broker does not recognize properties files used by third party login modules. For more information about status reporting, see Section 4.3.2.1, “Setting up user authentication by using the default JAAS login module”.
+====
+* Create text files for each of the .json properties files that are referenced in the login modules and configure the details required to connect AMQ Broker to Red Hat Single Sign-On. For example:
+
+[source,json]
+----
+_keycloak-bearer-token.json
+{
+    "realm": "amq-broker-ldap",
+    "resource": "amq-console",
+    "auth-server-url": "https://keycloak-svc-rte-kc-ldap-tests-0eae49.apps.412t.broker.app-services-dev.net",
+    "principal-attribute": "preferred_username",
+    "use-resource-role-mappings": false,
+    "ssl-required": "external",
+    "confidential-port": 0
+}
+
+_keycloak-direct-access.json
+{
+    "realm": "amq-broker-ldap",
+    "resource": "amq-broker",
+    "auth-server-url": "https://keycloak-svc-rte-kc-ldap-tests-0eae49.apps.412t.broker.app-services-dev.net",
+    "principal-attribute": "preferred_username",
+    "use-resource-role-mappings": false,
+    "ssl-required": "external",
+    "credentials": {
+        "secret": "Lfk6g1ZKlGzNT6eRkz0d1scM4M29Ohmn"
+    }
+}
+----
+
+* Create a text file named _keycloak-js-client.json and add the configuration required for AMQ Management Console to redirect users to the URL of the Red Hat Single Sign-On Admin Console, where they enter their credentials. For example:
+
+[source,json]
+----
+{
+  "realm": "amq-broker-ldap",
+  "clientId": "amq-console",
+  "url": "https://keycloak-svc-rte-kc-ldap-tests-0eae49.apps.412t.broker.app-services-dev.net"
+}
+----
+
+* Use the oc create secret command to create a secret that contains the files that are referenced in the login module configuration. For example:
+
+[source,json]
+----
+oc create secret generic sso-jaas-config --from-file=login.config --from-file=artemis-users.properties --from-file=artemis-roles.properties --from-file=_keycloak-bearer-token.json --from-file=_keycloak-direct-access.json --from-file=_keycloak-js-client.json
+----
 
 [NOTE]
-.Reference to Context
-The process of creating and linking secrets for sensitive data, such as IDP credentials, mirrors the method used for managing TLS certificates and keystores as described in the "Securing AMQ Broker on OpenShift" context. You would create a generic secret and then reference it in your `ActiveMQArtemis` CR where the IDP configuration requires credentials.
+====
+The secret name must have a suffix of -jaas-config so the Operator can recognize that the secret contains login module configuration and propagate any updates to each broker Pod.
+The secret name must match the last directory name in the path to the .json configuration files, which you specified in the login.config file. For example, if the path to the configuration files is /amq/extra/secrets/sso-jaas-config, you must specify a secret name of sso-jaas-config.
+====
+
+* Create an extraMounts attribute and a secrets attribute and add the name of the secret. The following example adds a secret named custom-jaas-config to the CR.
+
+[source, yaml]
+----
+deploymentPlan:
+  ...
+  extraMounts:
+    secrets:
+    - "sso-jaas-config"
+  ...
+----
+
+
+* In the ActiveMQArtemis CR, create an environment variable that contains the hawtio settings required by AMQ Management Console to use Red Hat Single Sign-On for authentication. The contents of the environment variable are passed as arguments to the Java application launcher when the JVM that hosts a broker is started. For example:
+
+[source, yaml]
+----
+env:
+- name: JAVA_ARGS_APPEND
+  value: -Dhawtio.rolePrincipalClasses=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal
+      -Dhawtio.keycloakEnabled=true -Dhawtio.keycloakClientConfig=/amq/extra/secrets/sso-jaas-config/_keycloak-js-client.json
+      -Dhawtio.authenticationEnabled=true -Dhawtio.realm=console
+----
+
+
+* In the spec section of the ActiveMQArtemis CR, add a brokerProperties attribute and add permissions for the roles configured in the LDAP directory. You can grant a role permissions to a single address. Or, you can specify a wildcard match using the # sign to grant a role permissions to all addresses. For example:
+
+[source, yaml]
+----
+spec:
+  ...
+  brokerProperties:
+  - securityRoles.#.producers.send=true
+  - securityRoles.#.consumers.consume=true
+  ...
+----
+
+* Save the CR.
+
+  The Operator mounts the files in the secret in a /amq/extra/secrets/secret name directory on each Pod and configures the broker JVM to read the mounted login.config file, which contains the SSO configuration, instead of the default login.config file.
+
+
 
 Example (Conceptual `ActiveMQArtemis` CR snippet - actual fields and structure will vary significantly by IDP type and AMQ Broker Operator version):
 
@@ -62,43 +176,79 @@ Example (Conceptual `ActiveMQArtemis` CR snippet - actual fields and structure w
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
-  name: my-idp-broker
-  namespace: my-openshift-project
+  name: broker
+  namespace: amq
 spec:
-  # ... other broker configurations ...
-  externalSecurity:
-    # Example for LDAP integration (conceptual structure)
-    ldap:
-      url: ldaps://ldap.example.com:636
-      bindDn: "cn=broker-reader,dc=example,dc=com"
-      bindPasswordSecret: # Reference to an OpenShift secret for the bind password
-        name: ldap-bind-secret
-        key: password
-      userSearchBase: "ou=users,dc=example,dc=com"
-      userSearchFilter: "(uid={0})"
-      groupSearchBase: "ou=groups,dc=example,dc=com"
-      groupSearchFilter: "(member={0})"
-      groupNameAttribute: "cn" # Attribute in LDAP group entry for group name
-      roleMapping:
-        - ldapGroup: "amqAdmins" # Group name from LDAP
-          brokerRoles: ["admin", "manage"] # Corresponding AMQ Broker roles
-        - ldapGroup: "amqConsumers"
-          brokerRoles: ["consume"]
-
-    # Example for OpenID Connect integration (conceptual structure)
-    openidConnect:
-      issuerUrl: "https://keycloak.example.com/auth/realms/myrealm"
-      clientId: "amq-broker-client"
-      clientSecretSecret: # Reference to an OpenShift secret for the client secret
-        name: keycloak-client-secret
-        key: clientSecret
-      jwksUrl: "https://keycloak.example.com/auth/realms/myrealm/protocol/openid-connect/certs" # URL for JWKS endpoint
-      rolesClaim: "realm_access.roles" # JWT claim path for roles
-      roleMapping:
-        - oidcRole: "broker-admin-role" # Role name from OIDC token
-          brokerRoles: ["admin", "manage", "send", "consume"]
-        - oidcRole: "broker-app-user"
-          brokerRoles: ["send", "consume"]
+  resourceTemplates:
+  - selector:
+     kind: "StatefulSet"
+    patch:
+     kind: "StatefulSet"
+     spec:
+      template:
+       spec:
+        initContainers:
+        - name: "broker-container-init"
+          args:
+          -  '-c'
+          -  '/opt/amq/bin/launch.sh && /opt/amq-broker/script/default.sh; echo "Empty management.xml";echo "<management-context xmlns=\"http://activemq.apache.org/schema\" />" > /amq/init/config/amq-broker/etc/management.xml'
+  env:
+  - name: JAVA_ARGS_APPEND
+    value: -Dhawtio.rolePrincipalClasses=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal
+      -Dhawtio.keycloakEnabled=true -Dhawtio.keycloakClientConfig=/amq/extra/secrets/sso-jaas-config/_keycloak-js-client.json
+      -Dhawtio.authenticationEnabled=true -Dhawtio.realm=console -Dhawtio.roles=* -Djavax.management.builder.initial=org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder
+  brokerProperties:
+    - addressConfigurations.test.queueConfigs.test.routingType=ANYCAST
+    - securityRoles."mops.address.activemq.management.*".admin.view=true
+    - securityRoles."mops.address.activemq.management.*".admin.edit=true
+    - securityRoles."mops.address.activemq.management.*".viewer.view=true
+    - securityRoles."mops.#".admin.view=true
+    - securityRoles."mops.#".admin.edit=true
+    - securityRoles."mops.#".viewer.view=true
+    - securityRoles.#.admin.createAddress=true
+    - securityRoles.#.admin.deleteAddress=true
+    - securityRoles.#.admin.createDurableQueue=true
+    - securityRoles.#.admin.deleteDurableQueue=true
+    - securityRoles.#.admin.createNonDurableQueue=true
+    - securityRoles.#.admin.deleteNonDurableQueue=true
+    - securityRoles.#.admin.send=true
+    - securityRoles.#.sender.send=true
+    - securityRoles.#.admin.consume=true
+    - securityRoles.#.consumer.consume=true
+    - securityRoles.#.admin.browse=true
+    - securityRoles."activemq.management.#".admin.createNonDurableQueue=true
+    - securityRoles."activemq.management.#".admin.createAddress=true
+    - securityRoles."activemq.management.#".admin.consume=true
+    - securityRoles."activemq.management.#".admin.manage=true
+    - securityRoles."activemq.management.#".admin.send=true
+  version: 7.13.1
+  deploymentPlan:
+    extraMounts:
+      secrets:
+      - sso-jaas-config
+      - keycloak-truststore
+    image: placeholder
+    size: 1
+    jolokiaAgentEnabled: true
+    managementRBACEnabled: true
+  console:
+    expose: true
+    sslEnabled: true
+    sslSecret: console-secret
+  adminUser: admin
+  adminPassword: admin
+  acceptors:
+    - name: artemis
+      protocols: amqp,core
+      port: 61617
+      expose: true
+      sslEnabled: true
+      sslSecret: artemis-secret
+    - name: all
+      protocols: all
+      port: 61616
+      sslEnabled: false
+      expose: true
 ```
 This conceptual YAML demonstrates how external security configurations for LDAP or OpenID Connect *might* be integrated into the `ActiveMQArtemis` CR. The exact fields, their allowed values, and structural hierarchy would be defined by the AMQ Broker Operator's Custom Resource Definition (CRD) for external security and are subject to change between versions. Always consult the official Red Hat documentation for the specific version you are using.
 
@@ -106,7 +256,6 @@ This conceptual YAML demonstrates how external security configurations for LDAP 
 
 After successfully authenticating users via an external IDP, AMQ Broker leverages its internal Role-Based Access Control (RBAC) mechanism for authorization. The role mapping configured within the `ActiveMQArtemis` CR is a critical component of this process. It translates the roles or groups provided by the IDP into roles understood by AMQ Broker (e.g., `admin`, `manage`, `send`, `consume`).
 
-For example, an LDAP group named `amqAdmins` could be mapped to AMQ Broker's `admin` and `manage` roles. Consequently, any user belonging to the `amqAdmins` LDAP group would automatically be granted full administrative and management access to the broker, including permissions to create/delete queues, view metrics, and manage connections. This separation of authentication and authorization allows for flexible and granular access control.
 
 == Hands-on Activity: Configuring External IDP Integration (Conceptual)
 
@@ -133,20 +282,33 @@ Configure an AMQ Broker instance on OpenShift to authenticate users against an e
 .  **Create OpenShift Secrets for Credentials**:
     Securely store any sensitive credentials required by the AMQ Broker to interact with the IDP (e.g., LDAP bind password, Keycloak client secret, or a truststore if the IDP uses a non-publicly trusted TLS certificate) as OpenShift Secrets within your project.
 
-    *   For example, to store an LDAP bind password:
+    *   For example, to store an LDAP config:
+
         ```bash
-        oc create secret generic ldap-bind-secret --from-literal=password='your-secure-ldap-bind-password' -n my-openshift-project
+        oc create secret generic sso-jaas-config --from-file=login.config=/path/to/login.config -n my-openshift-project
         ```
     *   Or for a Keycloak client secret:
+
         ```bash
-        oc create secret generic keycloak-client-secret --from-literal=clientSecret='your-secure-keycloak-client-secret' -n my-openshift-project
+        oc create secret generic sso-jaas-config --from-file=login.config=/path/to/login.config --from-file=_keycloak-bearer-token.json=/path/to/relevant_file.json --from-file=_keycloak-direct-access.json=/path/to/relevant_file.json --from-file=_keycloak-js-client.json=/path/to/relevant_file.json -n my-openshift-project
         ```
 
 .  **Modify `ActiveMQArtemis` Custom Resource**:
-    Update your broker's `ActiveMQArtemis` CR to include the `externalSecurity` configuration block. This involves:
-    *   Specifying the IDP type (e.g., `ldap`, `openidConnect`).
-    *   Providing the connection parameters using the secrets created in the previous step (e.g., referencing `ldap-bind-secret` or `keycloak-client-secret`).
-    *   Defining the role mapping logic to translate IDP-provided roles or groups into AMQ Broker's internal roles (e.g., `admin`, `manage`, `send`, `consume`).
+    Update your broker's `ActiveMQArtemis` CR to include the jaas configuration through extraMounts configuration block and adjust the JVM options accordingly. 
+    
+[source,yaml]
+----
+extraMounts:
+   secrets:
+    - sso-jaas-config
+----
+[source,yaml]
+----
+spec:
+  env:
+  - name: JAVA_ARGS_APPEND
+    value: '-Dhawtio.roles=* -Dhawtio.rolePrincipalClasses=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal -Dhawtio.keycloakEnabled=true -Dhawtio.keycloakClientConfig=/amq/extra/secrets/sso-jaas-config/_keycloak-js-client.json -Dhawtio.authenticationEnabled=true -Dhawtio.realm=console'
+----
 
     Refer to the conceptual YAML example provided earlier for the general structure, and *critically, consult the official AMQ Broker Operator documentation for your specific version* for the exact and up-to-date fields and syntax.
 
