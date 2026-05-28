@@ -43,7 +43,6 @@ metadata:
 spec:
   console:
     expose: true
-    requireLogin: true
     adminUser: superadmin
     adminPassword: <your-secure-password> # xref:../securing-amq-broker/defining-users-roles.adoc[Refer to security guidelines for strong passwords]
   # ... other broker configurations
@@ -123,9 +122,6 @@ In this activity, you will enable the Hawtio Management Console for an existing 
    spec:
      console:
        expose: true
-       requireLogin: true
-       adminUser: amqadmin
-       adminPassword: supersecretpassword123
      # ... (rest of the spec)
    ----
 

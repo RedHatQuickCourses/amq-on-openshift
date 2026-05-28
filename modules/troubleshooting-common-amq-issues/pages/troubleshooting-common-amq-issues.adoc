@@ -1,0 +1,466 @@
+= ActiveMQ Artemis / Red Hat AMQ Broker: Common Issues & Troubleshooting on OpenShift
+
+
+[abstract]
+== Overview
+
+This document covers the most common operational issues encountered when running **ActiveMQ Artemis** or **Red Hat AMQ Broker** deployed on **Kubernetes** or **OpenShift** clusters. For each issue, a brief description, root-cause analysis, and step-by-step troubleshooting guidance are provided.
+
+> All commands assume you have `kubectl` / `oc` access to the target namespace where the broker is deployed. Replace `<namespace>` and `<broker-pod>` with your actual values.
+
+---
+
+== 1. Broker Pod Failing to Start / CrashLoopBackOff
+
+=== Symptoms
+* The broker pod is stuck in `CrashLoopBackOff` or `Error` state.
+* `oc get pods` shows repeated restarts.
+
+=== Common Root Causes
+* Incorrect or missing credentials in Secrets (e.g., `AMQ_USER`, `AMQ_PASSWORD`).
+* Misconfigured `broker.xml` or invalid custom configuration mounted via ConfigMap.
+* Insufficient CPU/memory resource limits causing OOMKill.
+* PersistentVolumeClaim (PVC) not bound or inaccessible.
+* Incorrect image pull policy or missing `imagePullSecret`.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Check pod status and recent events
+oc get pods -n <namespace>
+oc describe pod <broker-pod> -n <namespace>
+
+# 2. View broker container logs
+oc logs <broker-pod> -n <namespace> --previous
+
+# 3. Verify that the PVC is bound
+oc get pvc -n <namespace>
+
+# 4. Inspect the Secret referenced by the deployment
+oc get secret <amq-secret> -n <namespace> -o yaml
+
+# 5. Check resource limits / OOMKilled events
+oc describe pod <broker-pod> -n <namespace> | grep -A5 "Last State"
+----
+
+---
+
+== 2. Messages Piling Up / Consumer Lag
+
+=== Symptoms
+* Queue depth keeps growing; consumers are not processing messages fast enough.
+* High memory usage reported in the broker JMX metrics or Prometheus.
+* `ADDRESS_FULL` warnings appear in the broker log.
+
+=== Common Root Causes
+* Insufficient consumer replicas or slow consumer processing.
+* Address/queue `max-size-bytes` policy reached, triggering `BLOCK` or `FAIL` flow-control.
+* Consumers connected but not acknowledging messages (large in-flight window).
+* Network partition between producer pods and the broker.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Check broker logs for ADDRESS_FULL or flow-control warnings
+oc logs <broker-pod> -n <namespace> | grep -iE "address.full|block|flow"
+
+# 2. Use the Artemis CLI inside the pod to inspect queues
+oc exec -it <broker-pod> -n <namespace> -- \
+  /home/jboss/amq-broker/bin/artemis queue stat --url tcp://localhost:61616 \
+  --user <admin-user> --password <admin-password>
+
+# 3. Check address settings in broker.xml (if mounted via ConfigMap)
+oc get configmap <broker-config> -n <namespace> -o yaml | grep -A10 "address-setting"
+
+# 4. Scale up consumers (example: Deployment)
+oc scale deployment <consumer-deployment> --replicas=5 -n <namespace>
+----
+
+WARNING: Setting `address-full-policy` to `DROP` silently discards messages. Prefer `BLOCK` or `PAGE` in production environments.
+
+---
+
+== 3. Split-Brain / Replication Issues in HA Pairs
+
+=== Symptoms
+* Both the primary and backup broker report themselves as `live`.
+* Messages are duplicated or lost after a failover event.
+* `AMQBrokerReplicationPair` CR shows degraded status on OpenShift.
+
+=== Common Root Causes
+* Network disruption between primary and backup pods (inter-pod connectivity issue).
+* Shared storage (ReadWriteMany PVC) not flushed before backup promotion.
+* Incorrect `ha-policy` configuration in `broker.xml`.
+* Pod anti-affinity rules not configured, placing both pods on the same node.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Check replication status from broker logs
+oc logs <primary-pod> -n <namespace> | grep -iE "replicated|backup|failover"
+oc logs <backup-pod> -n <namespace> | grep -iE "replicated|backup|live"
+
+# 2. Verify network connectivity between pods
+oc exec -it <primary-pod> -n <namespace> -- \
+  curl -v telnet://<backup-pod-ip>:61616
+
+# 3. Inspect the AMQBroker CR status (OpenShift AMQ Operator)
+oc describe amqbroker <broker-name> -n <namespace>
+
+# 4. Check pod scheduling (should be on different nodes)
+oc get pods -n <namespace> -o wide
+----
+
+IMPORTANT: Always configure `podAntiAffinity` in the broker CR or Deployment to prevent co-location of primary and backup pods on the same Kubernetes node.
+
+[source,yaml]
+----
+# Example podAntiAffinity snippet for AMQBroker CR
+spec:
+  deploymentPlan:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                ActiveMQArtemis: <broker-name>
+            topologyKey: "kubernetes.io/hostname"
+----
+
+---
+
+== 4. Connection Refused / Clients Unable to Connect
+
+=== Symptoms
+* Producers or consumers receive `Connection refused` or `AMQConnectionTimedOutException`.
+* The broker pod is running, but the Service endpoint is unreachable.
+
+=== Common Root Causes
+* Kubernetes Service (`ClusterIP`, `NodePort`, or `Route`) not correctly targeting the broker pod.
+* Broker acceptor port not matching the Service `targetPort`.
+* TLS misconfiguration — certificate CN/SAN mismatch or missing Keystore Secret.
+* OpenShift `NetworkPolicy` blocking traffic from client namespaces.
+* Protocol mismatch (e.g., AMQP client connecting to an OpenWire-only acceptor).
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Verify the Service endpoints are populated
+oc get endpoints <broker-service> -n <namespace>
+
+# 2. Check Service definition and port mappings
+oc describe svc <broker-service> -n <namespace>
+
+# 3. Test internal connectivity from a debug pod
+oc run -it --rm debug --image=busybox --restart=Never -n <namespace> -- \
+  nc -zv <broker-service> 61616
+
+# 4. Check Route/Ingress (OpenShift)
+oc get route -n <namespace>
+oc describe route <broker-route> -n <namespace>
+
+# 5. Review NetworkPolicy rules
+oc get networkpolicy -n <namespace>
+oc describe networkpolicy <policy-name> -n <namespace>
+
+# 6. Inspect acceptor TLS config in broker.xml
+oc get configmap <broker-config> -n <namespace> -o yaml | grep -A15 "acceptor"
+----
+
+TIP: When using the AMQ Operator on OpenShift, acceptors defined in the `AMQBroker` CR automatically create corresponding Services. Verify the CR spec matches the client protocol (e.g., `amqp`, `openwire`, `core`).
+
+---
+
+== 5. High Memory / Heap Usage and OutOfMemoryError
+
+=== Symptoms
+* Broker pod is OOMKilled (`oc describe pod` shows `OOMKilled` in `Last State`).
+* GC overhead warnings in broker logs.
+* `java.lang.OutOfMemoryError: Java heap space` in logs.
+
+=== Common Root Causes
+* JVM heap (`-Xmx`) set too low relative to the Kubernetes memory limit.
+* Large persistent message stores loaded into memory.
+* Message paging not enabled, causing all messages to reside in heap.
+* Large numbers of open sessions/connections not being cleaned up.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Identify OOMKilled pods
+oc describe pod <broker-pod> -n <namespace> | grep -A5 "OOMKilled"
+
+# 2. Check current JVM settings inside the pod
+oc exec -it <broker-pod> -n <namespace> -- \
+  cat /home/jboss/amq-broker/etc/artemis.profile | grep -E "Xms|Xmx|JAVA_ARGS"
+
+# 3. Inspect paging configuration
+oc get configmap <broker-config> -n <namespace> -o yaml | grep -A5 "page"
+
+# 4. View live heap via the Artemis web console (if enabled)
+# Port-forward the web console port
+oc port-forward <broker-pod> 8161:8161 -n <namespace>
+# Then open: http://localhost:8161/console
+----
+
+CAUTION: The Kubernetes memory limit must always be *larger* than the JVM `-Xmx` value (allow at least 20–25% headroom for off-heap, metaspace, and OS overhead).
+
+[source,yaml]
+----
+# Recommended resource configuration example
+spec:
+  deploymentPlan:
+    resources:
+      limits:
+        memory: "2Gi"
+      requests:
+        memory: "1Gi"
+  # JVM heap set via env var or artemis.profile
+  env:
+    - name: JAVA_OPTS
+      value: "-Xms512m -Xmx1536m"
+----
+
+---
+
+== 6. Slow Message Throughput / High Latency
+
+=== Symptoms
+* Message send/receive rates are lower than expected.
+* Consumers report intermittent delays.
+* High `GlobalOpenSessionCount` in JMX metrics.
+
+=== Common Root Causes
+* Broker journal stored on slow or throttled storage (e.g., NFS-backed PVC).
+* Journal type set to `NIO` instead of `ASYNCIO` (Linux kernel async I/O not available).
+* Insufficient CPU resources causing scheduling delays.
+* High number of durable subscriptions with large backlogs.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Check journal type and storage class
+oc get pvc -n <namespace>
+oc describe pvc <broker-pvc> -n <namespace> | grep StorageClass
+
+# 2. Inspect journal configuration
+oc get configmap <broker-config> -n <namespace> -o yaml | \
+  grep -E "journal-type|journal-directory|journal-min-files"
+
+# 3. Monitor I/O performance inside the pod
+oc exec -it <broker-pod> -n <namespace> -- iostat -x 2 5
+
+# 4. Check CPU throttling
+oc top pod <broker-pod> -n <namespace>
+
+# 5. Use Artemis CLI to see active sessions
+oc exec -it <broker-pod> -n <namespace> -- \
+  /home/jboss/amq-broker/bin/artemis consumer --url tcp://localhost:61616 \
+  --user <admin-user> --password <admin-password> --verbose
+----
+
+TIP: Use a **block-storage** StorageClass (e.g., `gp3` on AWS, `ssd` on GCP, `managed-premium` on Azure) for broker PVCs. Avoid NFS or `ReadWriteMany` volumes for the data journal — they introduce significant I/O latency.
+
+---
+
+== 7. Dead Letter Queue (DLQ) / Expiry Queue Buildup
+
+=== Symptoms
+* `DLQ` or `ExpiryQueue` depths grow continuously.
+* Consumers are not processing poison messages.
+* Alerts fire on DLQ depth thresholds.
+
+=== Common Root Causes
+* Consumer application throwing exceptions and not handling retries, causing max-delivery-attempts to be exceeded.
+* Message TTL set too low, routing messages to the expiry queue prematurely.
+* No consumer subscribed to the DLQ.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. List messages in the DLQ
+oc exec -it <broker-pod> -n <namespace> -- \
+  /home/jboss/amq-broker/bin/artemis queue browse --name DLQ \
+  --url tcp://localhost:61616 \
+  --user <admin-user> --password <admin-password>
+
+# 2. Check address-setting for max-delivery-attempts and DLQ routing
+oc get configmap <broker-config> -n <namespace> -o yaml | \
+  grep -A10 "dead-letter"
+
+# 3. Move messages back to the original queue (after fixing the consumer)
+oc exec -it <broker-pod> -n <namespace> -- \
+  /home/jboss/amq-broker/bin/artemis queue move-messages \
+  --source-queue DLQ --target-queue <original-queue> \
+  --url tcp://localhost:61616 \
+  --user <admin-user> --password <admin-password>
+----
+
+NOTE: It is good practice to configure separate DLQ consumers or a dedicated re-processing microservice to handle poison messages automatically rather than letting the DLQ grow unbounded.
+
+---
+
+== 8. Prometheus Metrics / Monitoring Not Scraping
+
+=== Symptoms
+* Grafana dashboards show no data for the broker.
+* Prometheus targets show the broker as `DOWN`.
+
+=== Common Root Causes
+* Prometheus annotations missing from the broker Pod or Service.
+* `metrics-plugin` (Prometheus exporter) not enabled in `broker.xml`.
+* `ServiceMonitor` or `PodMonitor` CRD not configured (if using the Prometheus Operator).
+* Port `8161` not exposed or blocked by NetworkPolicy.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Verify the metrics endpoint is accessible
+oc port-forward <broker-pod> 8161:8161 -n <namespace>
+curl http://localhost:8161/metrics
+
+# 2. Check Pod annotations for Prometheus scraping
+oc get pod <broker-pod> -n <namespace> -o jsonpath='{.metadata.annotations}'
+
+# 3. Check ServiceMonitor (if using Prometheus Operator)
+oc get servicemonitor -n <namespace>
+oc describe servicemonitor <broker-monitor> -n <namespace>
+
+# 4. Verify the metrics plugin is enabled in broker.xml
+oc get configmap <broker-config> -n <namespace> -o yaml | grep -A5 "metrics-plugin"
+----
+
+[source,xml]
+----
+<!-- Enable Prometheus metrics plugin in broker.xml -->
+<metrics>
+  <plugin class-name="org.apache.activemq.artemis.core.server.metrics.plugins.ArtemisPrometheusMetricsPlugin"/>
+</metrics>
+----
+
+---
+
+== 9. Operator-Related Issues (AMQ Broker Operator on OpenShift)
+
+=== Symptoms
+* `AMQBroker` CR stuck in `Deploying` or `Failed` state.
+* Operator pod is crashing or not reconciling changes.
+* Broker CR updates (e.g., adding an acceptor) are not reflected in the running pods.
+
+=== Common Root Causes
+* Operator version incompatible with the OpenShift / Kubernetes version.
+* RBAC permissions missing for the operator ServiceAccount.
+* CR spec validation errors (invalid field or value in `AMQBroker` YAML).
+* Operator pod throttled due to low CPU limits.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Check operator pod status and logs
+oc get pods -n <operator-namespace> | grep amq-broker-operator
+oc logs deployment/amq-broker-operator -n <operator-namespace>
+
+# 2. Describe the AMQBroker CR for status conditions
+oc describe amqbroker <broker-name> -n <namespace>
+
+# 3. Check operator ClusterRole / RoleBinding
+oc get clusterrolebinding | grep amq
+oc describe clusterrole amq-broker-operator -n <namespace>
+
+# 4. Validate the CR YAML
+oc explain amqbroker.spec
+
+# 5. Force reconciliation by adding a harmless annotation
+oc annotate amqbroker <broker-name> \
+  troubleshoot.amq/trigger-reconcile="$(date +%s)" \
+  --overwrite -n <namespace>
+----
+
+---
+
+== 10. TLS / SSL Handshake Failures
+
+=== Symptoms
+* Clients report `SSLHandshakeException` or `certificate verify failed`.
+* Broker logs show `PKIX path building failed`.
+
+=== Common Root Causes
+* Certificates expired or not yet valid.
+* Keystore/Truststore passwords incorrect in the Secret referenced by the broker.
+* Client truststore does not contain the broker's CA certificate.
+* OpenShift Route using `passthrough` TLS but broker not configured to terminate TLS.
+
+=== Troubleshooting Steps
+
+[source,bash]
+----
+# 1. Inspect the TLS Secret
+oc get secret <tls-secret> -n <namespace> -o yaml
+
+# 2. Check certificate validity inside the pod
+oc exec -it <broker-pod> -n <namespace> -- \
+  keytool -list -v -keystore /home/jboss/amq-broker/etc/broker.ks \
+  -storepass <keystore-password> | grep -E "Alias|Valid|Owner"
+
+# 3. Test the TLS handshake from a client pod
+oc exec -it <debug-pod> -n <namespace> -- \
+  openssl s_client -connect <broker-service>:61617 -showcerts
+
+# 4. Check acceptor SSL configuration
+oc get configmap <broker-config> -n <namespace> -o yaml | grep -A20 "ssl"
+----
+
+NOTE: On OpenShift, consider using **cert-manager** or the OpenShift **Service CA** to automatically rotate broker certificates, removing manual certificate management toil.
+
+---
+
+== Quick Reference: Useful Commands
+
+[cols="1,2", options="header"]
+|===
+| Task | Command
+
+| View broker pod logs
+| `oc logs <broker-pod> -n <namespace>`
+
+| Open interactive shell in broker pod
+| `oc exec -it <broker-pod> -n <namespace> -- /bin/bash`
+
+| List all queues and depths
+| `/home/jboss/amq-broker/bin/artemis queue stat --url tcp://localhost:61616 --user <u> --password <p>`
+
+| Check address memory usage
+| `/home/jboss/amq-broker/bin/artemis address show --url tcp://localhost:61616 --user <u> --password <p>`
+
+| Purge a queue
+| `/home/jboss/amq-broker/bin/artemis queue purge --name <queue> --url tcp://localhost:61616 --user <u> --password <p>`
+
+| Browse DLQ messages
+| `/home/jboss/amq-broker/bin/artemis queue browse --name DLQ --url tcp://localhost:61616 --user <u> --password <p>`
+
+| Port-forward web console
+| `oc port-forward <broker-pod> 8161:8161 -n <namespace>`
+
+| Check operator logs (OpenShift)
+| `oc logs deployment/amq-broker-operator -n <operator-namespace>`
+|===
+
+---
+
+== Additional Resources
+
+* https://activemq.apache.org/components/artemis/documentation/[ActiveMQ Artemis Documentation]
+* https://access.redhat.com/documentation/en-us/red_hat_amq_broker[Red Hat AMQ Broker Documentation (Red Hat Customer Portal)]
+* https://github.com/artemiscloud/activemq-artemis-operator[ActiveMQ Artemis Operator on GitHub]
+* https://access.redhat.com/solutions/[Red Hat Knowledgebase — AMQ Solutions]
+
+---

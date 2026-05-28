@@ -35,6 +35,8 @@ Duration: 4 hours
 
 *  AMQP Protocol Client Examples
 
+*  Troubleshooting Common AMQ Issues
+
 *  Hands-on Lab: Deploying and Managing AMQ Broker
 
 

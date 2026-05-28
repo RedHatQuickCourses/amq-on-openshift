@@ -46,16 +46,13 @@ metadata:
   name: my-broker
 spec:
   deploymentPlan:
+    persistenceEnabled: true  
     size: 1
     storage:
       size: 10Gi
-      selector: {} # Optional: label selector for PV
-      # journalDirectory: /var/lib/artemis/data/journal # These are default paths within the pod
-      # pagingDirectory: /var/lib/artemis/data/paging
-      # bindingsDirectory: /var/lib/artemis/data/bindings
-      # largeMessagesDirectory: /var/lib/artemis/data/largemessages
+      selector: {}
 ----
-In the `storage` section of the `ActiveMQArtemis` Custom Resource (CR), you specify the desired size for the Persistent Volume. The AMQ Broker Operator then provisions the necessary PV/PVCs and mounts them to the broker pods at the default paths (`/var/lib/artemis/data/journal`, etc.) within the container.
+In the `storage` section of the `ActiveMQArtemis` Custom Resource (CR), you specify the desired size for the Persistent Volume. The AMQ Broker Operator then provisions the necessary PV/PVCs and mounts them to the broker pods at the default paths (`/opt/my-broker/data/journal`, etc.) within the container.
 
 == JDBC Message Store
 
@@ -92,23 +89,149 @@ Deploying with a JDBC message store on OpenShift involves:
 3.  **Datasource Configuration**: The `ActiveMQArtemis` CR needs to be configured with the JDBC connection URL, credentials, and driver details.
 
 .Example: Broker CR fields for JDBC Storage (Conceptual)
-[source,yaml]
+[source,yaml,subs="attributes+"]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: ActiveMQArtemis
+kind: Broker
 metadata:
-  name: my-jdbc-broker
+  name: ha-broker-pair1
 spec:
   deploymentPlan:
     size: 1
-    persistence:
-      config:
-        type: JDBC # Indicate JDBC persistence
-        jdbcStore:
-          jdbcConnectionUrl: jdbc:postgresql://my-db-service:5432/artemis
-          jdbcDriverClassName: org.postgresql.Driver
-          # ... other JDBC properties like user, password (via secretRef)
-          # ... and table names configuration
+    persistenceEnabled: false
+    clustered: false
+    labels:
+      peer.group: jdbc-ha    
+    livenessProbe:
+      exec:
+        command:
+        - test
+        - -f
+        - /home/jboss/amq-broker/lock/cli.lock
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+           - labelSelector:
+               matchExpressions:
+                - key: peer.group
+                   operator: In
+                   values:
+                    - jdbc-ha
+              topologyKey: topology.kubernetes.io/zone
+  env:
+    - name: ARTEMIS_EXTRA_LIBS
+      value: '/amq/init/config/extra-libs'
+  brokerProperties:
+    - 'criticalAnalyser=false'
+    - 'storeConfiguration=DATABASE'
+    - 'storeConfiguration.jdbcDriverClassName=oracle.jdbc.OracleDriver'
+    - 'storeConfiguration.jdbcConnectionUrl=jdbc:oracle:thin:user/password@DB_HOST:1521/SID'
+    - 'storeConfiguration.jdbcLockRenewPeriodMillis=2000'
+    - 'storeConfiguration.jdbcLockExpirationMillis=6000'
+    - 'HAPolicyConfiguration=SHARED_STORE_PRIMARY'              
+  acceptors: # Define messaging protocol listeners
+    - name: amqp
+      protocols: amqp
+      port: 5672
+      sslEnabled: true
+      sslSecret: my-ssl-secret
+      expose: true 
+    - name: core
+      protocols: core
+      port: 61616
+      sslEnabled: false
+  console: # Configure the Hawtio management console
+    expose: true # Expose the console via an OpenShift Route
+    sslEnabled: false
+  resourceTemplates:
+    - selector:
+        kind: StatefulSet
+      patch:
+        kind: StatefulSet
+        spec:
+          template:
+            spec:
+              initContainers:
+                - name: oracle-database-jdbc-driver-init
+                  image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
+                  volumeMounts:
+                    - name: amq-config
+                      mountPath: /amq/init/config
+                  command:
+                    - "bash"
+                    - "-c"
+                    - "mkdir -p /amq/init/config/extra-libs && curl -Lo /amq/init/config/extra-libs/ojdbc11.jar https://download.oracle.com/otn-pub/otn_software/jdbc/233/ojdbc11.jar"
+---
+apiVersion: broker.amq.io/v1beta1
+kind: Broker
+metadata:
+  name: ha-broker-pair2
+spec:
+  deploymentPlan:
+    size: 1
+    persistenceEnabled: false
+    clustered: false
+    labels:
+      peer.group: jdbc-ha    
+    livenessProbe:
+      exec:
+        command:
+        - test
+        - -f
+        - /home/jboss/amq-broker/lock/cli.lock
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+           - labelSelector:
+               matchExpressions:
+                - key: peer.group
+                   operator: In
+                   values:
+                    - jdbc-ha
+              topologyKey: topology.kubernetes.io/zone
+  env:
+    - name: ARTEMIS_EXTRA_LIBS
+      value: '/amq/init/config/extra-libs'
+  brokerProperties:
+    - 'criticalAnalyser=false'
+    - 'storeConfiguration=DATABASE'
+    - 'storeConfiguration.jdbcDriverClassName=oracle.jdbc.OracleDriver'
+    - 'storeConfiguration.jdbcConnectionUrl=jdbc:oracle:thin:user/password@DB_HOST:1521/SID'
+    - 'storeConfiguration.jdbcLockRenewPeriodMillis=2000'
+    - 'storeConfiguration.jdbcLockExpirationMillis=6000'
+    - 'HAPolicyConfiguration=SHARED_STORE_PRIMARY'              
+  acceptors: # Define messaging protocol listeners
+    - name: amqp
+      protocols: amqp
+      port: 5672
+      sslEnabled: true
+      sslSecret: my-ssl-secret
+      expose: true 
+    - name: core
+      protocols: core
+      port: 61616
+      sslEnabled: false
+  console: # Configure the Hawtio management console
+    expose: true # Expose the console via an OpenShift Route
+    sslEnabled: false
+  resourceTemplates:
+    - selector:
+        kind: StatefulSet
+      patch:
+        kind: StatefulSet
+        spec:
+          template:
+            spec:
+              initContainers:
+                - name: oracle-database-jdbc-driver-init
+                  image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
+                  volumeMounts:
+                    - name: amq-config
+                      mountPath: /amq/init/config
+                  command:
+                    - "bash"
+                    - "-c"
+                    - "mkdir -p /amq/init/config/extra-libs && curl -Lo /amq/init/config/extra-libs/ojdbc11.jar https://download.oracle.com/otn-pub/otn_software/jdbc/233/ojdbc11.jar"
 ----
 *Note:* The actual `ActiveMQArtemis` CR structure for JDBC persistence might vary slightly based on the AMQ Broker Operator version and specific configuration options. This is a conceptual representation.
 
@@ -155,6 +278,7 @@ metadata:
   name: my-broker
 spec:
   deploymentPlan:
+    persistenceEnabled: true  
     size: 1
     storage:
       size: 1Gi # Small size for quick testing
@@ -174,15 +298,15 @@ You should see a PVC similar to `my-broker-data-my-broker-ss-0` with a status of
 ----
 oc rsh -n amq-broker-test my-broker-ss-0
 ----
-.  **Inspect Storage Directories**: Once inside the pod, navigate to the default data directory `/var/lib/artemis/data` and observe the persistence files.
+.  **Inspect Storage Directories**: Once inside the pod, navigate to the default data directory `/opt/my-broker/data` and observe the persistence files.
 +
 [source,bash]
 ----
-ls -l /var/lib/artemis/data/
-ls -l /var/lib/artemis/data/journal
-ls -l /var/lib/artemis/data/paging
-ls -l /var/lib/artemis/data/bindings
-ls -l /var/lib/artemis/data/largemessages
+ls -l /opt/my-broker/data/
+ls -l /opt/my-broker/data/journal
+ls -l /opt/my-broker/data/paging
+ls -l /opt/my-broker/data/bindings
+ls -l /opt/my-broker/data/largemessages
 ----
 +
 You will see various files (e.g., `activemq-data-*.amq`, `activemq-bindings-*.amq`, `activemq-journal-*.amq`, `activemq-paging-*.page`) within these directories, indicating the broker is actively using the file-based message store.

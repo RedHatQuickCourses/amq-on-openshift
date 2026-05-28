@@ -40,4 +40,4 @@ Beyond OpenShift's foundational capabilities, AMQ Broker itself offers specific 
 
 == Next Steps
 
-Understanding these foundational HA concepts is crucial for designing and implementing resilient messaging solutions. In subsequent sections, we will delve into the practical aspects of deploying and configuring HA AMQ Broker clusters, exploring different strategies like shared store and replicated live-backup, and how to manage failover and recovery mechanisms effectively.
+Understanding these foundational HA concepts is crucial for designing and implementing resilient messaging solutions. In subsequent sections, we will delve into the practical aspects of deploying and configuring HA AMQ Broker clusters, exploring different strategies like shared store and jdbc store live-backup, and how to manage failover and recovery mechanisms effectively.

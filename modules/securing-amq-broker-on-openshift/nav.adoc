@@ -6,4 +6,3 @@
 ** xref:enabling-rbac-role-based-access-control.adoc[]
 ** xref:defining-users-roles-and-permissions-in-amq-broker.adoc[]
 ** xref:integrating-external-identity-providers-idp.adoc[]
-** xref:configuring-amq-broker-for-external-idp-authentication.adoc[]

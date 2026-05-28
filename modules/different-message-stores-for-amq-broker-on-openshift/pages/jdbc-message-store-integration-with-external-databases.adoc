@@ -40,7 +40,7 @@ Before configuring AMQ Broker for JDBC persistence, ensure the following prerequ
 *   **Database Credentials:** You will need appropriate database credentials (username and password) for the broker to connect and write data. These should be stored securely, ideally in an OpenShift `Secret`.
 *   **JDBC Driver JAR File:** The required JDBC driver JAR file for your specific database must be available to the broker at runtime. This typically involves:
     *   Including the JAR in a custom broker image.
-    *   Mounting the JAR via an OpenShift `ConfigMap` or `Secret` as a volume into the broker pod and ensuring it's on the classpath.
+    *   Mounting the JAR via an OpenShift `ConfigMap` or `Secret` as a volume into the broker pod and ensuring it's on the classpath (if the size of the driver is less than 4 MB).
     *   Using an `initContainer` to download the JAR into a shared volume accessible by the broker container.
     *   Refer to the AMQ Broker documentation (e.g., "Section 4.4, 'Adding third-party JAR files'") for specific instructions on making JAR files available.
 *   **OpenShift Storage (for the database):** If deploying the database itself within OpenShift, ensure you have appropriate Persistent Volumes (PVs) and Persistent Volume Claims (PVCs) configured for database data persistence.
@@ -82,19 +82,63 @@ Here's an example of how these properties would look in an `ActiveMQArtemis` Cus
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
-  name: my-jdbc-broker
+  name: jdbc-store
 spec:
   deploymentPlan:
-    size: 1 # For a single instance with JDBC, or 2 for HA shared store
-    image: registry.redhat.io/amq7/amq-broker-rhel8:latest
-    # ... other deployment plan configurations ...
+    size: 1
+    persistenceEnabled: false
+    clustered: false
+    labels:
+      peer.group: jdbc-store
+    livenessProbe:
+      exec:
+        command:
+        - test
+        - -f
+        - /home/jboss/amq-broker/lock/cli.lock
+  env:
+    - name: ARTEMIS_EXTRA_LIBS
+      value: '/amq/init/config/extra-libs'
   brokerProperties:
-    - "storeConfiguration=DATABASE"
-    - "storeConfiguration.jdbcDriverClassName=org.postgresql.Driver"
-    - "storeConfiguration.jdbcConnectionUrl=jdbc:postgresql://postgresql-service.default.svc.cluster.local:5432/postgres?user=postgres&password=postgres"
-    # Example for HA shared store (if applicable, typically with size: 2)
-    # - "HAPolicyConfiguration=SHARED_STORE_PRIMARY"
-  # ... other broker configurations ...
+    - 'criticalAnalyser=false'
+    - 'storeConfiguration=DATABASE'
+    - 'storeConfiguration.jdbcDriverClassName=org.postgresql.Driver'
+    - 'storeConfiguration.jdbcConnectionUrl=jdbc:postgresql://postgresql-service.default.svc.cluster.local:5432/postgres?user=postgres&password=postgres'
+    - 'storeConfiguration.jdbcLockRenewPeriodMillis=2000'
+    - 'storeConfiguration.jdbcLockExpirationMillis=6000'         
+  acceptors: # Define messaging protocol listeners
+    - name: amqp
+      protocols: amqp
+      port: 5672
+      sslEnabled: true
+      sslSecret: my-ssl-secret
+      expose: true 
+    - name: core
+      protocols: core
+      port: 61616
+      sslEnabled: false
+  console: # Configure the Hawtio management console
+    expose: true # Expose the console via an OpenShift Route
+    sslEnabled: false
+  resourceTemplates:
+    - selector:
+        kind: StatefulSet
+      patch:
+        kind: StatefulSet
+        spec:
+          template:
+            spec:
+              initContainers:
+                - name: postgres-database-jdbc-driver-init
+                  image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
+                  volumeMounts:
+                    - name: amq-config
+                      mountPath: /amq/init/config
+                  command:
+                    - "bash"
+                    - "-c"
+                    - "mkdir -p /amq/init/config/extra-libs && curl -Lo /amq/init/config/extra-libs/postgresql-42.2.19.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.19/postgresql-42.2.19.jar"
+
 ----
 
 *Security Note*: In a real-world scenario, the `user` and `password` in `jdbcConnectionUrl` should be injected via environment variables from an OpenShift Secret, not hardcoded. The AMQ Broker Operator supports injecting secrets into broker pods.
@@ -254,32 +298,59 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:latest
-    requireLogin: false # For simplicity in lab, typically 'true'
-    persistenceEnabled: true # Ensure persistence is enabled
-    env: # Inject DB credentials from secret
-      - name: POSTGRES_USERNAME
-        valueFrom:
-          secretKeyRef:
-            name: postgres-secret
-            key: POSTGRESQL_USER # Assuming postgres-secret contains POSTGRESQL_USER and POSTGRESQL_PASSWORD
-      - name: POSTGRES_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: postgres-secret
-            key: POSTGRES_PASSWORD
-    brokerProperties:
-      - "storeConfiguration=DATABASE"
-      - "storeConfiguration.jdbcDriverClassName=org.postgresql.Driver"
-      - "storeConfiguration.jdbcConnectionUrl=jdbc:postgresql://postgresql-service:5432/postgres?user=$(POSTGRES_USERNAME)&password=$(POSTGRES_PASSWORD)"
-    extraVolumes: # Mount the ConfigMap with the JDBC driver
-      - name: jdbc-driver-volume
-        configMap:
-          name: amq-jdbc-driver
-    extraVolumeMounts:
-      - name: jdbc-driver-volume
-        mountPath: /opt/amq/drivers # A standard location where broker might look or add to classpath
-        readOnly: true
+    persistenceEnabled: false
+    clustered: false
+    labels:
+      peer.group: jdbc-store
+    livenessProbe:
+      exec:
+        command:
+        - test
+        - -f
+        - /home/jboss/amq-broker/lock/cli.lock
+  env:
+    - name: ARTEMIS_EXTRA_LIBS
+      value: '/amq/init/config/extra-libs'
+  brokerProperties:
+    - 'criticalAnalyser=false'
+    - 'storeConfiguration=DATABASE'
+    - 'storeConfiguration.jdbcDriverClassName=org.postgresql.Driver'
+    - 'storeConfiguration.jdbcConnectionUrl=jdbc:postgresql://postgresql-service.default.svc.cluster.local:5432/postgres?user=postgres&password=postgres'
+    - 'storeConfiguration.jdbcLockRenewPeriodMillis=2000'
+    - 'storeConfiguration.jdbcLockExpirationMillis=6000'         
+  acceptors: # Define messaging protocol listeners
+    - name: amqp
+      protocols: amqp
+      port: 5672
+      sslEnabled: true
+      sslSecret: my-ssl-secret
+      expose: true 
+    - name: core
+      protocols: core
+      port: 61616
+      sslEnabled: false
+  console: # Configure the Hawtio management console
+    expose: true # Expose the console via an OpenShift Route
+    sslEnabled: false
+  resourceTemplates:
+    - selector:
+        kind: StatefulSet
+      patch:
+        kind: StatefulSet
+        spec:
+          template:
+            spec:
+              initContainers:
+                - name: postgres-database-jdbc-driver-init
+                  image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
+                  volumeMounts:
+                    - name: amq-config
+                      mountPath: /amq/init/config
+                  command:
+                    - "bash"
+                    - "-c"
+                    - "mkdir -p /amq/init/config/extra-libs && curl -Lo /amq/init/config/extra-libs/postgresql-42.2.19.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.19/postgresql-42.2.19.jar"
+
     # For a production scenario, you'd also need to ensure the driver is on the classpath.
     # The AMQ Broker image often has mechanisms to pick up JARs from specific locations like /opt/amq/drivers.
     # If not, a custom image with the driver pre-installed or explicit classpath modification is needed.

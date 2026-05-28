@@ -122,60 +122,82 @@ This activity focuses on understanding how message store options are specified w
    spec:
      deploymentPlan:
        size: 1
-       image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
+       image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
        persistenceEnabled: true
-       journalType: large_messages_optimized
-       # For file-based persistence, a Persistent Volume Claim (PVC) is automatically created
-       # or you can specify an existing one via `storage.pvc` field if not using default.
-       # The 'journalType' field indicates the type of journal.
-       # Common options:
-       #   'large_messages_optimized': Optimized for large messages (default for new CRs)
-       #   'nondurable_dlr': Non-durable store for delivery acknowledgements
-       #   'nio': Basic Non-Blocking I/O
-       #   'aio': Asynchronous I/O (Linux only, requires libaio)
      # ... other configurations
    ```
 
    Now, consider a conceptual `ActiveMQArtemis` CR snippet for a JDBC message store:
 
    ```yaml
-   apiVersion: broker.amq.io/v1beta1
-   kind: ActiveMQArtemis
-   metadata:
-     name: jdbc-broker
-   spec:
-     deploymentPlan:
-       size: 1
-       image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
-       persistenceEnabled: true
-       # For JDBC, the journalType is implicitly handled by the 'database' configuration
-       # or explicitly set to 'jdbc'.
-       database:
-         type: postgres
-         jdbcUrl: "jdbc:postgresql://postgresql-service:5432/brokerdb"
-         # Reference to a Secret containing database credentials
-         databaseSecret:
-           name: broker-db-secret
-           userKey: database-user
-           passwordKey: database-password
-         # Optionally, specify a custom JDBC driver image if not included in the base image
-         # jdbcDriverImage: my-custom-jdbc-driver-image:latest
-         # Or, configure additional mounts for JDBC driver JARs
-         externalVolumes:
-           - name: jdbc-driver-volume
-             mountPath: /opt/amq/drivers
-             secret:
-               secretName: custom-jdbc-driver-secret
+    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: amq-jdbc-broker
+    spec:
+      deploymentPlan:
+        size: 1
+        persistenceEnabled: false
+        clustered: false
+        labels:
+          peer.group: jdbc-store
+        livenessProbe:
+          exec:
+            command:
+            - test
+            - -f
+            - /home/jboss/amq-broker/lock/cli.lock
+      env:
+        - name: ARTEMIS_EXTRA_LIBS
+          value: '/amq/init/config/extra-libs'
+      brokerProperties:
+        - 'criticalAnalyser=false'
+        - 'storeConfiguration=DATABASE'
+        - 'storeConfiguration.jdbcDriverClassName=org.postgresql.Driver'
+        - 'storeConfiguration.jdbcConnectionUrl=jdbc:postgresql://postgresql-service.default.svc.cluster.local:5432/postgres?user=postgres&password=postgres'
+        - 'storeConfiguration.jdbcLockRenewPeriodMillis=2000'
+        - 'storeConfiguration.jdbcLockExpirationMillis=6000'         
+      acceptors: # Define messaging protocol listeners
+        - name: amqp
+          protocols: amqp
+          port: 5672
+          sslEnabled: true
+          sslSecret: my-ssl-secret
+          expose: true 
+        - name: core
+          protocols: core
+          port: 61616
+          sslEnabled: false
+      console: # Configure the Hawtio management console
+        expose: true # Expose the console via an OpenShift Route
+        sslEnabled: false
+      resourceTemplates:
+        - selector:
+            kind: StatefulSet
+          patch:
+            kind: StatefulSet
+            spec:
+              template:
+                spec:
+                  initContainers:
+                    - name: postgres-database-jdbc-driver-init
+                      image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
+                      volumeMounts:
+                        - name: amq-config
+                          mountPath: /amq/init/config
+                      command:
+                        - "bash"
+                        - "-c"
+                        - "mkdir -p /amq/init/config/extra-libs && curl -Lo /amq/init/config/extra-libs/postgresql-42.2.19.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.19/postgresql-42.2.19.jar"
+
      # ... other configurations
    ```
 
 .  **Observe Key Differences:**
    *   For file-based persistence, the `persistenceEnabled: true` and `journalType` fields are primary. The OpenShift Operator handles PVC creation and mounting.
-   *   For JDBC persistence, the `database` section is introduced. This section specifies:
-        *   `type`: The database type (e.g., `postgres`, `mysql`).
-        *   `jdbcUrl`: The connection string for your database.
-        *   `databaseSecret`: A reference to an OpenShift `Secret` containing the database username and password. This is crucial for securely managing credentials.
-        *   `jdbcDriverImage` or `externalVolumes`: How the JDBC driver JAR file is made available to the broker pod. This is a critical prerequisite.
+   *   For JDBC persistence, the `brokerProperties.storeConfiguration` section is introduced. This section specifies:
+        *   `jdbcDriverClassName`: The database driver class name.
+        *   `jdbcConnectionUrl`: The connection string for your database.
 
 .  **Consider Prerequisites for JDBC:**
    Before deploying an AMQ Broker with a JDBC message store, ensure the following are in place:
