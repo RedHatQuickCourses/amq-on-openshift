@@ -32,7 +32,7 @@ Let's inspect how Services work by looking at an existing Service in an OpenShif
 +
 [,bash]
 ----
-oc login -u developer -p developer https://<openshift-cluster-url>:8443
+oc login -u developer -p developer https://<openshift-cluster-url>:443
 oc new-project amq-broker-project
 ----
 . Deploy a simple application (e.g., an Nginx deployment) to create some pods and a service.
