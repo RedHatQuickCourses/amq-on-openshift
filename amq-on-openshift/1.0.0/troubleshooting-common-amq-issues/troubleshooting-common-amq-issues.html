@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ActiveMQ Artemis / Red Hat AMQ Broker: Common Issues &amp; Troubleshooting on OpenShift :: AMQ Broker on OpenShift: Deployment and Management</title>
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">AMQ Broker on OpenShift: Deployment and Management</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="amq-on-openshift" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/overview-of-message-oriented-middleware.html">Overview of Message-Oriented Middleware</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/introduction-to-message-oriented-middleware-mom.html">Introduction to Message-Oriented Middleware (MOM)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/benefits-and-use-cases-of-asynchronous-messaging.html">Benefits and Use Cases of Asynchronous Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/core-concepts-producers-consumers-queues-topics.html">Core Concepts: Producers, Consumers, Queues, Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview-of-message-oriented-middleware/common-messaging-patterns-point-to-point-publishsubscribe.html">Common Messaging Patterns</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-overview.html">AMQ Broker Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/introduction-to-red-hat-amq-broker.html">Introduction to Red Hat AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/foundations-in-apache-activemq-artemis.html">Foundations in Apache ActiveMQ Artemis</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/key-features-and-capabilities.html">Key Features and Capabilities</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/supported-messaging-protocols-jms-amqp-mqtt-stomp-openwire.html">Supported Messaging Protocols (JMS, AMQP, MQTT, STOMP, OpenWire)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-overview/amq-broker-architecture.html">AMQ Broker Architecture</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/deploying-amq-broker-on-openshift.html">Deploying AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/openshift-container-platform-fundamentals-for-amq-broker.html">OpenShift Container Platform Fundamentals for AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/introduction-to-the-amq-broker-operator.html">Introduction to the AMQ Broker Operator</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/installing-the-amq-broker-operator-via-cli-or-operatorhub.html">Installing the AMQ Broker Operator via CLI or OperatorHub</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/understanding-amq-broker-custom-resource-definitions-crds.html">understanding-amq-broker-custom-resource-definitions-crds.adoc</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/creating-and-managing-broker-instances-with-custom-resources-crs.html">Creating and Managing Broker Instances with Custom Resources (CRs)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../deploying-amq-broker-on-openshift/monitoring-initial-broker-deployment.html">Monitoring Initial Broker Deployment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-amq-broker-on-openshift.html">Scaling AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/concepts-of-horizontal-and-vertical-scaling.html">Concepts of Horizontal and Vertical Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/scaling-broker-pods-and-replicas.html">Scaling Broker Pods and Replicas</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/adjusting-resource-allocations-cpu-memory-for-broker-pods.html">Adjusting Resource Allocations (CPU, Memory) for Broker Pods</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/performance-considerations-for-scaling.html">Performance Considerations for Scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../scaling-amq-broker-on-openshift/best-practices-for-scaling-in-openshift.html">Best Practices for Scaling AMQ Broker on OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/securing-amq-broker-on-openshift.html">Securing AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/encrypting-connections.html">Encrypting Connections</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-ssltls-for-client-broker-communication.html">Configuring SSL/TLS for Client-Broker Communication</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/managing-certificates-and-trust-stores-on-openshift.html">Managing Certificates and Trust Stores on OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-secure-listeners.html">Enabling Secure Listeners</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/enabling-rbac-role-based-access-control.html">Enabling RBAC (Role-Based Access Control)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/defining-users-roles-and-permissions-in-amq-broker.html">Defining Users, Roles, and Permissions in AMQ Broker</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/amq-broker-high-availability-on-openshift.html">AMQ Broker High Availability on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-sharing-for-ha.html">Persistence and Data Sharing for HA</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/different-message-stores-for-amq-broker-on-openshift.html">Different Message Stores for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/overview-of-message-store-options.html">Overview of Message Store Options</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/file-based-message-store-configuration.html">File-Based Message Store Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/jdbc-message-store-integration-with-external-databases.html">JDBC Message Store Integration with External Databases</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/journal-vs-paging-for-message-persistence.html">Journal vs. Paging for Message Persistence</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/choosing-the-appropriate-message-store-strategy.html">Choosing the Appropriate Message Store Strategy</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../different-message-stores-for-amq-broker-on-openshift/openshift-storage-considerations-persistent-volumes.html">Storage Considerations</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/accessing-management-console-for-amq-broker-on-openshift.html">Accessing Management Console for AMQ Broker on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/introduction-to-the-hawtio-management-console.html">Introduction to the Hawtio Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/exposing-the-console-via-openshift-routes.html">Exposing the Hawtio Management Console via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/authentication-and-authorization-for-console-access.html">Authentication and Authorization for AMQ Broker Management Console Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/monitoring-broker-metrics-queues-and-topics.html">Monitoring Broker Metrics, Queues, and Topics</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../accessing-management-console-for-amq-broker-on-openshift/performing-administrative-tasks-through-the-console.html">Performing Administrative Tasks through the Console</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/enabling-external-access-to-brokers-deployed-on-openshift.html">Enabling External Access to Brokers Deployed on OpenShift</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/openshift-networking-concepts-services-routes-ingress.html">OpenShift Networking Concepts: Services, Routes, Ingress</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/exposing-broker-listeners-via-openshift-routes.html">Exposing Broker Listeners via OpenShift Routes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/configuring-client-connections-for-external-access.html">Configuring Client Connections for External Access</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../enabling-external-access-to-brokers-deployed-on-openshift/security-implications-and-best-practices-for-external-access.html">Securing External Access to AMQ Broker on OpenShift</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../core-protocol-client-examples/core-protocol-client-examples.html">Core Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/introduction-to-amq-core-protocol.html">Introduction to AMQ Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/setting-up-a-core-protocol-client-development-environment.html">Setting Up a Core Protocol Client Development Environment</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/developing-producers-and-consumers-with-java-core-protocol.html">Developing Producers and Consumers with Java Core Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-point-to-point-messaging.html">Implementing Point-to-Point Messaging</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../core-protocol-client-examples/implementing-publishsubscribe-messaging.html">Implementing Publish/Subscribe Messaging</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../amqp-protocol-client-examples/amqp-protocol-client-examples.html">AMQP Protocol Client Examples</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/introduction-to-amqp-10-standard.html">Introduction to AMQP 1.0 Standard</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/setting-up-an-amqp-client-development-environment-eg-qpid-jms.html">Setting Up an AMQP Client Development Environment (e.g., Qpid JMS)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/developing-producers-and-consumers-with-amqp-clients-eg-java-python.html">Developing Producers and Consumers with AMQP Clients (e.g., Java, Python)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/connecting-to-amq-broker-using-amqp.html">Connecting to AMQ Broker using AMQP</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../amqp-protocol-client-examples/exploring-advanced-amqp-features.html">Exploring Advanced AMQP Features</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/hands-on-lab-deploying-and-managing-amq-broker.html">Hands-on Lab: Deploying and Managing AMQ Broker</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-a-basic-amq-broker-instance.html">Lab: Deploying a Basic AMQ Broker Instance</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-configuring-external-access-and-testing-client-connectivity.html">Lab: Configuring External Access and Testing Client Connectivity</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-implementing-basic-security-encryption-rbac.html">Lab: Implementing Basic Security (Encryption, RBAC)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-deploying-an-ha-broker-cluster.html">Lab: Deploying an HA Broker Cluster</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-monitoring-with-the-management-console.html">Lab: Monitoring with the Management Console</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../hands-on-lab-deploying-and-managing-amq-broker/lab-developing-and-testing-core-protocol-and-amqp-clients.html">Lab: Developing and Testing Core Protocol and AMQP Clients</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">AMQ Broker on OpenShift: Deployment and Management</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">AMQ Broker on OpenShift: Deployment and Management</a></li>
+    <li><a href="troubleshooting-common-amq-issues.html">ActiveMQ Artemis / Red Hat AMQ Broker: Common Issues &amp; Troubleshooting on OpenShift</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">ActiveMQ Artemis / Red Hat AMQ Broker: Common Issues &amp; Troubleshooting on OpenShift</h1>
+<div class="sect1">
+<h2 id="_overview"><a class="anchor" href="#_overview"></a>Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This document covers the most common operational issues encountered when running <strong>ActiveMQ Artemis</strong> or <strong>Red Hat AMQ Broker</strong> deployed on <strong>Kubernetes</strong> or <strong>OpenShift</strong> clusters. For each issue, a brief description, root-cause analysis, and step-by-step troubleshooting guidance are provided.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>All commands assume you have <code>kubectl</code> / <code>oc</code> access to the target namespace where the broker is deployed. Replace <code>&lt;namespace&gt;</code> and <code>&lt;broker-pod&gt;</code> with your actual values.</p>
+</div>
+</blockquote>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_1_broker_pod_failing_to_start_crashloopbackoff"><a class="anchor" href="#_1_broker_pod_failing_to_start_crashloopbackoff"></a>1. Broker Pod Failing to Start / CrashLoopBackOff</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms"><a class="anchor" href="#_symptoms"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>The broker pod is stuck in <code>CrashLoopBackOff</code> or <code>Error</code> state.</p>
+</li>
+<li>
+<p><code>oc get pods</code> shows repeated restarts.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes"><a class="anchor" href="#_common_root_causes"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Incorrect or missing credentials in Secrets (e.g., <code>AMQ_USER</code>, <code>AMQ_PASSWORD</code>).</p>
+</li>
+<li>
+<p>Misconfigured <code>broker.xml</code> or invalid custom configuration mounted via ConfigMap.</p>
+</li>
+<li>
+<p>Insufficient CPU/memory resource limits causing OOMKill.</p>
+</li>
+<li>
+<p>PersistentVolumeClaim (PVC) not bound or inaccessible.</p>
+</li>
+<li>
+<p>Incorrect image pull policy or missing <code>imagePullSecret</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps"><a class="anchor" href="#_troubleshooting_steps"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Check pod status and recent events
+oc get pods -n &lt;namespace&gt;
+oc describe pod &lt;broker-pod&gt; -n &lt;namespace&gt;
+
+# 2. View broker container logs
+oc logs &lt;broker-pod&gt; -n &lt;namespace&gt; --previous
+
+# 3. Verify that the PVC is bound
+oc get pvc -n &lt;namespace&gt;
+
+# 4. Inspect the Secret referenced by the deployment
+oc get secret &lt;amq-secret&gt; -n &lt;namespace&gt; -o yaml
+
+# 5. Check resource limits / OOMKilled events
+oc describe pod &lt;broker-pod&gt; -n &lt;namespace&gt; | grep -A5 "Last State"</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2_messages_piling_up_consumer_lag"><a class="anchor" href="#_2_messages_piling_up_consumer_lag"></a>2. Messages Piling Up / Consumer Lag</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_2"><a class="anchor" href="#_symptoms_2"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Queue depth keeps growing; consumers are not processing messages fast enough.</p>
+</li>
+<li>
+<p>High memory usage reported in the broker JMX metrics or Prometheus.</p>
+</li>
+<li>
+<p><code>ADDRESS_FULL</code> warnings appear in the broker log.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_2"><a class="anchor" href="#_common_root_causes_2"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Insufficient consumer replicas or slow consumer processing.</p>
+</li>
+<li>
+<p>Address/queue <code>max-size-bytes</code> policy reached, triggering <code>BLOCK</code> or <code>FAIL</code> flow-control.</p>
+</li>
+<li>
+<p>Consumers connected but not acknowledging messages (large in-flight window).</p>
+</li>
+<li>
+<p>Network partition between producer pods and the broker.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_2"><a class="anchor" href="#_troubleshooting_steps_2"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Check broker logs for ADDRESS_FULL or flow-control warnings
+oc logs &lt;broker-pod&gt; -n &lt;namespace&gt; | grep -iE "address.full|block|flow"
+
+# 2. Use the Artemis CLI inside the pod to inspect queues
+oc exec -it &lt;broker-pod&gt; -n &lt;namespace&gt; -- \
+  /home/jboss/amq-broker/bin/artemis queue stat --url tcp://localhost:61616 \
+  --user &lt;admin-user&gt; --password &lt;admin-password&gt;
+
+# 3. Check address settings in broker.xml (if mounted via ConfigMap)
+oc get configmap &lt;broker-config&gt; -n &lt;namespace&gt; -o yaml | grep -A10 "address-setting"
+
+# 4. Scale up consumers (example: Deployment)
+oc scale deployment &lt;consumer-deployment&gt; --replicas=5 -n &lt;namespace&gt;</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Setting <code>address-full-policy</code> to <code>DROP</code> silently discards messages. Prefer <code>BLOCK</code> or <code>PAGE</code> in production environments.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_3_split_brain_replication_issues_in_ha_pairs"><a class="anchor" href="#_3_split_brain_replication_issues_in_ha_pairs"></a>3. Split-Brain / Replication Issues in HA Pairs</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_3"><a class="anchor" href="#_symptoms_3"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Both the primary and backup broker report themselves as <code>live</code>.</p>
+</li>
+<li>
+<p>Messages are duplicated or lost after a failover event.</p>
+</li>
+<li>
+<p><code>AMQBrokerReplicationPair</code> CR shows degraded status on OpenShift.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_3"><a class="anchor" href="#_common_root_causes_3"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Network disruption between primary and backup pods (inter-pod connectivity issue).</p>
+</li>
+<li>
+<p>Shared storage (ReadWriteMany PVC) not flushed before backup promotion.</p>
+</li>
+<li>
+<p>Incorrect <code>ha-policy</code> configuration in <code>broker.xml</code>.</p>
+</li>
+<li>
+<p>Pod anti-affinity rules not configured, placing both pods on the same node.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_3"><a class="anchor" href="#_troubleshooting_steps_3"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Check replication status from broker logs
+oc logs &lt;primary-pod&gt; -n &lt;namespace&gt; | grep -iE "replicated|backup|failover"
+oc logs &lt;backup-pod&gt; -n &lt;namespace&gt; | grep -iE "replicated|backup|live"
+
+# 2. Verify network connectivity between pods
+oc exec -it &lt;primary-pod&gt; -n &lt;namespace&gt; -- \
+  curl -v telnet://&lt;backup-pod-ip&gt;:61616
+
+# 3. Inspect the AMQBroker CR status (OpenShift AMQ Operator)
+oc describe amqbroker &lt;broker-name&gt; -n &lt;namespace&gt;
+
+# 4. Check pod scheduling (should be on different nodes)
+oc get pods -n &lt;namespace&gt; -o wide</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Always configure <code>podAntiAffinity</code> in the broker CR or Deployment to prevent co-location of primary and backup pods on the same Kubernetes node.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Example podAntiAffinity snippet for AMQBroker CR
+spec:
+  deploymentPlan:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                ActiveMQArtemis: &lt;broker-name&gt;
+            topologyKey: "kubernetes.io/hostname"</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_4_connection_refused_clients_unable_to_connect"><a class="anchor" href="#_4_connection_refused_clients_unable_to_connect"></a>4. Connection Refused / Clients Unable to Connect</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_4"><a class="anchor" href="#_symptoms_4"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Producers or consumers receive <code>Connection refused</code> or <code>AMQConnectionTimedOutException</code>.</p>
+</li>
+<li>
+<p>The broker pod is running, but the Service endpoint is unreachable.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_4"><a class="anchor" href="#_common_root_causes_4"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Kubernetes Service (<code>ClusterIP</code>, <code>NodePort</code>, or <code>Route</code>) not correctly targeting the broker pod.</p>
+</li>
+<li>
+<p>Broker acceptor port not matching the Service <code>targetPort</code>.</p>
+</li>
+<li>
+<p>TLS misconfiguration — certificate CN/SAN mismatch or missing Keystore Secret.</p>
+</li>
+<li>
+<p>OpenShift <code>NetworkPolicy</code> blocking traffic from client namespaces.</p>
+</li>
+<li>
+<p>Protocol mismatch (e.g., AMQP client connecting to an OpenWire-only acceptor).</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_4"><a class="anchor" href="#_troubleshooting_steps_4"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Verify the Service endpoints are populated
+oc get endpoints &lt;broker-service&gt; -n &lt;namespace&gt;
+
+# 2. Check Service definition and port mappings
+oc describe svc &lt;broker-service&gt; -n &lt;namespace&gt;
+
+# 3. Test internal connectivity from a debug pod
+oc run -it --rm debug --image=busybox --restart=Never -n &lt;namespace&gt; -- \
+  nc -zv &lt;broker-service&gt; 61616
+
+# 4. Check Route/Ingress (OpenShift)
+oc get route -n &lt;namespace&gt;
+oc describe route &lt;broker-route&gt; -n &lt;namespace&gt;
+
+# 5. Review NetworkPolicy rules
+oc get networkpolicy -n &lt;namespace&gt;
+oc describe networkpolicy &lt;policy-name&gt; -n &lt;namespace&gt;
+
+# 6. Inspect acceptor TLS config in broker.xml
+oc get configmap &lt;broker-config&gt; -n &lt;namespace&gt; -o yaml | grep -A15 "acceptor"</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+When using the AMQ Operator on OpenShift, acceptors defined in the <code>AMQBroker</code> CR automatically create corresponding Services. Verify the CR spec matches the client protocol (e.g., <code>amqp</code>, <code>openwire</code>, <code>core</code>).
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_5_high_memory_heap_usage_and_outofmemoryerror"><a class="anchor" href="#_5_high_memory_heap_usage_and_outofmemoryerror"></a>5. High Memory / Heap Usage and OutOfMemoryError</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_5"><a class="anchor" href="#_symptoms_5"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Broker pod is OOMKilled (<code>oc describe pod</code> shows <code>OOMKilled</code> in <code>Last State</code>).</p>
+</li>
+<li>
+<p>GC overhead warnings in broker logs.</p>
+</li>
+<li>
+<p><code>java.lang.OutOfMemoryError: Java heap space</code> in logs.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_5"><a class="anchor" href="#_common_root_causes_5"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>JVM heap (<code>-Xmx</code>) set too low relative to the Kubernetes memory limit.</p>
+</li>
+<li>
+<p>Large persistent message stores loaded into memory.</p>
+</li>
+<li>
+<p>Message paging not enabled, causing all messages to reside in heap.</p>
+</li>
+<li>
+<p>Large numbers of open sessions/connections not being cleaned up.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_5"><a class="anchor" href="#_troubleshooting_steps_5"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Identify OOMKilled pods
+oc describe pod &lt;broker-pod&gt; -n &lt;namespace&gt; | grep -A5 "OOMKilled"
+
+# 2. Check current JVM settings inside the pod
+oc exec -it &lt;broker-pod&gt; -n &lt;namespace&gt; -- \
+  cat /home/jboss/amq-broker/etc/artemis.profile | grep -E "Xms|Xmx|JAVA_ARGS"
+
+# 3. Inspect paging configuration
+oc get configmap &lt;broker-config&gt; -n &lt;namespace&gt; -o yaml | grep -A5 "page"
+
+# 4. View live heap via the Artemis web console (if enabled)
+# Port-forward the web console port
+oc port-forward &lt;broker-pod&gt; 8161:8161 -n &lt;namespace&gt;
+# Then open: http://localhost:8161/console</code></pre>
+</div>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+The Kubernetes memory limit must always be <strong>larger</strong> than the JVM <code>-Xmx</code> value (allow at least 20–25% headroom for off-heap, metaspace, and OS overhead).
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># Recommended resource configuration example
+spec:
+  deploymentPlan:
+    resources:
+      limits:
+        memory: "2Gi"
+      requests:
+        memory: "1Gi"
+  # JVM heap set via env var or artemis.profile
+  env:
+    - name: JAVA_OPTS
+      value: "-Xms512m -Xmx1536m"</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_6_slow_message_throughput_high_latency"><a class="anchor" href="#_6_slow_message_throughput_high_latency"></a>6. Slow Message Throughput / High Latency</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_6"><a class="anchor" href="#_symptoms_6"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Message send/receive rates are lower than expected.</p>
+</li>
+<li>
+<p>Consumers report intermittent delays.</p>
+</li>
+<li>
+<p>High <code>GlobalOpenSessionCount</code> in JMX metrics.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_6"><a class="anchor" href="#_common_root_causes_6"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Broker journal stored on slow or throttled storage (e.g., NFS-backed PVC).</p>
+</li>
+<li>
+<p>Journal type set to <code>NIO</code> instead of <code>ASYNCIO</code> (Linux kernel async I/O not available).</p>
+</li>
+<li>
+<p>Insufficient CPU resources causing scheduling delays.</p>
+</li>
+<li>
+<p>High number of durable subscriptions with large backlogs.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_6"><a class="anchor" href="#_troubleshooting_steps_6"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Check journal type and storage class
+oc get pvc -n &lt;namespace&gt;
+oc describe pvc &lt;broker-pvc&gt; -n &lt;namespace&gt; | grep StorageClass
+
+# 2. Inspect journal configuration
+oc get configmap &lt;broker-config&gt; -n &lt;namespace&gt; -o yaml | \
+  grep -E "journal-type|journal-directory|journal-min-files"
+
+# 3. Monitor I/O performance inside the pod
+oc exec -it &lt;broker-pod&gt; -n &lt;namespace&gt; -- iostat -x 2 5
+
+# 4. Check CPU throttling
+oc top pod &lt;broker-pod&gt; -n &lt;namespace&gt;
+
+# 5. Use Artemis CLI to see active sessions
+oc exec -it &lt;broker-pod&gt; -n &lt;namespace&gt; -- \
+  /home/jboss/amq-broker/bin/artemis consumer --url tcp://localhost:61616 \
+  --user &lt;admin-user&gt; --password &lt;admin-password&gt; --verbose</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Use a <strong>block-storage</strong> StorageClass (e.g., <code>gp3</code> on AWS, <code>ssd</code> on GCP, <code>managed-premium</code> on Azure) for broker PVCs. Avoid NFS or <code>ReadWriteMany</code> volumes for the data journal — they introduce significant I/O latency.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_7_dead_letter_queue_dlq_expiry_queue_buildup"><a class="anchor" href="#_7_dead_letter_queue_dlq_expiry_queue_buildup"></a>7. Dead Letter Queue (DLQ) / Expiry Queue Buildup</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_7"><a class="anchor" href="#_symptoms_7"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>DLQ</code> or <code>ExpiryQueue</code> depths grow continuously.</p>
+</li>
+<li>
+<p>Consumers are not processing poison messages.</p>
+</li>
+<li>
+<p>Alerts fire on DLQ depth thresholds.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_7"><a class="anchor" href="#_common_root_causes_7"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Consumer application throwing exceptions and not handling retries, causing max-delivery-attempts to be exceeded.</p>
+</li>
+<li>
+<p>Message TTL set too low, routing messages to the expiry queue prematurely.</p>
+</li>
+<li>
+<p>No consumer subscribed to the DLQ.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_7"><a class="anchor" href="#_troubleshooting_steps_7"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. List messages in the DLQ
+oc exec -it &lt;broker-pod&gt; -n &lt;namespace&gt; -- \
+  /home/jboss/amq-broker/bin/artemis queue browse --name DLQ \
+  --url tcp://localhost:61616 \
+  --user &lt;admin-user&gt; --password &lt;admin-password&gt;
+
+# 2. Check address-setting for max-delivery-attempts and DLQ routing
+oc get configmap &lt;broker-config&gt; -n &lt;namespace&gt; -o yaml | \
+  grep -A10 "dead-letter"
+
+# 3. Move messages back to the original queue (after fixing the consumer)
+oc exec -it &lt;broker-pod&gt; -n &lt;namespace&gt; -- \
+  /home/jboss/amq-broker/bin/artemis queue move-messages \
+  --source-queue DLQ --target-queue &lt;original-queue&gt; \
+  --url tcp://localhost:61616 \
+  --user &lt;admin-user&gt; --password &lt;admin-password&gt;</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+It is good practice to configure separate DLQ consumers or a dedicated re-processing microservice to handle poison messages automatically rather than letting the DLQ grow unbounded.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_8_prometheus_metrics_monitoring_not_scraping"><a class="anchor" href="#_8_prometheus_metrics_monitoring_not_scraping"></a>8. Prometheus Metrics / Monitoring Not Scraping</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_8"><a class="anchor" href="#_symptoms_8"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Grafana dashboards show no data for the broker.</p>
+</li>
+<li>
+<p>Prometheus targets show the broker as <code>DOWN</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_8"><a class="anchor" href="#_common_root_causes_8"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Prometheus annotations missing from the broker Pod or Service.</p>
+</li>
+<li>
+<p><code>metrics-plugin</code> (Prometheus exporter) not enabled in <code>broker.xml</code>.</p>
+</li>
+<li>
+<p><code>ServiceMonitor</code> or <code>PodMonitor</code> CRD not configured (if using the Prometheus Operator).</p>
+</li>
+<li>
+<p>Port <code>8161</code> not exposed or blocked by NetworkPolicy.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_8"><a class="anchor" href="#_troubleshooting_steps_8"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Verify the metrics endpoint is accessible
+oc port-forward &lt;broker-pod&gt; 8161:8161 -n &lt;namespace&gt;
+curl http://localhost:8161/metrics
+
+# 2. Check Pod annotations for Prometheus scraping
+oc get pod &lt;broker-pod&gt; -n &lt;namespace&gt; -o jsonpath='{.metadata.annotations}'
+
+# 3. Check ServiceMonitor (if using Prometheus Operator)
+oc get servicemonitor -n &lt;namespace&gt;
+oc describe servicemonitor &lt;broker-monitor&gt; -n &lt;namespace&gt;
+
+# 4. Verify the metrics plugin is enabled in broker.xml
+oc get configmap &lt;broker-config&gt; -n &lt;namespace&gt; -o yaml | grep -A5 "metrics-plugin"</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;!-- Enable Prometheus metrics plugin in broker.xml --&gt;
+&lt;metrics&gt;
+  &lt;plugin class-name="org.apache.activemq.artemis.core.server.metrics.plugins.ArtemisPrometheusMetricsPlugin"/&gt;
+&lt;/metrics&gt;</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_9_operator_related_issues_amq_broker_operator_on_openshift"><a class="anchor" href="#_9_operator_related_issues_amq_broker_operator_on_openshift"></a>9. Operator-Related Issues (AMQ Broker Operator on OpenShift)</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_9"><a class="anchor" href="#_symptoms_9"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>AMQBroker</code> CR stuck in <code>Deploying</code> or <code>Failed</code> state.</p>
+</li>
+<li>
+<p>Operator pod is crashing or not reconciling changes.</p>
+</li>
+<li>
+<p>Broker CR updates (e.g., adding an acceptor) are not reflected in the running pods.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_9"><a class="anchor" href="#_common_root_causes_9"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Operator version incompatible with the OpenShift / Kubernetes version.</p>
+</li>
+<li>
+<p>RBAC permissions missing for the operator ServiceAccount.</p>
+</li>
+<li>
+<p>CR spec validation errors (invalid field or value in <code>AMQBroker</code> YAML).</p>
+</li>
+<li>
+<p>Operator pod throttled due to low CPU limits.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_9"><a class="anchor" href="#_troubleshooting_steps_9"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Check operator pod status and logs
+oc get pods -n &lt;operator-namespace&gt; | grep amq-broker-operator
+oc logs deployment/amq-broker-operator -n &lt;operator-namespace&gt;
+
+# 2. Describe the AMQBroker CR for status conditions
+oc describe amqbroker &lt;broker-name&gt; -n &lt;namespace&gt;
+
+# 3. Check operator ClusterRole / RoleBinding
+oc get clusterrolebinding | grep amq
+oc describe clusterrole amq-broker-operator -n &lt;namespace&gt;
+
+# 4. Validate the CR YAML
+oc explain amqbroker.spec
+
+# 5. Force reconciliation by adding a harmless annotation
+oc annotate amqbroker &lt;broker-name&gt; \
+  troubleshoot.amq/trigger-reconcile="$(date +%s)" \
+  --overwrite -n &lt;namespace&gt;</code></pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_10_tls_ssl_handshake_failures"><a class="anchor" href="#_10_tls_ssl_handshake_failures"></a>10. TLS / SSL Handshake Failures</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_symptoms_10"><a class="anchor" href="#_symptoms_10"></a>Symptoms</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Clients report <code>SSLHandshakeException</code> or <code>certificate verify failed</code>.</p>
+</li>
+<li>
+<p>Broker logs show <code>PKIX path building failed</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_common_root_causes_10"><a class="anchor" href="#_common_root_causes_10"></a>Common Root Causes</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Certificates expired or not yet valid.</p>
+</li>
+<li>
+<p>Keystore/Truststore passwords incorrect in the Secret referenced by the broker.</p>
+</li>
+<li>
+<p>Client truststore does not contain the broker&#8217;s CA certificate.</p>
+</li>
+<li>
+<p>OpenShift Route using <code>passthrough</code> TLS but broker not configured to terminate TLS.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_steps_10"><a class="anchor" href="#_troubleshooting_steps_10"></a>Troubleshooting Steps</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># 1. Inspect the TLS Secret
+oc get secret &lt;tls-secret&gt; -n &lt;namespace&gt; -o yaml
+
+# 2. Check certificate validity inside the pod
+oc exec -it &lt;broker-pod&gt; -n &lt;namespace&gt; -- \
+  keytool -list -v -keystore /home/jboss/amq-broker/etc/broker.ks \
+  -storepass &lt;keystore-password&gt; | grep -E "Alias|Valid|Owner"
+
+# 3. Test the TLS handshake from a client pod
+oc exec -it &lt;debug-pod&gt; -n &lt;namespace&gt; -- \
+  openssl s_client -connect &lt;broker-service&gt;:61617 -showcerts
+
+# 4. Check acceptor SSL configuration
+oc get configmap &lt;broker-config&gt; -n &lt;namespace&gt; -o yaml | grep -A20 "ssl"</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+On OpenShift, consider using <strong>cert-manager</strong> or the OpenShift <strong>Service CA</strong> to automatically rotate broker certificates, removing manual certificate management toil.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_quick_reference_useful_commands"><a class="anchor" href="#_quick_reference_useful_commands"></a>Quick Reference: Useful Commands</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Task</th>
+<th class="tableblock halign-left valign-top">Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">View broker pod logs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>oc logs &lt;broker-pod&gt; -n &lt;namespace&gt;</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Open interactive shell in broker pod</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>oc exec -it &lt;broker-pod&gt; -n &lt;namespace&gt;&#8201;&#8212;&#8201;/bin/bash</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List all queues and depths</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/home/jboss/amq-broker/bin/artemis queue stat --url tcp://localhost:61616 --user &lt;u&gt; --password &lt;p&gt;</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Check address memory usage</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/home/jboss/amq-broker/bin/artemis address show --url tcp://localhost:61616 --user &lt;u&gt; --password &lt;p&gt;</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Purge a queue</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/home/jboss/amq-broker/bin/artemis queue purge --name &lt;queue&gt; --url tcp://localhost:61616 --user &lt;u&gt; --password &lt;p&gt;</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Browse DLQ messages</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/home/jboss/amq-broker/bin/artemis queue browse --name DLQ --url tcp://localhost:61616 --user &lt;u&gt; --password &lt;p&gt;</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Port-forward web console</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>oc port-forward &lt;broker-pod&gt; 8161:8161 -n &lt;namespace&gt;</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Check operator logs (OpenShift)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>oc logs deployment/amq-broker-operator -n &lt;operator-namespace&gt;</code></p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_additional_resources"><a class="anchor" href="#_additional_resources"></a>Additional Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://activemq.apache.org/components/artemis/documentation/">ActiveMQ Artemis Documentation</a></p>
+</li>
+<li>
+<p><a href="https://access.redhat.com/documentation/en-us/red_hat_amq_broker">Red Hat AMQ Broker Documentation (Red Hat Customer Portal)</a></p>
+</li>
+<li>
+<p><a href="https://github.com/artemiscloud/activemq-artemis-operator">ActiveMQ Artemis Operator on GitHub</a></p>
+</li>
+<li>
+<p><a href="https://access.redhat.com/solutions/">Red Hat Knowledgebase — AMQ Solutions</a></p>
+</li>
+</ul>
+</div>
+<hr>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

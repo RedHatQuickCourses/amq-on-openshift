@@ -171,9 +171,6 @@
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
   </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
-  </li>
 </ul>
   </li>
 </ul>
@@ -188,16 +185,13 @@
     <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
-  </li>
-  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-sharing-for-ha.html">Persistence and Data Sharing for HA</a>
   </li>
 </ul>
   </li>
@@ -654,17 +648,8 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
+    image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
     persistenceEnabled: true
-    journalType: large_messages_optimized
-    # For file-based persistence, a Persistent Volume Claim (PVC) is automatically created
-    # or you can specify an existing one via `storage.pvc` field if not using default.
-    # The 'journalType' field indicates the type of journal.
-    # Common options:
-    #   'large_messages_optimized': Optimized for large messages (default for new CRs)
-    #   'nondurable_dlr': Non-durable store for delivery acknowledgements
-    #   'nio': Basic Non-Blocking I/O
-    #   'aio': Asynchronous I/O (Linux only, requires libaio)
   # ... other configurations
 ```</pre>
 </div>
@@ -677,34 +662,70 @@ spec:
 <div class="literalblock">
 <div class="content">
 <pre>```yaml
-apiVersion: broker.amq.io/v1beta1
-kind: ActiveMQArtemis
-metadata:
-  name: jdbc-broker
-spec:
-  deploymentPlan:
-    size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
-    persistenceEnabled: true
-    # For JDBC, the journalType is implicitly handled by the 'database' configuration
-    # or explicitly set to 'jdbc'.
-    database:
-      type: postgres
-      jdbcUrl: "jdbc:postgresql://postgresql-service:5432/brokerdb"
-      # Reference to a Secret containing database credentials
-      databaseSecret:
-        name: broker-db-secret
-        userKey: database-user
-        passwordKey: database-password
-      # Optionally, specify a custom JDBC driver image if not included in the base image
-      # jdbcDriverImage: my-custom-jdbc-driver-image:latest
-      # Or, configure additional mounts for JDBC driver JARs
-      externalVolumes:
-        - name: jdbc-driver-volume
-          mountPath: /opt/amq/drivers
-          secret:
-            secretName: custom-jdbc-driver-secret
-  # ... other configurations
+ apiVersion: broker.amq.io/v1beta1
+ kind: ActiveMQArtemis
+ metadata:
+   name: amq-jdbc-broker
+ spec:
+   deploymentPlan:
+     size: 1
+     persistenceEnabled: false
+     clustered: false
+     labels:
+       peer.group: jdbc-store
+     livenessProbe:
+       exec:
+         command:
+         - test
+         - -f
+         - /home/jboss/amq-broker/lock/cli.lock
+   env:
+     - name: ARTEMIS_EXTRA_LIBS
+       value: '/amq/init/config/extra-libs'
+   brokerProperties:
+     - 'criticalAnalyser=false'
+     - 'storeConfiguration=DATABASE'
+     - 'storeConfiguration.jdbcDriverClassName=org.postgresql.Driver'
+     - 'storeConfiguration.jdbcConnectionUrl=jdbc:postgresql://postgresql-service.default.svc.cluster.local:5432/postgres?user=postgres&amp;password=postgres'
+     - 'storeConfiguration.jdbcLockRenewPeriodMillis=2000'
+     - 'storeConfiguration.jdbcLockExpirationMillis=6000'
+   acceptors: # Define messaging protocol listeners
+     - name: amqp
+       protocols: amqp
+       port: 5672
+       sslEnabled: true
+       sslSecret: my-ssl-secret
+       expose: true
+     - name: core
+       protocols: core
+       port: 61616
+       sslEnabled: false
+   console: # Configure the Hawtio management console
+     expose: true # Expose the console via an OpenShift Route
+     sslEnabled: false
+   resourceTemplates:
+     - selector:
+         kind: StatefulSet
+       patch:
+         kind: StatefulSet
+         spec:
+           template:
+             spec:
+               initContainers:
+                 - name: postgres-database-jdbc-driver-init
+                   image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
+                   volumeMounts:
+                     - name: amq-config
+                       mountPath: /amq/init/config
+                   command:
+                     - "bash"
+                     - "-c"
+                     - "mkdir -p /amq/init/config/extra-libs &amp;&amp; curl -Lo /amq/init/config/extra-libs/postgresql-42.2.19.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.19/postgresql-42.2.19.jar"</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>  # ... other configurations
 ```</pre>
 </div>
 </div>
@@ -717,19 +738,13 @@ spec:
 <p>For file-based persistence, the <code>persistenceEnabled: true</code> and <code>journalType</code> fields are primary. The OpenShift Operator handles PVC creation and mounting.</p>
 </li>
 <li>
-<p>For JDBC persistence, the <code>database</code> section is introduced. This section specifies:</p>
+<p>For JDBC persistence, the <code>brokerProperties.storeConfiguration</code> section is introduced. This section specifies:</p>
 </li>
 <li>
-<p><code>type</code>: The database type (e.g., <code>postgres</code>, <code>mysql</code>).</p>
+<p><code>jdbcDriverClassName</code>: The database driver class name.</p>
 </li>
 <li>
-<p><code>jdbcUrl</code>: The connection string for your database.</p>
-</li>
-<li>
-<p><code>databaseSecret</code>: A reference to an OpenShift <code>Secret</code> containing the database username and password. This is crucial for securely managing credentials.</p>
-</li>
-<li>
-<p><code>jdbcDriverImage</code> or <code>externalVolumes</code>: How the JDBC driver JAR file is made available to the broker pod. This is a critical prerequisite.</p>
+<p><code>jdbcConnectionUrl</code>: The connection string for your database.</p>
 </li>
 </ul>
 </div>

@@ -171,9 +171,6 @@
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../securing-amq-broker-on-openshift/integrating-external-identity-providers-idp.html">Integrating External Identity Providers (IDP)</a>
   </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../securing-amq-broker-on-openshift/configuring-amq-broker-for-external-idp-authentication.html">Configuring AMQ Broker for External Identity Provider (IDP) Authentication</a>
-  </li>
 </ul>
   </li>
 </ul>
@@ -188,16 +185,13 @@
     <a class="nav-link" href="../amq-broker-high-availability-on-openshift/introduction-to-high-availability-ha-concepts.html">Introduction to High Availability (HA) Concepts</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/broker-clustering-strategies-shared-store-vs-replicated-live-backup.html">Broker Clustering Strategies: Shared Store vs. Replicated Live-Backup</a>
-  </li>
-  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../amq-broker-high-availability-on-openshift/deploying-and-configuring-an-ha-broker-pair.html">Deploying and Configuring an HA Broker Pair</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../amq-broker-high-availability-on-openshift/understanding-failover-and-recovery-mechanisms.html">Understanding Failover and Recovery Mechanisms</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-replication-for-ha.html">Persistence and Data Replication for HA</a>
+    <a class="nav-link" href="../amq-broker-high-availability-on-openshift/persistence-and-data-sharing-for-ha.html">Persistence and Data Sharing for HA</a>
   </li>
 </ul>
   </li>
@@ -471,22 +465,18 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.11
-    # Enable persistence for this broker instance
     persistenceEnabled: true
+    storage:
+      size: 1Gi
+    # Optional: specify a storage class if you don't want to use the default
+    # storageClassName: "ocs-storagecluster-cephfs"
   brokerProperties:
     # Specify the full directory paths on the mounted persistent volume
-    # These paths are relative to the root of the mounted volume, which is /var/lib/amq/data by default
-    - journalDirectory=/var/lib/amq/data/journal
-    - pagingDirectory=/var/lib/amq/data/paging
-    - bindingsDirectory=/var/lib/amq/data/bindings
-    - largeMessagesDirectory=/var/lib/amq/data/large-messages
-  # Define the storage requirements for the broker's persistence
-  container:
-    storage:
-      size: 5Gi # Request a 5Gi persistent volume for the broker data
-      # Optional: specify a storage class if you don't want to use the default
-      # storageClassName: "ocs-storagecluster-cephfs"</code></pre>
+    # These paths are relative to the root of the mounted volume, which is /opt/my-broker/data by default
+    - journalDirectory=/opt/my-broker/data/journal
+    - pagingDirectory=/opt/my-broker/data/paging
+    - bindingsDirectory=/opt/my-broker/data/bindings
+    - largeMessagesDirectory=/opt/my-broker/data/large-messages</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -498,10 +488,10 @@ spec:
 <p><code>spec.deploymentPlan.persistenceEnabled: true</code> explicitly enables persistence for the broker instance.</p>
 </li>
 <li>
-<p><code>spec.container.storage.size</code> requests a Persistent Volume Claim (PVC) of 5Gi. The AMQ Broker Operator will automatically create this PVC if one with the specified size and access mode doesn&#8217;t already exist and bind it to the broker pod. The Operator mounts this PVC at <code>/var/lib/amq/data</code> within the broker container.</p>
+<p><code>spec.deploymentPlan.storage.size</code> requests a Persistent Volume Claim (PVC) of 5Gi. The AMQ Broker Operator will automatically create this PVC if one with the specified size and access mode doesn&#8217;t already exist and bind it to the broker pod. The Operator mounts this PVC at <code>/opt/my-broker/data</code> within the broker container.</p>
 </li>
 <li>
-<p>The <code>brokerProperties</code> define the <strong>paths</strong> within the mounted volume (<code>/var/lib/amq/data</code>) where AMQ Broker will store its data. The Operator ensures these subdirectories are created and managed correctly.</p>
+<p>The <code>brokerProperties</code> define the <strong>paths</strong> within the mounted volume (<code>/opt/my-broker/data</code>) where AMQ Broker will store its data. The Operator ensures these subdirectories are created and managed correctly.</p>
 </li>
 </ul>
 </div>
@@ -585,21 +575,15 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.11
-    # Crucial: Enable persistence using the storage configuration below
     persistenceEnabled: true
+    storage:
+     size: 1Gi
   brokerProperties:
     # Define the directory paths for persistence within the mounted volume
-    - journalDirectory=/var/lib/amq/data/journal
-    - pagingDirectory=/var/lib/amq/data/paging
-    - bindingsDirectory=/var/lib/amq/data/bindings
-    - largeMessagesDirectory=/var/lib/amq/data/large-messages
-  container:
-    storage:
-      size: 2Gi # Request a 2Gi Persistent Volume Claim
-      # Optional: Uncomment and specify a storage class if your cluster has multiple
-      # and you don't want to use the default one.
-      # storageClassName: "your-preferred-storage-class"
+    - journalDirectory=/opt/my-broker/data/journal
+    - pagingDirectory=/opt/my-broker/data/paging
+    - bindingsDirectory=/opt/my-broker/data/bindings
+    - largeMessagesDirectory=/opt/my-broker/data/large-messages
 ----</pre>
 </div>
 </div>
@@ -649,15 +633,15 @@ You should see a PVC named <code>my-file-broker-pvc-0</code> (or similar, depend
 <p>Inspect the mounted volume inside the pod to confirm the PVC is being used:
 [source,bash]
 ----
-oc exec -it $(oc get pod -l app=my-file-broker -o jsonpath='{.items[0].metadata.name}')&#8201;&#8212;&#8201;df -h /var/lib/amq/data
+oc exec -it $(oc get pod -l app=my-file-broker -o jsonpath='{.items[0].metadata.name}')&#8201;&#8212;&#8201;df -h /opt/my-broker/data
 ----
-This command will show the mounted file system at <code>/var/lib/amq/data</code> and its usage, confirming the PV is correctly mounted within the broker pod.</p>
+This command will show the mounted file system at <code>/opt/my-broker/data</code> and its usage, confirming the PV is correctly mounted within the broker pod.</p>
 </li>
 <li>
 <p>List the created persistence directories within the mounted volume:
 [source,bash]
 ----
-oc exec -it $(oc get pod -l app=my-file-broker -o jsonpath='{.items[0].metadata.name}')&#8201;&#8212;&#8201;ls -l /var/lib/amq/data
+oc exec -it $(oc get pod -l app=my-file-broker -o jsonpath='{.items[0].metadata.name}')&#8201;&#8212;&#8201;ls -l /opt/my-broker/data
 ----
 You should observe the <code>journal</code>, <code>paging</code>, <code>bindings</code>, and <code>large-messages</code> directories, confirming the broker is set up for file-based persistence.</p>
 </li>
