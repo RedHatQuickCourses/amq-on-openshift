@@ -27,6 +27,8 @@ nav:
 
 - modules/amqp-protocol-client-examples/nav.adoc
 
+- modules/troubleshooting-common-amq-issues/nav.adoc
+
 - modules/hands-on-lab-deploying-and-managing-amq-broker/nav.adoc
 
 - modules/appendix/nav.adoc
