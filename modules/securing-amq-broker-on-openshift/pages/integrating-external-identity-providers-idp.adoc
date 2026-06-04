@@ -1,6 +1,5 @@
 #  Integrating External Identity Providers (IDP)
 
-= Integrating External Identity Providers (IDP)
 
 This section delves into integrating Red Hat AMQ Broker on OpenShift with external Identity Providers (IDP). This capability is crucial for organizations that need to centralize user management and leverage existing authentication systems for their messaging infrastructure.
 

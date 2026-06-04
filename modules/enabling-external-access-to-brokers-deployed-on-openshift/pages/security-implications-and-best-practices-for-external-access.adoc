@@ -52,7 +52,7 @@ Clients connecting to a TLS-enabled broker listener must be configured with the 
 
 The provided context highlights how to configure different protocol clients for TLS.
 
-===== OpenWire Client with Two-Way TLS
+==== OpenWire Client with Two-Way TLS
 
 For an external OpenWire client using two-way TLS, the connection URL must specify the `ssl://` protocol and the port (typically 443 for external routes). Additionally, Java Virtual Machine (JVM) flags are used to provide the paths and passwords for the client's key store and trust store.
 
@@ -69,7 +69,7 @@ ssl://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:44
 *   Replace `my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain` with the actual route hostname.
 *   Replace `<key_store_password>` and `<trust_store_password>` with your actual passwords.
 
-===== AMQP Client with One-Way TLS
+==== AMQP Client with One-Way TLS
 
 For an external AMQP client using one-way TLS, the connection URL uses `amqps://` and includes parameters for the trust store. The `transport.verifyHost=true` parameter is crucial for host name verification, preventing man-in-the-middle attacks.
 
@@ -82,7 +82,7 @@ transport.verifyHost=true&transport.trustStoreLocation=~/client.ts&transport.tru
 *   Replace `my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain` with the actual route hostname.
 *   Replace `<trust_store_password>` with your actual password.
 
-===== AMQP Client with Two-Way TLS
+==== AMQP Client with Two-Way TLS
 
 For an external AMQP client using two-way TLS, both the key store and trust store parameters are included in the connection URL.
 

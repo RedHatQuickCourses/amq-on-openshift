@@ -1,6 +1,5 @@
 #  AMQ Broker Overview
 
-=== AMQ Broker Overview
 
 Red Hat AMQ Broker is a flexible, high-performance, and lightweight message broker built on xref:amq-broker-on-openshift-deployment-and-management.adoc#_foundations_in_apache_activemq_artemis[Apache ActiveMQ Artemis]. It facilitates asynchronous messaging by acting as xref:amq-broker-on-openshift-deployment-and-management.adoc#_introduction_to_message_oriented_middleware_mom[Message-Oriented Middleware (MOM)].
 

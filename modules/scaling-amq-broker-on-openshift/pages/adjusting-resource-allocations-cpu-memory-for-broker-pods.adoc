@@ -1,6 +1,5 @@
 #  Adjusting Resource Allocations (CPU, Memory) for Broker Pods
 
-= Adjusting Resource Allocations (CPU, Memory) for Broker Pods
 
 This section details how to configure CPU and memory resource allocations for your AMQ Broker pods deployed on OpenShift. Properly setting these values is crucial for ensuring stable performance, efficient resource utilization, and predictable behavior of your messaging infrastructure.
 

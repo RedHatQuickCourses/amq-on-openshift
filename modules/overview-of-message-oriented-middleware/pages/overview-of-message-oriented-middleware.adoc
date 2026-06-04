@@ -1,6 +1,5 @@
 #  Overview of Message-Oriented Middleware
 
-=== Overview of Message-Oriented Middleware
 
 Message-Oriented Middleware (MOM) is a software layer that enables communication between distributed applications by sending and receiving messages. It facilitates asynchronous messaging, decoupling senders (producers) from receivers (consumers).
 

@@ -1,6 +1,5 @@
 #  Scaling AMQ Broker on OpenShift
 
-=== Scaling AMQ Broker on OpenShift
 
 Scaling AMQ Broker on OpenShift involves adjusting its capacity to handle varying message loads. This includes:
 

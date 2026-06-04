@@ -14,9 +14,9 @@ In a P2P model:
 *   *Queue*: A persistent storage mechanism that holds messages in the order they are received.
 *   *Consumer*: Retrieves messages from the queue. Once a message is consumed, it is removed from the queue.
 
-As per the xref:../../overview/overview-of-message-oriented-middleware.adoc#_queue[product documentation^], a *queue* implements point-to-point semantics: "Each message is seen by only one consumer, and the message is removed from the queue after it is read."
+As per the xref:../../overview/overview-of-message-oriented-middleware.adoc#_queue[product documentation], a *queue* implements point-to-point semantics: "Each message is seen by only one consumer, and the message is removed from the queue after it is read."
 
-Key characteristics of Point-to-Point messaging:
+*Key characteristics of Point-to-Point messaging:*
 
 *   *Single Consumer*: Regardless of how many consumers are listening to a queue, each message is delivered to only one of them.
 *   *Message Removal*: After a consumer successfully processes a message, the message is removed from the queue, ensuring it's not processed again by another consumer.

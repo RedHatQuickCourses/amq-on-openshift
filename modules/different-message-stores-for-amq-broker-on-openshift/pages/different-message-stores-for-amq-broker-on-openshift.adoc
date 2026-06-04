@@ -1,6 +1,5 @@
 #  Different Message Stores for AMQ Broker on OpenShift
 
-=== Different Message Stores for AMQ Broker on OpenShift
 
 AMQ Broker uses message stores for persistence, ensuring message durability and reliability. On OpenShift, various strategies are available:
 

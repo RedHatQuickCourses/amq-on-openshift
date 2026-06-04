@@ -21,7 +21,7 @@ Regardless of the method chosen, once the Operator is deployed, it continuously 
 
 The CLI method offers precise control over the installation process, making it suitable for environments requiring specific version deployments or integration into CI/CD pipelines.
 
-=== Prerequisites
+== Prerequisites
 
 Before proceeding with the CLI installation, ensure you have the following:
 
@@ -30,7 +30,7 @@ Before proceeding with the CLI installation, ensure you have the following:
 *   The AMQ Broker Operator installation archive (`amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip` or similar) downloaded from the Red Hat Customer Portal. This archive contains the necessary deployment files, including `operator.yaml`.
 *   An existing OpenShift project where you intend to manage your AMQ Broker deployments.
 
-=== Hands-on Activity: Deploying the Operator via CLI
+== Hands-on Activity: Deploying the Operator via CLI
 
 Follow these steps to install the AMQ Broker Operator using the OpenShift CLI.
 
@@ -41,6 +41,7 @@ You need to download the AMQ Broker Operator installation files from the Red Hat
 . Locate the `AMQ Broker 7.13.3 Operator Installation and Example Files` and click `Download`. The `amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip` archive will download automatically.
 
 .Extract the Operator Files
+
 Once downloaded, prepare a directory and extract the contents of the archive.
 
 . Create a new directory for your operator files:
@@ -74,6 +75,7 @@ $ unzip amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip
 This will create a `amq-broker-operator-7.13.3-ocp-install-examples` directory containing the `deploy` folder and other example files.
 
 .Log in to OpenShift and Select Project
+
 You need to log in to your OpenShift cluster as an administrator and switch to the project where you want to install the Operator.
 
 . Log in to your OpenShift cluster:
@@ -95,6 +97,7 @@ $ oc project <project-name>
 Replace `<project-name>` with the name of your target OpenShift project (e.g., `amq-broker-project`).
 
 .Deploy the Operator
+
 The necessary deployment manifests are found within the extracted `deploy` directory.
 
 . Navigate to the `deploy` directory within the extracted operator files:
@@ -114,6 +117,7 @@ $ oc apply -f operator.yaml
 This command creates the necessary Kubernetes resources (Deployment, Service Account, ClusterRole, ClusterRoleBinding, etc.) that constitute the AMQ Broker Operator.
 
 .Verify Operator Deployment
+
 Confirm that the Operator pod is running successfully.
 
 . Check the status of the Operator's deployment:
@@ -154,7 +158,7 @@ Once the Operator pod is running, the AMQ Broker Operator is successfully instal
 
 For a more guided and graphical installation experience, OperatorHub in the OpenShift web console is the recommended method.
 
-=== Prerequisites
+== Prerequisites
 
 Before installing via OperatorHub, ensure you meet the following conditions:
 
@@ -167,7 +171,7 @@ Before installing via OperatorHub, ensure you meet the following conditions:
 In OperatorHub, you can typically only install the latest Operator version provided in each channel. If you require an earlier version of an Operator, you *must* install it by using the CLI, as described in xref:deploying-amq-broker-on-openshift.adoc#installing-the-operator-using-the-cli[Installing the Operator using the CLI].
 ====
 
-=== Hands-on Activity: Deploying the Operator via OperatorHub
+== Hands-on Activity: Deploying the Operator via OperatorHub
 
 Follow these steps to install the AMQ Broker Operator using the OpenShift web console's OperatorHub.
 

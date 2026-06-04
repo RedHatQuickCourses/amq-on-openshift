@@ -1,6 +1,5 @@
 #  Performance Considerations for Scaling
 
-= Performance Considerations for Scaling AMQ Broker on OpenShift
 
 When scaling your Red Hat AMQ Broker deployment on OpenShift, it's not just about adding more pods or increasing their count; it's crucially about ensuring each pod has the right resources to perform optimally. Misconfigured resource allocations can lead to performance bottlenecks, instability, or inefficient use of your OpenShift cluster, directly impacting message throughput, latency, and overall system reliability. This section delves into the key performance considerations related to resource management when scaling AMQ Broker instances.
 

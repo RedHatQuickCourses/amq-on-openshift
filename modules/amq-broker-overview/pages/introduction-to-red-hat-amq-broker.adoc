@@ -1,7 +1,6 @@
 #  Introduction to Red Hat AMQ Broker
 
 [#_introduction_to_red_hat_amq_broker]
-= Introduction to Red Hat AMQ Broker
 
 This section provides a foundational understanding of Red Hat AMQ Broker, covering its identity, underlying technology, core features, supported messaging protocols, and architectural overview. Mastering these introductory concepts is essential before proceeding to its deployment and management on OpenShift.
 

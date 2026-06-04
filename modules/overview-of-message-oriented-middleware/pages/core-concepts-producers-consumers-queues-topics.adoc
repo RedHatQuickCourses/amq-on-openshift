@@ -51,7 +51,8 @@ A xref:amq-broker-on-openshift::overview.adoc#_queue[queue] implements *point-to
 *   **Ordering:** Messages are typically processed in the order they were received (FIFO - First-In, First-Out).
 
 [EXAMPLE]
-.Point-to-Point Messaging with Queues
+.*Point-to-Point Messaging with Queues*
+
 Imagine an online order processing system. Each new order is placed into an `OrderQueue`. Multiple worker processes (consumers) can listen to this queue. When an order arrives, one worker picks it up for processing. The message is then removed from the queue, preventing duplicate processing by other workers.
 
 === Topics (Publish-Subscribe Messaging)
