@@ -791,12 +791,11 @@ ha-broker-pair2-ss-0   0/1     Running   0          87s</code></pre>
 *   <code>ha-broker-pair2-ss-0 ` remaining `Running</code> and, in its logs, becoming the new <code>LIVE</code> broker.
 *   A new <code>ha-broker-pair1-ss-0</code> pod being created, transitioning through <code>Pending</code>, then <code>Running</code>, and eventually becoming the new <code>BACKUP</code> broker.</p>
 </div>
-<div class="paragraph">
-<p>+
-This demonstrates the automatic failover and self-healing capabilities of an Operator-managed HA broker pair, ensuring continuous availability of your messaging infrastructure.</p>
-</div>
 </li>
 </ol>
+</div>
+<div class="paragraph">
+<p>This demonstrates the automatic failover and self-healing capabilities of an Operator-managed HA broker pair, ensuring continuous availability of your messaging infrastructure.</p>
 </div>
 <div class="paragraph">
 <p>This lab provides a robust, operator-managed Shared Database (JDBC) Live-Backup HA setup, which is a common and highly recommended configuration for AMQ Broker on OpenShift, offering strong guarantees against message loss and downtime.</p>

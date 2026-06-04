@@ -421,8 +421,9 @@
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Broker Health Metrics</strong>: These provide an overall picture of the broker&#8217;s operational state. Key metrics include:</p>
-</li>
+<p><strong>Broker Health Metrics:</strong> These provide an overall picture of the broker&#8217;s operational state. Key metrics include:</p>
+<div class="ulist">
+<ul>
 <li>
 <p>CPU usage and memory consumption of broker pods.</p>
 </li>
@@ -438,9 +439,13 @@
 <li>
 <p>Message processing rates (messages added, delivered, acknowledged).</p>
 </li>
-<li>
-<p><strong>Queue Metrics</strong>: These offer insights into message flow and potential bottlenecks within specific queues. Important queue metrics include:</p>
+</ul>
+</div>
 </li>
+<li>
+<p><strong>Queue Metrics:</strong> These offer insights into message flow and potential bottlenecks within specific queues. Important queue metrics include:</p>
+<div class="ulist">
+<ul>
 <li>
 <p><code>MessageCount</code>: The number of messages currently awaiting consumption in the queue.</p>
 </li>
@@ -465,9 +470,13 @@
 <li>
 <p><code>ExpiredCount</code>: Messages that have passed their Time-To-Live (TTL) and have expired.</p>
 </li>
-<li>
-<p><strong>Topic Metrics</strong>: While ActiveMQ Artemis internally manages topics via durable subscriptions on specific queues, monitoring involves observing the queues associated with these subscriptions. Key topic-related metrics (observed on durable subscription queues) include:</p>
+</ul>
+</div>
 </li>
+<li>
+<p><strong>Topic Metrics:</strong> While ActiveMQ Artemis internally manages topics via durable subscriptions on specific queues, monitoring involves observing the queues associated with these subscriptions. Key topic-related metrics (observed on durable subscription queues) include:</p>
+<div class="ulist">
+<ul>
 <li>
 <p><code>MessageCount</code>: Messages pending for a specific durable subscriber.</p>
 </li>
@@ -477,9 +486,13 @@
 <li>
 <p>Message publication rates and consumption rates.</p>
 </li>
-<li>
-<p><strong>Connection Metrics</strong>: Details about client connections can help diagnose connectivity issues. This includes:</p>
+</ul>
+</div>
 </li>
+<li>
+<p><strong>Connection Metrics:</strong> Details about client connections can help diagnose connectivity issues. This includes:</p>
+<div class="ulist">
+<ul>
 <li>
 <p>Number of active client connections per protocol.</p>
 </li>
@@ -489,9 +502,13 @@
 <li>
 <p>Remote address of connected clients.</p>
 </li>
-<li>
-<p><strong>Message Store Metrics</strong>: These indicate the health and performance of message persistence.</p>
+</ul>
+</div>
 </li>
+<li>
+<p><strong>Message Store Metrics:</strong> These indicate the health and performance of message persistence.</p>
+<div class="ulist">
+<ul>
 <li>
 <p>Disk usage for the message journal and paging files.</p>
 </li>
@@ -500,6 +517,9 @@
 </li>
 <li>
 <p>Paging file sizes and counts.</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>

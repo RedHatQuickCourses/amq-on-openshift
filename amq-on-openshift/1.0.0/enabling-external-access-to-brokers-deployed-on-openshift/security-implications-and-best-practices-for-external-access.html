@@ -494,8 +494,9 @@
 <div class="paragraph">
 <p>The provided context highlights how to configure different protocol clients for TLS.</p>
 </div>
-<div class="sect4">
-<h5 id="_openwire_client_with_two_way_tls"><a class="anchor" href="#_openwire_client_with_two_way_tls"></a>OpenWire Client with Two-Way TLS</h5>
+</div>
+<div class="sect3">
+<h4 id="_openwire_client_with_two_way_tls"><a class="anchor" href="#_openwire_client_with_two_way_tls"></a>OpenWire Client with Two-Way TLS</h4>
 <div class="paragraph">
 <p>For an external OpenWire client using two-way TLS, the connection URL must specify the <code>ssl://</code> protocol and the port (typically 443 for external routes). Additionally, Java Virtual Machine (JVM) flags are used to provide the paths and passwords for the client&#8217;s key store and trust store.</p>
 </div>
@@ -520,8 +521,8 @@ ssl://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:44
 </ul>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_amqp_client_with_one_way_tls"><a class="anchor" href="#_amqp_client_with_one_way_tls"></a>AMQP Client with One-Way TLS</h5>
+<div class="sect3">
+<h4 id="_amqp_client_with_one_way_tls"><a class="anchor" href="#_amqp_client_with_one_way_tls"></a>AMQP Client with One-Way TLS</h4>
 <div class="paragraph">
 <p>For an external AMQP client using one-way TLS, the connection URL uses <code>amqps://</code> and includes parameters for the trust store. The <code>transport.verifyHost=true</code> parameter is crucial for host name verification, preventing man-in-the-middle attacks.</p>
 </div>
@@ -542,8 +543,8 @@ transport.verifyHost=true&amp;transport.trustStoreLocation=~/client.ts&amp;trans
 </ul>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_amqp_client_with_two_way_tls"><a class="anchor" href="#_amqp_client_with_two_way_tls"></a>AMQP Client with Two-Way TLS</h5>
+<div class="sect3">
+<h4 id="_amqp_client_with_two_way_tls"><a class="anchor" href="#_amqp_client_with_two_way_tls"></a>AMQP Client with Two-Way TLS</h4>
 <div class="paragraph">
 <p>For an external AMQP client using two-way TLS, both the key store and trust store parameters are included in the connection URL.</p>
 </div>
@@ -562,7 +563,6 @@ transport.verifyHost=true&amp;transport.keyStoreLocation=~/client.ks&amp;transpo
 <p>Replace <code>&lt;key_store_password&gt;</code> and <code>&lt;trust_store_password&gt;</code> with your actual passwords.</p>
 </li>
 </ul>
-</div>
 </div>
 </div>
 </div>

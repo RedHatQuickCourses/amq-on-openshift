@@ -755,19 +755,13 @@ EOF
 <div class="paragraph">
 <p>Identify the hostname of the external route pointing to your broker&#8217;s <code>my-acceptor</code>.</p>
 </div>
-<div class="paragraph">
-<div class="title">Execute the following command on your OpenShift CLI:</div>
-<p>+</p>
-</div>
 <div class="listingblock">
+<div class="title">Execute the following command on your OpenShift CLI:</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">OCP_PROJECT=$(oc project -q)
 BROKER_ROUTE=$(oc get route my-broker-my-acceptor -o jsonpath='{.spec.host}')
 echo "AMQ Broker Route: ${BROKER_ROUTE}"</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>+</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -775,8 +769,7 @@ echo "AMQ Broker Route: ${BROKER_ROUTE}"</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>+
-Make a note of this hostname; you will use it in your client application.</p>
+<p>Make a note of this hostname; you will use it in your client application.</p>
 </div>
 </div>
 <div class="sect3">
@@ -784,20 +777,14 @@ Make a note of this hostname; you will use it in your client application.</p>
 <div class="paragraph">
 <p>Create a new Maven project for your Java Core client.</p>
 </div>
-<div class="paragraph">
-<div class="title">On your local machine, create a new directory for your project:</div>
-<p>+</p>
-</div>
 <div class="listingblock">
+<div class="title">On your local machine, create a new directory for your project:</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir amq-external-client &amp;&amp; cd amq-external-client</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<div class="title">Create a <code>pom.xml</code> file with the necessary dependencies for the AMQ Broker Core client:</div>
-<p>+</p>
-</div>
 <div class="listingblock">
+<div class="title">Create a <code>pom.xml</code> file with the necessary dependencies for the AMQ Broker Core client:</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
@@ -870,11 +857,8 @@ Make a note of this hostname; you will use it in your client application.</p>
 <div class="paragraph">
 <p>Create a simple Java class that acts as a message producer using the Core protocol.</p>
 </div>
-<div class="paragraph">
-<div class="title">In the <code>amq-external-client</code> directory, create the <code>src/main/java/com/redhat/amq/client/ProducerClient.java</code> file:</div>
-<p>+</p>
-</div>
 <div class="listingblock">
+<div class="title">In the <code>amq-external-client</code> directory, create the <code>src/main/java/com/redhat/amq/client/ProducerClient.java</code> file:</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.redhat.amq.client;
 
@@ -944,27 +928,18 @@ public class ProducerClient {
 <div class="paragraph">
 <p>Now, compile and run your client, providing the broker&#8217;s route hostname as an environment variable.</p>
 </div>
-<div class="paragraph">
-<div class="title">Compile the Java client:</div>
-<p>+</p>
-</div>
 <div class="listingblock">
+<div class="title">Compile the Java client:</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn clean install</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<div class="title">Run the client, replacing <code>YOUR_BROKER_ROUTE_HOSTNAME</code> with the actual hostname you obtained in Step 1. Remember to include the port <code>61616</code>.</div>
-<p>+</p>
-</div>
 <div class="listingblock">
+<div class="title">Run the client, replacing <code>YOUR_BROKER_ROUTE_HOSTNAME</code> with the actual hostname you obtained in Step 1. Remember to include the port <code>61616</code>.</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export BROKER_URL="tcp://YOUR_BROKER_ROUTE_HOSTNAME:61616"
 mvn exec:java</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>+</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -998,8 +973,7 @@ INFO: Messages sent successfully.
 </div>
 </div>
 <div class="paragraph">
-<p>+
-You should see output indicating that messages were successfully sent.</p>
+<p>You should see output indicating that messages were successfully sent.</p>
 </div>
 </div>
 <div class="sect3">
