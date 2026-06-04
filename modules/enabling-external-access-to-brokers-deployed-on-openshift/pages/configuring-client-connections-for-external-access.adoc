@@ -199,19 +199,19 @@ This lab demonstrates how to connect a simple Java-based Core protocol client to
 Identify the hostname of the external route pointing to your broker's `my-acceptor`.
 
 .Execute the following command on your OpenShift CLI:
-+
+
 [source,bash]
 ----
 OCP_PROJECT=$(oc project -q)
 BROKER_ROUTE=$(oc get route my-broker-my-acceptor -o jsonpath='{.spec.host}')
 echo "AMQ Broker Route: ${BROKER_ROUTE}"
 ----
-+
+
 [output]
 ----
 AMQ Broker Route: my-broker-my-acceptor-my-openshift-project.apps.your-openshift-domain.com
 ----
-+
+
 Make a note of this hostname; you will use it in your client application.
 
 ==== 2. Create a Maven Project for the Client
@@ -219,14 +219,14 @@ Make a note of this hostname; you will use it in your client application.
 Create a new Maven project for your Java Core client.
 
 .On your local machine, create a new directory for your project:
-+
+
 [source,bash]
 ----
 mkdir amq-external-client && cd amq-external-client
 ----
 
 .Create a `pom.xml` file with the necessary dependencies for the AMQ Broker Core client:
-+
+
 [source,xml]
 ----
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -299,7 +299,7 @@ mkdir amq-external-client && cd amq-external-client
 Create a simple Java class that acts as a message producer using the Core protocol.
 
 .In the `amq-external-client` directory, create the `src/main/java/com/redhat/amq/client/ProducerClient.java` file:
-+
+
 [source,java]
 ----
 package com.redhat.amq.client;
@@ -369,20 +369,20 @@ public class ProducerClient {
 Now, compile and run your client, providing the broker's route hostname as an environment variable.
 
 .Compile the Java client:
-+
+
 [source,bash]
 ----
 mvn clean install
 ----
 
 .Run the client, replacing `YOUR_BROKER_ROUTE_HOSTNAME` with the actual hostname you obtained in Step 1. Remember to include the port `61616`.
-+
+
 [source,bash]
 ----
 export BROKER_URL="tcp://YOUR_BROKER_ROUTE_HOSTNAME:61616"
 mvn exec:java
 ----
-+
+
 [output]
 ----
 [INFO] Scanning for projects...
@@ -413,7 +413,7 @@ INFO: Messages sent successfully.
 [INFO] Finished at: 2023-09-05T10:30:06+00:00
 [INFO] ------------------------------------------------------------------------
 ----
-+
+
 You should see output indicating that messages were successfully sent.
 
 ==== 5. Verify Messages in Hawtio Console (Optional)

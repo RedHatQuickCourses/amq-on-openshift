@@ -1,6 +1,5 @@
 #  Encrypting Connections
 
-= Encrypting Connections for AMQ Broker on OpenShift
 
 This section details how to secure client-broker communication for Red Hat AMQ Broker deployed on OpenShift using Transport Layer Security (TLS). Encrypting connections is a fundamental security measure, ensuring the confidentiality and integrity of messages exchanged between clients and the broker.
 

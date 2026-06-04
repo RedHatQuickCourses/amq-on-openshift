@@ -5,7 +5,6 @@ ifndef::internal[]
 :description: Understand the foundational concepts of OpenShift Container Platform essential for deploying and managing Red Hat AMQ Broker.
 endif::internal[]
 
-= OpenShift Container Platform Fundamentals for AMQ Broker
 
 This section provides an essential overview of OpenShift Container Platform (OCP) concepts critical for deploying, managing, and scaling Red Hat AMQ Broker. Understanding these fundamentals will empower you to effectively leverage the power of OCP for your messaging infrastructure.
 

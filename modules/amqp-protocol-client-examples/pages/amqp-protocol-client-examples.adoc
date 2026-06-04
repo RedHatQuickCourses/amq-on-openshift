@@ -1,6 +1,5 @@
 #  AMQP Protocol Client Examples
 
-=== AMQP Protocol Client Examples
 
 * Introduces the AMQP 1.0 standard, a widely adopted messaging protocol.
 * Covers setting up development environments for AMQP clients, such as using Red Hat build of Apache Qpid JMS for Java.

@@ -1,6 +1,5 @@
 #  AMQ Broker Architecture
 
-= AMQ Broker Architecture
 
 The Red Hat AMQ Broker, built upon the robust Apache ActiveMQ Artemis project, is a high-performance, asynchronous messaging system. Understanding its architecture is crucial for effective deployment, management, and troubleshooting, especially when operating within a container orchestration platform like OpenShift.
 

@@ -46,5 +46,5 @@ Duration: 4 hours
 This course assumes that you have the following prior experience:
 
 * Understanding of Message Oriented Middleware and JMS
-* Understanding on Containers, Kubernetes, and OpenShift
+* Understanding of Containers, Kubernetes, and OpenShift
 * Understanding of basic Java

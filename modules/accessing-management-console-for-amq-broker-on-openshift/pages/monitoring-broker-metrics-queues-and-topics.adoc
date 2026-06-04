@@ -13,33 +13,37 @@ The OpenShift monitoring stack can also integrate with this, as indicated by the
 
 Monitoring an AMQ Broker involves keeping an eye on several key aspects:
 
-*   *Broker Health Metrics*: These provide an overall picture of the broker's operational state. Key metrics include:
-    *   CPU usage and memory consumption of broker pods.
-    *   JVM statistics (heap usage, garbage collection activity).
-    *   File descriptor usage.
-    *   Total connection counts and session counts.
-    *   Message processing rates (messages added, delivered, acknowledged).
-*   *Queue Metrics*: These offer insights into message flow and potential bottlenecks within specific queues. Important queue metrics include:
-    *   `MessageCount`: The number of messages currently awaiting consumption in the queue.
-    *   `Consumers`: The count of active message consumers connected to the queue.
-    *   `Producers`: The count of active message producers sending to the queue.
-    *   `MessagesAdded`: The total number of messages ever added to the queue since the broker started.
-    *   `MessagesAcknowledged`: The total number of messages successfully processed and acknowledged by consumers.
-    *   `DeliveringCount`: Messages currently in the process of being delivered to consumers.
-    *   `ScheduledCount`: Messages scheduled for future delivery.
-    *   `ExpiredCount`: Messages that have passed their Time-To-Live (TTL) and have expired.
-*   *Topic Metrics*: While ActiveMQ Artemis internally manages topics via durable subscriptions on specific queues, monitoring involves observing the queues associated with these subscriptions. Key topic-related metrics (observed on durable subscription queues) include:
-    *   `MessageCount`: Messages pending for a specific durable subscriber.
-    *   `ConsumerCount`: Number of active consumers for a durable subscription.
-    *   Message publication rates and consumption rates.
-*   *Connection Metrics*: Details about client connections can help diagnose connectivity issues. This includes:
-    *   Number of active client connections per protocol.
-    *   Connection duration.
-    *   Remote address of connected clients.
-*   *Message Store Metrics*: These indicate the health and performance of message persistence.
-    *   Disk usage for the message journal and paging files.
-    *   Journal write rates.
-    *   Paging file sizes and counts.
+* **Broker Health Metrics:** These provide an overall picture of the broker's operational state. Key metrics include:
+** CPU usage and memory consumption of broker pods.
+** JVM statistics (heap usage, garbage collection activity).
+** File descriptor usage.
+** Total connection counts and session counts.
+** Message processing rates (messages added, delivered, acknowledged).
+
+* **Queue Metrics:** These offer insights into message flow and potential bottlenecks within specific queues. Important queue metrics include:
+** `MessageCount`: The number of messages currently awaiting consumption in the queue.
+** `Consumers`: The count of active message consumers connected to the queue.
+** `Producers`: The count of active message producers sending to the queue.
+** `MessagesAdded`: The total number of messages ever added to the queue since the broker started.
+** `MessagesAcknowledged`: The total number of messages successfully processed and acknowledged by consumers.
+** `DeliveringCount`: Messages currently in the process of being delivered to consumers.
+** `ScheduledCount`: Messages scheduled for future delivery.
+** `ExpiredCount`: Messages that have passed their Time-To-Live (TTL) and have expired.
+
+* **Topic Metrics:** While ActiveMQ Artemis internally manages topics via durable subscriptions on specific queues, monitoring involves observing the queues associated with these subscriptions. Key topic-related metrics (observed on durable subscription queues) include:
+** `MessageCount`: Messages pending for a specific durable subscriber.
+** `ConsumerCount`: Number of active consumers for a durable subscription.
+** Message publication rates and consumption rates.
+
+* **Connection Metrics:** Details about client connections can help diagnose connectivity issues. This includes:
+** Number of active client connections per protocol.
+** Connection duration.
+** Remote address of connected clients.
+
+* **Message Store Metrics:** These indicate the health and performance of message persistence.
+** Disk usage for the message journal and paging files.
+** Journal write rates.
+** Paging file sizes and counts.
 
 [[hawtio-console-for-monitoring]]
 == Monitoring with the Hawtio Management Console

@@ -1,7 +1,5 @@
 #  Managing Certificates and Trust Stores on OpenShift
 
-= Managing Certificates and Trust Stores on OpenShift
-include::partial$attributes.adoc[]
 
 _A technical deep dive into securing Red Hat AMQ Broker deployments on OpenShift by effectively managing TLS certificates and trust stores._
 
