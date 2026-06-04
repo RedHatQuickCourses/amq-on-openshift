@@ -21,7 +21,7 @@ To effectively develop a Java Core Protocol client, it's crucial to understand t
 .The relationship between ConnectionFactory, Connection, Session, Producer, and Consumer
 image::core-protocol-components.png[Core Protocol Client Components, 600, 400]
 
-// no image aaded here, please add
+FIXME: no image aaded here, please add
 
 [NOTE]
 As highlighted in the provided context, the Core Protocol JMS client library allows for advanced features like flow control. You can configure `ConnectionFactory` properties such as `setConsumerWindowSize()` and `setProducerWindowSize()` to regulate the flow of messages and prevent resource exhaustion, especially in scenarios with varying producer and consumer speeds. For basic examples, default settings are often sufficient, but for performance-critical or high-volume applications, understanding and tuning these settings is crucial.
