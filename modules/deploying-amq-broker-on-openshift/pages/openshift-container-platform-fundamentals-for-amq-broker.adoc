@@ -133,6 +133,7 @@ oc login --server=<your_api_server>
 ----
 +
 NOTE: Replace `<your_token>` and `<your_api_server>` with your actual cluster credentials. You can usually find these by clicking "Copy Login Command" in the OpenShift console.
+You may skip this step if you are using lab environment provided with this course. Authentication is performed automatically using `~/.kube/config` file.
 
 .  **Create a New Project (Namespace):**
     For organizational purposes, let's create a new project.
@@ -144,90 +145,110 @@ oc new-project amq-broker-fundamentals
 +
 This command creates a new project and automatically switches your current context to it.
 
-.  **Deploy a Sample Application (nginx) to see Pods and Deployments:**
-    To see pods and deployments in action, let's deploy a simple `nginx` web server.
+.  **Deploy a Sample Application (httpd) to see Pods and Deployments:**
+    To see pods and deployments in action, let's deploy a simple `httpd` web server.
 +
 [source,bash]
 ----
-oc new-app --image=nginx:latest --name=my-nginx
+oc new-app registry.redhat.io/rhel9/httpd-24 --name my-httpd
 ----
 +
-TIP: The `oc new-app` command simplifies the creation of deployments, services, and routes from images or source code.
+TIP: The `oc new-app` command simplifies the creation of deployments and services from images or source code.
 
 .  **Observe Pods:**
-    Check the pods running in your project. You should see an `nginx` pod being created.
+    Check the pods running in your project. You should see an `httpd` pod being created.
 +
 [source,bash]
 ----
 oc get pods
 ----
 +
-[source,text]
+.Sample output
++
 ----
-NAME                          READY   STATUS      RESTARTS   AGE
-my-nginx-6677f59d4c-abcde   1/1     Running     0          30s
+NAME                       READY   STATUS    RESTARTS   AGE
+my-httpd-d9dc69874-jdp2g   1/1     Running   0          6s
 ----
 
 .  **Observe Deployments:**
-    Check the deployment created for `my-nginx`.
+    Check the deployment created for `my-httpd`.
 +
 [source,bash]
 ----
 oc get deployments
 ----
 +
-[source,text]
+.Sample output
 ----
-NAME        READY   UP-TO-DATE   AVAILABLE   AGE
-my-nginx    1/1     1            1           45s
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+my-httpd   1/1     1            1           53s
 ----
 
 .  **Observe Services:**
-    Check the service created for `my-nginx`. Note the ClusterIP, which is the internal stable IP.
+    Check the service created for `my-httpd`. Note the ClusterIP, which is the internal stable IP.
 +
 [source,bash]
 ----
 oc get services
 ----
 +
-[source,text]
+.Sample output
++
 ----
-NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
-my-nginx     ClusterIP   172.30.xxx.xxx   <none>        80/TCP     1m
+NAME       TYPE        CLUSTER-IP        EXTERNAL-IP   PORT(S)             AGE
+my-httpd   ClusterIP   172.231.165.174   <none>        8080/TCP,8443/TCP   85s
 ----
 
-.  **Observe Routes:**
-    Check if a route was automatically created for `my-nginx`. If not, you can expose it manually (optional).
-+
-[source,bash]
-----
-oc get routes
-----
+.  **Create Route:**
+    Expose the service to create route for httpd.
 +
 [source,text]
 ----
-# If no route is shown, expose the service:
-oc expose service my-nginx
+oc expose service my-httpd
 oc get routes
 ----
 +
-[source,text]
+.Sample output
++
 ----
-NAME         HOST/PORT                                  PATH   SERVICES   PORT   TERMINATION   WILDCARD
-my-nginx     my-nginx-amq-broker-fundamentals.apps.cluster.example.com          my-nginx   8080-tcp         None
+NAME       HOST/PORT                                                                         PATH   SERVICES   PORT       TERMINATION   WILDCARD
+my-httpd   my-httpd-amq-broker-fundamentals.apps.cluster-4x6rw.dynamic2.redhatworkshops.io          my-httpd   8080-tcp                 None
 ----
 +
-You can now access the Nginx web server from your browser using the `HOST/PORT` provided by the route.
+You can now access the httpd web server from your browser or from CLI using curl command on provided route.
++
+[source,text]
+----
+curl my-httpd-amq-broker-fundamentals.apps.cluster-4x6rw.dynamic2.redhatworkshops.io | head
+----
++
+.Sample output
++
+----
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  5909  100  5909    0     0  49952      0 --:--:-- --:--:-- --:--:-- 50076
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+	<head>
+		<title>Test Page for the HTTP Server on Red Hat Enterprise Linux</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<style type="text/css">
+			/*<![CDATA[*/
+			body {
+				background-color: #fff;
+----
 
 .  **Clean up the Sample Application:**
-    Remove the `my-nginx` application and its associated resources.
+    Remove the `httpd` application and its associated resources.
 +
 [source,bash]
 ----
-oc delete all -l app=my-nginx
+oc delete all -l app=my-httpd
 ----
 +
-This command deletes the Deployment, Pods, Service, and Route associated with `my-nginx`.
+This command deletes the Deployment, Pods, Service, and Route associated with `my-httpd`.
 
 .  **Switch back to the default project or delete the project:**
     You can switch back to the `default` project or delete the `amq-broker-fundamentals` project if you no longer need it.
