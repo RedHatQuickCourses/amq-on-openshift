@@ -404,9 +404,12 @@
 </aside>
 <article class="doc">
 <h1 class="page">Introduction to the AMQ Broker Operator</h1>
-<h1 id="_introduction_to_the_amq_broker_operator" class="sect0"><a class="anchor" href="#_introduction_to_the_amq_broker_operator"></a>Introduction to the AMQ Broker Operator</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
 <p>The Red Hat AMQ Broker Operator is a critical component for deploying and managing AMQ Broker instances efficiently on OpenShift Container Platform. It extends the OpenShift API with custom resources, enabling users to provision, configure, and manage AMQ Broker deployments using a declarative approach native to Kubernetes.</p>
+</div>
+</div>
 </div>
 <div class="sect1">
 <h2 id="_what_is_a_kubernetes_operator"><a class="anchor" href="#_what_is_a_kubernetes_operator"></a>What is a Kubernetes Operator?</h2>
@@ -496,6 +499,57 @@
 <div class="title">Procedure: Download and Extract Operator Installation Files</div>
 <ol class="arabic">
 <li>
+<p>Login to <a href="https://access.redhat.com/" target="_blank" rel="noopener">Red Hat Customer Portal</a> using your credentials.</p>
+</li>
+<li>
+<p>Click <strong>Downloads</strong> option on top of the page.</p>
+</li>
+<li>
+<p>Look for <strong>Red Hat AMQ Broker</strong> option on the page and click on it.</p>
+</li>
+<li>
+<p>On the <strong>Download AMQ Broker</strong> page, look for <strong>Operator Installation and Example Files</strong></p>
+</li>
+<li>
+<p>Click on the available option.</p>
+</li>
+<li>
+<p>On the next page, click <strong>Download Release</strong> button to download the <strong>amq-broker-operator-x.y.z-ocp-install-examples-rhel9.zip</strong> file.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The version number x.y.z will vary.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Copy downloaded file to your lab environment.</p>
+<div class="listingblock">
+<div class="title">Example command</div>
+<div class="content">
+<pre>scp -P 31233 /tmp/amq-broker-operator-7.14.0-ocp-install-examples-rhel9.zip  lab-user@ssh.ocpv08.rhdp.net:/tmp/</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Change the port number, file name and path, ssh host name as per your lab environment.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
 <p>Create a dedicated directory for your AMQ Broker Operator files. This helps in organizing your workspace.</p>
 <div class="listingblock">
 <div class="content">
@@ -512,7 +566,12 @@
 </div>
 </li>
 <li>
-<p>Download the AMQ Broker Operator installation and example files.</p>
+<p>Copy the AMQ Broker Operator installation and example files to this directory.</p>
+<div class="listingblock">
+<div class="content">
+<pre>mv /tmp/amq-broker-operator-7.14.0-ocp-install-examples-rhel9.zip .</pre>
+</div>
+</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -520,25 +579,20 @@
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The exact version number (e.g., <code>7.13.3</code>) may vary depending on the latest release. Always refer to the official Red Hat documentation for the most current download links and instructions. The following example uses <code>7.13.3</code>.
+The exact version number (e.g., <code>7.14.0</code>) may vary depending on the latest release. Always refer to the official Red Hat documentation for the most current download links and instructions. The following example uses <code>7.14.0</code>.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>You would typically download this from the Red Hat Customer Portal. For demonstration purposes, assume you&#8217;ve downloaded <code>amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip</code> to your <code>Downloads</code> directory.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mv ~/Downloads/amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip .</code></pre>
-</div>
+<p>You would typically download this from the Red Hat Customer Portal. For demonstration purposes, assume you&#8217;ve downloaded <code>amq-broker-operator-7.14.0-ocp-install-examples-rhel9.zip</code> file.</p>
 </div>
 </li>
 <li>
 <p>Extract the contents of the downloaded archive.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">unzip amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">unzip amq-broker-operator-7.14.0-ocp-install-examples-rhel9.zip</code></pre>
 </div>
 </div>
 <div class="paragraph">

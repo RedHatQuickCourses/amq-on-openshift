@@ -683,6 +683,7 @@ oc login --server=&lt;your_api_server&gt;</code></pre>
 </td>
 <td class="content">
 Replace <code>&lt;your_token&gt;</code> and <code>&lt;your_api_server&gt;</code> with your actual cluster credentials. You can usually find these by clicking "Copy Login Command" in the OpenShift console.
+You may skip this step if you are using lab environment provided with this course. Authentication is performed automatically using <code>~/.kube/config</code> file.
 </td>
 </tr>
 </table>
@@ -701,11 +702,11 @@ For organizational purposes, let&#8217;s create a new project.</p>
 </div>
 </li>
 <li>
-<p><strong>Deploy a Sample Application (nginx) to see Pods and Deployments:</strong>
-To see pods and deployments in action, let&#8217;s deploy a simple <code>nginx</code> web server.</p>
+<p><strong>Deploy a Sample Application (httpd) to see Pods and Deployments:</strong>
+To see pods and deployments in action, let&#8217;s deploy a simple <code>httpd</code> web server.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-app --image=nginx:latest --name=my-nginx</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-app registry.redhat.io/rhel9/httpd-24 --name my-httpd</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
@@ -715,7 +716,7 @@ To see pods and deployments in action, let&#8217;s deploy a simple <code>nginx</
 <i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-The <code>oc new-app</code> command simplifies the creation of deployments, services, and routes from images or source code.
+The <code>oc new-app</code> command simplifies the creation of deployments and services from images or source code.
 </td>
 </tr>
 </table>
@@ -723,84 +724,105 @@ The <code>oc new-app</code> command simplifies the creation of deployments, serv
 </li>
 <li>
 <p><strong>Observe Pods:</strong>
-Check the pods running in your project. You should see an <code>nginx</code> pod being created.</p>
+Check the pods running in your project. You should see an <code>httpd</code> pod being created.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods</code></pre>
 </div>
 </div>
 <div class="listingblock">
+<div class="title">Sample output</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME                          READY   STATUS      RESTARTS   AGE
-my-nginx-6677f59d4c-abcde   1/1     Running     0          30s</code></pre>
+<pre>NAME                       READY   STATUS    RESTARTS   AGE
+my-httpd-d9dc69874-jdp2g   1/1     Running   0          6s</pre>
 </div>
 </div>
 </li>
 <li>
 <p><strong>Observe Deployments:</strong>
-Check the deployment created for <code>my-nginx</code>.</p>
+Check the deployment created for <code>my-httpd</code>.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get deployments</code></pre>
 </div>
 </div>
 <div class="listingblock">
+<div class="title">Sample output</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME        READY   UP-TO-DATE   AVAILABLE   AGE
-my-nginx    1/1     1            1           45s</code></pre>
+<pre>NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+my-httpd   1/1     1            1           53s</pre>
 </div>
 </div>
 </li>
 <li>
 <p><strong>Observe Services:</strong>
-Check the service created for <code>my-nginx</code>. Note the ClusterIP, which is the internal stable IP.</p>
+Check the service created for <code>my-httpd</code>. Note the ClusterIP, which is the internal stable IP.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get services</code></pre>
 </div>
 </div>
 <div class="listingblock">
+<div class="title">Sample output</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
-my-nginx     ClusterIP   172.30.xxx.xxx   &lt;none&gt;        80/TCP     1m</code></pre>
+<pre>NAME       TYPE        CLUSTER-IP        EXTERNAL-IP   PORT(S)             AGE
+my-httpd   ClusterIP   172.231.165.174   &lt;none&gt;        8080/TCP,8443/TCP   85s</pre>
 </div>
 </div>
 </li>
 <li>
-<p><strong>Observe Routes:</strong>
-Check if a route was automatically created for <code>my-nginx</code>. If not, you can expose it manually (optional).</p>
+<p><strong>Create Route:</strong>
+Expose the service to create route for httpd.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get routes</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text"># If no route is shown, expose the service:
-oc expose service my-nginx
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">oc expose service my-httpd
 oc get routes</code></pre>
 </div>
 </div>
 <div class="listingblock">
+<div class="title">Sample output</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">NAME         HOST/PORT                                  PATH   SERVICES   PORT   TERMINATION   WILDCARD
-my-nginx     my-nginx-amq-broker-fundamentals.apps.cluster.example.com          my-nginx   8080-tcp         None</code></pre>
+<pre>NAME       HOST/PORT                                                                         PATH   SERVICES   PORT       TERMINATION   WILDCARD
+my-httpd   my-httpd-amq-broker-fundamentals.apps.cluster-4x6rw.dynamic2.redhatworkshops.io          my-httpd   8080-tcp                 None</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can now access the Nginx web server from your browser using the <code>HOST/PORT</code> provided by the route.</p>
+<p>You can now access the httpd web server from your browser or from CLI using curl command on provided route.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">curl my-httpd-amq-broker-fundamentals.apps.cluster-4x6rw.dynamic2.redhatworkshops.io | head</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample output</div>
+<div class="content">
+<pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  5909  100  5909    0     0  49952      0 --:--:-- --:--:-- --:--:-- 50076
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"&gt;
+
+&lt;html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"&gt;
+	&lt;head&gt;
+		&lt;title&gt;Test Page for the HTTP Server on Red Hat Enterprise Linux&lt;/title&gt;
+		&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /&gt;
+		&lt;style type="text/css"&gt;
+			/*&lt;![CDATA[*/
+			body {
+				background-color: #fff;</pre>
+</div>
 </div>
 </li>
 <li>
 <p><strong>Clean up the Sample Application:</strong>
-Remove the <code>my-nginx</code> application and its associated resources.</p>
+Remove the <code>httpd</code> application and its associated resources.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete all -l app=my-nginx</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete all -l app=my-httpd</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This command deletes the Deployment, Pods, Service, and Route associated with <code>my-nginx</code>.</p>
+<p>This command deletes the Deployment, Pods, Service, and Route associated with <code>my-httpd</code>.</p>
 </div>
 </li>
 <li>
