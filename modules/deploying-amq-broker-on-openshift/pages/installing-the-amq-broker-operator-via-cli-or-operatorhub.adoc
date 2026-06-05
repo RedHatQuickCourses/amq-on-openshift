@@ -34,58 +34,19 @@ Before proceeding with the CLI installation, ensure you have the following:
 
 Follow these steps to install the AMQ Broker Operator using the OpenShift CLI.
 
-.Download and Prepare the Operator Files
-You need to download the AMQ Broker Operator installation files from the Red Hat Customer Portal.
-
-. From the Red Hat Customer Portal, navigate to the AMQ Broker downloads section for version `7.13.3` (or the desired version).
-. Locate the `AMQ Broker 7.13.3 Operator Installation and Example Files` and click `Download`. The `amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip` archive will download automatically.
-
-.Extract the Operator Files
-
-Once downloaded, prepare a directory and extract the contents of the archive.
-
-. Create a new directory for your operator files:
-+
-[source,bash]
-----
-$ mkdir ~/broker/operator
-----
-
-. Move the downloaded archive to this new directory:
-+
-[source,bash]
-----
-$ mv amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip ~/broker/operator
-----
 
 . Navigate into the directory:
 +
 [source,bash]
 ----
-$ cd ~/broker/operator
+$ cd ~/broker/operator/amq-broker-operator-7.14.0-ocp-install-examples
 ----
-
-. Extract the contents of the archive:
-+
-[source,bash]
-----
-$ unzip amq-broker-operator-7.13.3-ocp-install-examples-rhel9.zip
-----
-+
-This will create a `amq-broker-operator-7.13.3-ocp-install-examples` directory containing the `deploy` folder and other example files.
 
 .Log in to OpenShift and Select Project
 
 You need to log in to your OpenShift cluster as an administrator and switch to the project where you want to install the Operator.
 
-. Log in to your OpenShift cluster:
-+
-[source,bash]
-----
-$ oc login -u <your-admin-user> <your-openshift-api-url>
-----
-+
-Replace `<your-admin-user>` and `<your-openshift-api-url>` with your OpenShift administrator credentials and API endpoint.
+. Lab environment provided with this course has `~/.kube/config` file which authenticates you as `admin` user.
 
 . Switch to the OpenShift project where you want to deploy the Operator. If the project does not exist, you may need to create it first.
 +
@@ -100,11 +61,54 @@ Replace `<project-name>` with the name of your target OpenShift project (e.g., `
 
 The necessary deployment manifests are found within the extracted `deploy` directory.
 
-. Navigate to the `deploy` directory within the extracted operator files:
-+
-[source,bash]
+FIXME: Steps performed in the lab
 ----
-$ cd amq-broker-operator-7.13.3-ocp-install-examples/deploy
+[lab-user@bastion deploy]$ oc create -f service_account.yaml 
+serviceaccount/amq-broker-controller-manager created
+
+
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc create -f deploy/role.yaml 
+role.rbac.authorization.k8s.io/amq-broker-operator-role created
+
+
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc create -f deploy/role_binding.yaml 
+rolebinding.rbac.authorization.k8s.io/amq-broker-operator-rolebinding created
+
+
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc create -f deploy/crds/broker_activemqartemis_crd.yaml 
+customresourcedefinition.apiextensions.k8s.io/activemqartemises.broker.amq.io created
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc create -f deploy/crds/broker_activemqartemisaddress_crd.yaml 
+customresourcedefinition.apiextensions.k8s.io/activemqartemisaddresses.broker.amq.io created
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc create -f deploy/crds/broker_activemqartemisscaledown_crd.yaml 
+customresourcedefinition.apiextensions.k8s.io/activemqartemisscaledowns.broker.amq.io created
+
+
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc get secrets 
+NAME                                            TYPE                      DATA   AGE
+amq-broker-controller-manager-dockercfg-pbjps   kubernetes.io/dockercfg   1      7m27s
+builder-dockercfg-2xpxw                         kubernetes.io/dockercfg   1      19m
+default-dockercfg-5x24r                         kubernetes.io/dockercfg   1      19m
+deployer-dockercfg-thw6v                        kubernetes.io/dockercfg   1      19m
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ 
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc secrets link --for=pull default default-dockercfg-5x24r
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc secrets link --for=pull deployer deployer-dockercfg-thw6v
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc secrets link --for=pull builder builder-dockercfg-2xpxw
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ 
+
+
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc create -f deploy/operator.yaml
+deployment.apps/amq-broker-controller-manager created
+
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc get deployment
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+amq-broker-controller-manager   1/1     1            1           2m35s
+
+
+
+[lab-user@bastion amq-broker-operator-7.14.0-ocp-install-examples]$ oc get crd | grep "broker.amq.io"
+activemqartemisaddresses.broker.amq.io                            2026-06-05T13:19:48Z
+activemqartemises.broker.amq.io                                   2026-06-05T13:18:46Z
+activemqartemisscaledowns.broker.amq.io                           2026-06-05T13:20:23Z
 ----
 
 . Apply the `operator.yaml` manifest to deploy the AMQ Broker Operator:
