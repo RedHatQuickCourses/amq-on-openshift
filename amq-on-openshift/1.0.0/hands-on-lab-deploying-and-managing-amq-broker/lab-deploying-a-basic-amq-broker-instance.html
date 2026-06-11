@@ -494,7 +494,7 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc whoami --show-current-project</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc whoami &amp;&amp; oc project</code></pre>
 </div>
 </div>
 </div>
@@ -589,9 +589,8 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.13
+    image: placeholder
     journalType: nio
-    enableAnonymous: true
   console:
     expose: true # Expose Hawtio console for later access
   acceptors:
@@ -599,7 +598,6 @@ spec:
       protocols: [AMQP, CORE, MQTT, STOMP, OPENWIRE]
       port: 61616
       sslEnabled: false
-      expose: true # Expose this internal acceptor via a Service
 EOF</code></pre>
 </div>
 </div>
