@@ -55,10 +55,7 @@ Follow these steps to deploy your HA AMQ Broker cluster:
     spec:
       deploymentPlan:
         size: 2 # Deploy 2 broker pods for HA
-        autoCreateResources: true
         persistenceEnabled: true # Enable persistent storage for message data
-        persistentVolumeClaim:
-          size: 1Gi # Allocate 1 GB for each broker's PVC
       acceptors:
         - name: amqp
           protocols: AMQP

@@ -46,7 +46,7 @@ Verify your current project (namespace):
 
 [source,bash]
 ----
-oc whoami --show-current-project
+oc whoami && oc project
 ----
 
 === Step 2: Create a New Project
@@ -126,9 +126,8 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.13
+    image: placeholder
     journalType: nio
-    enableAnonymous: true
   console:
     expose: true # Expose Hawtio console for later access
   acceptors:
@@ -136,7 +135,6 @@ spec:
       protocols: [AMQP, CORE, MQTT, STOMP, OPENWIRE]
       port: 61616
       sslEnabled: false
-      expose: true # Expose this internal acceptor via a Service
 EOF
 ----
 
