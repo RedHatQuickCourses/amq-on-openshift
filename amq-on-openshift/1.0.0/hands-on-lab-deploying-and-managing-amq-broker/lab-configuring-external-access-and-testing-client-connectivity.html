@@ -474,65 +474,13 @@ This lab demonstrates how to enable external access to an AMQ Broker instance de
 </div>
 </div>
 <div class="paragraph">
-<p>Look for a service related to your broker, typically exposing ports like <code>61616</code> (Core protocol), <code>5672</code> (AMQP), etc. For this lab, we&#8217;ll assume the Core protocol port (61616) is exposed.</p>
+<p>Look for a service related to your broker, typically exposing ports like <code>61616</code> (Core protocol), <code>5672</code> (AMQP), etc. For this lab, we&#8217;ll assume the Core protocol port (61617) is exposed (as done in the last lab).</p>
 </div>
 </li>
 <li>
-<p>Create an OpenShift Route for the broker.</p>
+<p>Find an OpenShift Route for the broker.</p>
 <div class="paragraph">
-<p>We will create an <code>Edge</code> terminated TLS route for secure external access. This means OpenShift handles the TLS certificate, and the client connects via TLS to the route&#8217;s hostname. The OpenShift router then forwards the traffic to the internal broker service.</p>
-</div>
-<div class="paragraph">
-<p>Create a file named <code>broker-route.yaml</code> with the following content:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: my-broker-external-route
-  labels:
-    app: my-broker
-spec:
-  to:
-    kind: Service
-    name: &lt;your-broker-service-name&gt; <i class="conum" data-value="1"></i><b>(1)</b>
-    weight: 100
-  port:
-    targetPort: 61616 <i class="conum" data-value="2"></i><b>(2)</b>
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Redirect
-  wildcardPolicy: None</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Replace <code>&lt;your-broker-service-name&gt;</code> with the actual name of your broker&#8217;s service (e.g., <code>my-broker-amq-broker-acceptors</code>).</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>This is the default target port for the AMQ Core protocol.</td>
-</tr>
-</table>
-</div>
-</li>
-<li>
-<p>Apply the Route configuration.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f broker-route.yaml</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Verify the Route and retrieve its hostname.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route my-broker-external-route</code></pre>
-</div>
+<p>oc get route</p>
 </div>
 <div class="paragraph">
 <p>Note down the <code>HOST/PORT</code> value from the output (e.g., <code>my-broker-external-route-your-project.apps.cluster.example.com</code>). This is the external URL your clients will use to connect to the broker.</p>
@@ -678,7 +626,7 @@ import java.util.logging.Logger;
 public class Producer {
 
     private static final Logger logger = Logger.getLogger(Producer.class.getName());
-    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61616"); <i class="conum" data-value="1"></i><b>(1)</b>
+    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61617"); <i class="conum" data-value="1"></i><b>(1)</b>
     private static final String QUEUE_NAME = System.getProperty("queue.name", "myQueue");
 
     public static void main(String[] args) throws Exception {
@@ -766,7 +714,7 @@ import java.util.logging.Logger;
 public class Consumer {
 
     private static final Logger logger = Logger.getLogger(Consumer.class.getName());
-    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61616");
+    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61617");
     private static final String QUEUE_NAME = System.getProperty("queue.name", "myQueue");
 
     public static void main(String[] args) throws Exception {
@@ -858,7 +806,7 @@ Since we created an <code>edge</code> terminated route, the client must initiate
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export BROKER_URI="tcp://&lt;your-route-hostname&gt;:443?sslEnabled=true&amp;trustAll=true&amp;verifyHost=false"</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export BROKER_URI="tcp://&lt;your-route-hostname&gt;:443?sslEnabled=true&amp;trustStorePath=/path/to/broker_trustStore.jks&amp;trustStorePassword=password&amp;verifyHost=false"</code></pre>
 </div>
 </div>
 </li>
@@ -967,7 +915,7 @@ For production environments, directly using <code>trustAll=true</code> and <code
 <p>Ensure the AMQ Broker pod is running (<code>oc get pod</code>).</p>
 </li>
 <li>
-<p>Verify the <code>targetPort</code> in the <code>Route</code> (<code>broker-route.yaml</code>) matches the broker&#8217;s listener port (e.g., <code>61616</code>).</p>
+<p>Verify the <code>targetPort</code> in the <code>Route</code> (<code>broker-route.yaml</code>) matches the broker&#8217;s listener port (e.g., <code>61617</code>).</p>
 </li>
 <li>
 <p>Check your <code>BROKER_URI</code> for correct hostname and port <code>443</code>.</p>

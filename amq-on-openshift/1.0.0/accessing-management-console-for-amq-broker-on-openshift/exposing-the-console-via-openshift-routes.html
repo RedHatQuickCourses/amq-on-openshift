@@ -443,9 +443,6 @@
 <li>
 <p><code>ingressHost</code>: This attribute allows you to <strong>replace</strong> the default generated hostname with a completely custom one for the console route.</p>
 </li>
-<li>
-<p><code>ingressDomain</code>: This attribute allows you to <strong>append</strong> a custom domain to the default or <code>ingressHost</code> value. The context clarifies that this custom domain is applied to <strong>all</strong> other routes exposed by the CR, not just the console.</p>
-</li>
 </ul>
 </div>
 <div class="paragraph">
@@ -531,7 +528,7 @@ spec:
 <div class="listingblock">
 <div class="title">Verify the console route:</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route -l app.kubernetes.io/name=&lt;your-broker-name&gt;-console</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route -l ActiveMQArtemis=&lt;your-broker-name&gt;-console</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -554,7 +551,7 @@ my-broker-console              my-broker-console-project.apps.cluster.example.co
 <div class="sect2">
 <h3 id="_step_3_customize_the_console_route_hostname_optional"><a class="anchor" href="#_step_3_customize_the_console_route_hostname_optional"></a>Step 3: Customize the Console Route Hostname (Optional)</h3>
 <div class="paragraph">
-<p>Let&#8217;s modify the route&#8217;s hostname for easier access. We&#8217;ll use the <code>ingressDomain</code> attribute to append a custom domain.</p>
+<p>Let&#8217;s modify the route&#8217;s hostname for easier access. We&#8217;ll use the <code>ingressHost</code> attribute to append a custom host.</p>
 </div>
 <div class="listingblock">
 <div class="title">Edit the <code>ActiveMQArtemis</code> CR again:</div>
@@ -563,14 +560,14 @@ my-broker-console              my-broker-console-project.apps.cluster.example.co
 </div>
 </div>
 <div class="listingblock">
-<div class="title">Modify the <code>spec.console</code> section to include <code>ingressDomain</code>:</div>
+<div class="title">Modify the <code>spec.console</code> section to include <code>ingressHost</code>:</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml"># ... (existing content)
 spec:
   # ... (other broker configurations)
   console:
     expose: true
-    ingressDomain: custom-domain.io &lt;&lt; Add this line
+    ingressHost: custom-host.io &lt;&lt; Add this line
 # ... (rest of the CR)</code></pre>
 </div>
 </div>
@@ -589,21 +586,21 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>Choose either <code>ingressDomain</code> or <code>ingressHost</code> as per your requirement. For this example, we&#8217;ll use <code>ingressDomain</code>. Save and exit the editor.</p>
+<p>Choose the <code>ingressHost</code> as per your requirement.</p>
 </div>
 <div class="listingblock">
 <div class="title">Verify the updated console route:</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route -l app.kubernetes.io/name=&lt;your-broker-name&gt;-console</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route -l ActiveMQArtemis=&lt;your-broker-name&gt;-console</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You should observe that the <code>HOST/PORT</code> has been updated to include your <code>custom-domain.io</code> or <code>haw-console.mycompany.com</code> (depending on which attribute you used).</p>
+<p>You should observe that the <code>HOST/PORT</code> has been updated to include your <code>custom-host.io</code> or <code>haw-console.mycompany.com</code> (depending on which attribute you used).</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-none hljs">NAME                           HOST/PORT                                  PATH   SERVICES                   PORT    TERMINATION            WILDCARD
-my-broker-console              my-broker-console-project.custom-domain.io   /      my-broker-console          &lt;all&gt;   reencrypt/Redirect     None</code></pre>
+my-broker-console              my-broker-console-project.custom-host.io   /      my-broker-console          &lt;all&gt;   reencrypt/Redirect     None</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -630,7 +627,7 @@ spec:
   # ... (other broker configurations)
   # console: &lt;&lt; Remove this entire section
   #   expose: true
-  #   ingressDomain: custom-domain.io
+  #   ingressHost: custom-host.io
 # ... (rest of the CR)</code></pre>
 </div>
 </div>
@@ -644,7 +641,7 @@ spec:
   # ... (other broker configurations)
   console:
     expose: false &lt;&lt; Set to false
-    # ingressDomain: custom-domain.io &lt;&lt; Can be left or removed
+    # ingressHost: custom-host.io &lt;&lt; Can be left or removed
 # ... (rest of the CR)</code></pre>
 </div>
 </div>
@@ -654,7 +651,7 @@ spec:
 <div class="listingblock">
 <div class="title">Verify the route is removed:</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route -l app.kubernetes.io/name=&lt;your-broker-name&gt;-console</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route -l ActiveMQArtemis=&lt;your-broker-name&gt;-console</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -677,7 +674,7 @@ oc logs -f $(oc get pod -l app=amq-broker-operator -o jsonpath='{.items[0].metad
 <li>
 <p><strong>"Application is not available"</strong>: This often indicates an issue with the underlying service or broker pod. Ensure the broker pod is running and healthy:
 <code><code>bash
-oc get pods -l app.kubernetes.io/name=&lt;your-broker-name&gt;
+oc get pods -l ActiveMQArtemis=&lt;your-broker-name&gt;
 oc logs &lt;your-broker-pod-name&gt;
 </code></code></p>
 </li>
@@ -685,7 +682,7 @@ oc logs &lt;your-broker-pod-name&gt;
 <p><strong>Security Implications</strong>: Exposing the management console creates an external access point. Ensure you have proper authentication and authorization configured for the console. By default, the console often uses a simple username/password combination. For production environments, integrate with OpenShift&#8217;s authentication mechanisms or an external identity provider, as covered in the "Securing AMQ Broker on OpenShift" section.</p>
 </li>
 <li>
-<p><strong><code>exposeMode: ingress</code></strong>: While this lab focused on OpenShift Routes (the default), the Operator also supports exposing the console via OpenShift <code>Ingress</code> resources. This is configured by adding <code>exposeMode: ingress</code> under the <code>console</code> section. If using <code>ingress</code>, you <strong>must</strong> specify <code>ingressHost</code> or <code>ingressDomain</code>. Choose <code>Route</code> or <code>Ingress</code> based on your OpenShift cluster&#8217;s networking configuration and your specific requirements. The default <code>route</code> is generally simpler for basic exposure on OpenShift.</p>
+<p><strong><code>exposeMode: ingress</code></strong>: While this lab focused on OpenShift Routes (the default), the Operator also supports exposing the console via OpenShift <code>Ingress</code> resources. This is configured by adding <code>exposeMode: ingress</code> under the <code>console</code> section. If using <code>ingress</code>, you <strong>must</strong> specify <code>ingressHost</code>. Choose <code>Route</code> or <code>Ingress</code> based on your OpenShift cluster&#8217;s networking configuration and your specific requirements. The default <code>route</code> is generally simpler for basic exposure on OpenShift.</p>
 </li>
 </ul>
 </div>

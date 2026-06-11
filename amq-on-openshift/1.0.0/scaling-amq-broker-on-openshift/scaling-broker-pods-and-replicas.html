@@ -525,8 +525,7 @@ spec:
     spec:
       deploymentPlan:
         size: 1
-        persistence:
-          enabled: true
+        persistenceEnabled: true
         # Add a simple acceptor if needed for client connections
         acceptors:
         - name: default
@@ -548,7 +547,7 @@ EOF</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l app.kubernetes.io/name=my-broker
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l ActiveMQArtemis=my-broker
 oc get activemqartemis my-broker -o yaml | grep "size"</code></pre>
 </div>
 </div>
@@ -570,7 +569,7 @@ oc get activemqartemis my-broker -o yaml | grep "size"</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l app.kubernetes.io/name=my-broker --watch</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l ActiveMQArtemis=my-broker --watch</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -614,7 +613,7 @@ spec:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l app.kubernetes.io/name=my-broker --watch</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -l ActiveMQArtemis=my-broker --watch</code></pre>
 </div>
 </div>
 <div class="paragraph">

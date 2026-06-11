@@ -700,7 +700,7 @@ oc get pvc -n amq</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -w -l app.kubernetes.io/name=broker1</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -w -l ActiveMQArtemis=broker1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -714,7 +714,7 @@ oc get pvc -n amq</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc exec broker1-ss-0 -- /home/jboss/amq-broker/artemis consumer --destination TEST --user admin --passwor admin</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc exec broker1-ss-0 -- /home/jboss/amq-broker/artemis consumer --destination TEST --user admin --password admin</code></pre>
 </div>
 </div>
 <div class="paragraph">

@@ -522,39 +522,6 @@
 <div class="paragraph">
 <p>If the AMQ Broker Operator is not already installed in your cluster, you need to install it. For this lab, we will install it in the <code>amq-broker-lab</code> namespace.</p>
 </div>
-<div class="listingblock">
-<div class="title">Create the Operator Group (if not already present for your namespace)</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f - &lt;&lt;EOF
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: amq-broker-operator-group
-  namespace: amq-broker-lab
-spec:
-  targetNamespaces:
-  - amq-broker-lab
-EOF</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">Subscribe to the AMQ Broker Operator</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f - &lt;&lt;EOF
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: amq-broker-operator
-  namespace: amq-broker-lab
-spec:
-  channel: current
-  installPlanApproval: Automatic
-  name: amq-broker-rhel8
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
-EOF</code></pre>
-</div>
-</div>
 <div class="paragraph">
 <div class="title">Verify the Operator deployment</div>
 <p>Wait for the Operator Pod to be in a <code>Running</code> state. This might take a few minutes.</p>
@@ -569,7 +536,22 @@ EOF</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">amq-broker-operator-XXXXX-YYYYY   1/1     Running   0          3m</code></pre>
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">amq-broker-controller-manager-XXXXX-YYYYY   1/1     Running   0          3m</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_4_configure_the_ssl_secret"><a class="anchor" href="#_step_4_configure_the_ssl_secret"></a>Step 4: Configure the SSL Secret</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">keytool -genkeypair -alias broker -keyalg RSA -keysize 2048 -validity 365 -keystore broker.ks -storepass password -keypass password -dname "CN=*.my-openshift.domain, OU=IT, O=RedHat, L=Raleigh, ST=NC, C=US"
+
+keytool -exportcert -alias broker -file broker.cer -keystore broker.ks -storepass password -noprompt
+
+oc create secret generic my-ssl-secret \
+  --from-file=broker.ks=./broker.ks \
+  --from-literal=keyStorePassword=password \
+  -n $(oc project -q)</code></pre>
 </div>
 </div>
 </div>
@@ -594,15 +576,17 @@ spec:
   console:
     expose: true # Expose Hawtio console for later access
   acceptors:
-    - name: my-acceptor
+    - name: ssl-acceptor
       protocols: [AMQP, CORE, MQTT, STOMP, OPENWIRE]
-      port: 61616
-      sslEnabled: false
+      port: 61617
+      expose: true
+      sslEnabled: true
+      sslSecret: my-ssl-secret
 EOF</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This command creates a single-node AMQ Broker instance named <code>my-broker</code> in the <code>amq-broker-lab</code> namespace. It uses a specific Red Hat AMQ Broker image, enables anonymous access, and configures an acceptor for common messaging protocols on port 61616, which will be exposed internally within OpenShift. We also enable the Hawtio management console for potential later use.</p>
+<p>This command creates a single-node AMQ Broker instance named <code>my-broker</code> in the <code>amq-broker-lab</code> namespace. It uses a specific Red Hat AMQ Broker image, enables anonymous access, and configures an acceptor for common messaging protocols on port 61617, which will be exposed externally outside of OpenShift. We also enable the Hawtio management console for potential later use.</p>
 </div>
 </div>
 <div class="sect2">
@@ -646,7 +630,7 @@ EOF</code></pre>
 <div class="listingblock">
 <div class="title">Access the Broker Pod&#8217;s shell</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc exec -it deployment/my-broker-broker -- bash</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc exec -it pod/my-broker-ss-0 -- bash</code></pre>
 </div>
 </div>
 <div class="paragraph">

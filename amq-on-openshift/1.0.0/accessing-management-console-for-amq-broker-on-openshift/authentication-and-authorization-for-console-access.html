@@ -485,10 +485,9 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.13
+    image: placeholder
   console:
-    expose: true
-    exposeMode: route</code></pre>
+    expose: true</code></pre>
 </div>
 </div>
 </li>
@@ -504,7 +503,7 @@ spec:
 <p>Wait for the broker and console pods to be ready. You can monitor the deployment:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get ActiveMQArtemis my-broker-console -o jsonpath='{.status.brokerPodsStatus[0].podName}'
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get ActiveMQArtemis my-broker-console -o jsonpath='{.status.podStatus}'
 oc get route my-broker-console-console -o jsonpath='{.spec.host}'</code></pre>
 </div>
 </div>
@@ -516,8 +515,8 @@ oc get route my-broker-console-console -o jsonpath='{.spec.host}'</code></pre>
 <p>Retrieve the generated credentials secret for your broker.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_CONSOLE_USER}' | base64 --decode
-oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_CONSOLE_PASSWORD}' | base64 --decode</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_USER}' | base64 --decode
+oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_PASSWORD}' | base64 --decode</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -576,9 +575,31 @@ oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_CONSO
 <div class="listingblock">
 <div class="title">login.config (Example, actual content depends on Keycloak setup)</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">amq-broker {
-   org.apache.activemq.artemis.spi.core.security.jaas.KeycloakLoginModule required
-   keycloak-config-path="/opt/amq/broker/etc/keycloak-jaas-config/_keycloak-bearer-token.json";
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">console {
+    // ensure the operator can connect to the broker by referencing the existing properties config
+    org.apache.activemq.artemis.spi.core.security.jaas.PropertiesLoginModule sufficient
+        org.apache.activemq.jaas.properties.user="artemis-users.properties"
+        org.apache.activemq.jaas.properties.role="artemis-roles.properties"
+        baseDir="/home/jboss/amq-broker/etc";
+
+   org.keycloak.adapters.jaas.BearerTokenLoginModule sufficient
+        keycloak-config-file="${secret.mount}/_keycloak-bearer-token.json"
+        role-principal-class=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal;
+
+    org.apache.activemq.artemis.spi.core.security.jaas.PrincipalConversionLoginModule required
+       principalClassList=org.keycloak.KeycloakPrincipal;
+};
+activemq {
+    org.keycloak.adapters.jaas.BearerTokenLoginModule sufficient
+        keycloak-config-file="${secret.mount}/_keycloak-bearer-token.json"
+        role-principal-class=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal;
+
+    org.keycloak.adapters.jaas.DirectAccessGrantsLoginModule sufficient
+        keycloak-config-file="${secret.mount}/_keycloak-direct-access.json"
+        role-principal-class=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal;
+
+    org.apache.activemq.artemis.spi.core.security.jaas.PrincipalConversionLoginModule required
+       principalClassList=org.keycloak.KeycloakPrincipal;
 };</code></pre>
 </div>
 </div>
@@ -586,14 +607,9 @@ oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_CONSO
 <div class="title">_keycloak-js-client.json (Example, replace with your Keycloak client details)</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "realm": "your-realm",
-  "auth-server-url": "https://your-keycloak-instance.com/auth",
-  "ssl-required": "external",
-  "resource": "amq-broker-console-client",
-  "public-client": true,
-  "verify-token-audience": true,
-  "use-resource-role-mappings": true,
-  "confidential-port": 0
+  "realm": "amq-broker-realm",
+  "clientId": "amq-console",
+  "url": "https://\$KEYCLOAK_URL"
 }</code></pre>
 </div>
 </div>
@@ -601,13 +617,15 @@ oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_CONSO
 <div class="title">_keycloak-bearer-token.json (Example, replace with your Keycloak client details)</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "realm": "your-realm",
-  "auth-server-url": "https://your-keycloak-instance.com/auth",
-  "ssl-required": "external",
-  "resource": "amq-broker-bearer-token-client",
-  "credentials": {
-    "secret": "your-client-secret"
-  },
+  "realm": "amq-broker-realm",
+  "auth-server-url": "https://\$KEYCLOAK_URL",
+  "ssl-required": "all",
+  "resource": "amq-console",
+  "public-client": true,
+  "use-resource-role-mappings": true,
+  "principal-attribute": "preferred_username",
+  "verify-token-audience": false,
+  "enable-basic-auth": true,
   "confidential-port": 0
 }</code></pre>
 </div>
@@ -629,6 +647,18 @@ oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_CONSO
 </div>
 </li>
 <li>
+<p>Create a secret to specify the truststore for the keyclaok server</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret generic keycloak-truststore -n amq-broker-console-lab --from-file=tls.crt</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
 <p>Update your <code>ActiveMQArtemis</code> Custom Resource to:</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
@@ -636,7 +666,7 @@ oc get secret my-broker-console-credentials-secret -o jsonpath='{.data.AMQ_CONSO
 <p>Mount the <code>keycloak-jaas-config</code> secret into a known path within the broker container (e.g., <code>/opt/amq/broker/etc/keycloak-jaas-config</code>).</p>
 </li>
 <li>
-<p>Configure the broker&#8217;s JAAS by setting the <code>JAVA_SECURITY_AUTH_LOGIN_CONFIG</code> environment variable to point to the <code>login.config</code> file within the mounted secret.</p>
+<p>Configure the broker&#8217;s JAAS by setting the <code>extraMounts &gt; secrets &gt; keycloak-jaas-config</code> tag in the ActiveMQArtemis custom resource yaml.</p>
 </li>
 <li>
 <p>Configure the console for Keycloak integration by referencing the <code>_keycloak-js-client.json</code> file.</p>
@@ -649,22 +679,20 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.13
+    image: placeholder
     extraMounts:
-      - name: keycloak-config-volume
-        mountPath: /opt/amq/broker/etc/keycloak-jaas-config
-        secret: keycloak-jaas-config
+      secrets:
+      - keycloak-jaas-config
+      - keycloak-truststore
     env:
-      - name: JAVA_SECURITY_AUTH_LOGIN_CONFIG
-        value: "/opt/amq/broker/etc/keycloak-jaas-config/login.config"
+      - name: JAVA_ARGS_APPEND
+        value: -Dsecret.mount=/amq/extra/secrets/keycloak-jaas-config -Djavax.net.ssl.trustStore=/amq/extra/secrets/keycloak-truststore/truststore.jks
+          -Djavax.net.ssl.trustStorePassword=password -Djavax.net.ssl.trustStoreType=jks
+          -Dhawtio.rolePrincipalClasses=org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal
+          -Dhawtio.keycloakEnabled=true -Dhawtio.keycloakClientConfig=/amq/extra/secrets/keycloak-jaas-config/_keycloak-js-client.json
+          -Dhawtio.authenticationEnabled=true -Dhawtio.realm=console -Dhawtio.roles=* -Djavax.management.builder.initial=org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder
   console:
-    expose: true
-    exposeMode: route
-    # Configure Hawtio to use Keycloak for frontend authentication
-    hawtio:
-      extraOptions: |
-        -Dhawtio.keycloakEnabled=true
-        -Dhawtio.keycloakConfigFile=/opt/amq/broker/etc/keycloak-jaas-config/_keycloak-js-client.json</code></pre>
+    expose: true</code></pre>
 </div>
 </div>
 <div class="paragraph">

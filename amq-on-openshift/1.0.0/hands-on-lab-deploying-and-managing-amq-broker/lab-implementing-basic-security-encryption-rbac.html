@@ -449,7 +449,7 @@ spec:
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-project amq || oc project amq
 oc apply -f mybroker-initial.yaml -n amq
-oc wait --for=condition=Ready pod -l app.kubernetes.io/name=mybroker -n amq --timeout=300s</code></pre>
+oc wait --for=condition=Ready pod -l ActiveMQArtemis=mybroker -n amq --timeout=300s</code></pre>
 </div>
 </div>
 </div>
@@ -670,7 +670,7 @@ spec:
 <p>Examine the broker logs for messages indicating secure listener startup. Look for references to SSL:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc logs -f $(oc get pod -l app.kubernetes.io/name=mybroker -o jsonpath='{.items[0].metadata.name}') -n amq | grep -i ssl</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc logs -f $(oc get pod -l ActiveMQArtemis=mybroker -o jsonpath='{.items[0].metadata.name}') -n amq | grep -i ssl</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -702,44 +702,72 @@ spec:
 <div class="sect2">
 <h3 id="_technical_explanation_rbac_with_propertiesloginmodule"><a class="anchor" href="#_technical_explanation_rbac_with_propertiesloginmodule"></a>Technical Explanation: RBAC with <code>PropertiesLoginModule</code></h3>
 <div class="paragraph">
-<p>The <code>PropertiesLoginModule</code> is a JAAS module that authenticates users by comparing provided credentials against a list of usernames and hashed passwords stored in a properties file (e.g., <code>users.properties</code>). It then authorizes users by assigning them roles, which are also defined in another properties file (e.g., <code>roles.properties</code>). These properties files are typically managed within OpenShift Secrets.</p>
+<p>The <code>PropertiesLoginModule</code> is a JAAS module that authenticates users by comparing provided credentials against a list of usernames and hashed passwords stored in a properties file (e.g., <code>new-users.properties</code>). It then authorizes users by assigning them roles, which are also defined in another properties file (e.g., <code>new-roles.properties</code>). These properties files are typically managed within OpenShift Secrets.</p>
 </div>
 <div class="paragraph">
-<p>The AMQ Broker Operator simplifies this process significantly. You define your users and their roles directly within an <code>ActiveMQArtemisSecurity</code> Custom Resource. The Operator then takes this definition, automatically creates the necessary internal properties files (<code>users.properties</code>, <code>roles.properties</code>), and packages them into an OpenShift Secret. This secret is then mounted into the broker pods, and the broker is configured to use the <code>PropertiesLoginModule</code> for authentication and authorization.</p>
+<p>The AMQ Broker Operator simplifies this process significantly. You define your users and their roles directly in the properties files and attach them to the running broker through a jaas-config secret in the <code>ActiveMQArtemis</code> Custom Resource. This secret is then mounted into the broker pods, and the broker is configured to use the <code>PropertiesLoginModule</code> for authentication and authorization.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_hands_on_activity_create_secret_for_users_and_passwords"><a class="anchor" href="#_hands_on_activity_create_secret_for_users_and_passwords"></a>Hands-on Activity: Create Secret for Users and Passwords</h3>
 <div class="paragraph">
-<p>First, create an OpenShift Secret to store the usernames and their passwords. This secret must follow a specific naming convention: <code>security-properties-&lt;module_name&gt;</code>, where <code>&lt;module_name&gt;</code> is the name you&#8217;ll give your <code>PropertiesLoginModule</code> later in the <code>ActiveMQArtemisSecurity</code> CR.</p>
+<p>First, create an OpenShift Secret to store the usernames and their passwords. This secret must follow a specific naming convention: <code>*-jaas-config</code>.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Choose a module name, for instance, <code>prop-module</code>. This name will be used in both the secret name and the <code>ActiveMQArtemisSecurity</code> CR.</p>
-</li>
-<li>
-<p>Create the secret named <code>security-properties-prop-module</code> with your desired users and passwords:</p>
+<p>Create three files new-users.properties, new-roles.properties, and login.config with this content</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret generic security-properties-prop-module \
-  --from-literal=sam=samspassword \
-  --from-literal=rob=robspassword -n amq</code></pre>
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">login.config:
+
+activemq {
+   org.apache.activemq.artemis.spi.core.security.jaas.PropertiesLoginModule sufficient
+      reload=true
+      org.apache.activemq.jaas.properties.user="new-users.properties"
+      org.apache.activemq.jaas.properties.role="new-roles.properties";
+
+   org.apache.activemq.artemis.spi.core.security.jaas.PropertiesLoginModule sufficient
+      reload=false
+      org.apache.activemq.jaas.properties.user="artemis-users.properties"
+      org.apache.activemq.jaas.properties.role="artemis-roles.properties"
+      baseDir="/home/jboss/amq-broker/etc";
+};
+
+new-users.properties:
+
+admin=admin
+sender=sender
+receiver=receiver
+
+new-roles.properties:
+
+admins=admin
+receivers=receiver
+senders=sender</code></pre>
 </div>
 </div>
-<div class="ulist">
-<ul>
+</li>
 <li>
-<p>This command creates a secret containing user <code>sam</code> with password <code>samspassword</code> and user <code>rob</code> with password <code>robspassword</code>.</p>
+<p>Create the secret named <code>properties-jaas-config</code> with your desired users and passwords</p>
 </li>
-</ul>
+</ol>
 </div>
-</li>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create secret generic properties-jaas-config --from-file=login.config --from-file=new-users.properties --from-file=new-roles.properties -n amq</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>+</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p>Verify the secret has been created:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get secret security-properties-prop-module -n amq</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get secret properties-jaas-config -n amq</code></pre>
 </div>
 </div>
 </li>
@@ -747,124 +775,75 @@ spec:
 </div>
 </div>
 <div class="sect2">
-<h3 id="_hands_on_activity_define_roles_and_permissions_using_activemqartemissecurity_cr"><a class="anchor" href="#_hands_on_activity_define_roles_and_permissions_using_activemqartemissecurity_cr"></a>Hands-on Activity: Define Roles and Permissions using <code>ActiveMQArtemisSecurity</code> CR</h3>
+<h3 id="_hands_on_activity_define_roles_and_permissions_using_activemqartemis_cr"><a class="anchor" href="#_hands_on_activity_define_roles_and_permissions_using_activemqartemis_cr"></a>Hands-on Activity: Define Roles and Permissions using <code>ActiveMQArtemis</code> CR</h3>
 <div class="paragraph">
-<p>Now, create an <code>ActiveMQArtemisSecurity</code> Custom Resource to define the <code>PropertiesLoginModule</code> configuration and map your users to their respective roles.</p>
+<p>Now, create an <code>ActiveMQArtemis</code> Custom Resource to define the <code>brokerProperties</code> configuration and map your users to their respective roles.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Create a file named <code>activemqartemis-security-prop.yaml</code> with the following content:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
-kind: ActiveMQArtemisSecurity
-metadata:
-  name: ex-prop # Name of this security configuration instance
-  namespace: amq
-spec:
-  loginModules:
-    propertiesLoginModules: <i class="conum" data-value="1"></i><b>(1)</b>
-      - name: "prop-module" # &lt;2&gt; This name *must* match the module_name used in the secret name
-        users:
-          - name: "sam" # &lt;3&gt; User defined in the secret
-            roles:
-              - "sender"
-              - "admin" # Sam can send messages and perform administrative tasks
-          - name: "rob" # &lt;4&gt; User defined in the secret
-            roles:
-              - "receiver" # Rob can only receive messages</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Specifies that we are configuring a properties-based login module.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>name</code> field here (<code>"prop-module"</code>) is crucial as it creates the link to the <code>security-properties-prop-module</code> secret you created earlier.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>sam</code> is assigned <code>sender</code> and <code>admin</code> roles.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td><code>rob</code> is assigned the <code>receiver</code> role.</td>
-</tr>
-</table>
-</div>
-</li>
-<li>
-<p>Apply the <code>ActiveMQArtemisSecurity</code> CR to your cluster:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f activemqartemis-security-prop.yaml -n amq</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Verify that the security CR has been created:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get activemqartemissecurity -n amq</code></pre>
-</div>
-</div>
-</li>
-</ol>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_hands_on_activity_associate_security_configuration_with_the_broker"><a class="anchor" href="#_hands_on_activity_associate_security_configuration_with_the_broker"></a>Hands-on Activity: Associate Security Configuration with the Broker</h3>
-<div class="paragraph">
-<p>The final step for RBAC is to instruct your <code>ActiveMQArtemis</code> broker instance (<code>mybroker</code>) to use the <code>ex-prop</code> security configuration that you just defined.</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Edit your existing <code>mybroker-initial.yaml</code> file. Add a reference to the <code>ActiveMQArtemisSecurity</code> CR under <code>spec.loginModules</code>:</p>
+<p>Create a file named <code>activemqartemis-security.yaml</code> with the following content:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
-  name: mybroker
+  name: my-broker
   namespace: amq
 spec:
+  brokerProperties:
+    - securityRoles.#.admins.createAddress=true
+    - securityRoles.#.admins.deleteAddress=true
+    - securityRoles.#.admins.createDurableQueue=true
+    - securityRoles.#.admins.deleteDurableQueue=true
+    - securityRoles.#.admins.createNonDurableQueue=true
+    - securityRoles.#.admins.deleteNonDurableQueue=true
+    - securityRoles.#.admins.send=true
+    - securityRoles.#.senders.send=true
+    - securityRoles.#.admins.consume=true
+    - securityRoles.#.receivers.consume=true
+    - securityRoles.#.admins.browse=true
+  version: 7.13.1
   deploymentPlan:
-    size: 1
+    extraMounts:
+      secrets:
+      - properties-jaas-config
     image: placeholder
-  acceptors:
-    - name: insecure-acceptor
-      port: 61616
-      protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE
-    - name: my-secure-acceptor
-      port: 61617
-      protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE
-      sslEnabled: true
-      sslSecret: mytlssecret
+    size: 1
+    jolokiaAgentEnabled: true
+    requireLogin: true
+    managementRBACEnabled: true
   console:
     expose: true
-    sslSecret: mytlssecret
-    sslEnabled: true</code></pre>
+  adminUser: global-admin
+  adminPassword: password
+  acceptors:
+    - name: myacceptor
+      protocols: amqp
+      port: 5673
+      expose: true
+      connectionsAllowed: 100
+    - name: all
+      protocols: all
+      port: 61616
+      sslEnabled: false
+      expose: true</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Apply the updated <code>ActiveMQArtemis</code> CR:</p>
+<p>Apply the <code>ActiveMQArtemis</code> CR to your cluster:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f mybroker-initial.yaml -n amq</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f activemqartemis-security.yaml -n amq</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Monitor the broker pods. They will restart to apply the new security configuration.</p>
+<p>Verify that the activemqartemis CR has been created:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get pods -n amq -w</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get activemqartemis -n amq</code></pre>
 </div>
 </div>
 </li>
@@ -883,25 +862,25 @@ spec:
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Authorization Configuration (Broker.xml):</strong> The <code>ActiveMQArtemisSecurity</code> CR handles user authentication and role mapping. Granular permissions (e.g., which roles can send to <code>queueA</code>, which can create queues) are typically defined in the broker&#8217;s <code>broker.xml</code> configuration, specifically within the <code>&lt;security-settings&gt;</code> and <code>&lt;address-settings&gt;</code> sections. For basic RBAC, the <code>admin</code> role usually has full access, while other roles like <code>sender</code> and <code>receiver</code> would have permissions tailored to sending/receiving messages on specific destinations.</p>
+<p><strong>Authorization Configuration:</strong> The brokerProperties configured in the <code>ActiveMQArtemis</code> CR handles user authentication and role mapping. Granular permissions (e.g., which roles can send to <code>queueA</code>, which can create queues) are typically defined in the broker&#8217;s <code>broker.xml</code> configuration, specifically within the <code>&lt;security-settings&gt;</code> and <code>&lt;address-settings&gt;</code> sections. For basic RBAC, the <code>admin</code> role usually has full access, while other roles like <code>sender</code> and <code>receiver</code> would have permissions tailored to sending/receiving messages on specific destinations.</p>
 </li>
 <li>
-<p><strong>As <code>sam</code> (roles: <code>sender</code>, <code>admin</code>):</strong></p>
+<p><strong>As <code>sender</code> (roles: <code>senders</code>, <code>admins</code>):</strong></p>
 </li>
 <li>
-<p>Using a messaging client (e.g., a simple Java/AMQP client), attempt to connect to the secure acceptor (<code>61617</code>) using <code>sam&#8217;s credentials (`samspassword</code>). The connection should succeed.</p>
+<p>Using a messaging client (e.g., a simple Java/AMQP client), attempt to connect to the secure acceptor (<code>61617</code>) using <code>sender&#8217;s credentials (`sender</code>). The connection should succeed.</p>
 </li>
 <li>
 <p>Try to create a new queue, send messages to it, and receive messages from it. All operations should succeed due to the <code>admin</code> role.</p>
 </li>
 <li>
-<p><strong>As <code>rob</code> (role: <code>receiver</code>):</strong></p>
+<p><strong>As <code>receivers</code> (role: <code>receiver</code>):</strong></p>
 </li>
 <li>
-<p>Attempt to connect to the secure acceptor (<code>61617</code>) using <code>rob&#8217;s credentials (`robspassword</code>). The connection should succeed.</p>
+<p>Attempt to connect to the secure acceptor (<code>61617</code>) using <code>receiver&#8217;s credentials (`receiver</code>). The connection should succeed.</p>
 </li>
 <li>
-<p>Try to create a new queue or send messages to an existing queue. These operations should <strong>fail</strong> with an authorization error, as <code>rob</code> only has the <code>receiver</code> role, which typically implies read-only access to messages.</p>
+<p>Try to create a new queue or send messages to an existing queue. These operations should <strong>fail</strong> with an authorization error, as <code>receiver</code> only has the <code>receivers</code> role, which typically implies read-only access to messages.</p>
 </li>
 <li>
 <p>Try to receive messages from an existing queue. This operation should succeed.</p>

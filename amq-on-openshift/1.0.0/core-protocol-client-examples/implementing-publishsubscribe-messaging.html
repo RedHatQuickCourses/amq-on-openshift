@@ -564,16 +564,22 @@ kind: ActiveMQArtemis
 metadata:
   name: amq-pubsub-broker
 spec:
+  acceptors:
+    - name: amqp
+      protocols: amqp
+      port: 5672
+      sslSecret: my-ssl-secret
+      expose: true
+    - name: core
+      protocols: core
+      port: 61616 <i class="conum" data-value="2"></i><b>(2)</b>
+      sslSecret: my-ssl-secret
+      expose: true
+  console:
+    expose: true
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker-rhel8:7.12
-    # Define a network via an OpenShift Route for external access
-    expose: true
-    # Configure the console for monitoring
-    console: true
-  brokerProperties:
-    - addressSettings.#.default.durable-topic-paging=true
-    - addressSettings.#.default.topic-paging=true</code></pre>
+    image: placeholder</code></pre>
 </div>
 </div>
 <div class="paragraph">

@@ -525,11 +525,11 @@ spec:
 <ol class="arabic">
 <li>
 <p><strong>Get the console route URL</strong>
-You can filter routes by the <code>app.kubernetes.io/name=amq-broker</code> label, or specifically search for routes matching the console naming pattern:</p>
+You can filter routes by the <code>ActiveMQArtemis=amq-broker</code> label, or specifically search for routes matching the console naming pattern:</p>
 <div class="literalblock">
 <div class="content">
 <pre>```bash
-oc get routes -l app.kubernetes.io/name=amq-broker
+oc get routes -l ActiveMQArtemis=amq-broker
 ```</pre>
 </div>
 </div>

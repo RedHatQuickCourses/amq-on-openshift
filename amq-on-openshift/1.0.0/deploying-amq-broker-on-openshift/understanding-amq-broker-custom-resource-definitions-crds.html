@@ -503,28 +503,6 @@ Think of a CRD as a cookie cutter defining the shape, and a CR as an individual 
 </ul>
 </div>
 </li>
-<li>
-<p><strong><code>ActiveMQArtemisAddress</code> CRD</strong>:</p>
-<div class="ulist">
-<ul>
-<li>
-<p>This CRD is used to define messaging addresses and queues that exist <strong>within</strong> your deployed AMQ Broker instances.</p>
-</li>
-<li>
-<p>Instead of configuring addresses and queues directly on the broker&#8217;s filesystem or through its management console (though that&#8217;s still an option), you can declaratively define them using <code>ActiveMQArtemisAddress</code> CRs.</p>
-</li>
-<li>
-<p>Each address and/or queue you wish to create on the broker requires a separate, uniquely named CR instance based on this CRD.</p>
-</li>
-<li>
-<p>This allows for GitOps-style management of your messaging topology.</p>
-</li>
-<li>
-<p><strong>Reference</strong>: For detailed configuration options, refer to the "Address Custom Resource configuration reference" (Section 8.1.2 in the provided context).</p>
-</li>
-</ul>
-</div>
-</li>
 </ol>
 </div>
 <div class="paragraph">

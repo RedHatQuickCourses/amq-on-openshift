@@ -476,11 +476,11 @@ oc new-project amq-broker-project</code></pre>
 </div>
 </li>
 <li>
-<p>Deploy a simple application (e.g., an Nginx deployment) to create some pods and a service.</p>
+<p>Deploy a simple application (e.g., an httpd deployment) to create some pods and a service.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create deployment nginx --image=nginx
-oc expose deployment nginx --port=80</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-app registry.redhat.io/rhel9/httpd-24 --name my-httpd
+oc expose service my-httpd</code></pre>
 </div>
 </div>
 </li>
@@ -497,19 +497,19 @@ oc expose deployment nginx --port=80</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">NAME    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
-nginx   ClusterIP   172.30.200.123   &lt;none&gt;        80/TCP    2m</code></pre>
+my-httpd   ClusterIP   172.30.200.123   &lt;none&gt;        8080/TCP    2m</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Describe the <code>nginx</code> service to see its details, including its IP and selector.</p>
+<p>Describe the <code>my-httpd</code> service to see its details, including its IP and selector.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc describe svc nginx</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc describe svc my-httpd</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You&#8217;ll notice the <code>Selector</code> field, which links this Service to pods with the label <code>app=nginx</code>. The <code>Cluster-IP</code> is the stable internal IP.</p>
+<p>You&#8217;ll notice the <code>Selector</code> field, which links this Service to pods with the label <code>app=my-httpd</code>. The <code>Cluster-IP</code> is the stable internal IP.</p>
 </div>
 </li>
 </ol>
@@ -563,16 +563,16 @@ nginx   ClusterIP   172.30.200.123   &lt;none&gt;        80/TCP    2m</code></pr
 <div class="sect2">
 <h3 id="_hands_on_activity_exposing_a_service_with_an_openshift_route"><a class="anchor" href="#_hands_on_activity_exposing_a_service_with_an_openshift_route"></a>Hands-on Activity: Exposing a Service with an OpenShift Route</h3>
 <div class="paragraph">
-<p>Let&#8217;s expose our <code>nginx</code> service using an OpenShift Route.</p>
+<p>Let&#8217;s expose our <code>my-httpd</code> service using an OpenShift Route.</p>
 </div>
 <div class="olist arabic">
 <div class="title">Procedure</div>
 <ol class="arabic">
 <li>
-<p>Create a Route for the <code>nginx</code> service.</p>
+<p>Create a Route for the <code>my-httpd</code> service.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create route edge --service=nginx</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc create route edge --service=my-httpd</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -583,7 +583,7 @@ nginx   ClusterIP   172.30.200.123   &lt;none&gt;        80/TCP    2m</code></pr
 <p>Get the route information to find its hostname.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route nginx</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route my-httpd</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -592,7 +592,7 @@ nginx   ClusterIP   172.30.200.123   &lt;none&gt;        80/TCP    2m</code></pr
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">NAME    HOST/PORT                                                         PATH   SERVICES   PORT   TERMINATION          WILDCARD
-nginx   nginx-amq-broker-project.apps.cluster-abc.example.com             nginx   8080   edge/Redirect      None</code></pre>
+my-httpd   my-httpd-amq-broker-project.apps.cluster-abc.example.com             my-httpd   8080   edge/Redirect      None</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -600,46 +600,46 @@ nginx   nginx-amq-broker-project.apps.cluster-abc.example.com             nginx 
 </div>
 </li>
 <li>
-<p>Access the <code>nginx</code> application using the provided <code>HOST/PORT</code> in a web browser or with <code>curl</code>.</p>
+<p>Access the <code>my-httpd</code> application using the provided <code>HOST/PORT</code> in a web browser or with <code>curl</code>.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://$(oc get route nginx -o jsonpath='{.spec.host}')</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://$(oc get route my-httpd -o jsonpath='{.spec.host}')</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You should receive the Nginx welcome page HTML.</p>
+<p>You should receive the Red Hat Enterprise Linux Test Page HTML.</p>
 </div>
 </li>
 </ol>
 </div>
 <div class="paragraph">
 <div class="title">Customizing a Route Hostname</div>
-<p>Now, let&#8217;s see how <code>ingressHost</code> and <code>ingressDomain</code> relate to customizing routes. While we usually apply these in the <code>ActiveMQArtemis</code> CR for AMQ Broker, we can demonstrate the concept by editing our <code>nginx</code> route&#8217;s hostname.</p>
+<p>Now, let&#8217;s see how <code>ingressHost</code> and <code>ingressDomain</code> relate to customizing routes. While we usually apply these in the <code>ActiveMQArtemis</code> CR for AMQ Broker, we can demonstrate the concept by editing our <code>my-httpd</code> route&#8217;s hostname.</p>
 </div>
 <div class="olist arabic">
 <div class="title">Procedure</div>
 <ol class="arabic">
 <li>
-<p>Edit the <code>nginx</code> route.</p>
+<p>Edit the <code>my-httpd</code> route.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc edit route nginx</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc edit route my-httpd</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Modify the <code>spec.host</code> field to a custom value, for example, <code>mycustomnginx.apps.cluster-abc.example.com</code>.</p>
+<p>Modify the <code>spec.host</code> field to a custom value, for example, <code>mycustommy-httpd.apps.cluster-abc.example.com</code>.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: nginx
+  name: my-httpd
 spec:
-  host: mycustomnginx.apps.cluster-abc.example.com <i class="conum" data-value="1"></i><b>(1)</b>
+  host: mycustomhttpd.apps.cluster-abc.example.com <i class="conum" data-value="1"></i><b>(1)</b>
   to:
     kind: Service
-    name: nginx
+    name: my-httpd
   # ... other fields</code></pre>
 </div>
 </div>
@@ -647,7 +647,7 @@ spec:
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Replace <code>mycustomnginx</code> and the domain with values appropriate for your cluster. Ensure the domain resolves to your OpenShift router.</td>
+<td>Replace <code>mycustomhttpd</code> and the domain with values appropriate for your cluster. Ensure the domain resolves to your OpenShift router.</td>
 </tr>
 </table>
 </div>
@@ -659,7 +659,7 @@ spec:
 <p>Access the service using the new custom hostname:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://mycustomnginx.apps.cluster-abc.example.com</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://mycustomhttpd.apps.cluster-abc.example.com</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -705,41 +705,41 @@ spec:
 <div class="sect2">
 <h3 id="_hands_on_activity_exposing_a_service_with_kubernetes_ingress"><a class="anchor" href="#_hands_on_activity_exposing_a_service_with_kubernetes_ingress"></a>Hands-on Activity: Exposing a Service with Kubernetes Ingress</h3>
 <div class="paragraph">
-<p>Let&#8217;s modify our approach to use Ingress for the <code>nginx</code> service. (Note: For this to work seamlessly, your OpenShift cluster must have an Ingress Controller configured and running, which is typically the case by default.)</p>
+<p>Let&#8217;s modify our approach to use Ingress for the <code>my-httpd</code> service. (Note: For this to work seamlessly, your OpenShift cluster must have an Ingress Controller configured and running, which is typically the case by default.)</p>
 </div>
 <div class="olist arabic">
 <div class="title">Procedure</div>
 <ol class="arabic">
 <li>
-<p>First, remove the previously created <code>nginx</code> route.</p>
+<p>First, remove the previously created <code>my-httpd</code> route.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete route nginx</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete route my-httpd</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Create an Ingress resource for the <code>nginx</code> service.</p>
+<p>Create an Ingress resource for the <code>my-httpd</code> service.</p>
 <div class="listingblock">
 <div class="title">ingress.yaml</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nginx-ingress
+  name: my-httpd-ingress
   annotations:
     # Example annotation for an IngressClass, might vary based on your cluster setup
     kubernetes.io/ingress.class: "openshift-default"
 spec:
   rules:
-  - host: mynginx.apps.cluster-abc.example.com <i class="conum" data-value="1"></i><b>(1)</b>
+  - host: my-httpd.apps.cluster-abc.example.com <i class="conum" data-value="1"></i><b>(1)</b>
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: nginx
+            name: my-httpd
             port:
               number: 80</code></pre>
 </div>
@@ -748,7 +748,7 @@ spec:
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Replace <code>mynginx</code> and the domain with values appropriate for your cluster. This hostname needs to be resolvable externally to your OpenShift Ingress controller.</td>
+<td>Replace <code>my-httpd</code> and the domain with values appropriate for your cluster. This hostname needs to be resolvable externally to your OpenShift Ingress controller.</td>
 </tr>
 </table>
 </div>
@@ -765,7 +765,7 @@ spec:
 <p>Get the Ingress details.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get ingress nginx-ingress</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get ingress my-httpd-ingress</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -774,7 +774,7 @@ spec:
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">NAME          CLASS    HOSTS                              ADDRESS                               PORTS   AGE
-nginx-ingress   &lt;none&gt;   mynginx.apps.cluster-abc.example.com   &lt;router-ip-or-hostname&gt;   80      1m</code></pre>
+my-httpd-ingress   &lt;none&gt;   my-httpd.apps.cluster-abc.example.com   &lt;router-ip-or-hostname&gt;   80      1m</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -782,14 +782,14 @@ nginx-ingress   &lt;none&gt;   mynginx.apps.cluster-abc.example.com   &lt;router
 </div>
 </li>
 <li>
-<p>Access the <code>nginx</code> application using the provided <code>HOSTS</code> in a web browser or with <code>curl</code>.</p>
+<p>Access the <code>my-httpd</code> application using the provided <code>HOSTS</code> in a web browser or with <code>curl</code>.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://mynginx.apps.cluster-abc.example.com</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://my-httpd.apps.cluster-abc.example.com</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You should again receive the Nginx welcome page HTML. This demonstrates how Ingress can be used to expose services externally, similar to Routes.</p>
+<p>You should again receive the Red Hat Enterprise Linux Test Page HTML. This demonstrates how Ingress can be used to expose services externally, similar to Routes.</p>
 </div>
 </li>
 </ol>

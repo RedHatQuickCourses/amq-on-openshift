@@ -515,10 +515,10 @@
 <p>Enable SSL in the connection URL: <code>sslEnabled=true</code>.</p>
 </li>
 <li>
-<p>Specify the path to the client&#8217;s trust store: <code>transport.trustStoreLocation=&lt;path_to_truststore&gt;</code>.</p>
+<p>Specify the path to the client&#8217;s trust store: <code>trustStorePath=&lt;path_to_truststore&gt;</code>.</p>
 </li>
 <li>
-<p>Provide the trust store password: <code>transport.trustStorePassword=&lt;password&gt;</code>.</p>
+<p>Provide the trust store password: <code>trustStorePassword=&lt;password&gt;</code>.</p>
 </li>
 </ol>
 </div>
@@ -526,7 +526,7 @@
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">tcp://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443? \
 useTopologyForLoadBalancing=false&amp;sslEnabled=true&amp; \
-transport.trustStoreLocation=~/client.ts&amp;transport.trustStorePassword=myTrustStorePassword</code></pre>
+trustStorePath=~/client.ts&amp;trustStorePassword=myTrustStorePassword</code></pre>
 </div>
 </div>
 </div>
@@ -553,7 +553,7 @@ transport.trustStoreLocation=~/client.ts&amp;transport.trustStorePassword=myTrus
 <pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">tcp://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443? \
 useTopologyForLoadBalancing=false&amp;sslEnabled=true&amp; \
 keyStorePath=~/client.ks&amp;keyStorePassword=myKeyStorePassword&amp; \
-transport.trustStoreLocation=~/client.ts&amp;transport.trustStorePassword=myTrustStorePassword</code></pre>
+trustStorePath=~/client.ts&amp;trustStorePassword=myTrustStorePassword</code></pre>
 </div>
 </div>
 </div>
@@ -944,7 +944,7 @@ public class ProducerClient {
 <div class="listingblock">
 <div class="title">Run the client, replacing <code>YOUR_BROKER_ROUTE_HOSTNAME</code> with the actual hostname you obtained in Step 1. Remember to include the port <code>61616</code>.</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export BROKER_URL="tcp://YOUR_BROKER_ROUTE_HOSTNAME:61616"
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export BROKER_URL="tcp://YOUR_BROKER_ROUTE_HOSTNAME:61616?sslEnabled=true;trustStorePath=/path/to/truststore.jks;trustStorePassword=password"
 mvn exec:java</code></pre>
 </div>
 </div>
@@ -992,12 +992,17 @@ INFO: Messages sent successfully.
 <ol class="arabic">
 <li>
 <p>Get the Hawtio console route:
-+
-[source,bash]
-----
-oc get route my-broker-console -o jsonpath='{.spec.host}'
-----</p>
++</p>
 </li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>    oc get route my-broker-console -o jsonpath='{.spec.host}'</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p>Open the Hawtio console URL in your browser.</p>
 </li>

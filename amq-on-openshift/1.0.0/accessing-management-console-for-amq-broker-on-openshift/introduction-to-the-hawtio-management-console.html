@@ -581,8 +581,12 @@ metadata:
   name: my-broker-deployment
 spec:
   deploymentPlan:
+    requireLogin: true
+  adminPassword: supersecretpassword123
+  adminUser: amqadmin
+  deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.10
+    image: placeholder
 EOF
 ----</p>
 </li>

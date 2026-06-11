@@ -519,12 +519,13 @@ spec:
   deploymentPlan:
     size: 1
     persistenceEnabled: false
-  jolokiaAgentEnabled: true <i class="conum" data-value="1"></i><b>(1)</b>
-  managementRBACEnabled: false <i class="conum" data-value="2"></i><b>(2)</b>
+    jolokiaAgentEnabled: true <i class="conum" data-value="1"></i><b>(1)</b>
+    managementRBACEnabled: false <i class="conum" data-value="2"></i><b>(2)</b>
   console:
     expose: true <i class="conum" data-value="3"></i><b>(3)</b>
-    adminUser: admin <i class="conum" data-value="4"></i><b>(4)</b>
-    adminPassword: admin <i class="conum" data-value="5"></i><b>(5)</b>
+
+  adminUser: admin <i class="conum" data-value="4"></i><b>(4)</b>
+  adminPassword: admin <i class="conum" data-value="5"></i><b>(5)</b>
   # ... other broker configurations</code></pre>
 </div>
 </div>
@@ -569,26 +570,29 @@ spec:
 <p>An OpenShift cluster with the AMQ Broker Operator installed.</p>
 </li>
 <li>
-<p>An existing <code>ActiveMQArtemis</code> broker instance deployed in a project. If you don&#8217;t have one, you can create a basic instance using:
-[source,yaml]
-----
-apiVersion: broker.amq.io/v1beta1
-kind: ActiveMQArtemis
-metadata:
-  name: my-console-broker
-spec:
-  deploymentPlan:
-    size: 1
-    persistenceEnabled: false
-    journalType: MAPPED_FILE
-----
-Save this as <code>my-console-broker.yaml</code> and apply it:
-<code>oc apply -f my-console-broker.yaml</code></p>
-</li>
-<li>
-<p><code>oc</code> command-line tool configured and logged into your OpenShift cluster.</p>
+<p>An existing <code>ActiveMQArtemis</code> broker instance deployed in a project. If you don&#8217;t have one, you can create a basic instance using:</p>
 </li>
 </ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-console-broker
+    spec:
+      deploymentPlan:
+        size: 1
+        persistenceEnabled: false
+        journalType: MAPPED_FILE</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>    Save this as `my-console-broker.yaml` and apply it:
+    `oc apply -f my-console-broker.yaml`
+*   `oc` command-line tool configured and logged into your OpenShift cluster.</pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -632,8 +636,8 @@ spec:
   managementRBACEnabled: false
   console:
     expose: true
-    adminUser: admin
-    adminPassword: admin
+  adminUser: admin
+  adminPassword: admin
   # ... other configurations
 ----</pre>
 </div>
@@ -647,7 +651,10 @@ spec:
 <p>Set <code>managementRBACEnabled</code> to <code>false</code>. Re-read the security warning above to understand the implications.</p>
 </li>
 <li>
-<p>Configure the <code>console:</code> section with <code>expose: true</code>, <code>adminUser: admin</code>, and <code>adminPassword: admin</code>. You can choose different credentials if desired.</p>
+<p>Configure the <code>console:</code> section with <code>expose: true</code>,</p>
+</li>
+<li>
+<p>Configure the <code>adminUser: admin</code>, and <code>adminPassword: admin</code>. You can choose different credentials if desired.</p>
 </li>
 </ul>
 </div>
@@ -664,7 +671,7 @@ Save the changes and exit the editor. The OpenShift Operator will detect the cha
 <div class="content">
 <pre>[source,bash]
 ----
-oc get pod -l app.kubernetes.io/name=my-console-broker -w
+oc get pod -l ActiveMQArtemis=my-console-broker -w
 ----
 Wait until the pod shows `Running` and is ready.</pre>
 </div>
@@ -738,7 +745,7 @@ Assuming you have a queue named `exampleQueue` with messages:
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Console Route not available</strong>: Ensure <code>console.expose: true</code> is set in your CR and allow a few moments for the Operator to create the route. Check <code>oc get route -l app.kubernetes.io/name=my-console-broker</code>.</p>
+<p><strong>Console Route not available</strong>: Ensure <code>console.expose: true</code> is set in your CR and allow a few moments for the Operator to create the route. Check <code>oc get route -l ActiveMQArtemis=my-console-broker</code>.</p>
 </li>
 <li>
 <p><strong>Login Issues</strong>: Double-check the <code>adminUser</code> and <code>adminPassword</code> configured in your <code>ActiveMQArtemis</code> CR. Passwords are case-sensitive.</p>

@@ -856,19 +856,15 @@ spec:
     - name: amqp
       protocols: amqp
       port: 5672
+      sslSecret: my-ssl-secret
+      expose: true
     - name: core
       protocols: core
       port: 61616 <i class="conum" data-value="2"></i><b>(2)</b>
+      sslSecret: my-ssl-secret
+      expose: true
   console:
-    expose: true
-  addressSettings:
-    - applyToAllAddresses: true
-      redeliveryDelay: 1000
-      maxDeliveryAttempts: 5
-      maxSizeMessages: 100000
-      maxSizeBytes: 100Mi
-      deadLetterAddress: DLQ
-      expiryAddress: ExpiryQueue</code></pre>
+    expose: true</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1488,19 +1484,15 @@ spec:
     - name: amqp
       protocols: amqp
       port: 5672
+      sslSecret: my-ssl-secret
+      expose: true
     - name: core
       protocols: core
       port: 61616 <i class="conum" data-value="2"></i><b>(2)</b>
+      sslSecret: my-ssl-secret
+      expose: true
   console:
-    expose: true
-  addressSettings:
-    - applyToAllAddresses: true
-      redeliveryDelay: 1000
-      maxDeliveryAttempts: 5
-      maxSizeMessages: 100000
-      maxSizeBytes: 100Mi
-      deadLetterAddress: DLQ
-      expiryAddress: ExpiryQueue</code></pre>
+    expose: true</code></pre>
 </div>
 </div>
 <div class="colist arabic">

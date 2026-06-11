@@ -584,7 +584,7 @@
 <h2 id="_hands_on_activity_demonstrating_horizontal_scaling_with_amq_broker_on_openshift"><a class="anchor" href="#_hands_on_activity_demonstrating_horizontal_scaling_with_amq_broker_on_openshift"></a>Hands-on Activity: Demonstrating Horizontal Scaling with AMQ Broker on OpenShift</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This activity demonstrates how to horizontally scale an AMQ Broker instance deployed on OpenShift using the <code>kubectl</code> command-line tool. This is a common operation for adjusting the capacity of your messaging infrastructure.</p>
+<p>This activity demonstrates how to horizontally scale an AMQ Broker instance deployed on OpenShift using the <code>oc</code> command-line tool. This is a common operation for adjusting the capacity of your messaging infrastructure.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -625,7 +625,7 @@ Before scaling, check the current number of replicas for your AMQ Broker instanc
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>oc get pods -l app.kubernetes.io/name=your-broker-name -n your-namespace</pre>
+<pre>oc get pods -l ActiveMQArtemis=broker -n your-namespace</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -636,7 +636,7 @@ Before scaling, check the current number of replicas for your AMQ Broker instanc
 </li>
 <li>
 <p><strong>Scale Up the Broker Instance:</strong>
-To horizontally scale out your broker, you&#8217;ll increase the <code>replicas</code> count for the <code>ActiveMQArtemis</code> custom resource. The <code>kubectl scale</code> command is a convenient way to do this.</p>
+To horizontally scale out your broker, you&#8217;ll increase the <code>replicas</code> count for the <code>ActiveMQArtemis</code> custom resource. The <code>oc scale</code> command is a convenient way to do this.</p>
 <div class="literalblock">
 <div class="content">
 <pre>For example, if you want to scale a broker named `broker-dr` in the `dr` namespace to 2 instances:</pre>
@@ -644,7 +644,7 @@ To horizontally scale out your broker, you&#8217;ll increase the <code>replicas<
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 2</pre>
+<pre>oc -n dr scale ActiveMQArtemis broker-dr --replicas 2</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -654,7 +654,7 @@ To horizontally scale out your broker, you&#8217;ll increase the <code>replicas<
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>kubectl -n production scale ActiveMQArtemis broker-prod --replicas 2</pre>
+<pre>oc -n production scale ActiveMQArtemis broker-prod --replicas 2</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -668,8 +668,8 @@ To horizontally scale out your broker, you&#8217;ll increase the <code>replicas<
 Observe the pod status in your namespace. You should see new pods spinning up for your broker:</p>
 <div class="literalblock">
 <div class="content">
-<pre>oc get pods -l app.kubernetes.io/name=broker-dr -n dr
-oc get pods -l app.kubernetes.io/name=broker-prod -n production</pre>
+<pre>oc get pods -l ActiveMQArtemis=broker-dr -n dr
+oc get pods -l ActiveMQArtemis=broker-prod -n production</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -688,8 +688,8 @@ Once you&#8217;ve tested, you can scale the broker back down to its original num
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>kubectl -n dr scale ActiveMQArtemis broker-dr --replicas 1
-kubectl -n production scale ActiveMQArtemis broker-prod --replicas 1</pre>
+<pre>oc -n dr scale ActiveMQArtemis broker-dr --replicas 1
+oc -n production scale ActiveMQArtemis broker-prod --replicas 1</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -703,8 +703,8 @@ kubectl -n production scale ActiveMQArtemis broker-prod --replicas 1</pre>
 Confirm that the replica count has returned to the desired number by checking the pods again:</p>
 <div class="literalblock">
 <div class="content">
-<pre>oc get pods -l app.kubernetes.io/name=broker-dr -n dr
-oc get pods -l app.kubernetes.io/name=broker-prod -n production</pre>
+<pre>oc get pods -l ActiveMQArtemis=broker-dr -n dr
+oc get pods -l ActiveMQArtemis=broker-prod -n production</pre>
 </div>
 </div>
 <div class="literalblock">
@@ -716,7 +716,7 @@ oc get pods -l app.kubernetes.io/name=broker-prod -n production</pre>
 </ol>
 </div>
 <div class="paragraph">
-<p>This hands-on activity demonstrates the power and simplicity of horizontal scaling on OpenShift using the AMQ Broker Operator and <code>kubectl</code>. By adjusting the <code>replicas</code> count, you can dynamically adapt your messaging infrastructure to changing workload demands.</p>
+<p>This hands-on activity demonstrates the power and simplicity of horizontal scaling on OpenShift using the AMQ Broker Operator and <code>oc</code>. By adjusting the <code>replicas</code> count, you can dynamically adapt your messaging infrastructure to changing workload demands.</p>
 </div>
 </div>
 </div>

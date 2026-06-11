@@ -625,62 +625,72 @@ oc new-project amq-broker-persistence-lab
 <li>
 <p><strong>Define the <code>ActiveMQArtemis</code> Custom Resource:</strong>
 You will create a YAML file, <code>broker-persistence-cr.yaml</code>, to define your broker instance. This example configures both <code>journalDirectory</code> and <code>pagingDirectory</code> to point to specific paths within a mounted persistent volume.</p>
-<div class="literalblock">
-<div class="content">
-<pre>```yaml
-apiVersion: broker.amq.io/v1beta1
-kind: ActiveMQArtemis
-metadata:
-  name: my-ha-broker
-  namespace: amq-broker-persistence-lab
-spec:
-  deploymentPlan:
-    size: 2
-    image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
-    extraMounts:
-      # Define a Persistent Volume Claim to be mounted
-      - name: broker-data
-        mountPath: /var/lib/artemis/data
-        persistentVolumeClaim:
-          claimName: amq-broker-data-pvc # This PVC needs to be created first
-    brokerProperties:
-      # --- Journal Configuration ---
-      - "broker.amq.io/v1beta1.ActiveMQArtemis/metadata.name={{ .Metadata.Name }}"
-      - "journalDirectory=/var/lib/artemis/data/journal" # Path within the mounted PV
-      - "bindingsDirectory=/var/lib/artemis/data/bindings" # Path within the mounted PV
-      - "largeMessagesDirectory=/var/lib/artemis/data/large-messages" # Path within the mounted PV
-      # --- Paging Configuration ---
-      - "pagingDirectory=/var/lib/artemis/data/paging" # Path within the mounted PV
-      # --- High Availability Configuration (for example, using shared store) ---
-      # Note: SHARED_STORE_PRIMARY implies the broker uses a file lock
-      # to prevent concurrent access by multiple brokers to the same store.
-      - "HAPolicyConfiguration.policyType=SHARED_STORE_PRIMARY"
-      - "HAPolicyConfiguration.sharedStorePrimary.voteRetries=10"
-      - "HAPolicyConfiguration.sharedStorePrimary.voteRetryWait=1000"
-      # Optional: Configure global paging limits
-      - "global-max-size=100m" # Trigger paging if total message memory exceeds 100MB
-      - "address-full-policy=PAGE" # Default policy, but explicit for clarity
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: amq-broker-data-pvc
-  namespace: amq-broker-persistence-lab
-spec:
-  accessModes:
-    - ReadWriteOnce # or ReadWriteMany if your storage supports it and HA policy allows
-  resources:
-    requests:
-      storage: 10Gi # Request 10GB of storage
-  # storageClassName: my-storage-class # Uncomment and specify if not using default
-```
-*   **`extraMounts`**: This section is crucial. It defines a `broker-data` volume mount that uses a `PersistentVolumeClaim` named `amq-broker-data-pvc` and mounts it to `/var/lib/artemis/data` inside the broker pod.
-*   **`brokerProperties`**: Within this section, `journalDirectory`, `pagingDirectory`, `bindingsDirectory`, and `largeMessagesDirectory` are set to subdirectories within the mounted `/var/lib/artemis/data` path. This ensures all persistent data goes to the dedicated storage.
-*   **`global-max-size`**: This is an example of a paging-related broker property that sets the overall memory limit for messages before paging starts.
-*   **`HAPolicyConfiguration.policyType=SHARED_STORE_PRIMARY`**: As seen in the context, this is important for shared-store HA setups, where multiple brokers share the same underlying storage. The file lock ensures data integrity.</pre>
-</div>
-</div>
 </li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">    apiVersion: broker.amq.io/v1beta1
+    kind: ActiveMQArtemis
+    metadata:
+      name: my-ha-broker
+      namespace: amq-broker-persistence-lab
+    spec:
+      deploymentPlan:
+        size: 2
+        image: registry.redhat.io/amq7/amq-broker-rhel9:7.14
+        extraMounts:
+          # Define a Persistent Volume Claim to be mounted
+          - name: broker-data
+            mountPath: /var/lib/artemis/data
+            persistentVolumeClaim:
+              claimName: amq-broker-data-pvc # This PVC needs to be created first
+        brokerProperties:
+          # --- Journal Configuration ---
+          - "journalDirectory=/var/lib/artemis/data/journal" # Path within the mounted PV
+          - "bindingsDirectory=/var/lib/artemis/data/bindings" # Path within the mounted PV
+          - "largeMessagesDirectory=/var/lib/artemis/data/large-messages" # Path within the mounted PV
+          # --- Paging Configuration ---
+          - "pagingDirectory=/var/lib/artemis/data/paging" # Path within the mounted PV
+          # --- High Availability Configuration (for example, using shared store) ---
+          # Note: SHARED_STORE_PRIMARY implies the broker uses a file lock
+          # to prevent concurrent access by multiple brokers to the same store.
+          - "HAPolicyConfiguration.policyType=SHARED_STORE_PRIMARY"
+          - "HAPolicyConfiguration.sharedStorePrimary.voteRetries=10"
+          - "HAPolicyConfiguration.sharedStorePrimary.voteRetryWait=1000"
+          # Optional: Configure global paging limits
+          - "globalMaxSize=100m" # Trigger paging if total message memory exceeds 100MB
+          - "addressFullPolicy=PAGE" # Default policy, but explicit for clarity
+    ---
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: amq-broker-data-pvc
+      namespace: amq-broker-persistence-lab
+    spec:
+      accessModes:
+        - ReadWriteOnce # or ReadWriteMany if your storage supports it and HA policy allows
+      resources:
+        requests:
+          storage: 10Gi # Request 10GB of storage
+      # storageClassName: my-storage-class # Uncomment and specify if not using default</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong><code>extraMounts</code></strong>: This section is crucial. It defines a <code>broker-data</code> volume mount that uses a <code>PersistentVolumeClaim</code> named <code>amq-broker-data-pvc</code> and mounts it to <code>/var/lib/artemis/data</code> inside the broker pod.</p>
+</li>
+<li>
+<p><strong><code>brokerProperties</code></strong>: Within this section, <code>journalDirectory</code>, <code>pagingDirectory</code>, <code>bindingsDirectory</code>, and <code>largeMessagesDirectory</code> are set to subdirectories within the mounted <code>/var/lib/artemis/data</code> path. This ensures all persistent data goes to the dedicated storage.</p>
+</li>
+<li>
+<p><strong><code>global-max-size</code></strong>: This is an example of a paging-related broker property that sets the overall memory limit for messages before paging starts.</p>
+</li>
+<li>
+<p><strong><code>HAPolicyConfiguration.policyType=SHARED_STORE_PRIMARY</code></strong>: As seen in the context, this is important for shared-store HA setups, where multiple brokers share the same underlying storage. The file lock ensures data integrity.</p>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p><strong>Apply the Configuration:</strong>
 Apply the YAML file to your OpenShift cluster.
@@ -702,6 +712,9 @@ oc exec -it my-ha-broker-ss-0 -n amq-broker-persistence-lab&#8201;&#8212;&#8201;
 You should see <code>journal</code>, <code>paging</code>, <code>bindings</code>, and <code>large-messages</code> directories.</p>
 </li>
 </ol>
+</div>
+</li>
+</ul>
 </div>
 <div class="ulist">
 <div class="title">Best Practices</div>
