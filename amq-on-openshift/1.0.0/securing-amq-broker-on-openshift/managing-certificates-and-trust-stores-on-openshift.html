@@ -699,7 +699,7 @@ When generating a secret for TLS, the AMQ Broker requires you to specify both a 
 <div class="title">Example <code>Broker</code> CR snippet for TLS configuration</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: amq-broker-tls
 spec:
@@ -735,7 +735,7 @@ spec:
 <div class="title">Example <code>Broker</code> CR snippet for Mutual TLS configuration</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: amq-broker-mtls
 spec:
@@ -746,7 +746,6 @@ spec:
       sslEnabled: true
       sslSecret: broker-cert-secret
       needClientAuth: true <i class="conum" data-value="1"></i><b>(1)</b>
-      trustSecret: trusted-clients-bundle <i class="conum" data-value="2"></i><b>(2)</b>
       # ... other acceptor configurations
   # ... other broker configurations</code></pre>
 </div>

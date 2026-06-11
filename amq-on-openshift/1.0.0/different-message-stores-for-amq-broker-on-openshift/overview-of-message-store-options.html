@@ -591,7 +591,7 @@ spec:
 <div class="title">Example: Broker CR fields for JDBC Storage (Conceptual)</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: ha-broker-pair1
 spec:
@@ -662,7 +662,7 @@ spec:
                     - "mkdir -p /amq/init/config/extra-libs &amp;&amp; curl -Lo /amq/init/config/extra-libs/ojdbc11.jar https://download.oracle.com/otn-pub/otn_software/jdbc/233/ojdbc11.jar"
 ---
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: ha-broker-pair2
 spec:

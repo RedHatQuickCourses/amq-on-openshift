@@ -844,13 +844,13 @@ public class JMSReceiver {
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: mybroker
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.11
+    image: placeholder
     requireLogin: false <i class="conum" data-value="1"></i><b>(1)</b>
   acceptors:
     - name: amqp
@@ -861,7 +861,6 @@ spec:
       port: 61616 <i class="conum" data-value="2"></i><b>(2)</b>
   console:
     expose: true
-    authenticationEnabled: false <i class="conum" data-value="3"></i><b>(3)</b>
   addressSettings:
     - applyToAllAddresses: true
       redeliveryDelay: 1000
@@ -869,25 +868,7 @@ spec:
       maxSizeMessages: 100000
       maxSizeBytes: 100Mi
       deadLetterAddress: DLQ
-      expiryAddress: ExpiryQueue
-  addresses:
-    - name: myQueue <i class="conum" data-value="4"></i><b>(4)</b>
-      queueRoutingType: ANYCAST
-      config:
-        maxConsumers: -1
-        consumersBeforeDispatch: 0
-        exclusive: false
-        lastValueQueue: false
-        nonDestructive: false
-        purgeOnNoConsumers: false
-        routingType: ANYCAST
-        groupRebalance: false
-        groupBuckets: -1
-        groupFirstKey: null
-        enqueueDelay: 0
-        sendToDLAOnNoRoute: false
-        autoCreateJMSQueues: true <i class="conum" data-value="5"></i><b>(5)</b>
-        autoCreateJMSTopics: true</code></pre>
+      expiryAddress: ExpiryQueue</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -899,18 +880,6 @@ spec:
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
 <td>The <code>core</code> acceptor listens on port 61616, which our JMS clients will connect to.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>authenticationEnabled: false</code> for the console simplifies access for monitoring but is not secure.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Defines a queue named <code>myQueue</code> which our clients will use.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td><code>autoCreateJMSQueues</code> ensures JMS queues are created automatically if they don&#8217;t exist. This is useful if you don&#8217;t pre-define the queue in the Broker CR, but we explicitly define <code>myQueue</code> here for clarity.</td>
 </tr>
 </table>
 </div>
@@ -1507,13 +1476,13 @@ public class JMSReceiver {
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: mybroker
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.11
+    image: placeholder
     requireLogin: false <i class="conum" data-value="1"></i><b>(1)</b>
   acceptors:
     - name: amqp
@@ -1524,7 +1493,6 @@ spec:
       port: 61616 <i class="conum" data-value="2"></i><b>(2)</b>
   console:
     expose: true
-    authenticationEnabled: false <i class="conum" data-value="3"></i><b>(3)</b>
   addressSettings:
     - applyToAllAddresses: true
       redeliveryDelay: 1000
@@ -1532,25 +1500,7 @@ spec:
       maxSizeMessages: 100000
       maxSizeBytes: 100Mi
       deadLetterAddress: DLQ
-      expiryAddress: ExpiryQueue
-  addresses:
-    - name: myQueue <i class="conum" data-value="4"></i><b>(4)</b>
-      queueRoutingType: ANYCAST
-      config:
-        maxConsumers: -1
-        consumersBeforeDispatch: 0
-        exclusive: false
-        lastValueQueue: false
-        nonDestructive: false
-        purgeOnNoConsumers: false
-        routingType: ANYCAST
-        groupRebalance: false
-        groupBuckets: -1
-        groupFirstKey: null
-        enqueueDelay: 0
-        sendToDLAOnNoRoute: false
-        autoCreateJMSQueues: true <i class="conum" data-value="5"></i><b>(5)</b>
-        autoCreateJMSTopics: true</code></pre>
+      expiryAddress: ExpiryQueue</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1562,18 +1512,6 @@ spec:
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
 <td>The <code>core</code> acceptor listens on port 61616, which our JMS clients will connect to.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>authenticationEnabled: false</code> for the console simplifies access for monitoring but is not secure.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Defines a queue named <code>myQueue</code> which our clients will use.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td><code>autoCreateJMSQueues</code> ensures JMS queues are created automatically if they don&#8217;t exist. This is useful if you don&#8217;t pre-define the queue in the Broker CR, but we explicitly define <code>myQueue</code> here for clarity.</td>
 </tr>
 </table>
 </div>

@@ -441,7 +441,7 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.12 # Use an appropriate image for your OpenShift version</code></pre>
+    image: placeholder</code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -595,7 +595,7 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.12
+    image: placeholder
   acceptors: <i class="conum" data-value="1"></i><b>(1)</b>
     - name: insecure-acceptor <i class="conum" data-value="2"></i><b>(2)</b>
       port: 61616
@@ -835,7 +835,7 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.12
+    image: placeholder
   acceptors:
     - name: insecure-acceptor
       port: 61616
@@ -848,22 +848,8 @@ spec:
   console:
     expose: true
     sslSecret: mytlssecret
-    sslEnabled: true
-  loginModules: <i class="conum" data-value="1"></i><b>(1)</b>
-    activeMQArtemisSecurityRef: ex-prop <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+    sslEnabled: true</code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>This section defines the JAAS login modules the broker will use.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>This references the <code>ActiveMQArtemisSecurity</code> instance by its <code>metadata.name</code> (<code>ex-prop</code>).</td>
-</tr>
-</table>
 </div>
 </li>
 <li>
