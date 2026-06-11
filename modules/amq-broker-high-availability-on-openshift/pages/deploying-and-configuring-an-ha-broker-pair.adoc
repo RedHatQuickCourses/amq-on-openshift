@@ -285,7 +285,7 @@ Now, continuously monitor the pods to observe the failover and recovery process:
 +
 [source,bash]
 ----
-oc get pods -l broker.amq.io/cluster-name=ha-broker-pair --watch
+oc get pods -l ActiveMQArtemis=ha-broker-pair --watch
 ----
 +
 You will observe:

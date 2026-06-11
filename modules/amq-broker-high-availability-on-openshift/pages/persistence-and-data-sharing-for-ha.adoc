@@ -219,7 +219,7 @@ Observe the pod's lifecycle as OpenShift terminates the old pod and provisions a
 +
 [source,bash]
 ----
-oc get pods -w -l app.kubernetes.io/name=broker1
+oc get pods -w -l ActiveMQArtemis=broker1
 ----
 +
 Wait until the new `broker2-ss-0` pod is in the `Running` state.
@@ -230,7 +230,7 @@ Once the new broker pod is running, deploy a message consumer client to check if
 +
 [source,bash]
 ----
-oc exec broker1-ss-0 -- /home/jboss/amq-broker/artemis consumer --destination TEST --user admin --passwor admin
+oc exec broker1-ss-0 -- /home/jboss/amq-broker/artemis consumer --destination TEST --user admin --password admin
 ----
 +
 You should observe the 1000 messages being successfully consumed by the client, unequivocally confirming that they persisted through the broker pod restart.

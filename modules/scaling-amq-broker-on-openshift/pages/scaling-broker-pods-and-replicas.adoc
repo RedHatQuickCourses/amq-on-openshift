@@ -81,8 +81,7 @@ oc apply -f - <<EOF
     spec:
       deploymentPlan:
         size: 1
-        persistence:
-          enabled: true
+        persistenceEnabled: true
         # Add a simple acceptor if needed for client connections
         acceptors:
         - name: default
@@ -101,7 +100,7 @@ Check the current number of broker pods and the `ActiveMQArtemis` CR configurati
 
 [source,bash]
 ----
-oc get pods -l app.kubernetes.io/name=my-broker
+oc get pods -l ActiveMQArtemis=my-broker
 oc get activemqartemis my-broker -o yaml | grep "size"
 ----
 
@@ -120,7 +119,7 @@ Monitor the pods until the new replica is ready.
 
 [source,bash]
 ----
-oc get pods -l app.kubernetes.io/name=my-broker --watch
+oc get pods -l ActiveMQArtemis=my-broker --watch
 ----
 
 You should eventually see two pods: `my-broker-ss-0` and `my-broker-ss-1`, both in `Running` and `Ready` states. Press `Ctrl+C` to exit the `watch` command.
@@ -158,7 +157,7 @@ Monitor the pods to observe the scale-down process. One of the pods will termina
 
 [source,bash]
 ----
-oc get pods -l app.kubernetes.io/name=my-broker --watch
+oc get pods -l ActiveMQArtemis=my-broker --watch
 ----
 
 You should see `my-broker-ss-1` terminating, and eventually disappear, leaving only `my-broker-ss-0`. During this process, if there were any messages on `my-broker-ss-1`, the scaledown controller would have initiated a drainer pod to migrate them to `my-broker-ss-0`. While we can't easily observe the internal drainer pod for a simple scale-down without active messaging, it's important to understand that this mechanism is in place.

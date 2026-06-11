@@ -36,13 +36,6 @@ The AMQ Broker Operator comes bundled with several CRDs that enable you to deplo
     *   The `ActiveMQArtemis` CRD is foundational for creating and managing the broker pods themselves within an OpenShift project.
     *   *Reference*: For detailed configuration options, refer to the "Broker custom resource configuration reference" (Section 8.1.1 in the provided context).
 
-2.  **`ActiveMQArtemisAddress` CRD**:
-    *   This CRD is used to define messaging addresses and queues that exist *within* your deployed AMQ Broker instances.
-    *   Instead of configuring addresses and queues directly on the broker's filesystem or through its management console (though that's still an option), you can declaratively define them using `ActiveMQArtemisAddress` CRs.
-    *   Each address and/or queue you wish to create on the broker requires a separate, uniquely named CR instance based on this CRD.
-    *   This allows for GitOps-style management of your messaging topology.
-    *   *Reference*: For detailed configuration options, refer to the "Address Custom Resource configuration reference" (Section 8.1.2 in the provided context).
-
 The AMQ Broker Operator installs these CRDs when it is deployed onto your OpenShift cluster. This makes it a prerequisite for creating any AMQ Broker-related Custom Resources.
 
 === Hands-on Activity: Exploring AMQ Broker CRDs

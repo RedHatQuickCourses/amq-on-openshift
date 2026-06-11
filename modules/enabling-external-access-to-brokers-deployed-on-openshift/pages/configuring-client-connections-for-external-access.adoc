@@ -55,14 +55,14 @@ In one-way TLS, the client verifies the broker's identity using a trust store co
 To configure one-way TLS for a Core client:
 
 1.  Enable SSL in the connection URL: `sslEnabled=true`.
-2.  Specify the path to the client's trust store: `transport.trustStoreLocation=<path_to_truststore>`.
-3.  Provide the trust store password: `transport.trustStorePassword=<password>`.
+2.  Specify the path to the client's trust store: `trustStorePath=<path_to_truststore>`.
+3.  Provide the trust store password: `trustStorePassword=<password>`.
 
 [source,text]
 ----
 tcp://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443? \
 useTopologyForLoadBalancing=false&sslEnabled=true& \
-transport.trustStoreLocation=~/client.ts&transport.trustStorePassword=myTrustStorePassword
+trustStorePath=~/client.ts&trustStorePassword=myTrustStorePassword
 ----
 
 ==== Two-Way TLS (Mutual Authentication)
@@ -79,7 +79,7 @@ To configure two-way TLS for a Core client, in *addition* to the one-way TLS set
 tcp://my-broker-deployment-0-svc-rte-my-openshift-project.my-openshift-domain:443? \
 useTopologyForLoadBalancing=false&sslEnabled=true& \
 keyStorePath=~/client.ks&keyStorePassword=myKeyStorePassword& \
-transport.trustStoreLocation=~/client.ts&transport.trustStorePassword=myTrustStorePassword
+trustStorePath=~/client.ts&trustStorePassword=myTrustStorePassword
 ----
 
 === Configuring Failover for Core Protocol Clients
@@ -379,7 +379,7 @@ mvn clean install
 
 [source,bash]
 ----
-export BROKER_URL="tcp://YOUR_BROKER_ROUTE_HOSTNAME:61616"
+export BROKER_URL="tcp://YOUR_BROKER_ROUTE_HOSTNAME:61616?sslEnabled=true;trustStorePath=/path/to/truststore.jks;trustStorePassword=password"
 mvn exec:java
 ----
 
@@ -422,10 +422,10 @@ You can verify that the messages were received by the broker by accessing the Ha
 
 1.  Get the Hawtio console route:
     +
-    [source,bash]
-    ----
+[source,bash]
+----
     oc get route my-broker-console -o jsonpath='{.spec.host}'
-    ----
+----
 2.  Open the Hawtio console URL in your browser.
 3.  Navigate to the `Connections` -> `Queues` tab.
 4.  Find `myQueue` and observe the `Message Count` increasing, or browse the messages to see the content.

@@ -173,7 +173,7 @@ oc apply -f amq-broker-secure-ha.yaml -n $(oc project -q)
 [source,bash]
 ----
 oc get activemqartemises
-oc get pods -l activemq-artemis-name=amq-broker-secure-example
+oc get pods -l ActiveMQArtemis=amq-broker-secure-example
 ----
 Wait for the broker pod(s) to be in the `Running` state.
 
@@ -184,7 +184,7 @@ Once the broker pod is running, check its logs to confirm that the secure listen
 .View the broker pod logs:
 [source,bash]
 ----
-oc logs $(oc get pod -l activemq-artemis-name=amq-broker-secure-example -o jsonpath='{.items[0].metadata.name}') -n $(oc project -q) | grep "acceptor"
+oc logs $(oc get pod -l ActiveMQArtemis=amq-broker-secure-example -o jsonpath='{.items[0].metadata.name}') -n $(oc project -q) | grep "acceptor"
 ----
 You should see log entries indicating that the secure acceptors are starting up on the specified ports (e.g., 5671 and 61617) with SSL enabled. Look for messages similar to:
 `INFO  [org.apache.activemq.artemis.core.server] AMQ221020: Started EPOLL Acceptor at amq-broker-secure-example-ss-0.amq-broker-secure-example-hdls-svc.broker.svc.cluster.local:5671 for protocols [AMQP]

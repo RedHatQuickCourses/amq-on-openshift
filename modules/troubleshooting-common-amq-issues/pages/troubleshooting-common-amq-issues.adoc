@@ -287,9 +287,9 @@ TIP: Use a **block-storage** StorageClass (e.g., `gp3` on AWS, `ssd` on GCP, `ma
 ----
 # 1. List messages in the DLQ
 oc exec -it <broker-pod> -n <namespace> -- \
-  /home/jboss/amq-broker/bin/artemis queue browse --name DLQ \
+  /home/jboss/amq-broker/bin/artemis browser --destination DLQ \
   --url tcp://localhost:61616 \
-  --user <admin-user> --password <admin-password>
+  --user <admin-user> --password <admin-password> --verbose
 
 # 2. Check address-setting for max-delivery-attempts and DLQ routing
 oc get configmap <broker-config> -n <namespace> -o yaml | \
@@ -445,7 +445,7 @@ NOTE: On OpenShift, consider using **cert-manager** or the OpenShift **Service C
 | `/home/jboss/amq-broker/bin/artemis queue purge --name <queue> --url tcp://localhost:61616 --user <u> --password <p>`
 
 | Browse DLQ messages
-| `/home/jboss/amq-broker/bin/artemis queue browse --name DLQ --url tcp://localhost:61616 --user <u> --password <p>`
+| `/home/jboss/amq-broker/bin/artemis browser --destination DLQ --url tcp://localhost:61616 --user <u> --password <p> --verbose`
 
 | Port-forward web console
 | `oc port-forward <broker-pod> 8161:8161 -n <namespace>`

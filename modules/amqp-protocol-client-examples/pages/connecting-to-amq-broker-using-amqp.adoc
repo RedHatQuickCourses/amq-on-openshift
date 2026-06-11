@@ -59,18 +59,11 @@ metadata:
   name: my-broker
 spec:
   # ...
-  addressSettings:
-    - name: "my.amqp.queue" # Defines an address
-      config:
-        maxSizeBytes: 10485760 # 10MB
-        expiryDelay: -1
-        # ...
-  queues:
-    - name: "my.amqp.queue" # Creates a queue on the address
-      address: "my.amqp.queue"
-      routingType: ANYCAST # For point-to-point
-      # For publish/subscribe, you might define an address with MULTICAST routing
-      # and allow consumers to create subscriptions (queues) dynamically.
+    brokerProperties:
+    - addressConfigurations.my.amqp.queue.queueConfigs.my.amqp.queue.routingType=ANYCAST
+    - addressConfigurations.my.amqp.queue.queueConfigs.my.amqp.queue.purgeOnNoConsumers=false
+    - addressConfigurations.my.amqp.queue.queueConfigs.my.amqp.queue.maxConsumers=20
+    ... #Define other configurations
 ----
 
 The provided context mentions `Addresses, Queues, and Topics` as a reference. Ensure that the address name used by your AMQP client (e.g., `my.amqp.queue`) corresponds to a configured address on the broker.
@@ -93,17 +86,12 @@ metadata:
   name: my-broker
 spec:
   # ...
-  securitySettings:
-    - addressMatch: "#" # Applies to all addresses
-      permission:
-        - roles: [ 'admin', 'developer' ]
-          operations: [ 'send', 'consume', 'createNonDurableQueue', 'createDurableQueue' ]
-    # ...
-  users:
-    - name: amqpuser
-      password: supersecurepassword
-      roles:
-        - developer
+  brokerProperties:
+  - securityRoles.#.group2.send=true
+  - securityRoles.#.group1.consume=true
+  - securityRoles.#.group1.createAddress=true
+  - securityRoles.#.group1.createNonDurableQueue=true
+  - securityRoles.#.group1.browse=true
 ----
 
 The provided context explicitly mentions `Broker Security` as a crucial reference.
@@ -238,6 +226,8 @@ kind: ActiveMQArtemis
 metadata:
   name: broker-amqp-lab
 spec:
+  console:
+   expose: true
   deploymentPlan:
     size: 1
   acceptors:
@@ -246,26 +236,7 @@ spec:
       protocols: AMQP
       # Ensure external access is enabled for this acceptor via a route
       expose: true
-      exposedEnvVars:
-        - name: AMQP_HOST
-          valueFromRoute: true
-    - name: console
-      port: 8161
-      protocols: CORE,AMQP,MQTT,STOMP,HORNETQ,OPENWIRE,JMS,WEB
-      expose: true
-      exposedEnvVars:
-        - name: CONSOLE_HOST
-          valueFromRoute: true
-  securitySettings:
-    - addressMatch: "#"
-      permission:
-        - roles: [ 'developer' ]
-          operations: [ 'send', 'consume', 'createNonDurableQueue', 'createDurableQueue' ]
-  users:
-    - name: amqpuser
-      password: supersecurepassword
-      roles:
-        - developer
+      sslSecret: my-ssl-secret
 EOF
 ----
 

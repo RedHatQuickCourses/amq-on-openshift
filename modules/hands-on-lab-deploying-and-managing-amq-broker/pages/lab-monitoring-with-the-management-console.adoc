@@ -62,10 +62,10 @@ The AMQ Management Console provides a web-based interface that allows you to vie
 After the Operator processes your CR update, it creates a dedicated OpenShift `Service` and `Route` for the AMQ Management Console associated with each broker pod. You can use the `oc get routes` command to find the external URL for your console.
 
 .  **Get the console route URL**
-    You can filter routes by the `app.kubernetes.io/name=amq-broker` label, or specifically search for routes matching the console naming pattern:
+    You can filter routes by the `ActiveMQArtemis=amq-broker` label, or specifically search for routes matching the console naming pattern:
 
     ```bash
-    oc get routes -l app.kubernetes.io/name=amq-broker
+    oc get routes -l ActiveMQArtemis=amq-broker
     ```
 
     Alternatively, based on the provided context, the route name follows the pattern `<custom-resource-name>-wconsj-<broker-pod-ordinal>-svc-rte`. You can use `grep` to find it:

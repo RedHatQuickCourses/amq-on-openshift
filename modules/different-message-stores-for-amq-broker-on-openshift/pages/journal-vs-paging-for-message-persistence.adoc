@@ -104,7 +104,7 @@ In an OpenShift environment, you deploy AMQ Broker using the AMQ Broker Operator
 .   **Define the `ActiveMQArtemis` Custom Resource:**
     You will create a YAML file, `broker-persistence-cr.yaml`, to define your broker instance. This example configures both `journalDirectory` and `pagingDirectory` to point to specific paths within a mounted persistent volume.
 
-    ```yaml
+```yaml
     apiVersion: broker.amq.io/v1beta1
     kind: ActiveMQArtemis
     metadata:
@@ -122,7 +122,6 @@ In an OpenShift environment, you deploy AMQ Broker using the AMQ Broker Operator
               claimName: amq-broker-data-pvc # This PVC needs to be created first
         brokerProperties:
           # --- Journal Configuration ---
-          - "broker.amq.io/v1beta1.ActiveMQArtemis/metadata.name={{ .Metadata.Name }}"
           - "journalDirectory=/var/lib/artemis/data/journal" # Path within the mounted PV
           - "bindingsDirectory=/var/lib/artemis/data/bindings" # Path within the mounted PV
           - "largeMessagesDirectory=/var/lib/artemis/data/large-messages" # Path within the mounted PV
@@ -135,8 +134,8 @@ In an OpenShift environment, you deploy AMQ Broker using the AMQ Broker Operator
           - "HAPolicyConfiguration.sharedStorePrimary.voteRetries=10"
           - "HAPolicyConfiguration.sharedStorePrimary.voteRetryWait=1000"
           # Optional: Configure global paging limits
-          - "global-max-size=100m" # Trigger paging if total message memory exceeds 100MB
-          - "address-full-policy=PAGE" # Default policy, but explicit for clarity
+          - "globalMaxSize=100m" # Trigger paging if total message memory exceeds 100MB
+          - "addressFullPolicy=PAGE" # Default policy, but explicit for clarity
     ---
     apiVersion: v1
     kind: PersistentVolumeClaim
@@ -150,7 +149,7 @@ In an OpenShift environment, you deploy AMQ Broker using the AMQ Broker Operator
         requests:
           storage: 10Gi # Request 10GB of storage
       # storageClassName: my-storage-class # Uncomment and specify if not using default
-    ```
+```
     *   **`extraMounts`**: This section is crucial. It defines a `broker-data` volume mount that uses a `PersistentVolumeClaim` named `amq-broker-data-pvc` and mounts it to `/var/lib/artemis/data` inside the broker pod.
     *   **`brokerProperties`**: Within this section, `journalDirectory`, `pagingDirectory`, `bindingsDirectory`, and `largeMessagesDirectory` are set to subdirectories within the mounted `/var/lib/artemis/data` path. This ensures all persistent data goes to the dedicated storage.
     *   **`global-max-size`**: This is an example of a paging-related broker property that sets the overall memory limit for messages before paging starts.

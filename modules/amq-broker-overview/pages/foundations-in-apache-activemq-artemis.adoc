@@ -60,29 +60,21 @@ Identify the Apache ActiveMQ Artemis version and confirm its startup messages wi
 
 [source,bash]
 ----
-    Server is now live
-    2021-09-17 09:35:25,660 INFO  [org.apache.activemq.artemis.core.server] AMQ221001:
-     
-    Apache ActiveMQ Artemis Message Broker version 2.16.0.redhat-00022 [amq-broker,
-     
-    nodeID=8d886031-179a-11ec-9e02-0a580ad9008b]
-    2021-09-17 09:35:26,470 INFO  [org.apache.amq.hawtio.branding.PluginContextListener]
-     
-    Initialized amq-broker-redhat-branding plugin
-    2021-09-17 09:35:26,656 INFO  [org.apache.activemq.hawtio.plugin.PluginContextListener]
-     
-    Initialized artemis-plugin plugin
-    
-    AMQ101000: Starting ActiveMQ Artemis Server
-    
-    2020-06-03 12:12:12,336 INFO  [org.apache.activemq.artemis.core.server] AMQ221007:
-     
-    Server is now live
+2026-06-11 20:09:11,099 INFO  [org.apache.activemq.artemis.integration.bootstrap] AMQ101000: Starting ActiveMQ Artemis Server version 2.40.0.redhat-00009
+...........
+2026-06-11 20:09:12,011 INFO  [org.apache.activemq.artemis.core.server] AMQ221007: Server is now active
+2026-06-11 20:09:12,011 INFO  [org.apache.activemq.artemis.core.server] AMQ221001: Apache ActiveMQ Artemis Message Broker version 2.40.0.redhat-00009 [0.0.0.0, nodeID=9e8121c6-3720-11f1-87d3-047bcb64475b] 
+2026-06-11 20:09:12,018 INFO  [org.apache.activemq.artemis] AMQ241003: Starting embedded web server
+2026-06-11 20:09:12,320 INFO  [io.hawt.HawtioContextListener] Initialising Hawtio services
+2026-06-11 20:09:12,325 INFO  [io.hawt.jmx.JmxTreeWatcher] Welcome to Hawtio 4.3.0.redhat-00010
+2026-06-11 20:09:12,331 INFO  [io.hawt.web.auth.AuthenticationConfiguration] Authentication throttling is enabled
+2026-06-11 20:09:12,332 INFO  [io.hawt.web.auth.AuthenticationConfiguration] Starting Hawtio authentication filter, JAAS realm: "activemq" authorized role(s): amq, role principal class names: org.apache.activemq.artemis.spi.core.security.jaas.RolePrincipal
+
 ----
 
   ** In this output, observe the key indicators: 
 
-    *   The log entry `AMQ221001: Apache ActiveMQ Artemis Message Broker version 2.16.0.redhat-00022` clearly identifies the underlying messaging engine and its specific version. The `.redhat-00022` suffix denotes Red Hat's specific build, indicating it's an enterprise-hardened version.
+    *   The log entry `AMQ221001: Apache ActiveMQ Artemis Message Broker version 2.40.0.redhat-00009` clearly identifies the underlying messaging engine and its specific version. The `.redhat-00009` suffix denotes Red Hat's specific build, indicating it's an enterprise-hardened version.
     *   The `org.apache.activemq.artemis.core.server` log category confirms that the Artemis core components are active and managing the server's lifecycle.
     *   Messages like `AMQ101000: Starting ActiveMQ Artemis Server` and `AMQ221007: Server is now live` are direct lifecycle messages from the Artemis server, confirming its successful startup.
 
@@ -92,7 +84,7 @@ Identify the Apache ActiveMQ Artemis version and confirm its startup messages wi
     
 [source,bash]
 ----    
-    $ <broker-instance-dir>/bin/artemis queue create --name exampleQueue --address exampleQueue --auto-create-address --anycast
+    $ <broker-instance-dir>/bin/artemis queue create --name exampleQueue --address exampleQueue --auto-create-address --anycast --durable --purge-on-no-consumers=false
 ----    
 
 This command demonstrates using the `artemis` executable, which is part of the core Apache ActiveMQ Artemis distribution. It allows you to directly interact with and manage broker resources like queues and addresses. The `<broker-instance-dir>` typically refers to the root directory where a standalone Artemis (or AMQ Broker) instance has been created or extracted.

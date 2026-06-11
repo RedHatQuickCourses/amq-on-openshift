@@ -35,12 +35,12 @@ Let's inspect how Services work by looking at an existing Service in an OpenShif
 oc login -u developer -p developer https://<openshift-cluster-url>:443
 oc new-project amq-broker-project
 ----
-. Deploy a simple application (e.g., an Nginx deployment) to create some pods and a service.
+. Deploy a simple application (e.g., an httpd deployment) to create some pods and a service.
 +
 [,bash]
 ----
-oc create deployment nginx --image=nginx
-oc expose deployment nginx --port=80
+oc new-app registry.redhat.io/rhel9/httpd-24 --name my-httpd
+oc expose service my-httpd
 ----
 . List the services in your current project.
 +
@@ -54,16 +54,16 @@ You should see an output similar to this:
 [,console]
 ----
 NAME    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
-nginx   ClusterIP   172.30.200.123   <none>        80/TCP    2m
+my-httpd   ClusterIP   172.30.200.123   <none>        8080/TCP    2m
 ----
-. Describe the `nginx` service to see its details, including its IP and selector.
+. Describe the `my-httpd` service to see its details, including its IP and selector.
 +
 [,bash]
 ----
-oc describe svc nginx
+oc describe svc my-httpd
 ----
 +
-You'll notice the `Selector` field, which links this Service to pods with the label `app=nginx`. The `Cluster-IP` is the stable internal IP.
+You'll notice the `Selector` field, which links this Service to pods with the label `app=my-httpd`. The `Cluster-IP` is the stable internal IP.
 
 This `ClusterIP` service is only accessible from within the `amq-broker-project` or other projects if network policies allow. To access it from outside the OpenShift cluster, we need Routes or Ingress.
 
@@ -86,14 +86,14 @@ Routes are the standard and recommended way to expose HTTP/HTTPS services in Ope
 
 === Hands-on Activity: Exposing a Service with an OpenShift Route
 
-Let's expose our `nginx` service using an OpenShift Route.
+Let's expose our `my-httpd` service using an OpenShift Route.
 
 .Procedure
-. Create a Route for the `nginx` service.
+. Create a Route for the `my-httpd` service.
 +
 [,bash]
 ----
-oc create route edge --service=nginx
+oc create route edge --service=my-httpd
 ----
 +
 This command creates an edge-terminated TLS route, which is a common type.
@@ -101,7 +101,7 @@ This command creates an edge-terminated TLS route, which is a common type.
 +
 [,bash]
 ----
-oc get route nginx
+oc get route my-httpd
 ----
 +
 You'll see output similar to:
@@ -109,51 +109,51 @@ You'll see output similar to:
 [,console]
 ----
 NAME    HOST/PORT                                                         PATH   SERVICES   PORT   TERMINATION          WILDCARD
-nginx   nginx-amq-broker-project.apps.cluster-abc.example.com             nginx   8080   edge/Redirect      None
+my-httpd   my-httpd-amq-broker-project.apps.cluster-abc.example.com             my-httpd   8080   edge/Redirect      None
 ----
 +
 The `HOST/PORT` column shows the external URL for your service.
-. Access the `nginx` application using the provided `HOST/PORT` in a web browser or with `curl`.
+. Access the `my-httpd` application using the provided `HOST/PORT` in a web browser or with `curl`.
 +
 [,bash]
 ----
-curl http://$(oc get route nginx -o jsonpath='{.spec.host}')
+curl http://$(oc get route my-httpd -o jsonpath='{.spec.host}')
 ----
 +
-You should receive the Nginx welcome page HTML.
+You should receive the Red Hat Enterprise Linux Test Page HTML.
 
 .Customizing a Route Hostname
-Now, let's see how `ingressHost` and `ingressDomain` relate to customizing routes. While we usually apply these in the `ActiveMQArtemis` CR for AMQ Broker, we can demonstrate the concept by editing our `nginx` route's hostname.
+Now, let's see how `ingressHost` and `ingressDomain` relate to customizing routes. While we usually apply these in the `ActiveMQArtemis` CR for AMQ Broker, we can demonstrate the concept by editing our `my-httpd` route's hostname.
 
 .Procedure
-. Edit the `nginx` route.
+. Edit the `my-httpd` route.
 +
 [,bash]
 ----
-oc edit route nginx
+oc edit route my-httpd
 ----
-. Modify the `spec.host` field to a custom value, for example, `mycustomnginx.apps.cluster-abc.example.com`.
+. Modify the `spec.host` field to a custom value, for example, `mycustommy-httpd.apps.cluster-abc.example.com`.
 +
 [,yaml]
 ----
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: nginx
+  name: my-httpd
 spec:
-  host: mycustomnginx.apps.cluster-abc.example.com # <1>
+  host: mycustomhttpd.apps.cluster-abc.example.com # <1>
   to:
     kind: Service
-    name: nginx
+    name: my-httpd
   # ... other fields
 ----
-<1> Replace `mycustomnginx` and the domain with values appropriate for your cluster. Ensure the domain resolves to your OpenShift router.
+<1> Replace `mycustomhttpd` and the domain with values appropriate for your cluster. Ensure the domain resolves to your OpenShift router.
 . Save and exit the editor.
 . Access the service using the new custom hostname:
 +
 [,bash]
 ----
-curl http://mycustomnginx.apps.cluster-abc.example.com
+curl http://mycustomhttpd.apps.cluster-abc.example.com
 ----
 +
 This demonstrates how `ingressHost` or `ingressDomain` in an AMQ Broker CR would influence the generated route's hostname.
@@ -175,16 +175,16 @@ In essence, while Routes are OpenShift's opinionated and often preferred way, In
 
 === Hands-on Activity: Exposing a Service with Kubernetes Ingress
 
-Let's modify our approach to use Ingress for the `nginx` service. (Note: For this to work seamlessly, your OpenShift cluster must have an Ingress Controller configured and running, which is typically the case by default.)
+Let's modify our approach to use Ingress for the `my-httpd` service. (Note: For this to work seamlessly, your OpenShift cluster must have an Ingress Controller configured and running, which is typically the case by default.)
 
 .Procedure
-. First, remove the previously created `nginx` route.
+. First, remove the previously created `my-httpd` route.
 +
 [,bash]
 ----
-oc delete route nginx
+oc delete route my-httpd
 ----
-. Create an Ingress resource for the `nginx` service.
+. Create an Ingress resource for the `my-httpd` service.
 +
 [,yaml]
 .ingress.yaml
@@ -192,24 +192,24 @@ oc delete route nginx
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nginx-ingress
+  name: my-httpd-ingress
   annotations:
     # Example annotation for an IngressClass, might vary based on your cluster setup
     kubernetes.io/ingress.class: "openshift-default"
 spec:
   rules:
-  - host: mynginx.apps.cluster-abc.example.com # <1>
+  - host: my-httpd.apps.cluster-abc.example.com # <1>
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: nginx
+            name: my-httpd
             port:
               number: 80
 ----
-<1> Replace `mynginx` and the domain with values appropriate for your cluster. This hostname needs to be resolvable externally to your OpenShift Ingress controller.
+<1> Replace `my-httpd` and the domain with values appropriate for your cluster. This hostname needs to be resolvable externally to your OpenShift Ingress controller.
 . Apply the Ingress resource.
 +
 [,bash]
@@ -220,7 +220,7 @@ oc apply -f ingress.yaml
 +
 [,bash]
 ----
-oc get ingress nginx-ingress
+oc get ingress my-httpd-ingress
 ----
 +
 You'll see output similar to:
@@ -228,18 +228,18 @@ You'll see output similar to:
 [,console]
 ----
 NAME          CLASS    HOSTS                              ADDRESS                               PORTS   AGE
-nginx-ingress   <none>   mynginx.apps.cluster-abc.example.com   <router-ip-or-hostname>   80      1m
+my-httpd-ingress   <none>   my-httpd.apps.cluster-abc.example.com   <router-ip-or-hostname>   80      1m
 ----
 +
 The `HOSTS` column shows the external URL. The `ADDRESS` typically points to your OpenShift router's external IP or hostname.
-. Access the `nginx` application using the provided `HOSTS` in a web browser or with `curl`.
+. Access the `my-httpd` application using the provided `HOSTS` in a web browser or with `curl`.
 +
 [,bash]
 ----
-curl http://mynginx.apps.cluster-abc.example.com
+curl http://my-httpd.apps.cluster-abc.example.com
 ----
 +
-You should again receive the Nginx welcome page HTML. This demonstrates how Ingress can be used to expose services externally, similar to Routes.
+You should again receive the Red Hat Enterprise Linux Test Page HTML. This demonstrates how Ingress can be used to expose services externally, similar to Routes.
 
 == Relevance to AMQ Broker Deployment
 

@@ -332,19 +332,15 @@ spec:
     - name: amqp
       protocols: amqp
       port: 5672
+      sslSecret: my-ssl-secret
+      expose: true      
     - name: core
       protocols: core
       port: 61616 <2>
+      sslSecret: my-ssl-secret
+      expose: true      
   console:
     expose: true
-  addressSettings:
-    - applyToAllAddresses: true
-      redeliveryDelay: 1000
-      maxDeliveryAttempts: 5
-      maxSizeMessages: 100000
-      maxSizeBytes: 100Mi
-      deadLetterAddress: DLQ
-      expiryAddress: ExpiryQueue
 ----
 <1> `requireLogin: false` simplifies initial testing by disabling authentication. **Not recommended for production.**
 <2> The `core` acceptor listens on port 61616, which our JMS clients will connect to.
@@ -776,19 +772,15 @@ spec:
     - name: amqp
       protocols: amqp
       port: 5672
+      sslSecret: my-ssl-secret
+      expose: true
     - name: core
       protocols: core
       port: 61616 <2>
+      sslSecret: my-ssl-secret
+      expose: true      
   console:
     expose: true
-  addressSettings:
-    - applyToAllAddresses: true
-      redeliveryDelay: 1000
-      maxDeliveryAttempts: 5
-      maxSizeMessages: 100000
-      maxSizeBytes: 100Mi
-      deadLetterAddress: DLQ
-      expiryAddress: ExpiryQueue
 ----
 <1> `requireLogin: false` simplifies initial testing by disabling authentication. **Not recommended for production.**
 <2> The `core` acceptor listens on port 61616, which our JMS clients will connect to.

@@ -15,7 +15,6 @@ In the OpenShift Container Platform, the AMQ Broker Operator simplifies the depl
 For AMQ Broker, the primary CRDs you'll interact with are:
 
 *   `ActiveMQArtemis`: Used to define and configure the AMQ Broker instance itself, including its size, image, persistence settings, and other deployment-related parameters.
-*   `ActiveMQArtemisAddress`: Used to define messaging addresses and queues *on* a deployed broker instance.
 
 By creating instances of these Custom Resources (CRs), you instruct the AMQ Broker Operator to provision, configure, and manage the underlying broker infrastructure according to your specifications. This declarative approach simplifies complex deployments and day-to-day operations.
 // end::introduction[]

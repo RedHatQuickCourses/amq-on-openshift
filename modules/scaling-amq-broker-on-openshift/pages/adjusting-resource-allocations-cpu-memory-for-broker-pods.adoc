@@ -100,7 +100,7 @@ In this activity, you will modify an existing AMQ Broker custom resource (CR) to
 
     a.  **Check Pod Status**: Ensure the broker pod(s) are running.
         
-        oc get pods -l app.kubernetes.io/name=my-broker # Replace 'my-broker' with your broker name
+        oc get pods -l ActiveMQArtemis=my-broker # Replace 'my-broker' with your broker name
         
 
     b.  **Describe a Broker Pod**: Get detailed information about one of the broker pods.

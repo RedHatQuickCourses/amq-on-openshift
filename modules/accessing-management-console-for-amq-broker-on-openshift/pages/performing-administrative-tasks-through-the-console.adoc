@@ -56,12 +56,13 @@ spec:
   deploymentPlan:
     size: 1
     persistenceEnabled: false
-  jolokiaAgentEnabled: true # <1>
-  managementRBACEnabled: false # <2>
+    jolokiaAgentEnabled: true # <1>
+    managementRBACEnabled: false # <2>
   console:
     expose: true # <3>
-    adminUser: admin # <4>
-    adminPassword: admin # <5>
+
+  adminUser: admin # <4>
+  adminPassword: admin # <5>
   # ... other broker configurations
 ----
 <1> Enables the Jolokia agent for runtime data exposure to the console.
@@ -78,8 +79,8 @@ In this activity, you will modify an existing `ActiveMQArtemis` broker deploymen
 
 *   An OpenShift cluster with the AMQ Broker Operator installed.
 *   An existing `ActiveMQArtemis` broker instance deployed in a project. If you don't have one, you can create a basic instance using:
-    [source,yaml]
-    ----
+[source,yaml]
+----
     apiVersion: broker.amq.io/v1beta1
     kind: ActiveMQArtemis
     metadata:
@@ -89,7 +90,7 @@ In this activity, you will modify an existing `ActiveMQArtemis` broker deploymen
         size: 1
         persistenceEnabled: false
         journalType: MAPPED_FILE
-    ----
+----
     Save this as `my-console-broker.yaml` and apply it:
     `oc apply -f my-console-broker.yaml`
 *   `oc` command-line tool configured and logged into your OpenShift cluster.
@@ -123,14 +124,15 @@ In this activity, you will modify an existing `ActiveMQArtemis` broker deploymen
       managementRBACEnabled: false
       console:
         expose: true
-        adminUser: admin
-        adminPassword: admin
+      adminUser: admin
+      adminPassword: admin
       # ... other configurations
     ----
 
     *   Ensure `jolokiaAgentEnabled` is `true`.
     *   Set `managementRBACEnabled` to `false`. Re-read the security warning above to understand the implications.
-    *   Configure the `console:` section with `expose: true`, `adminUser: admin`, and `adminPassword: admin`. You can choose different credentials if desired.
+    *   Configure the `console:` section with `expose: true`, 
+    *   Configure the `adminUser: admin`, and `adminPassword: admin`. You can choose different credentials if desired.
 
 4.  **Save and Apply the Changes**:
     Save the changes and exit the editor. The OpenShift Operator will detect the changes to the `ActiveMQArtemis` CR and reconfigure the broker instance. This might trigger a rolling restart of the broker pod(s).
@@ -139,7 +141,7 @@ In this activity, you will modify an existing `ActiveMQArtemis` broker deploymen
 
     [source,bash]
     ----
-    oc get pod -l app.kubernetes.io/name=my-console-broker -w
+    oc get pod -l ActiveMQArtemis=my-console-broker -w
     ----
     Wait until the pod shows `Running` and is ready.
 
@@ -177,7 +179,7 @@ In this activity, you will modify an existing `ActiveMQArtemis` broker deploymen
 
 === Troubleshooting Console Access
 
-*   **Console Route not available**: Ensure `console.expose: true` is set in your CR and allow a few moments for the Operator to create the route. Check `oc get route -l app.kubernetes.io/name=my-console-broker`.
+*   **Console Route not available**: Ensure `console.expose: true` is set in your CR and allow a few moments for the Operator to create the route. Check `oc get route -l ActiveMQArtemis=my-console-broker`.
 *   **Login Issues**: Double-check the `adminUser` and `adminPassword` configured in your `ActiveMQArtemis` CR. Passwords are case-sensitive.
 *   **No Broker Data**: If you log in but don't see any broker data or encounter errors, verify `jolokiaAgentEnabled: true` is set. Also, check the broker pod logs for any JMX or Jolokia-related errors: `oc logs <broker_pod_name>`.
 *   **Security Warning on Login**: You might see warnings related to security if not using HTTPS for the console or if self-signed certificates are in use. For production environments, ensure proper TLS configuration for the route.

@@ -38,51 +38,11 @@ The AMQ Broker Operator typically names the service based on the broker's Custom
 oc get svc
 ----
 +
-Look for a service related to your broker, typically exposing ports like `61616` (Core protocol), `5672` (AMQP), etc. For this lab, we'll assume the Core protocol port (61616) is exposed.
+Look for a service related to your broker, typically exposing ports like `61616` (Core protocol), `5672` (AMQP), etc. For this lab, we'll assume the Core protocol port (61617) is exposed (as done in the last lab).
 
-. Create an OpenShift Route for the broker.
+. Find an OpenShift Route for the broker.
 +
-We will create an `Edge` terminated TLS route for secure external access. This means OpenShift handles the TLS certificate, and the client connects via TLS to the route's hostname. The OpenShift router then forwards the traffic to the internal broker service.
-
-+
-Create a file named `broker-route.yaml` with the following content:
-+
-[,yaml]
-----
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: my-broker-external-route
-  labels:
-    app: my-broker
-spec:
-  to:
-    kind: Service
-    name: <your-broker-service-name> # <1>
-    weight: 100
-  port:
-    targetPort: 61616 # <2>
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Redirect
-  wildcardPolicy: None
-----
-<1> Replace `<your-broker-service-name>` with the actual name of your broker's service (e.g., `my-broker-amq-broker-acceptors`).
-<2> This is the default target port for the AMQ Core protocol.
-
-. Apply the Route configuration.
-+
-[,bash]
-----
-oc apply -f broker-route.yaml
-----
-
-. Verify the Route and retrieve its hostname.
-+
-[,bash]
-----
-oc get route my-broker-external-route
-----
+oc get route
 +
 Note down the `HOST/PORT` value from the output (e.g., `my-broker-external-route-your-project.apps.cluster.example.com`). This is the external URL your clients will use to connect to the broker.
 
@@ -204,7 +164,7 @@ import java.util.logging.Logger;
 public class Producer {
 
     private static final Logger logger = Logger.getLogger(Producer.class.getName());
-    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61616"); // <1>
+    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61617"); // <1>
     private static final String QUEUE_NAME = System.getProperty("queue.name", "myQueue");
 
     public static void main(String[] args) throws Exception {
@@ -277,7 +237,7 @@ import java.util.logging.Logger;
 public class Consumer {
 
     private static final Logger logger = Logger.getLogger(Consumer.class.getName());
-    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61616");
+    private static final String CONNECTION_URI = System.getProperty("broker.uri", "tcp://localhost:61617");
     private static final String QUEUE_NAME = System.getProperty("queue.name", "myQueue");
 
     public static void main(String[] args) throws Exception {
@@ -356,7 +316,7 @@ Construct your `BROKER_URI` by replacing `<your-route-hostname>` with the actual
 +
 [,bash]
 ----
-export BROKER_URI="tcp://<your-route-hostname>:443?sslEnabled=true&trustAll=true&verifyHost=false"
+export BROKER_URI="tcp://<your-route-hostname>:443?sslEnabled=true&trustStorePath=/path/to/broker_trustStore.jks&trustStorePassword=password&verifyHost=false"
 ----
 
 . Run the Consumer.
@@ -422,7 +382,7 @@ For production environments, directly using `trustAll=true` and `verifyHost=fals
     *   Ensure the `broker-route.yaml` was applied correctly with `oc apply -f broker-route.yaml`.
 *   **Connection Refused / Failed to connect**:
     *   Ensure the AMQ Broker pod is running (`oc get pod`).
-    *   Verify the `targetPort` in the `Route` (`broker-route.yaml`) matches the broker's listener port (e.g., `61616`).
+    *   Verify the `targetPort` in the `Route` (`broker-route.yaml`) matches the broker's listener port (e.g., `61617`).
     *   Check your `BROKER_URI` for correct hostname and port `443`.
     *   If OpenShift network policies are in place, they might be blocking external traffic to the route or internal traffic from the router to the service.
 *   **SSL Handshake Failure**:
