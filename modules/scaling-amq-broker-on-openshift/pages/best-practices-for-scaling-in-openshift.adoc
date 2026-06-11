@@ -31,7 +31,7 @@ Setting appropriate CPU and memory requests and limits for your broker pods is f
 [source,yaml]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: my-broker-scaled
 spec:
@@ -63,15 +63,14 @@ The provided context explicitly mentions "4.16. ENABLING MESSAGE MIGRATION TO SU
 [source,yaml]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: my-broker-scaled
 spec:
   # ... other broker configurations ...
   deploymentPlan:
     size: 2
-    messageMigration:
-      enabled: true # Enable message migration for graceful scaledown
+    messageMigration: false
   # ...
 ----
 
@@ -92,7 +91,7 @@ The context mentions "4.17. CONTROLLING PLACEMENT OF BROKER PODS ON OPENSHIFT CO
 [source,yaml]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: my-broker-scaled
 spec:
@@ -121,7 +120,7 @@ For any production or critical AMQ Broker deployment, *always* use persistent st
 [source,yaml]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: my-broker-scaled
 spec:
@@ -151,10 +150,11 @@ kind: PodDisruptionBudget
 metadata:
   name: my-broker-pdb
 spec:
-  minAvailable: 1 # Ensure at least one broker pod is always available
-  selector:
-    matchLabels:
-      app: my-broker-scaled # Match the label of your broker pods
+  deploymentPlan:
+    podDisruptionBudget:
+      minAvailable: 1 # Ensure at least one broker pod is always available
+    labels:
+        app: my-broker-scaled # Match the label of your broker pods
 ----
 <1> Replace `app: my-broker-scaled` with the actual label selector for your broker pods. The AMQ Broker Operator typically assigns labels that can be used here.
 

@@ -21,7 +21,7 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.12 # Use an appropriate image for your OpenShift version
+    image: placeholder
 ----
 
 .Deploy the broker and switch to the `amq` project:
@@ -131,7 +131,7 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.12
+    image: placeholder
   acceptors: # <1>
     - name: insecure-acceptor # <2>
       port: 61616
@@ -283,7 +283,7 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.12
+    image: placeholder
   acceptors:
     - name: insecure-acceptor
       port: 61616
@@ -297,11 +297,7 @@ spec:
     expose: true
     sslSecret: mytlssecret
     sslEnabled: true
-  loginModules: # <1>
-    activeMQArtemisSecurityRef: ex-prop # <2>
 ----
-<1> This section defines the JAAS login modules the broker will use.
-<2> This references the `ActiveMQArtemisSecurity` instance by its `metadata.name` (`ex-prop`).
 
 . Apply the updated `ActiveMQArtemis` CR:
 +

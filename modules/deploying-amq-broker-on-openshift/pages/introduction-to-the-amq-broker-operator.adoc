@@ -31,7 +31,7 @@ The AMQ Broker Operator automates numerous aspects of AMQ Broker's lifecycle and
 The AMQ Broker Operator introduces a new API object type to OpenShift: the `Broker` Custom Resource Definition (CRD). This CRD defines the schema for creating `Broker` Custom Resources (CRs).
 
 *   **Custom Resource Definition (CRD):** A CRD is like a blueprint that defines a new kind of object (e.g., `Broker`) that you can create in Kubernetes. It specifies the properties and configuration options available for that object.
-*   **Custom Resource (CR):** A CR is an actual instance of an object defined by a CRD. When you want to deploy an AMQ Broker, you create a `Broker` CR (e.g., `kind: Broker`), specifying its desired state (number of replicas, persistence settings, security configurations, etc.).
+*   **Custom Resource (CR):** A CR is an actual instance of an object defined by a CRD. When you want to deploy an AMQ Broker, you create a `Broker` CR (e.g., `kind: ActiveMQArtemis`), specifying its desired state (number of replicas, persistence settings, security configurations, etc.).
 
 The AMQ Broker Operator constantly monitors the OpenShift API for changes to `Broker` CRs. When a `Broker` CR is created, updated, or deleted, the Operator reconciles the desired state (defined in the CR) with the actual state of the cluster, creating or modifying the necessary underlying OpenShift resources (Deployments, StatefulSets, Services, ConfigMaps, Routes, etc.) to achieve the desired configuration.
 

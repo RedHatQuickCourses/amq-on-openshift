@@ -92,7 +92,7 @@ Deploying with a JDBC message store on OpenShift involves:
 [source,yaml,subs="attributes+"]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: ha-broker-pair1
 spec:
@@ -163,7 +163,7 @@ spec:
                     - "mkdir -p /amq/init/config/extra-libs && curl -Lo /amq/init/config/extra-libs/ojdbc11.jar https://download.oracle.com/otn-pub/otn_software/jdbc/233/ojdbc11.jar"
 ---
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: ha-broker-pair2
 spec:

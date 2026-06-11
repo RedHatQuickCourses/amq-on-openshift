@@ -320,13 +320,13 @@ oc new-project amq-broker-p2p
 [source,yaml]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: mybroker
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.11
+    image: placeholder
     requireLogin: false <1>
   acceptors:
     - name: amqp
@@ -337,7 +337,6 @@ spec:
       port: 61616 <2>
   console:
     expose: true
-    authenticationEnabled: false <3>
   addressSettings:
     - applyToAllAddresses: true
       redeliveryDelay: 1000
@@ -346,30 +345,10 @@ spec:
       maxSizeBytes: 100Mi
       deadLetterAddress: DLQ
       expiryAddress: ExpiryQueue
-  addresses:
-    - name: myQueue <4>
-      queueRoutingType: ANYCAST
-      config:
-        maxConsumers: -1
-        consumersBeforeDispatch: 0
-        exclusive: false
-        lastValueQueue: false
-        nonDestructive: false
-        purgeOnNoConsumers: false
-        routingType: ANYCAST
-        groupRebalance: false
-        groupBuckets: -1
-        groupFirstKey: null
-        enqueueDelay: 0
-        sendToDLAOnNoRoute: false
-        autoCreateJMSQueues: true <5>
-        autoCreateJMSTopics: true
 ----
 <1> `requireLogin: false` simplifies initial testing by disabling authentication. **Not recommended for production.**
 <2> The `core` acceptor listens on port 61616, which our JMS clients will connect to.
-<3> `authenticationEnabled: false` for the console simplifies access for monitoring but is not secure.
-<4> Defines a queue named `myQueue` which our clients will use.
-<5> `autoCreateJMSQueues` ensures JMS queues are created automatically if they don't exist. This is useful if you don't pre-define the queue in the Broker CR, but we explicitly define `myQueue` here for clarity.
+
 
 . Apply this CR to your OpenShift cluster:
 +
@@ -785,13 +764,13 @@ oc new-project amq-broker-p2p
 [source,yaml]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: mybroker
 spec:
   deploymentPlan:
     size: 1
-    image: registry.redhat.io/amq7/amq-broker:7.11
+    image: placeholder
     requireLogin: false <1>
   acceptors:
     - name: amqp
@@ -802,7 +781,6 @@ spec:
       port: 61616 <2>
   console:
     expose: true
-    authenticationEnabled: false <3>
   addressSettings:
     - applyToAllAddresses: true
       redeliveryDelay: 1000
@@ -811,30 +789,9 @@ spec:
       maxSizeBytes: 100Mi
       deadLetterAddress: DLQ
       expiryAddress: ExpiryQueue
-  addresses:
-    - name: myQueue <4>
-      queueRoutingType: ANYCAST
-      config:
-        maxConsumers: -1
-        consumersBeforeDispatch: 0
-        exclusive: false
-        lastValueQueue: false
-        nonDestructive: false
-        purgeOnNoConsumers: false
-        routingType: ANYCAST
-        groupRebalance: false
-        groupBuckets: -1
-        groupFirstKey: null
-        enqueueDelay: 0
-        sendToDLAOnNoRoute: false
-        autoCreateJMSQueues: true <5>
-        autoCreateJMSTopics: true
 ----
 <1> `requireLogin: false` simplifies initial testing by disabling authentication. **Not recommended for production.**
 <2> The `core` acceptor listens on port 61616, which our JMS clients will connect to.
-<3> `authenticationEnabled: false` for the console simplifies access for monitoring but is not secure.
-<4> Defines a queue named `myQueue` which our clients will use.
-<5> `autoCreateJMSQueues` ensures JMS queues are created automatically if they don't exist. This is useful if you don't pre-define the queue in the Broker CR, but we explicitly define `myQueue` here for clarity.
 
 . Apply this CR to your OpenShift cluster:
 +

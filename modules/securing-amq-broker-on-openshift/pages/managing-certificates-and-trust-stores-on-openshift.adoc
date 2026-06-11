@@ -163,7 +163,7 @@ Edit your `Broker` custom resource (CR) to specify that an acceptor should use S
 [source,yaml,subs="attributes+"]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: amq-broker-tls
 spec:
@@ -187,7 +187,7 @@ To enable mutual TLS, you need to instruct the acceptor to require client authen
 [source,yaml,subs="attributes+"]
 ----
 apiVersion: broker.amq.io/v1beta1
-kind: Broker
+kind: ActiveMQArtemis
 metadata:
   name: amq-broker-mtls
 spec:
@@ -198,7 +198,6 @@ spec:
       sslEnabled: true
       sslSecret: broker-cert-secret
       needClientAuth: true <1>
-      trustSecret: trusted-clients-bundle <2>
       # ... other acceptor configurations
   # ... other broker configurations
 ----
